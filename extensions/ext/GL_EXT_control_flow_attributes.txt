@@ -1,0 +1,184 @@
+Name
+
+    EXT_control_flow_attributes
+
+Name Strings
+
+    GL_EXT_control_flow_attributes
+
+Contact
+
+    John Kessenich (johnkessenich 'at' google.com), Google
+
+Contributors
+
+    Khronos members
+
+Notice
+
+    Copyright (c) 2018 Google, Inc.
+
+Status
+
+    Draft.
+
+Version
+
+    Last Modified Date: 25-Jan-2018
+    Revision: 2
+
+Number
+
+    TBD
+
+Dependencies
+
+    Written against SPIR-V 1.2.
+    Written against GLSL 4.6.
+
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+Overview
+
+    Adds attributes to declare how loops and selections should be lowered by
+    a consumer.
+
+    This is done through an attribute "[[ ... ]]" syntax. For example,
+
+        [[unroll]]               for (int i = 0; i < 8; ++i) { ... }
+        [[dont_unroll]]          while(...) { ... }
+        [[dependency_infinite]]  do { ... } while(...);
+        [[dependency_length(4)]] for (int i = 0; i < 8; ++i) { ... }
+        [[flatten]]              if (...) { ... } else { ... }
+        [[dont_flatten]]         switch(...) { ... }
+
+    These can be combined into a single use of an attribute, e.g.:
+
+        [[unroll, dependency_length(4)]] for (int x = 0; i < 8; ++i) { ... }
+
+    Combinations that don't make sense are allowed, but result in only an
+    unknown subset getting applied.
+
+Add to Chapter 3 of the OpenGL Shading Language Specification
+
+    Including the following line in a shader will control the language
+    features described in this extension:
+
+      #extension GL_EXT_control_flow_attributes : <behavior>
+
+    Where <behavior> is as specified in section 3.3.
+
+    This new definition is added to the OpenGL Shading Language:
+
+      #define GL_EXT_control_flow_attributes 1
+
+Add to Chapter 6 "Statements and Structure" to the OpenGL Shading Language
+Specification:
+
+    6.5 Control-Flow Attributes
+
+    Control-flow attributes are declared with the following example syntax:
+
+        [[attribute1]]
+        [[attribute1, attribute2, ...]]
+
+    The full syntax is normatively defined by the grammar in Section 9.
+
+    To take effect, the attribute must appear immediately in front of the *if*,
+    *switch*, *for*, *do*, or *while* keyword of the control-flow construct it
+    wants to affect.
+
+    Control-Flow Attributes
+
+       Attribute             | Relevant on | Intent
+      -----------------------+-------------+------------------------------------
+      *unroll*               |    Loop     | remove or reduce loop control flow
+      *dont_unroll*          |    Loop     | keep loop control flow
+      *loop*                 |    Loop     | same as *dont_unroll*
+      *dependency_infinite*  |    Loop     | declare no dependencies between
+                             |             |     loop iterations
+      *dependency_length(L)* |    Loop     | declare no dependencies between
+                             |             |     L iterations of the loop
+      *flatten*              |  Selection  | remove selection control flow
+      *dont_flatten*         |  Selection  | keep selection control flow
+      *branch*               |  Selection  | same as *dont_flatten*
+
+    "Loop" includes *for*, *while*, and *do-while* loops.
+    "Selection" includes *if*, *if-else*, and *switch* statements.
+    /L/ in *dependency_length* must be a positive signed or unsigned
+    non-specialization compile-time constant integral expression.
+
+    The *unroll*, *dont_unroll*, *flatten*, and *dont_flatten* attributes are
+    strong requests to the consumer. The *dependency_infinite* and
+    *dependency_length* attributes are guarantees that the consumer can rely on.
+
+    There are no constraints on which attributes can be used or combined on
+    which control-flow constructs. If contradictory or irrelevant attributes
+    are declared, the consumer is free to subset or ignore, respectively, the
+    attributes.
+
+Changes to Chapter 9 of the OpenGL Shading Language Specification
+
+  Add these:
+
+    attribute:
+        LEFT_BRACKET LEFT_BRACKET attribute_list RIGHT_BRACKET RIGHT_BRACKET
+
+    attribute_list:
+        single_attribute
+        attribute_list COMMA single_attribute
+
+    single_attribute:
+        IDENTIFIER
+        IDENTIFIER LEFT_PAREN constant_expression RIGHT_PAREN
+
+  Change "selection_statement: ..." to
+
+    selection_statement:
+        selection_statement_nonattributed
+        attribute selection_statement_nonattributed
+
+    selection_statement_nonattributed:
+        ...
+
+  Change "switch_statemment: ..." to
+  
+    switch_statement:
+        switch_statement_nonattributed
+        attribute switch_statement_nonattributed
+
+    switch_statement_nonattributed:
+        ...
+
+  Change "iteration_statement: ..." to
+
+    iteration_statement:
+        iteration_statement_nonattributed
+        attribute iteration_statement_nonattributed
+
+    iteration_statement_nonattributed:
+        ...
+
+Issues
+
+    1. Should we use namespaces? E.g. [[spv::unroll]]. These seem pretty
+       universal. OpenCL has [[cl::unroll]].
+
+    2. Should "[[" be a single token or two "[" tokens?
+
+       Past discussions around this have come down on the side of separate
+       tokens, allowing white space between the brackets.
+
+       RESOLVED.  Use two LEFT_BRACKET tokens. Same for RIGHT_BRACKET.
+
+Revision History
+
+    Rev.    Date         Author    Changes
+    ----  -----------    -------  ----------------------------------------------
+    1     25-Jan-2018    JohnK    initial draft
+    2     25-Jan-2018    JohnK    be more clear what L can be, complete the
+                                  grammar, and add issue 2
