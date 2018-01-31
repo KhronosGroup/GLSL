@@ -24,8 +24,8 @@ Status
 
 Version
 
-    Last Modified Date: 29-Jan-2018
-    Revision: 3
+    Last Modified Date: 31-Jan-2018
+    Revision: 4
 
 Number
 
@@ -122,6 +122,8 @@ Specification:
     are declared, the consumer is free to subset or ignore, respectively, the
     attributes.
 
+    Attributes are case sensitive.
+
     Unrecognized attributes, and attributes with unexpected arguments or lack of
     arguments, do not cause errors but are instead ignored. (Implementations
     would likely want to emit warnings for these situations.)
@@ -188,3 +190,4 @@ Revision History
     2     25-Jan-2018    JohnK    be more clear what L can be, complete the
                                   grammar, and add issue 2
     3     29-Jan-2018    JohnK    discuss errors and warnings
+    4     31-Jan-2018    JohnK    attributes are case sensitive
