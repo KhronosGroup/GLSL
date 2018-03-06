@@ -1,0 +1,1493 @@
+Name
+
+    KHR_shader_subgroup
+
+Name Strings
+
+    GL_KHR_shader_subgroup
+    GL_KHR_shader_subgroup_basic
+    GL_KHR_shader_subgroup_vote
+    GL_KHR_shader_subgroup_arithmetic
+    GL_KHR_shader_subgroup_ballot
+    GL_KHR_shader_subgroup_shuffle
+    GL_KHR_shader_subgroup_shuffle_relative
+    GL_KHR_shader_subgroup_clustered
+    GL_KHR_shader_subgroup_quad
+
+Contact
+
+    Neil Henning (neil 'at' codeplay.com), Codeplay
+
+Contributors
+
+    Jeff Bolz, NVIDIA
+    Matthaeus Chajdas, AMD
+    Jan-Harald Fredriksen, ARM
+    Alexander Galazin, ARM
+    Aaron Greig, Codeplay
+    Aaron Hagan, AMD
+    Tobias Hector, Imagination Technologies
+    Neil Henning, Codeplay
+    John Kessenich, Google
+    Daniel Koch, NVIDIA
+    Graeme Leese, Broadcom
+    Timothy Lottes, AMD
+    David Neto, Google
+    Kevin Petit, ARM
+    Ralph Potter, Codeplay
+    Colin Riley, AMD
+    Robert Simpson, Qualcomm
+
+Notice
+
+    Copyright (c) 2018 The Khronos Group Inc. Copyright terms at
+        http://www.khronos.org/registry/speccopyright.html
+
+Status
+
+    Approved by Vulkan working group 12-Sep-2017.
+    Ratified by the Khronos Board of Promoters 27-Oct-2017.
+
+Version
+
+    Last Modified Date: 28-Feb-2018
+    Revision: 6
+
+Number
+
+    TBD.
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    This extension is written against revision 6 of the OpenGL Shading Language
+    version 4.50, dated April 14, 2016.
+
+    This extension interacts with revision 36 of the GL_KHR_vulkan_glsl
+    extension, dated February 13, 2017.
+
+Overview
+
+    This extension document modifies GLSL to add subgroup functionality.
+
+    Invocations are partitioned into subgroups, where invocations within a
+    subgroup can synchronize and share data with each other efficiently. This
+    extension introduces a set of built-in functions to synchronize and share
+    data between invocations within a subgroup, as well as a common set of
+    arithmetic operations for reductions and scans.
+
+    This extension document adds support for the following extensions to be used
+    within GLSL:
+
+    - GL_KHR_shader_subgroup_basic - enables basic subgroup operations.
+    - GL_KHR_shader_subgroup_vote - enables subgroup vote operations.
+    - GL_KHR_shader_subgroup_arithmetic - enables subgroup arithmetic
+      operations.
+    - GL_KHR_shader_subgroup_ballot - enables subgroup ballot operations.
+    - GL_KHR_shader_subgroup_shuffle - enables subgroup shuffle operations.
+    - GL_KHR_shader_subgroup_shuffle_relative - enables subgroup shuffle
+      relative operations.
+    - GL_KHR_shader_subgroup_clustered - enables subgroup clustered operations.
+    - GL_KHR_shader_subgroup_quad - enables subgroup quad operations.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-specification), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+      gl_NumSubgroups -> NumSubgroups decorated OpVariable
+      gl_SubgroupID -> SubgroupId decorated OpVariable
+      gl_SubgroupSize -> SubgroupSize decorated OpVariable
+      gl_SubgroupInvocationID -> SubgroupLocalInvocationId decorated OpVariable
+      gl_SubgroupEqMask -> SubgroupEqMask decorated OpVariable
+      gl_SubgroupGeMask -> SubgroupGeMask decorated OpVariable
+      gl_SubgroupGtMask -> SubgroupGtMask decorated OpVariable
+      gl_SubgroupLeMask -> SubgroupLeMask decorated OpVariable
+      gl_SubgroupLtMask -> SubgroupLtMask decorated OpVariable
+
+      subgroupBarrier() -> OpControlBarrier(
+        /*Execution*/Subgroup,
+        /*Memory*/Subgroup,
+        /*Semantics*/AcquireRelease | UniformMemory | WorkgroupMemory | ImageMemory)
+
+      subgroupMemoryBarrier() -> OpMemoryBarrier(
+        /*Memory*/Subgroup,
+        /*Semantics*/AcquireRelease | UniformMemory | WorkgroupMemory | ImageMemory)
+
+      subgroupMemoryBarrierBuffer() -> OpMemoryBarrier(
+        /*Memory*/Subgroup,
+        /*Semantics*/AcquireRelease | UniformMemory)
+
+      subgroupMemoryBarrierShared() -> OpMemoryBarrier(
+        /*Memory*/Subgroup,
+        /*Semantics*/AcquireRelease | WorkgroupMemory)
+
+      subgroupMemoryBarrierImage() -> OpMemoryBarrier(
+        /*Memory*/Subgroup,
+        /*Semantics*/AcquireRelease | ImageMemory)
+
+      subgroupElect() -> OpGroupNonUniformElect(
+        /*Execution*/Subgroup)
+
+      subgroupAll(value) -> OpGroupNonUniformAll(
+        /*Execution*/Subgroup,
+        /*Predicate*/value)
+
+      subgroupAny(value) -> OpGroupNonUniformAny(
+        /*Execution*/Subgroup,
+        /*Predicate*/value)
+
+      subgroupAllEqual(value) -> OpGroupNonUniformAllEqual(
+        /*Execution*/Subgroup,
+        /*Value*/value)
+
+      subgroupBroadcast(value, id) -> OpGroupNonUniformBroadcast(
+        /*Execution*/Subgroup,
+        /*Value*/value,
+        /*Id*/id)
+
+      subgroupBroadcastFirst(value) -> OpGroupNonUniformBroadcastFirst(
+        /*Execution*/Subgroup,
+        /*Value*/value)
+
+      subgroupBallot(value) -> OpGroupNonUniformBallot(
+        /*Execution*/Subgroup,
+        /*Predicate*/value)
+
+      subgroupInverseBallot(value) -> OpGroupNonUniformInverseBallot(
+        /*Execution*/Subgroup,
+        /*Value*/value)
+
+      subgroupBallotBitExtract(value, id) -> OpGroupNonUniformBallotBitExtract(
+        /*Execution*/Subgroup,
+        /*Value*/value,
+        /*Index*/id)
+
+      subgroupBallotBitCount(value) -> OpGroupNonUniformBallotBitCount(
+        /*Execution*/Subgroup,
+        /*Operation*/Reduce,
+        /*Value*/value)
+
+      subgroupBallotInclusiveBitCount(value) -> OpGroupNonUniformBallotBitCount(
+        /*Execution*/Subgroup,
+        /*Operation*/InclusiveScan,
+        /*Value*/value)
+
+      subgroupBallotExclusiveBitCount(value) -> OpGroupNonUniformBallotBitCount(
+        /*Execution*/Subgroup,
+        /*Operation*/ExclusiveScan,
+        /*Value*/value)
+
+      subgroupBallotFindLSB(value) -> OpGroupNonUniformBallotFindLSB(
+        /*Execution*/Subgroup,
+        /*Value*/value)
+
+      subgroupBallotFindMSB(value) -> OpGroupNonUniformBallotFindMSB(
+        /*Execution*/Subgroup,
+        /*Value*/value)
+
+      subgroupShuffle(value, id) -> OpGroupNonUniformShuffle(
+        /*Execution*/Subgroup,
+        /*Value*/value,
+        /*Id*/id)
+
+      subgroupShuffleXor(value, mask) -> OpGroupNonUniformShuffleXor(
+        /*Execution*/Subgroup,
+        /*Value*/value,
+        /*Mask*/mask)
+
+      subgroupShuffleUp(value, delta) -> OpGroupNonUniformShuffleUp(
+        /*Execution*/Subgroup,
+        /*Value*/value,
+        /*Delta*/delta)
+
+      subgroupShuffleDown(value, delta) -> OpGroupNonUniformShuffleDown(
+        /*Execution*/Subgroup,
+        /*Value*/value,
+        /*Delta*/delta)
+
+      subgroupAdd(value) -> OpGroupNonUniformIAdd | OpGroupNonUniformFAdd(
+        /*Execution*/Subgroup,
+        /*Operation*/Reduce,
+        /*Value*/value)
+
+      subgroupMul(value) -> OpGroupNonUniformIMul | OpGroupNonUniformFMul(
+        /*Execution*/Subgroup,
+        /*Operation*/Reduce,
+        /*Value*/value)
+
+      subgroupMin(value) ->  OpGroupNonUniformSMin | OpGroupNonUniformUMin | OpGroupNonUniformFMin(
+        /*Execution*/Subgroup,
+        /*Operation*/Reduce,
+        /*Value*/value)
+
+      subgroupMax(value) ->  OpGroupNonUniformSMax | OpGroupNonUniformUMax | OpGroupNonUniformFMax(
+        /*Execution*/Subgroup,
+        /*Operation*/Reduce,
+        /*Value*/value)
+
+      subgroupAnd(value) -> OpGroupNonUniformBitwiseAnd | OpGroupNonUniformLogicalAnd(
+        /*Execution*/Subgroup,
+        /*Operation*/Reduce,
+        /*Value*/value)
+
+      subgroupOr(value) -> OpGroupNonUniformBitwiseOr | OpGroupNonUniformLogicalOr(
+        /*Execution*/Subgroup,
+        /*Operation*/Reduce,
+        /*Value*/value)
+
+      subgroupXor(value) -> OpGroupNonUniformBitwiseXor | OpGroupNonUniformLogicalXor(
+        /*Execution*/Subgroup,
+        /*Operation*/Reduce,
+        /*Value*/value)
+
+      subgroupInclusiveAdd(value) -> OpGroupNonUniformIAdd | OpGroupNonUniformFAdd(
+        /*Execution*/Subgroup,
+        /*Operation*/InclusiveScan,
+        /*Value*/value)
+
+      subgroupInclusiveMul(value) -> OpGroupNonUniformIMul | OpGroupNonUniformFMul(
+        /*Execution*/Subgroup,
+        /*Operation*/InclusiveScan,
+        /*Value*/value)
+
+      subgroupInclusiveMin(value) ->  OpGroupNonUniformSMin | OpGroupNonUniformUMin | OpGroupNonUniformFMin(
+        /*Execution*/Subgroup,
+        /*Operation*/InclusiveScan,
+        /*Value*/value)
+
+      subgroupInclusiveMax(value) ->  OpGroupNonUniformSMax | OpGroupNonUniformUMax | OpGroupNonUniformFMax(
+        /*Execution*/Subgroup,
+        /*Operation*/InclusiveScan,
+        /*Value*/value)
+
+      subgroupInclusiveAnd(value) -> OpGroupNonUniformBitwiseAnd | OpGroupNonUniformLogicalAnd(
+        /*Execution*/Subgroup,
+        /*Operation*/InclusiveScan,
+        /*Value*/value)
+
+      subgroupInclusiveOr(value) -> OpGroupNonUniformBitwiseOr | OpGroupNonUniformLogicalOr(
+        /*Execution*/Subgroup,
+        /*Operation*/InclusiveScan,
+        /*Value*/value)
+
+      subgroupInclusiveXor(value) -> OpGroupNonUniformBitwiseXor | OpGroupNonUniformLogicalXor(
+        /*Execution*/Subgroup,
+        /*Operation*/InclusiveScan,
+        /*Value*/value)
+
+      subgroupExclusiveAdd(value) -> OpGroupNonUniformIAdd | OpGroupNonUniformFAdd(
+        /*Execution*/Subgroup,
+        /*Operation*/ExclusiveScan,
+        /*Value*/value)
+
+      subgroupExclusiveMul(value) -> OpGroupNonUniformIMul | OpGroupNonUniformFMul(
+        /*Execution*/Subgroup,
+        /*Operation*/ExclusiveScan,
+        /*Value*/value)
+
+      subgroupExclusiveMin(value) ->  OpGroupNonUniformSMin | OpGroupNonUniformUMin | OpGroupNonUniformFMin(
+        /*Execution*/Subgroup,
+        /*Operation*/ExclusiveScan,
+        /*Value*/value)
+
+      subgroupExclusiveMax(value) ->  OpGroupNonUniformSMax | OpGroupNonUniformUMax | OpGroupNonUniformFMax(
+        /*Execution*/Subgroup,
+        /*Operation*/ExclusiveScan,
+        /*Value*/value)
+
+      subgroupExclusiveAnd(value) -> OpGroupNonUniformBitwiseAnd | OpGroupNonUniformLogicalAnd(
+        /*Execution*/Subgroup,
+        /*Operation*/ExclusiveScan,
+        /*Value*/value)
+
+      subgroupExclusiveOr(value) -> OpGroupNonUniformBitwiseOr | OpGroupNonUniformLogicalOr(
+        /*Execution*/Subgroup,
+        /*Operation*/ExclusiveScan,
+        /*Value*/value)
+
+      subgroupExclusiveXor(value) -> OpGroupNonUniformBitwiseXor | OpGroupNonUniformLogicalXor(
+        /*Execution*/Subgroup,
+        /*Operation*/ExclusiveScan,
+        /*Value*/value)
+
+      subgroupClusteredAdd(value) -> OpGroupNonUniformIAdd | OpGroupNonUniformFAdd(
+        /*Execution*/Subgroup,
+        /*Operation*/ClusteredReduce,
+        /*Value*/value,
+        /*ClusterSize*/clusterSize)
+
+      subgroupClusteredMul(value) -> OpGroupNonUniformIMul | OpGroupNonUniformFMul(
+        /*Execution*/Subgroup,
+        /*Operation*/ClusteredReduce,
+        /*Value*/value,
+        /*ClusterSize*/clusterSize)
+
+      subgroupClusteredMin(value) ->  OpGroupNonUniformSMin | OpGroupNonUniformUMin | OpGroupNonUniformFMin(
+        /*Execution*/Subgroup,
+        /*Operation*/ClusteredReduce,
+        /*Value*/value,
+        /*ClusterSize*/clusterSize)
+
+      subgroupClusteredMax(value) ->  OpGroupNonUniformSMax | OpGroupNonUniformUMax | OpGroupNonUniformFMax(
+        /*Execution*/Subgroup,
+        /*Operation*/ClusteredReduce,
+        /*Value*/value,
+        /*ClusterSize*/clusterSize)
+
+      subgroupClusteredAnd(value) -> OpGroupNonUniformBitwiseAnd | OpGroupNonUniformLogicalAnd(
+        /*Execution*/Subgroup,
+        /*Operation*/ClusteredReduce,
+        /*Value*/value,
+        /*ClusterSize*/clusterSize)
+
+      subgroupClusteredOr(value) -> OpGroupNonUniformBitwiseOr | OpGroupNonUniformLogicalOr(
+        /*Execution*/Subgroup,
+        /*Operation*/ClusteredReduce,
+        /*Value*/value,
+        /*ClusterSize*/clusterSize)
+
+      subgroupClusteredXor(value) -> OpGroupNonUniformBitwiseXor | OpGroupNonUniformLogicalXor(
+        /*Execution*/Subgroup,
+        /*Operation*/ClusteredReduce,
+        /*Value*/value,
+        /*ClusterSize*/clusterSize)
+
+      subgroupQuadBroadcast(value, id) -> OpGroupNonUniformQuadBroadcast(
+        /*Execution*/Subgroup,
+        /*Value*/value,
+        /*Index*/id)
+
+      subgroupQuadSwapHorizontal(value) -> OpGroupNonUniformQuadSwap(
+        /*Execution*/Subgroup,
+        /*Value*/value,
+        /*Direction*/0)
+
+      subgroupQuadSwapVertical(value) -> OpGroupNonUniformQuadSwap(
+        /*Execution*/Subgroup,
+        /*Value*/value,
+        /*Direction*/1)
+
+      subgroupQuadSwapDiagonal(value) -> OpGroupNonUniformQuadSwap(
+        /*Execution*/Subgroup,
+        /*Value*/value,
+        /*Direction*/2)
+
+Modifications to the OpenGL Shading Language Specification, Version 4.50
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_KHR_shader_subgroup_basic            : <behavior>
+      #extension GL_KHR_shader_subgroup_vote             : <behavior>
+      #extension GL_KHR_shader_subgroup_arithmetic       : <behavior>
+      #extension GL_KHR_shader_subgroup_ballot           : <behavior>
+      #extension GL_KHR_shader_subgroup_shuffle          : <behavior>
+      #extension GL_KHR_shader_subgroup_shuffle_relative : <behavior>
+      #extension GL_KHR_shader_subgroup_clustered        : <behavior>
+      #extension GL_KHR_shader_subgroup_quad             : <behavior>
+
+    where <behavior> is as specified in section 3.3.  If any of
+    GL_KHR_shader_subgroup_vote, GL_KHR_shader_subgroup_arithmetic,
+    GL_KHR_shader_subgroup_ballot, GL_KHR_shader_subgroup_shuffle,
+    GL_KHR_shader_subgroup_shuffle_relative, GL_KHR_shader_subgroup_clustered,
+    or GL_KHR_shader_subgroup_quad extension are enabled, the
+    GL_KHR_shader_subgroup_basic extension is also implicitly enabled.
+
+    New preprocessor #defines are added:
+
+      #define GL_KHR_shader_subgroup_basic                 1
+      #define GL_KHR_shader_subgroup_vote                  1
+      #define GL_KHR_shader_subgroup_arithmetic            1
+      #define GL_KHR_shader_subgroup_ballot                1
+      #define GL_KHR_shader_subgroup_shuffle               1
+      #define GL_KHR_shader_subgroup_shuffle_relative      1
+      #define GL_KHR_shader_subgroup_clustered             1
+      #define GL_KHR_shader_subgroup_quad                  1
+
+    Such that if using a GL_KHR_shader_subgroup_* extension is supported, the
+    corresponding GL_KHR_shader_subgroup_* #define is defined.
+
+Additions to Chapter 3 of the OpenGL Shading Language Specification
+(Basics)
+
+    Modify Section 3.8, Definitions
+
+    (Add a new subsection to the end of this section)
+
+        Subgroup
+
+        A subgroup is a set of invocations exposed as running concurrently with
+        the current shader invocation.  The number of invocations within a
+        subgroup (the size of the subgroup) is a fixed property of the device.
+
+        In compute shaders, the local workgroup is a superset of the subgroup.
+
+        Within any given subgroup, an invocation may be active or inactive.
+        The following are cases where this state may change:
+
+        - For N active invocations within a subgroup that encounter the same
+          dynamic instance of non-uniform control flow, there will be [0..N]
+          active invocations within the control flow as some invocations can
+          diverge. When the corresponding reconvergence of the dynamic instance
+          of the non-uniform control flow occurs, N active invocations will
+          reconverge.
+        - In graphics shaders, invocations may be inactive within a subgroup
+          if the device was unable to fully populate a subgroup prior to
+          beginning execution of that group of invocations. Behavior is
+          implementation dependent. For example, when rendering a
+          full-viewport triangle, in a viewport which is not aligned and sized
+          such that the device can maintain fully packed subgroups for the full
+          draw, invocations within a subgroup could be inactive.
+        - In a compute shader, invocations may be inactive within a subgroup
+          if the local workgroup size is not a multiple of the subgroup size.
+
+        In fragment shaders, helper invocations participate in subgroup
+        operations.
+
+        For each active invocation within a subgroup that reaches the same
+        dynamic instance of a subgroup built-in function, all active invocations
+        within a subgroup must execute the dynamic instance of the function
+        before any invocation can proceed.
+
+        The subgroup memory barrier built-in functions can be used to order
+        reads and writes to variables stored in memory accessible to other
+        shader invocations within a subgroup.  When called, these functions will
+        wait for the completion of all reads and writes previously performed by
+        the caller that access selected variable types, and then return with no
+        other effect.  The built-in functions subgroupMemoryBarrierBuffer(),
+        subgroupMemoryBarrierShared(), and subgroupMemoryBarrierImage() wait for
+        the completion of accesses to buffer, shared, and image variables,
+        respectively.  The built-in functions subgroupBarrier() and
+        subgroupMemoryBarrier() wait for the completion of accesses to all of
+        the above variable types.  The function subgroupmemoryBarrierShared() is
+        available only in compute shaders; the other functions are available in
+        all shader types.
+
+        When the subgroup memory barrier built-in functions return, the results
+        of any memory stores performed using coherent variables performed prior
+        to the call will be visible to any future coherent access to the same
+        memory performed by any other shader invocation within the same
+        subgroup.
+
+        There are two classes of subgroup built-in functions that have common
+        properties - subgroupInclusive<op>() and subgroupExclusive<op>() where
+        <op> is one of: Add, Mul, Min, Max, And, Or, Xor.
+
+        These operations perform a scan operation across the active invocations
+        within a subgroup in linear order starting at the active invocation
+        with the lowest <gl_SubgroupInvocationID>, increasing to the active
+        invocation with the highest <gl_SubgroupInvocationID>.
+
+            genType  subgroupInclusive<op>(genType value);
+            genIType subgroupInclusive<op>(genIType value);
+            genUType subgroupInclusive<op>(genUType value);
+
+        The inclusive scan operations are defined, over the set of n active
+        invocations within a subgroup, to return [x(0), x(0) <op> x(1), ...,
+        x(0) <op> x(1) <op> ... <op> x(n-1)], where x(i) is the <value> in the
+        i'th active invocation.
+
+            genType  subgroupExclusive<op>(genType value);
+            genIType subgroupExclusive<op>(genIType value);
+            genUType subgroupExclusive<op>(genUType value);
+
+        The exclusive scan operations are defined, over the set of n active
+        invocations within a subgroup, to return [I(), x(0), x(0) <op> x(1),
+        ..., x(0) <op> x(1) <op> ... <op> x(n-2)], where x(i) is the <value> in
+        the i'th active invocation.  I() is an identity function taken from the
+        following table:
+
+            <op> |   type   | I()
+            --------------------------
+            Add  |  genType | +0.0
+            Add  | genDType | +0.0
+            Add  | genIType | 0
+            Add  | genUType | 0
+            Mul  |  genType | 1.0
+            Mul  | genDType | 1.0
+            Mul  | genIType | 1
+            Mul  | genUType | 1
+            Min  |  genType | +INF
+            Min  | genDType | +INF
+            Min  | genIType | INT_MAX
+            Min  | genUType | UINT_MAX
+            Max  |  genType | -INF
+            Max  | genDType | -INF
+            Max  | genIType | INT_MIN
+            Max  | genUType | 0
+            And  | genIType | ~0
+            And  | genUType | ~0
+            And  | genBType | true
+            Or   | genIType | 0
+            Or   | genUType | 0
+            Or   | genBType | false
+            Xor  | genIType | 0
+            Xor  | genUType | 0
+            Xor  | genBType | false
+
+        For the uvec4 as used in subgroupBallot(), subgroupInverseBallot(),
+        subgroupBallotBitExtract(), subgroupBallotBitCount(),
+        subgroupBallotInclusiveBitCount(), subgroupBallotExclusiveBitCount(),
+        subgroupBallotFindLSB(), and subgroupBallotFindMSB() the following
+        properties hold:
+
+        - Bits are packed such that the first invocation is represented in bit
+          0 of the first vector component, and the last (up to
+          <gl_SubgroupSize>) is the highest bit number in the last vector
+          component needed to represent all bits for the total number of
+          subgroup invocations.  
+        - Bits that are beyond the highest bit number in the last vector
+          component needed to represent all bits for the total number of
+          subgroup invocations are ignored.
+
+        There is a class of subgroup built-in operations of the form
+        subgroupClustered<op>(), where <op> is one of: Add, Mul, Min, Max, And,
+        Or, Xor.  These built-in operations perform a clustered reduction
+        operation on the invocations within a subgroup, such that the <op> is
+        calculated on N clusters of invocations within a subgroup.  For example,
+        assume we have a shader such that gl_SubgroupSize is 8, and uses the
+        following GLSL:
+
+            float value = ...; // unique for each subgroup invocation
+            float result = subgroupClusteredAdd(value, 2);
+
+        Where the cluster size (the second parameter to subgroupClusteredAdd())
+        is 2, and each of our 8 invocations is active within the subgroup.
+
+        For each subgroup invocation in the set
+        [x(0), x(1), x(2), x(3), x(4), x(5), x(6), x(7)], the float <value> is
+        [42.0, 13.0, -56.0, 0.0, 128.0, -1.0, 7.0, 3.5].  The
+        subgroupClusteredAdd() operation will produce the float <result>
+        [55.0, 55.0, -56.0, -56.0, 127.0, 127.0, 10.5, 10.5].
+
+        A cluster as used by a clustered operation is defined such that for all
+        invocations within the cluster, their <gl_SubgroupInvocationID> is in
+        [x, x+1, x+2, ..., x+n-1], where n is the cluster size, and x is a
+        multiple of n.
+
+        The <clusterSize> as used in the subgroupClustered<op>() operations must
+        be:
+
+        - An integral constant expression.
+        - At least 1.
+        - A power of 2.
+
+        Undefined behavior will occur if a subgroupClustered<op>() operation is
+        executed with a <clusterSize> that is greater than <gl_SubgroupSize>.
+
+        The subgroup built-in operations subgroupQuadBroadcast(),
+        subgroupQuadSwapHorizontal(), subgroupQuadSwapVertical(), and
+        subgroupQuadSwapDiagonal() operate on clusters of 4 invocations called
+        a quad.  These built-in operations allow for sharing of data efficiently
+        within each quad.
+
+        In fragment shaders, this quad corresponds to 4 pixels arranged in a 2x2
+        grid:
+
+            0 | 1
+            --|--
+            2 | 3
+
+        such that:
+
+        - 0th index corresponds to a pixel with a coordinate of (x, y)
+        - 1st index corresponds to a pixel with a coordinate of (x + 1, y)
+        - 2nd index corresponds to a pixel with a coordinate of (x, y + 1)
+        - 3rd index corresponds to a pixel with a coordinate of (x + 1, y + 1)
+
+        If a primitive covers a fragment at (x, y), its fragment shader
+        invocation will be in a quad with fragment shader invocations
+        corresponding to the three neighboring pixels at (x + 1, y), (x, y + 1),
+        and (x + 1, y + 1).  These four invocations are arranged in a 2x2 grid,
+        that make up the quad.  If the neighbors of a fragment are not covered
+        by the primitive, fragment shader invocations will still be generated.
+
+        Note: in non-fragment shaders, the quad has no defined mapping to
+        non-subgroup shader stage state.
+
+        Subgroup built-in operations that perform minimum or maximum operations
+        have the following properties:
+
+        - Any operation performed on the <value>s provided by active
+          invocations within a subgroup, if <value> is of a vector type, the
+          operation is performed component-wise across the vector.
+        - From the set of <value>s provided by active invocations within a
+          subgroup, if for any two <value>s of them is a NaN, the other is
+          chosen.  If all <value>s that are used by the current invocation are
+          NaN, then the result is undefined.
+
+Additions to Chapter 7 of the OpenGL Shading Language Specification
+(Built-in Variables)
+
+    Modify Section 7.1, Built-in Languages Variable
+
+    (Add to the list of built-in variables for the compute languages)
+
+        highp in uint gl_NumSubgroups;
+        highp in uint gl_SubgroupID;
+
+    (Add to the list of built-in variables for the compute, vertex, geometry,
+    tessellation control, tessellation evaluation, and fragment languages)
+
+        mediump in uint  gl_SubgroupSize;
+        mediump in uint  gl_SubgroupInvocationID;
+        highp   in uvec4 gl_SubgroupEqMask;
+        highp   in uvec4 gl_SubgroupGeMask;
+        highp   in uvec4 gl_SubgroupGtMask;
+        highp   in uvec4 gl_SubgroupLeMask;
+        highp   in uvec4 gl_SubgroupLtMask;
+
+    (Add those paragraphs at the end of this section)
+
+    If the extension GL_KHR_shader_subgroup_basic is enabled, the variable
+    <gl_NumSubgroups> is a compute-shader built-in containing the number of
+    subgroups within the local workgroup.  The value of this variable is at
+    least 1, and is uniform across the invocation group.
+
+    If the extension GL_KHR_shader_subgroup_basic is enabled, the variable
+    <gl_SubgroupID> is a compute-shader built-in containing the index of the
+    subgroup within the local workgroup.  The value of this variable is in the
+    range 0 to <gl_NumSubgroups>-1.
+
+    If the extension GL_KHR_shader_subgroup_basic is enabled, the variable
+    <gl_SubgroupSize> is the number of invocations within a subgroup, and its
+    value is always a power of 2.  The maximum <gl_SubgroupSize> supported by
+    the GL_KHR_shader_subgroup_basic extension is 128.
+
+    If the extension GL_KHR_shader_subgroup_basic is enabled, the variable
+    <gl_SubgroupInvocationID> is a built-in containing the index of an
+    invocation within a subgroup.  The value of this variable is in the range
+    0 to <gl_SubgroupSize>-1.
+
+    If the extension GL_KHR_shader_subgroup_ballot is enabled, the
+    <gl_Subgroup??Mask> variables are built-ins that provide a bitmask of all
+    invocations, with one bit per invocation.  Bit 0 of the first vector
+    component represents the first invocation, higher-order bits within a
+    component and higher component numbers both represent, in order, higher
+    invocations, and the last invocation is the highest-order bit needed, in the
+    last component needed, to contiguously represent all bits of the invocations
+    in a subgroup.  These variables are defined according to the following
+    table:
+
+        variable          | equation for bit values
+        ------------------|-------------------------------------
+        gl_SubgroupEqMask | bit index == gl_SubgroupInvocationID
+        gl_SubgroupGeMask | bit index >= gl_SubgroupInvocationID
+        gl_SubgroupGtMask | bit index >  gl_SubgroupInvocationID
+        gl_SubgroupLeMask | bit index <= gl_SubgroupInvocationID
+        gl_SubgroupLtMask | bit index <  gl_SubgroupInvocationID
+
+Additions to Chapter 8 of the OpenGL Shading Language Specification
+(Built-in Functions)
+
+    Add Section 8.18, Shader Invocation Group Functions
+
+    Syntax:
+
+        void subgroupBarrier(void);
+
+    Only usable if the extension GL_KHR_shader_subgroup_basic is enabled.
+
+    The function subgroupBarrier() enforces that all active invocations within a
+    subgroup must execute this function before any are allowed to continue their
+    execution, and the results of any memory stores performed using coherent
+    variables performed prior to the call will be visible to any future
+    coherent access to the same memory performed by any other shader invocation
+    within the same subgroup.
+
+    Syntax:
+
+        void subgroupMemoryBarrier(void);
+
+    Only usable if the extension GL_KHR_shader_subgroup_basic is enabled.
+
+    The function subgroupMemoryBarrier() enforces the ordering of all memory
+    transactions issued within a single shader invocation, as viewed by other
+    invocations in the same subgroup.
+
+    Syntax:
+
+        void subgroupMemoryBarrierBuffer(void);
+
+    Only usable if the extension GL_KHR_shader_subgroup_basic is enabled.
+
+    The function subgroupMemoryBarrierBuffer() enforces the ordering of all
+    memory transactions to buffer variables issued within a single shader
+    invocation, as viewed by other invocations in the same subgroup.
+
+    Syntax:
+
+        void subgroupMemoryBarrierShared(void);
+
+    Only usable if the extension GL_KHR_shader_subgroup_basic is enabled.
+
+    The function subgroupMemoryBarrierShared() enforces the ordering of all
+    memory transactions to shared variables issued within a single shader
+    invocation, as viewed by other invocations in the same subgroup.
+
+    Only available in compute shaders.
+
+    Syntax:
+
+        void subgroupMemoryBarrierImage(void);
+
+    Only usable if the extension GL_KHR_shader_subgroup_basic is enabled.
+
+    The function subgroupMemoryBarrierImage() enforces the ordering of all
+    memory transactions to images issued within a single shader invocation, as
+    viewed by other invocations in the same subgroup.
+
+    Syntax:
+
+        bool subgroupElect(void);
+
+    Only usable if the extension GL_KHR_shader_subgroup_basic is enabled.
+
+    The function subgroupElect() returns true for exactly one invocation out of
+    the set of active invocations that execute a dynamic instance of this
+    instruction.  All other active invocations will return false.  The
+    invocation chosen is the active invocation with the lowest
+    <gl_SubgroupInvocationID>.
+
+    Syntax:
+
+        bool subgroupAll(bool value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_vote is enabled.
+
+    The function subgroupAll() returns true if for all active invocations
+    <value> evaluates to true.
+
+    Syntax:
+
+        bool subgroupAny(bool value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_vote is enabled.
+
+    The function subgroupAny() returns true if for any active invocation its
+    <value> evaluates to true.
+
+    Syntax:
+
+        bool subgroupAllEqual(genType value);
+        bool subgroupAllEqual(genIType value);
+        bool subgroupAllEqual(genUType value);
+        bool subgroupAllEqual(genBType value);
+        bool subgroupAllEqual(genDType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_vote is enabled.
+
+    The function subgroupAllEqual() returns true if <value> for all active
+    invocations is equal across the subgroup.
+
+    Syntax:
+
+        genType  subgroupBroadcast(genType value,  uint id);
+        genIType subgroupBroadcast(genIType value, uint id);
+        genUType subgroupBroadcast(genUType value, uint id);
+        genBType subgroupBroadcast(genBType value, uint id);
+        genDType subgroupBroadcast(genDType value, uint id);
+
+    Only usable if the extension GL_KHR_shader_subgroup_ballot is enabled.
+
+    The function subgroupBroadcast() returns the <value> from the invocation
+    whose <gl_SubgroupInvocationID> is equal to <id>.  <id> must be an integral
+    constant expression.  If the <id> is an inactive invocation or is
+    greater than or equal to <gl_SubgroupSize>, an undefined value is returned.
+
+    Syntax:
+
+        genType  subgroupBroadcastFirst(genType value);
+        genIType subgroupBroadcastFirst(genIType value);
+        genUType subgroupBroadcastFirst(genUType value);
+        genBType subgroupBroadcastFirst(genBType value);
+        genDType subgroupBroadcastFirst(genDType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_ballot is enabled.
+
+    The function subgroupBroadcastFirst() returns the <value> from the active
+    invocation with the lowest <gl_SubgroupInvocationID>.
+
+    Syntax:
+
+        uvec4 subgroupBallot(bool value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_ballot is enabled.
+
+    The function subgroupBallot() returns a set of bitfields containing the
+    result of evaluating the expression <value> in all active invocations in the
+    subgroup.  If <value> evaluates to true for an active invocation then the
+    bit corresponding to the <gl_SubgroupInvocationID> for the invocation is
+    set to one in the result, otherwise the bit is set to zero.  Bits
+    corresponding to inactive invocations are set to zero.  The following
+    assumptions can be made:
+
+        - a call to subgroupBallot() with a <value> such that for all active
+          invocation <value>s evaluates to true, will return a set of bitfields
+          where the corresponding bits are set for only the active invocations
+          in the subgroup.
+
+        - a call to subgroupBallot() with a <value> such that for all active
+          invocation <value>s evaluates to false, will return zero in each
+          component of the return.
+
+    Syntax:
+
+        bool subgroupInverseBallot(uvec4 value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_ballot is enabled.
+
+    The function subgroupInverseBallot() returns a bool that is true if the bit
+    in <value> that corresponds to the current invocation's
+    <gl_SubgroupInvocationID> in <value> is true.  All active invocations must
+    call subgroupInverseBallot() with the same <value>.
+
+    Syntax:
+
+        bool subgroupBallotBitExtract(uvec4 value, uint index);
+
+    Only usable if the extension GL_KHR_shader_subgroup_ballot is enabled.
+
+    The function subgroupBallotBitExtract() returns a bool that is true if the
+    bit in <value> that corresponds to <index> (where <index> begins at bit 0 of
+    the first vector component) is 1, and false otherwise.  If <index> is
+    greater than or equal to <gl_SubgroupSize>, an undefined result is returned.
+    This is useful in conjunction with subgroupBallot().
+
+    Syntax:
+
+        uint subgroupBallotBitCount(uvec4 value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_ballot is enabled.
+
+    The function subgroupBallotBitCount() returns the number of bits that are
+    set to 1 in the bits used to hold the subgroup invocations of <value>.
+    The bits are counted across the components of <value>.  This is useful in
+    conjunction with subgroupBallot() to get the number of active invocations
+    that contributed a true value.
+
+    Syntax:
+
+        uint subgroupBallotInclusiveBitCount(uvec4 value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_ballot is enabled.
+
+    The function subgroupBallotInclusiveBitCount() returns the number of bits
+    that are set to 1 in the ballot value for subgroup invocations with a lower,
+    or equal to, <gl_SubgroupInvocationID>.  The bits are inclusively counted
+    across the components of <value>.  This is useful in conjunction with
+    subgroupBallot().
+
+    Syntax:
+
+        uint subgroupBallotExclusiveBitCount(uvec4 value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_ballot is enabled.
+
+    The function subgroupBallotExclusiveBitCount() returns the number of bits
+    that are set to 1 in the ballot value for subgroup invocations with a lower
+    <gl_SubgroupInvocationID>.  The bits are exclusively counted across the
+    components of <value>.  This is useful in conjunction with subgroupBallot().
+
+    Syntax:
+
+        uint subgroupBallotFindLSB(uvec4 value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_ballot is enabled.
+
+    The function subgroupBallotFindLSB() returns the bit number of the least
+    significant bit set to 1 in the bits used to hold the subgroup invocations
+    of <value>.  If <value> is 0, an undefined value is returned.  This is
+    useful in conjunction with subgroupBallot().
+
+    Syntax:
+
+        uint subgroupBallotFindMSB(uvec4 value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_ballot is enabled.
+
+    The function subgroupBallotFindMSB() returns the bit number of the most
+    significant bit set to 1 in the bits used to hold the subgroup invocations
+    of <value>.  If <value> is 0, an undefined value is returned.  This is
+    useful in conjunction with subgroupBallot().
+
+    Syntax:
+
+        genType  subgroupShuffle(genType value,  uint id);
+        genIType subgroupShuffle(genIType value, uint id);
+        genUType subgroupShuffle(genUType value, uint id);
+        genBType subgroupShuffle(genBType value, uint id);
+        genDType subgroupShuffle(genDType value, uint id);
+
+    Only usable if the extension GL_KHR_shader_subgroup_shuffle is enabled.
+
+    The function subgroupShuffle() returns the <value> whose
+    <gl_SubgroupInvocationID> is equal to <id>.  If the <id> is an
+    inactive invocation or is greater than or equal to <gl_SubgroupSize>, an
+    undefined value is returned.
+
+    Syntax:
+
+        genType  subgroupShuffleXor(genType value,  uint mask);
+        genIType subgroupShuffleXor(genIType value, uint mask);
+        genUType subgroupShuffleXor(genUType value, uint mask);
+        genBType subgroupShuffleXor(genBType value, uint mask);
+        genDType subgroupShuffleXor(genDType value, uint mask);
+
+    Only usable if the extension GL_KHR_shader_subgroup_shuffle is enabled.
+
+    The function subgroupShuffleXor() returns the <value> whose
+    <gl_SubgroupInvocationID> is equal to the current invocation's
+    <gl_SubgroupInvocationID> xored with <mask>.  If the calculated index is
+    an inactive invocation or is greater than or equal to <gl_SubgroupSize>, an
+    undefined value is returned.  <mask> must be a power of 2.  The <mask> must
+    be an integral constant expression, or if subgroupShuffleXor() is used
+    within a loop:
+
+    - The initial value of the variable to be passed as <mask> (set in or
+      before the loop statement) must be an integral constant expression.
+    - Any operation that increases or decreases the value to be passed as <mask>
+      within the loop statement only modifies <mask> by an integral constant
+      expression.
+    - The variable to be passed as <mask> is not otherwise modified within the
+      loop.
+
+    Syntax:
+
+        genType  subgroupShuffleUp(genType value,  uint delta);
+        genIType subgroupShuffleUp(genIType value, uint delta);
+        genUType subgroupShuffleUp(genUType value, uint delta);
+        genBType subgroupShuffleUp(genBType value, uint delta);
+        genDType subgroupShuffleUp(genDType value, uint delta);
+
+    Only usable if the extension GL_KHR_shader_subgroup_shuffle_relative is
+    enabled.
+
+    The function subgroupShuffleUp() returns the <value> whose
+    <gl_SubgroupInvocationID> is equal to this invocation's
+    <gl_SubgroupInvocationID> minus <delta>.  If <gl_SubgroupInvocationID> minus
+    <delta> is an inactive invocation or is less than zero, an undefined value
+    is returned.
+
+    Syntax:
+
+        genType  subgroupShuffleDown(genType value,  uint delta);
+        genIType subgroupShuffleDown(genIType value, uint delta);
+        genUType subgroupShuffleDown(genUType value, uint delta);
+        genBType subgroupShuffleDown(genBType value, uint delta);
+        genDType subgroupShuffleDown(genDType value, uint delta);
+
+    Only usable if the extension GL_KHR_shader_subgroup_shuffle_relative is
+    enabled.
+
+    The function subgroupShuffleDown() returns the <value> whose
+    <gl_SubgroupInvocationID> is equal to this invocation's
+    <gl_SubgroupInvocationID> plus <delta>.  If <gl_SubgroupInvocationID> plus
+    <delta> is an inactive invocation or is greater than or equal to
+    <gl_SubgroupSize>, an undefined value is returned.
+
+    Syntax:
+
+        genType  subgroupAdd(genType value);
+        genIType subgroupAdd(genIType value);
+        genUType subgroupAdd(genUType value);
+        genDType subgroupAdd(genDType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    The function subgroupAdd() returns the summation of all active invocation
+    provided <value>s.  The method that is used to perform the operation on
+    each active invocation's <value> is implementation defined.
+
+    Syntax:
+
+        genType  subgroupMul(genType value);
+        genIType subgroupMul(genIType value);
+        genUType subgroupMul(genUType value);
+        genDType subgroupMul(genDType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    The function subgroupMul() returns the multiplication of all active
+    invocation-provided <value>s.  The method that is used to perform the
+    operation on each active invocation's <value> is implementation defined.
+
+    Syntax:
+
+        genType  subgroupMin(genType value);
+        genIType subgroupMin(genIType value);
+        genUType subgroupMin(genUType value);
+        genDType subgroupMin(genDType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    The function subgroupMin() returns the minimum <value> of all active
+    invocation-provided <value>s.
+
+    Syntax:
+
+        genType  subgroupMax(genType value);
+        genIType subgroupMax(genIType value);
+        genUType subgroupMax(genUType value);
+        genDType subgroupMax(genDType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    The function subgroupMax() returns the maximum <value> of all active
+    invocation-provided <value>s.
+
+    Syntax:
+
+        genIType subgroupAnd(genIType value);
+        genUType subgroupAnd(genUType value);
+        genBType subgroupAnd(genBType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    For genIType and genUType, the function subgroupAnd() returns the bitwise
+    AND of all active invocation provided <value>s.  For genBType, the function
+    subgroupAnd() returns the logical AND of all active invocation provided
+    <value>s.
+
+    Syntax:
+
+        genIType subgroupOr(genIType value);
+        genUType subgroupOr(genUType value);
+        genBType subgroupOr(genBType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    For genIType and genUType, the function subgroupOr() returns the bitwise
+    OR of all active invocation provided <value>s.  For genBType, the function
+    subgroupOr() returns the logical inclusive OR of all active invocation
+    provided <value>s.
+
+    Syntax:
+
+        genIType subgroupXor(genIType value);
+        genUType subgroupXor(genUType value);
+        genBType subgroupXor(genBType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    For genIType and genUType, the function subgroupXor() returns the bitwise
+    XOR of all active invocation provided <value>s.  For genBType, the function
+    subgroupXor() returns the logical exclusive OR of all active invocation
+    provided <value>s.
+
+    Syntax:
+
+        genType  subgroupInclusiveAdd(genType value);
+        genIType subgroupInclusiveAdd(genIType value);
+        genUType subgroupInclusiveAdd(genUType value);
+        genDType subgroupInclusiveAdd(genDType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    The function subgroupInclusiveAdd() returns an inclusive scan operation
+    that is the summation of all active invocation-provided <value>s.  The
+    method used to perform the operation on each active invocation's <value>
+    is implementation defined.
+
+    Syntax:
+
+        genType  subgroupInclusiveMul(genType value);
+        genIType subgroupInclusiveMul(genIType value);
+        genUType subgroupInclusiveMul(genUType value);
+        genDType subgroupInclusiveMul(genDType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    The function subgroupInclusiveMul() returns an inclusive scan operation
+    that is the multiplication of all active invocation-provided <value>s.
+    The method used to perform the operation on each active invocation's <value>
+    is implementation defined.
+
+    Syntax:
+
+        genType  subgroupInclusiveMin(genType value);
+        genIType subgroupInclusiveMin(genIType value);
+        genUType subgroupInclusiveMin(genUType value);
+        genDType subgroupInclusiveMin(genDType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    The function subgroupInclusiveMin() returns an inclusive scan operation
+    that is the minimum <value> of all active invocation-provided <value>s.
+
+    Syntax:
+
+        genType  subgroupInclusiveMax(genType value);
+        genIType subgroupInclusiveMax(genIType value);
+        genUType subgroupInclusiveMax(genUType value);
+        genDType subgroupInclusiveMax(genDType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    The function subgroupInclusiveMax() returns an inclusive scan operation
+    that is the maximum <value> of all active invocation-provided <value>s.
+
+    Syntax:
+
+        genIType subgroupInclusiveAnd(genIType value);
+        genUType subgroupInclusiveAnd(genUType value);
+        genBType subgroupInclusiveAnd(genBType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    For genIType and genUType, the function subgroupInclusiveAnd() returns an
+    inclusive scan operation that is the bitwise AND of all active
+    invocation-provided <value>s.  For genBType, the function
+    subgroupInclusiveAnd() returns an inclusive scan operation that is the
+    logical AND of all active invocation-provided <value>s.
+
+    Syntax:
+
+        genIType subgroupInclusiveOr(genIType value);
+        genUType subgroupInclusiveOr(genUType value);
+        genBType subgroupInclusiveOr(genBType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    For genIType and genUType, the function subgroupInclusiveOr() returns an
+    inclusive scan operation that is the bitwise OR of all active
+    invocation-provided <value>s.  For genBType, the function
+    subgroupInclusiveOr() returns an inclusive scan operation that is the
+    logical inclusive OR of all active invocation-provided <value>s.
+
+    Syntax:
+
+        genIType subgroupInclusiveXor(genIType value);
+        genUType subgroupInclusiveXor(genUType value);
+        genBType subgroupInclusiveXor(genBType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    For genIType and genUType, the function subgroupInclusiveXor() returns an
+    inclusive scan operation that is the bitwise XOR of all active
+    invocation-provided <value>s.  For genBType, the function
+    subgroupInclusiveXor() returns an inclusive scan operation that is the
+    logical exclusive OR of all active invocation-provided <value>s.
+
+   Syntax:
+
+        genType  subgroupExclusiveAdd(genType value);
+        genIType subgroupExclusiveAdd(genIType value);
+        genUType subgroupExclusiveAdd(genUType value);
+        genDType subgroupExclusiveAdd(genDType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    The function subgroupExclusiveAdd() returns an exclusive scan operation
+    that is the summation of all active invocation-provided <value>s.
+    The method used to perform the operation on each active invocation's <value>
+    is implementation defined.
+
+    Syntax:
+
+        genType  subgroupExclusiveMul(genType value);
+        genIType subgroupExclusiveMul(genIType value);
+        genUType subgroupExclusiveMul(genUType value);
+        genDType subgroupExclusiveMul(genDType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    The function subgroupExclusiveMul() returns an exclusive scan operation
+    that is the multiplication of all active invocation-provided <value>s.
+    The method used to perform the operation on each active invocation's <value>
+    is implementation defined.
+
+    Syntax:
+
+        genType  subgroupExclusiveMin(genType value);
+        genIType subgroupExclusiveMin(genIType value);
+        genUType subgroupExclusiveMin(genUType value);
+        genDType subgroupExclusiveMin(genDType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    The function subgroupExclusiveMin() returns an exclusive scan operation
+    that is the minimum <value> of all active invocation-provided <value>s.
+
+    Syntax:
+
+        genType  subgroupExclusiveMax(genType value);
+        genIType subgroupExclusiveMax(genIType value);
+        genUType subgroupExclusiveMax(genUType value);
+        genDType subgroupExclusiveMax(genDType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    The function subgroupExclusiveMax() returns an exclusive scan operation
+    that is the maximum <value> of all active invocation-provided <value>s.
+
+    Syntax:
+
+        genIType subgroupExclusiveAnd(genIType value);
+        genUType subgroupExclusiveAnd(genUType value);
+        genBType subgroupExclusiveAnd(genBType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    For genIType and genUType, the function subgroupExclusiveAnd() returns an
+    exclusive scan operation that is the bitwise AND of all active
+    invocation-provided <value>s.  For genBType, the function
+    subgroupExclusiveAnd() returns an exclusive scan operation that is the
+    logical AND of all active invocation-provided <value>s.
+
+    Syntax:
+
+        genIType subgroupExclusiveOr(genIType value);
+        genUType subgroupExclusiveOr(genUType value);
+        genBType subgroupExclusiveOr(genBType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    For genIType and genUType, the function subgroupExclusiveOr() returns an
+    exclusive scan operation that is the bitwise OR of all active
+    invocation-provided <value>s.  For genBType, the function
+    subgroupExclusiveOr() returns an exclusive scan operation that is the
+    logical inclusive OR of all active invocation-provided <value>s.
+
+    Syntax:
+
+        genIType subgroupExclusiveXor(genIType value);
+        genUType subgroupExclusiveXor(genUType value);
+        genBType subgroupExclusiveXor(genBType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_arithmetic is enabled.
+
+    For genIType and genUType, the function subgroupExclusiveXor() returns an
+    exclusive scan operation that is the bitwise XOR of all active
+    invocation-provided <value>s.  For genBType, the function
+    subgroupExclusiveXor() returns an exclusive scan operation that is the
+    logical exclusive OR of all active invocation-provided <value>s.
+
+    Syntax:
+
+        genType  subgroupClusteredAdd(genType value,  uint clusterSize);
+        genIType subgroupClusteredAdd(genIType value, uint clusterSize);
+        genUType subgroupClusteredAdd(genUType value, uint clusterSize);
+        genDType subgroupClusteredAdd(genDType value, uint clusterSize);
+
+    Only usable if the extension GL_KHR_shader_subgroup_clustered is enabled.
+
+    The function subgroupClusteredAdd() returns a clustered operation that is
+    the summation of all active invocation-provided <value>s within a cluster,
+    with a cluster size of <clusterSize>.  The method used to perform the
+    operation on each active invocation's <value> is implementation defined.
+
+    Syntax:
+
+        genType  subgroupClusteredMul(genType value,  uint clusterSize);
+        genIType subgroupClusteredMul(genIType value, uint clusterSize);
+        genUType subgroupClusteredMul(genUType value, uint clusterSize);
+        genDType subgroupClusteredMul(genDType value, uint clusterSize);
+
+    Only usable if the extension GL_KHR_shader_subgroup_clustered is enabled.
+
+    The function subgroupClusteredMul() returns a clustered operation that is
+    the multiplication of all active invocation-provided <value>s within a
+    cluster, with a cluster size of <clusterSize>.  The method used to perform
+    the operation on each active invocation's <value> is implementation defined.
+
+    Syntax:
+
+        genType  subgroupClusteredMin(genType value,  uint clusterSize);
+        genIType subgroupClusteredMin(genIType value, uint clusterSize);
+        genUType subgroupClusteredMin(genUType value, uint clusterSize);
+        genDType subgroupClusteredMin(genDType value, uint clusterSize);
+
+    Only usable if the extension GL_KHR_shader_subgroup_clustered is enabled.
+
+    The function subgroupClusteredMin() returns a clustered operation that is
+    the minimum of all active invocation-provided <value>s within a
+    cluster, with a cluster size of <clusterSize>.
+
+    Syntax:
+
+        genType  subgroupClusteredMax(genType value,  uint clusterSize);
+        genIType subgroupClusteredMax(genIType value, uint clusterSize);
+        genUType subgroupClusteredMax(genUType value, uint clusterSize);
+        genDType subgroupClusteredMax(genDType value, uint clusterSize);
+
+    Only usable if the extension GL_KHR_shader_subgroup_clustered is enabled.
+
+    The function subgroupClusteredMax() returns a clustered operation that is
+    the maximum of all active invocation-provided <value>s within a
+    cluster, with a cluster size of <clusterSize>.
+
+    Syntax:
+
+        genIType subgroupClusteredAnd(genIType value, uint clusterSize);
+        genUType subgroupClusteredAnd(genUType value, uint clusterSize);
+        genBType subgroupClusteredAnd(genBType value, uint clusterSize);
+
+    Only usable if the extension GL_KHR_shader_subgroup_clustered is enabled.
+
+    For genIType and genUType, the function subgroupClusteredAnd() returns a
+    clustered operation that is the bitwise AND of all active
+    invocation-provided <value>s within a cluster.  For genBType, the function
+    subgroupClusteredAnd() returns a clustered operation that is the logical
+    AND of all active invocation-provided <value>s within a cluster.
+
+    Syntax:
+
+        genIType subgroupClusteredOr(genIType value, uint clusterSize);
+        genUType subgroupClusteredOr(genUType value, uint clusterSize);
+        genBType subgroupClusteredOr(genBType value, uint clusterSize);
+
+    Only usable if the extension GL_KHR_shader_subgroup_clustered is enabled.
+
+    For genIType and genUType, the function subgroupClusteredOr() returns a
+    clustered operation that is the bitwise OR of all active
+    invocation-provided <value>s within a cluster.  For genBType, the function
+    subgroupClusteredOr() returns a clustered operation that is the logical
+    inclusive OR of all active invocation-provided <value>s within a cluster.
+
+    Syntax:
+
+        genIType subgroupClusteredXor(genIType value, uint clusterSize);
+        genUType subgroupClusteredXor(genUType value, uint clusterSize);
+        genBType subgroupClusteredXor(genBType value, uint clusterSize);
+
+    Only usable if the extension GL_KHR_shader_subgroup_clustered is enabled.
+
+    For genIType and genUType, the function subgroupClusteredXor() returns a
+    clustered operation that is the bitwise XOR of all active
+    invocation-provided <value>s within a cluster.  For genBType, the function
+    subgroupClusteredXor() returns a clustered operation that is the logical
+    exclusive OR of all active invocation-provided <value>s within a cluster.
+
+    Syntax:
+
+        genType  subgroupQuadBroadcast(genType value,  uint id);
+        genIType subgroupQuadBroadcast(genIType value, uint id);
+        genUType subgroupQuadBroadcast(genUType value, uint id);
+        genBType subgroupQuadBroadcast(genBType value, uint id);
+        genDType subgroupQuadBroadcast(genDType value, uint id);
+
+    Only usable if the extension GL_KHR_shader_subgroup_quad is enabled.
+
+    The function subgroupQuadBroadcast() returns the <value> from the invocation
+    within the quad whose <gl_SubgroupInvocationID> % 4 is equal to <id>.  <id>
+    must be an integral constant expression.  If the <id> is an inactive
+    invocation or is greater than or equal to 4, an undefined value is returned.
+
+    Syntax:
+
+        genType  subgroupQuadSwapHorizontal(genType value);
+        genIType subgroupQuadSwapHorizontal(genIType value);
+        genUType subgroupQuadSwapHorizontal(genUType value);
+        genBType subgroupQuadSwapHorizontal(genBType value);
+        genDType subgroupQuadSwapHorizontal(genDType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_quad is enabled.
+
+    The function subgroupQuadSwapHorizontal() swaps the <value>s, within the
+    quad horizontally.  This would result in the following transformation of the
+    quad:
+
+        a | b             b | a
+        --|--     -->     --|--
+        c | d             d | c
+
+    Syntax:
+
+        genType  subgroupQuadSwapVertical(genType value);
+        genIType subgroupQuadSwapVertical(genIType value);
+        genUType subgroupQuadSwapVertical(genUType value);
+        genBType subgroupQuadSwapVertical(genBType value);
+        genDType subgroupQuadSwapVertical(genDType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_quad is enabled.
+
+    The function subgroupQuadSwapVertical() swaps the <value>s, within the
+    quad vertically.  This would result in the following transformation of the
+    quad:
+
+        a | b             c | d
+        --|--     -->     --|--
+        c | d             a | b
+
+    Syntax:
+
+        genType  subgroupQuadSwapDiagonal(genType value);
+        genIType subgroupQuadSwapDiagonal(genIType value);
+        genUType subgroupQuadSwapDiagonal(genUType value);
+        genBType subgroupQuadSwapDiagonal(genBType value);
+        genDType subgroupQuadSwapDiagonal(genDType value);
+
+    Only usable if the extension GL_KHR_shader_subgroup_quad is enabled.
+
+    The function subgroupQuadSwapDiagonal() swaps the <value>s, within the
+    quad diagonally.  This would result in the following transformation of the
+    quad:
+
+        a | b             d | c
+        --|--     -->     --|--
+        c | d             b | a
+
+Issues
+
+1. What stages can subgroup built-in functions be used in?
+
+   RESOLUTION: Depends on what is supported from the host API that consumes the
+   shaders.
+
+2. What subgroup built-in functions can be supported across vendors?
+
+    RESOLUTION: Split subgroup functionality into separate extension strings
+    based on the categories vendors can support, and developers will query the
+    host API that consumes the shaders for what is supported.
+
+3. Should quad subgroup built-in functions be available in all stages?
+
+    RESOLUTION: Yes, but with the caveat that a quad is just a cluster of 4
+    invocations, and that there is no defined mapping of quad to IDs available
+    in non-fragment stages.
+
+4. Are 64 invocations the maximum subgroup size across vendors?
+
+    RESOLUTION: No, 128 is requested.  The subgroupBallot*() built-ins will use
+    a uvec4 return, and helper functions to only access the bits the vendor used
+    are added.
+
+5. How should subgroup min/max built-in functions handle NaNs?
+
+    RESOLUTION: For any two values; if either of them is a NaN, the other is
+    chosen.  If both are NaNs, then the result is undefined.
+
+6. Should gl_SubgroupSize be allowed to vary (for example across shader stages)?
+
+    RESOLUTION: No.  The subgroup size is a constant property of the device the
+    shader is executing on.
+
+7. Can all vendors support the four shuffle built-ins (shuffle, shuffle up,
+   shuffle down, and shuffle xor)?
+
+   RESOLUTION: No.  The shuffle built-ins are split into two categories instead.
+
+Revision History
+
+    Rev.  Date          Author     Changes
+    ----  -----------   --------   -------------------------------------------
+     6    28-Feb-2018   nhenning   Add approved and ratification dates.
+     5    12-Feb-2018   jbolz/     Add recommended mappings of GLSL builtin
+                        nhenning   functions to SPIR-V.
+     4    23-Aug-2017   nhenning   Cluster operations can cause undefined
+                                   behavior if the cluster size exceeds
+                                   gl_SubgroupSize.
+     3    13-Jul-2017   nhenning   Note that gl_NumSubgroups is guaranteed to be
+                                   uniform across a shader execution.
+     2    18-May-2017   nhenning   Fix the wording on some ballot built-in
+                                   operations.
+     1    13-Mar-2017   nhenning   Initial revision.
