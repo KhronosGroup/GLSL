@@ -38,3 +38,4 @@ which normatively accepts SPIR-V but does not normatively consume a high-level s
 - [GL_EXT_multiview](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_multiview.txt)
 - [GL_AMD_shader_fragment_mask](https://github.com/KhronosGroup/GLSL/blob/master/extensions/amd/GL_AMD_shader_fragment_mask.txt)
 - [GL_NVX_multiview_per_view_attributes](https://github.com/KhronosGroup/GLSL/blob/master/extensions/nvx/GL_NVX_multiview_per_view_attributes.txt)
+- [GL_KHR_shader_subgroup](https://github.com/KhronosGroup/GLSL/blob/master/extensions/khr/GL_KHR_shader_subgroup.txt)
