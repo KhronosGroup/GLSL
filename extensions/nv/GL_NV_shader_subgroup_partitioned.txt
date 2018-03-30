@@ -1,0 +1,467 @@
+Name
+
+    NV_shader_subgroup_partitioned
+
+Name Strings
+
+    GL_NV_shader_subgroup_partitioned
+
+Contact
+
+    Jeff Bolz (jbolz 'at' nvidia.com), NVIDIA
+
+Contributors
+
+Notice
+
+Status
+
+    Complete.
+
+Version
+
+    Last Modified Date: 16-Mar-2018
+    Revision: 1
+
+Number
+
+    TBD.
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    This extension is written against revision 6 of the OpenGL Shading Language
+    version 4.50, dated April 14, 2016.
+
+    This extension interacts with revision 36 of the GL_KHR_vulkan_glsl
+    extension, dated February 13, 2017.
+
+    This extension requires GL_KHR_shader_subgroup_basic, and is written assuming
+    the GL_KHR_shader_subgroup.txt extension is incorporated.
+
+Overview
+
+    This extension adds a builtin function that "partitions" a subgroup into
+    sets of invocations that have the same value of a variable, returning a
+    ballot value indicating which invocations are in the same subset of the
+    partition. It also adds a set of subgroup builtin functions that accept a
+    ballot value and compute the scan/reduce operation across the values in
+    the same subset of the partition, with each subset of the partition
+    computing an independent result. This can be thought of as a
+    generalization of clustering where rather than fixed-size/offset clusters
+    the clustering can be arbitrary.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-specification), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs.
+
+    All subgroupPartitioned<op>NV, subgroupPartitionedInclusive<op>NV
+    and subgroupPartitionedExclusive<op>NV functions map to
+    OpGroupNonUniform<op>:
+
+        (none)/*Reduce*/    -> GroupOperationPartitionedReduceNV
+        Inclusive           -> GroupOperationPartitionedInclusiveScanNV
+        Exclusive           -> GroupOperationPartitionedExclusiveScanNV
+
+    When using GroupOperationPartitioned*, the <ballot> parameter is the last
+    operand to OpGroupNonUniform<op>, similar to ClusterSize.
+
+        subgroupPartitionNV -> OpGroupNonUniformPartitionNV
+
+Modifications to the OpenGL Shading Language Specification, Version 4.50
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_NV_shader_subgroup_partitioned       : <behavior>
+
+    where <behavior> is as specified in section 3.3.  If
+    GL_NV_shader_subgroup_partitioned extension is enabled, the
+    GL_KHR_shader_subgroup_basic extension is also implicitly enabled.
+
+    A new preprocessor #define is added:
+
+      #define GL_NV_shader_subgroup_partitioned            1
+
+Additions to Chapter 3 of the OpenGL Shading Language Specification
+(Basics)
+
+    Modify Section 3.8, Definitions
+
+    (Add to the end of the Subgroup section)
+
+        There are three classes of subgroup built-in functions that take a
+        <ballot> parameter: subgroupPartitionedInclusive<op>NV(),
+        subgroupPartitionedExclusive<op>NV(), and subgroupPartitioned<op>NV(),
+        where <op> is one of: Add, Mul, Min, Max, And, Or, Xor
+
+        The <ballot> parameter to these functions must form a valid partition
+        of the active invocations in the subgroup. The values of <ballot> are
+        a valid partition if:
+
+          * for each active invocation <i>, the bit corresponding to <i> is
+            set in <i>'s value of <ballot>, and
+          * for any two active invocations <i> and <j>, if the bit
+            corresponding to invocation <j> is set in invocation <i>'s value
+            of <ballot>, then invocation <j>'s value of <ballot> must equal
+            invocation <i>'s value of <ballot>, and 
+          * bits not corresponding to any invocation in the subgroup are
+            ignored.
+
+        If two active invocations <i> and <j> have the same value of <ballot>,
+        they are said to be "in the same subset of the partition".
+
+        subgroupPartitionedInclusive<op>NV(),
+        subgroupPartitionedExclusive<op>NV(), and
+        subgroupPartitioned<op>NV() perform an inclusive scan, exclusive scan,
+        and reduction, respectively, across the values for invocations in the
+        same subset of the partition, and that result value is returned for
+        all invocations in that subset of the partition. The scan/reduce is
+        computed for each subset of the partition. As with the
+        subgroupInclusive<op>() and subgroupExclusive<op>() functions, the
+        scans treat the invocations as ordered according to their values of
+        <gl_SubgroupInvocationID>.
+
+        For example, assume we have a shader such that gl_SubgroupSize is 8,
+        and uses the following GLSL:
+
+            float value = ...; // unique for each subgroup invocation
+            uvec4 ballot;
+            if (gl_SubgroupInvocationID & 1) == 0) {
+                ballot = uvec4(0x55,0,0,0); // even invocations
+            } else {
+                ballot = uvec4(0xAA,0,0,0); // odd invocations
+            }
+            float result = subgroupPartitionedAddNV(value, ballot);
+
+        where the ballot partitions invocations according to even/odd values
+        of <gl_SubgroupInvocationID>, and each of our 8 invocations is active
+        within the subgroup.
+
+        For each subgroup invocation in the set
+        [x(0), x(1), x(2), x(3), x(4), x(5), x(6), x(7)], the float <value> is
+        [42.0, 13.0, -56.0, 0.0, 128.0, -1.0, 7.0, 3.5].  The
+        subgroupPartitionedAddNV() operation will produce the float <result>
+        [121.0, 15.5, 121.0, 15.5, 121.0, 15.5, 121.0, 15.5].
+
+        If the <ballot> parameter to any partitioned subgroup operation is
+        not a valid partition, then the result is undefined.
+
+Additions to Chapter 7 of the OpenGL Shading Language Specification
+(Built-in Variables)
+
+Additions to Chapter 8 of the OpenGL Shading Language Specification
+(Built-in Functions)
+
+    Add to Section 8.18, Shader Invocation Group Functions
+
+    Syntax:
+
+        genType    subgroupPartitionedAddNV(genType value, uvec4 ballot);
+        genIType   subgroupPartitionedAddNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedAddNV(genUType value, uvec4 ballot);
+        genDType   subgroupPartitionedAddNV(genDType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    The function subgroupPartitionedAddNV() returns the summation of all active invocation
+    provided <value>s in the invocation's subset of the partition.  The method that is used to perform the operation on
+    each active invocation's <value> is implementation defined.
+
+    Syntax:
+
+        genType    subgroupPartitionedMulNV(genType value, uvec4 ballot);
+        genIType   subgroupPartitionedMulNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedMulNV(genUType value, uvec4 ballot);
+        genDType   subgroupPartitionedMulNV(genDType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    The function subgroupPartitionedMulNV() returns the multiplication of all active
+    invocation-provided <value>s in the invocation's subset of the partition.  The method that is used to perform the
+    operation on each active invocation's <value> is implementation defined.
+
+    Syntax:
+
+        genType    subgroupPartitionedMinNV(genType value, uvec4 ballot);
+        genIType   subgroupPartitionedMinNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedMinNV(genUType value, uvec4 ballot);
+        genDType   subgroupPartitionedMinNV(genDType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    The function subgroupPartitionedMinNV() returns the minimum <value> of all active
+    invocation-provided <value>s in the invocation's subset of the partition.
+
+    Syntax:
+
+        genType    subgroupPartitionedMaxNV(genType value, uvec4 ballot);
+        genIType   subgroupPartitionedMaxNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedMaxNV(genUType value, uvec4 ballot);
+        genDType   subgroupPartitionedMaxNV(genDType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    The function subgroupPartitionedMaxNV() returns the maximum <value> of all active
+    invocation-provided <value>s in the invocation's subset of the partition.
+
+    Syntax:
+
+        genIType   subgroupPartitionedAndNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedAndNV(genUType value, uvec4 ballot);
+        genBType   subgroupPartitionedAndNV(genBType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    For genIType and genUType, the function subgroupPartitionedAndNV() returns the bitwise
+    AND of all active invocation provided <value>s in the invocation's subset of the partition.  For genBType, the function
+    subgroupPartitionedAndNV() returns the logical AND of all active invocation provided
+    <value>s in the invocation's subset of the partition.
+
+    Syntax:
+
+        genIType   subgroupPartitionedOrNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedOrNV(genUType value, uvec4 ballot);
+        genBType   subgroupPartitionedOrNV(genBType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    For genIType and genUType, the function subgroupPartitionedOrNV() returns the bitwise
+    OR of all active invocation provided <value>s in the invocation's subset of the partition.  For genBType, the function
+    subgroupPartitionedOrNV() returns the logical inclusive OR of all active invocation
+    provided <value>s in the invocation's subset of the partition.
+
+    Syntax:
+
+        genIType   subgroupPartitionedXorNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedXorNV(genUType value, uvec4 ballot);
+        genBType   subgroupPartitionedXorNV(genBType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    For genIType and genUType, the function subgroupPartitionedXorNV() returns the bitwise
+    XOR of all active invocation provided <value>s in the invocation's subset of the partition.  For genBType, the function
+    subgroupPartitionedXorNV() returns the logical exclusive OR of all active invocation
+    provided <value>s in the invocation's subset of the partition.
+
+    Syntax:
+
+        genType    subgroupPartitionedInclusiveAddNV(genType value, uvec4 ballot);
+        genIType   subgroupPartitionedInclusiveAddNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedInclusiveAddNV(genUType value, uvec4 ballot);
+        genDType   subgroupPartitionedInclusiveAddNV(genDType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    The function subgroupPartitionedInclusiveAddNV() returns an inclusive scan operation
+    that is the summation of all active invocation-provided <value>s in the invocation's subset of the partition.  The
+    method used to perform the operation on each active invocation's <value>
+    is implementation defined.
+
+    Syntax:
+
+        genType    subgroupPartitionedInclusiveMulNV(genType value, uvec4 ballot);
+        genIType   subgroupPartitionedInclusiveMulNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedInclusiveMulNV(genUType value, uvec4 ballot);
+        genDType   subgroupPartitionedInclusiveMulNV(genDType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    The function subgroupPartitionedInclusiveMulNV() returns an inclusive scan operation
+    that is the multiplication of all active invocation-provided <value>s in the invocation's subset of the partition.
+    The method used to perform the operation on each active invocation's <value>
+    is implementation defined.
+
+    Syntax:
+
+        genType    subgroupPartitionedInclusiveMinNV(genType value, uvec4 ballot);
+        genIType   subgroupPartitionedInclusiveMinNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedInclusiveMinNV(genUType value, uvec4 ballot);
+        genDType   subgroupPartitionedInclusiveMinNV(genDType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    The function subgroupPartitionedInclusiveMinNV() returns an inclusive scan operation
+    that is the minimum <value> of all active invocation-provided <value>s in the invocation's subset of the partition.
+
+    Syntax:
+
+        genType    subgroupPartitionedInclusiveMaxNV(genType value, uvec4 ballot);
+        genIType   subgroupPartitionedInclusiveMaxNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedInclusiveMaxNV(genUType value, uvec4 ballot);
+        genDType   subgroupPartitionedInclusiveMaxNV(genDType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    The function subgroupPartitionedInclusiveMaxNV() returns an inclusive scan operation
+    that is the maximum <value> of all active invocation-provided <value>s in the invocation's subset of the partition.
+
+    Syntax:
+
+        genIType   subgroupPartitionedInclusiveAndNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedInclusiveAndNV(genUType value, uvec4 ballot);
+        genBType   subgroupPartitionedInclusiveAndNV(genBType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    For genIType and genUType, the function subgroupPartitionedInclusiveAndNV() returns an
+    inclusive scan operation that is the bitwise AND of all active
+    invocation-provided <value>s in the invocation's subset of the partition.  For genBType, the function
+    subgroupPartitionedInclusiveAndNV() returns an inclusive scan operation that is the
+    logical AND of all active invocation-provided <value>s in the invocation's subset of the partition.
+
+    Syntax:
+
+        genIType   subgroupPartitionedInclusiveOrNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedInclusiveOrNV(genUType value, uvec4 ballot);
+        genBType   subgroupPartitionedInclusiveOrNV(genBType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    For genIType and genUType, the function subgroupPartitionedInclusiveOrNV() returns an
+    inclusive scan operation that is the bitwise OR of all active
+    invocation-provided <value>s in the invocation's subset of the partition.  For genBType, the function
+    subgroupPartitionedInclusiveOrNV() returns an inclusive scan operation that is the
+    logical inclusive OR of all active invocation-provided <value>s in the invocation's subset of the partition.
+
+    Syntax:
+
+        genIType   subgroupPartitionedInclusiveXorNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedInclusiveXorNV(genUType value, uvec4 ballot);
+        genBType   subgroupPartitionedInclusiveXorNV(genBType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    For genIType and genUType, the function subgroupPartitionedInclusiveXorNV() returns an
+    inclusive scan operation that is the bitwise XOR of all active
+    invocation-provided <value>s in the invocation's subset of the partition.  For genBType, the function
+    subgroupPartitionedInclusiveXorNV() returns an inclusive scan operation that is the
+    logical exclusive OR of all active invocation-provided <value>s in the invocation's subset of the partition.
+
+   Syntax:
+
+        genType    subgroupPartitionedExclusiveAddNV(genType value, uvec4 ballot);
+        genIType   subgroupPartitionedExclusiveAddNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedExclusiveAddNV(genUType value, uvec4 ballot);
+        genDType   subgroupPartitionedExclusiveAddNV(genDType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    The function subgroupPartitionedExclusiveAddNV() returns an exclusive scan operation
+    that is the summation of all active invocation-provided <value>s in the invocation's subset of the partition.
+    The method used to perform the operation on each active invocation's <value>
+    is implementation defined.
+
+    Syntax:
+
+        genType    subgroupPartitionedExclusiveMulNV(genType value, uvec4 ballot);
+        genIType   subgroupPartitionedExclusiveMulNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedExclusiveMulNV(genUType value, uvec4 ballot);
+        genDType   subgroupPartitionedExclusiveMulNV(genDType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    The function subgroupPartitionedExclusiveMulNV() returns an exclusive scan operation
+    that is the multiplication of all active invocation-provided <value>s in the invocation's subset of the partition.
+    The method used to perform the operation on each active invocation's <value>
+    is implementation defined.
+
+    Syntax:
+
+        genType    subgroupPartitionedExclusiveMinNV(genType value, uvec4 ballot);
+        genIType   subgroupPartitionedExclusiveMinNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedExclusiveMinNV(genUType value, uvec4 ballot);
+        genDType   subgroupPartitionedExclusiveMinNV(genDType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    The function subgroupPartitionedExclusiveMinNV() returns an exclusive scan operation
+    that is the minimum <value> of all active invocation-provided <value>s in the invocation's subset of the partition.
+
+    Syntax:
+
+        genType    subgroupPartitionedExclusiveMaxNV(genType value, uvec4 ballot);
+        genIType   subgroupPartitionedExclusiveMaxNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedExclusiveMaxNV(genUType value, uvec4 ballot);
+        genDType   subgroupPartitionedExclusiveMaxNV(genDType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    The function subgroupPartitionedExclusiveMaxNV() returns an exclusive scan operation
+    that is the maximum <value> of all active invocation-provided <value>s in the invocation's subset of the partition.
+
+    Syntax:
+
+        genIType   subgroupPartitionedExclusiveAndNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedExclusiveAndNV(genUType value, uvec4 ballot);
+        genBType   subgroupPartitionedExclusiveAndNV(genBType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    For genIType and genUType, the function subgroupPartitionedExclusiveAndNV() returns an
+    exclusive scan operation that is the bitwise AND of all active
+    invocation-provided <value>s in the invocation's subset of the partition.  For genBType, the function
+    subgroupPartitionedExclusiveAndNV() returns an exclusive scan operation that is the
+    logical AND of all active invocation-provided <value>s in the invocation's subset of the partition.
+
+    Syntax:
+
+        genIType   subgroupPartitionedExclusiveOrNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedExclusiveOrNV(genUType value, uvec4 ballot);
+        genBType   subgroupPartitionedExclusiveOrNV(genBType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    For genIType and genUType, the function subgroupPartitionedExclusiveOrNV() returns an
+    exclusive scan operation that is the bitwise OR of all active
+    invocation-provided <value>s in the invocation's subset of the partition.  For genBType, the function
+    subgroupPartitionedExclusiveOrNV() returns an exclusive scan operation that is the
+    logical inclusive OR of all active invocation-provided <value>s in the invocation's subset of the partition.
+
+    Syntax:
+
+        genIType   subgroupPartitionedExclusiveXorNV(genIType value, uvec4 ballot);
+        genUType   subgroupPartitionedExclusiveXorNV(genUType value, uvec4 ballot);
+        genBType   subgroupPartitionedExclusiveXorNV(genBType value, uvec4 ballot);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    For genIType and genUType, the function subgroupPartitionedExclusiveXorNV() returns an
+    exclusive scan operation that is the bitwise XOR of all active
+    invocation-provided <value>s in the invocation's subset of the partition.  For genBType, the function
+    subgroupPartitionedExclusiveXorNV() returns an exclusive scan operation that is the
+    logical exclusive OR of all active invocation-provided <value>s in the invocation's subset of the partition.
+
+    Syntax:
+
+        uvec4 subgroupPartitionNV(genType value);
+        uvec4 subgroupPartitionNV(genIType value);
+        uvec4 subgroupPartitionNV(genUType value);
+        uvec4 subgroupPartitionNV(genBType value);
+        uvec4 subgroupPartitionNV(genDType value);
+
+    Only usable if the extension GL_NV_shader_subgroup_partitioned is enabled.
+
+    The function subgroupPartitionNV() returns a ballot that is a valid
+    partition of the active invocations such that all invocations in each
+    subset of the partition have the same value of <value>. For any two
+    invocations in different subsets of the partition, either their values of
+    <value> must not be equal or one must be a floating point NaN.
+
+Issues
+
+    None.
+
+Revision History
+
+    Rev.  Date          Author     Changes
+    ----  -----------   --------   -------------------------------------------
+     1    26-Dec-2017   jbolz      Initial revision.
