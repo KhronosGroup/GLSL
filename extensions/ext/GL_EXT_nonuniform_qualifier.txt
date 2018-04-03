@@ -1,0 +1,221 @@
+Name
+
+    EXT_nonuniform_qualifier
+
+Name Strings
+
+    GL_EXT_nonuniform_qualifier
+
+Contact
+
+    Jeff Bolz, NVIDIA Corporation (jbolz 'at' nvidia.com)
+
+Contributors
+
+    John Kessenich, Google
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date:         March 12, 2018
+    Revision:                   1
+
+Number
+
+    TBD
+
+Dependencies
+
+    This extension requires GL_KHR_vulkan_glsl
+
+Overview
+
+    This extension adds a "nonuniform" type qualifier and constructor, which
+    is required by the Vulkan API to be used when indexing descriptor
+    bindings with an index that is not dynamically uniform.
+
+    This extension also allows arrays of resources declared using unsized
+    arrays to become run-time sized arrays.
+
+New Procedures and Functions
+
+    None.
+
+New Tokens
+
+    None.
+
+Modifications to GL_KHR_vulkan_glsl
+
+    Add to the "Mapping to SPIR-V" section
+    
+    Mapping of nonuniformEXT type qualifier:
+
+      nonuniformEXT -> NonUniformEXT decoration on variables
+
+    Mapping of arrays:
+
+      Explicitly- and implicitly-sized arrays use OpTypeArray. Run-time sized
+      arrays use OpTypeRuntimeArray, and are only supported for the last
+      member of a storage block, or for an array of resources. Resources
+      include all variables with storage class code:Uniform,
+      code:StorageBuffer, or code:UniformConstant (e.g. an array of
+      samplers or images in uniform storage, or uniform/buffer blocks),
+      or for the outermost dimension of an array of arrays of resources.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.50
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_EXT_nonuniform_qualifier : <behavior>
+
+    where <behavior> is as specified in section 3.3
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+        #define GL_EXT_nonuniform_qualifier     1
+
+    Add to section 3.6 Keywords:
+
+        nonuniformEXT
+
+    Modify section 4.1.9:
+
+    Replace the first paragraph:
+
+      Variables of the same type can be aggregated into arrays by declaring
+      a name followed by brackets ( [] ) enclosing an optional size.
+      When an array size is specified in a declaration, it must be an
+      integral constant expression (see section 4.3.3 "Constant Expressions")
+      greater than zero.
+      An array whose size is specified in its declaration or determined by
+      its initializer is _explicitly-sized_.
+      An array whose size is not specified in a declaration is _unsized_.
+      Unsized arrays can either be implicitly sized or run-time sized.
+      A _run-time sized_ array has its size determined by a buffer or
+      descriptor set bound via the API.
+      An _implicitly sized_ array has its size determined by the largest
+      (constant expression) index used to index the array.
+      If the last member of a shader storage block is an unsized array, it is
+      run-time sized.
+      Unsized arrays of opaque uniforms, uniform blocks, and shader storage
+      blocks are run-time sized if there is a static use of a non-constant
+      expression to index that array.
+      All other unsized arrays are implicitly sized.
+
+      Implicitly sized arrays must only be indexed with integral constant
+      expressions.
+      Unsized arrays must not be passed as an argument to a function, and
+      arrays declared as formal parameters in a function declaration must
+      be explicitly sized.
+      Violation of any of these rules result in compile-time errors.
+
+      It is legal to declare an array without a size and then later redeclare
+      the same name as an array of the same type and specify a size, and such
+      an array is considered to be explicitly sized.
+      However, unless noted otherwise, blocks cannot be redeclared; an
+      unsized array in a user-declared block cannot be sized by a block
+      redeclaration.
+
+      It is a compile-time error to declare an array with a size, and then
+      later (in the same shader) index the same array with an integral
+      constant expression greater than or equal to the declared size.
+      It is a compile-time error to redeclare an unsized array with a size
+      equal to or smaller than any index used earlier in the shader to index
+      the array.
+      It is also a compile-time error to index an array with a negative
+      constant expression.
+      Undefined behavior results from indexing an array with a non-constant
+      expression that's greater than or equal to the array's size or less
+      than 0.
+      Arrays only have a single dimension (a single entry within "[]"),
+      however, arrays of arrays can be declared.
+      All types (basic types, structures, arrays) can be formed into an array.
+
+
+    Add a new section:
+      
+      "4.X Nonuniform qualifier"
+
+      The nonuniformEXT qualifier can be used to assert that a variable or
+      expression is not dynamically uniform. In a declaration, it is
+      syntactically treated as a qualifier. It can be applied to:
+
+        * variable declarations qualified as *in*
+        * global variable declarations with no storage qualifier
+        * local variable declarations with no storage qualifier
+        * function parameter declarations and function return types.
+
+      Any other use on a declaration results in a compile-time error.
+
+      The nonuniformEXT qualifier can also be used with constructor syntax to
+      assert that an expression is not dynamically uniform. For example:
+
+          layout(location = 0) flat in int i;
+          layout(set = 0, binding = 0) uniform sampler2D tex[2];
+
+          color = texture(tex[nonuniformEXT(i)], ...);
+
+      This constructor syntax takes a single argument of any type and returns
+      the value with the same type, qualified with nonuniformEXT.
+
+      Only some operations discussed in Chapter 5 (Operators and Expressions)
+      can be applied to nonuniform value(s) and still yield a result that is
+      nonuniform. The operations that do so are listed below. When a
+      nonuniform value is operated on with one of these operators (regardless
+      of whether any and other operands are nonuniform), the result is
+      implicitly nonuniform:
+
+        * All Operators in Section 5.1 (Operators), except for assignment,
+          arithmetic assignment, and sequence
+        * Component selection in Section 5.5
+        * Matrix components in Section 5.6
+        * Structure and Array Operations in Section 5.7, except for the length
+          method and assignment operator.
+
+      Constructors and builtin functions, which all have return types that
+      are not qualified by nonuniformEXT, will not generate nonuniform results.
+      Shaders need to use the constructor syntax (or assignment to a
+      nonuniformEXT-qualified variable) to re-add the nonuniformEXT qualifier
+      to the result of builtin functions. Similarly, when a nonuniform value
+      is passed as a function parameter, whether it is treated as nonuniform
+      inside the function is based solely on the function parameter
+      declaration, and not on whether the value passed in was nonuniform.
+
+Changes to the grammar:
+
+    Add the token NONUNIFORM
+
+    Add a new rule:
+    
+      nonuniform_qualifier:
+
+        NONUNIFORM
+
+    Under the rule for single_type_qualifier, add:
+
+      | nonuniform_qualifier
+
+    Under the rule for function_identifier, add:
+    
+      | nonuniform_qualifier
+
+Errors
+
+    None.
+
+Issues
+
+    (1) Can nonuniformEXT be used on structure or block members?
+
+    RESOLVED: No, for simplicity it can only be applied to variables and not
+    in structure or block type declarations.
+
+Revision History
+
+    Revision 1
+      - Internal revisions.
