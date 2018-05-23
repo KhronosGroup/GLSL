@@ -1,0 +1,183 @@
+Name
+
+    EXT_shader_16bit_storage
+
+Name Strings
+
+    GL_EXT_shader_16bit_storage
+
+Contact
+
+     Jeff Bolz (jbolz 'at' nvidia.com)
+
+Contributors
+
+     Contributors to KHR_shader_explicit_arithmetic_types
+
+Notice
+
+    Copyright (c) 2018 The Khronos Group Inc. Copyright terms at
+        http://www.khronos.org/registry/speccopyright.html
+
+Status
+
+Number
+
+    TBD
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    All these versions map GLSL/ESSL semantics to the same SPIR-V 1.0
+    semantics (approximating the most recent versions of GLSL/ESSL).
+
+    This extension is written against the OpenGL Shading Language
+    specification, Language Version 4.60, Document Revision 3.
+
+Overview
+
+    This extension adds minimal support to allow loading/storing 16-bit
+    integer and floating-point scalar and vector types from/to uniform and
+    storage buffers, and to convert those values to and from 32-bit types.
+    All other operations on these types are not supported.
+
+    The goal is to be able to load 16-bit data from buffer memory, in order
+    to reduce storage, bandwidth, and register usage requirements. To use
+    the values for any other operations, they must be promoted to 32-bit via
+    a constructor.
+
+    This extension can be implemented in terms of the SPV_KHR_16bit_storage
+    SPIR-V extension, and inherits most of its limitations from that spec.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+Including the following line in a shader can be used to control the language
+features described in this extension:
+
+    #extension GL_EXT_shader_16bit_storage                     : <behavior>
+
+A new preprocessor #define is added:
+
+    #define GL_EXT_shader_16bit_storage                              1
+
+Changes to Chapter 3 of the OpenGL Shading Language Specification
+
+    If the extension GL_EXT_shader_16bit_storage is supported,
+    add the following keywords to Section 3.6 Keywords:
+
+    float16_t   f16vec2     f16vec3    f16vec4
+    int16_t     i16vec2     i16vec3    i16vec4
+    uint16_t    u16vec2     u16vec3    u16vec4
+
+Changes to Chapter 4 of the OpenGL Shading Language Specification
+
+    Add into the tables in section 4.1 a new table interleaved with the existing
+    tables:
+
+    Transparent types with explicit bit size
+    --------------------------------------------------------------------------
+    | Type        | Meaning                                                  |
+    |             |                                                          |
+    --------------------------------------------------------------------------
+    | float16_t   | a 16-bit floating-point scalar                           |
+    | f16vec2     | a two-component 16-bit floating-point vector             |
+    | f16vec3     | a three-component 16-bit floating-point vector           |
+    | f16vec4     | a four-component 16-bit floating-point vector            |
+    | int16_t     | a 16-bit signed integer scalar                           |
+    | i16vec2     | a two-component 16-bit signed integer vector             |
+    | i16vec3     | a three-component 16-bit signed integer vector           |
+    | i16vec4     | a four-component 16-bit signed integer vector            |
+    | uint16_t    | a 16-bit unsigned integer scalar                         |
+    | u16vec2     | a two-component 16-bit unsigned integer vector           |
+    | u16vec3     | a three-component 16-bit unsigned integer vector         |
+    | u16vec4     | a four-component 16-bit unsigned integer vector          |
+    --------------------------------------------------------------------------
+
+    Add a new subsection 4.1.X 16-bit Types
+
+     Variables with the types float16_t, int16_t, and uint16_t represent
+     floating-point, signed integer, and unsigned integer types with exactly
+     16 bits, respectively. The int16_t includes a leading sign bit and is
+     in two's complement form. float16_t is a half-precision floating point
+     type with a leading sign bit, followed by 5 exponent bits, followed by
+     10 mantissa bits, as defined in the IEEE 754-2008 standard.
+
+     f16vec*, i16vec*, and u16vec* are 16-bit vector types where each
+     component is the corresponding 16-bit scalar type. Scalar and vector
+     16-bit types can be aggregated into arrays and structures. Variables of
+     any basic 16-bit type or aggregate type containing a 16-bit type must
+     not be used to declare variables, unless that variable is a structure
+     with uniform or buffer storage qualifier (see Section 4.3, Storage
+     Qualifiers).
+
+     16-bit scalar or vector types can only be loaded from uniform or buffer
+     memory, stored to buffer memory, or converted to and from 32-bit types
+     via constructors (see Section 5.4.1, Conversion and Scalar Constructors,
+     and Section 5.4.2 Vector and Matrix Constructors). Arrays and structures
+     containing 16-bit types do not have constructors.
+
+     16-bit types do not support implicit conversions (see Section 4.1.10,
+     Implicit Conversions), do not support swizzle, do not support component
+     selection (except to select a scalar from a vector), do not support
+     vector array subscripting syntax, and do not support any mathematical
+     operations.
+
+Changes to Chapter 5 of the OpenGL Shading Language Specification
+
+    Modify subsection 5.4.1, Conversion and Scalar Constructors
+    (add after the first list of constructor examples)
+
+    int16_t(int)              // convert a int       value to a int16_t
+    int16_t(uint)             // convert a uint      value to a int16_t
+    uint16_t(int)             // convert a int       value to a uint16_t
+    uint16_t(uint)            // convert a uint      value to a uint16_t
+
+    int(int16_t)              // convert a int16_t   value to a int
+    int(uint16_t)             // convert a uint16_t  value to a int
+    uint(int16_t)             // convert a int16_t   value to a uint
+    uint(uint16_t)            // convert a uint16_t  value to a uint
+
+    float16_t(float)          // convert a float     value to a float16_t
+    float(float16_t)          // convert a float16_t value to a float
+
+    Modify subsection 5.4.2, Vector and Matrix Constructors
+
+    Add to the end of the section:
+
+    Constructors of or using 16-bit vector types must construct from a type
+    with the same number of components. The following is a complete list of
+    such constructors:
+
+    f16vec2(fvec2)
+    f16vec3(fvec3)
+    f16vec4(fvec4)
+    fvec2(f16vec2)
+    fvec3(f16vec3)
+    fvec4(f16vec4)
+    i16vec2(ivec2)
+    i16vec3(ivec3)
+    i16vec4(ivec4)
+    ivec2(i16vec2)
+    ivec3(i16vec3)
+    ivec4(i16vec4)
+    u16vec2(uvec2)
+    u16vec3(uvec3)
+    u16vec4(uvec4)
+    uvec2(u16vec2)
+    uvec3(u16vec3)
+    uvec4(u16vec4)
+
+Issues
+
+None.
+
+Revision History
+
+    Rev.    Date         Author               Changes
+    ----  -----------    -------------------  --------------------------------
+       1  22-May-2018    Jeff Bolz            Initial draft
