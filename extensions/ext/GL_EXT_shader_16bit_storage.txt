@@ -5,6 +5,7 @@ Name
 Name Strings
 
     GL_EXT_shader_16bit_storage
+    GL_EXT_shader_8bit_storage
 
 Contact
 
@@ -41,31 +42,44 @@ Dependencies
 
 Overview
 
-    This extension adds minimal support to allow loading/storing 16-bit
+    This extension adds minimal support to allow loading/storing 8/16-bit
     integer and floating-point scalar and vector types from/to uniform and
     storage buffers, and to convert those values to and from 32-bit types.
     All other operations on these types are not supported.
 
-    The goal is to be able to load 16-bit data from buffer memory, in order
+    The goal is to be able to load 8/16-bit data from buffer memory, in order
     to reduce storage, bandwidth, and register usage requirements. To use
     the values for any other operations, they must be promoted to 32-bit via
     a constructor.
 
     This extension can be implemented in terms of the SPV_KHR_16bit_storage
-    SPIR-V extension, and inherits most of its limitations from that spec.
+    and SPV_KHR_8bit_storage SPIR-V extensions, and inherits most of its
+    limitations from those specs.
 
 Modifications to the OpenGL Shading Language Specification, Version 4.60
 
-Including the following line in a shader can be used to control the language
-features described in this extension:
+Including the following lines in a shader can be used to control the
+language features described in this extension:
 
     #extension GL_EXT_shader_16bit_storage                     : <behavior>
+    #extension GL_EXT_shader_8bit_storage                      : <behavior>
 
-A new preprocessor #define is added:
+If GL_EXT_shader_16bit_storage is not enabled, the new language affecting
+16-bit types is not applied. If GL_EXT_shader_8bit_storage is not enabled,
+the new language affecting 8-bit types is not applied.
+
+New preprocessor #defines are added:
 
     #define GL_EXT_shader_16bit_storage                              1
+    #define GL_EXT_shader_8bit_storage                               1
 
 Changes to Chapter 3 of the OpenGL Shading Language Specification
+
+    If the extension GL_EXT_shader_8bit_storage is supported,
+    add the following keywords to Section 3.6 Keywords:
+
+    int8_t      i8vec2      i8vec3     i8vec4
+    uint8_t     u8vec2      u8vec3     u8vec4
 
     If the extension GL_EXT_shader_16bit_storage is supported,
     add the following keywords to Section 3.6 Keywords:
@@ -88,10 +102,18 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
     | f16vec2     | a two-component 16-bit floating-point vector             |
     | f16vec3     | a three-component 16-bit floating-point vector           |
     | f16vec4     | a four-component 16-bit floating-point vector            |
+    | int8_t      | an 8-bit signed integer scalar                           |
+    | i8vec2      | a two-component 8-bit signed integer vector             |
+    | i8vec3      | a three-component 8-bit signed integer vector           |
+    | i8vec4      | a four-component 8-bit signed integer vector            |
     | int16_t     | a 16-bit signed integer scalar                           |
     | i16vec2     | a two-component 16-bit signed integer vector             |
     | i16vec3     | a three-component 16-bit signed integer vector           |
     | i16vec4     | a four-component 16-bit signed integer vector            |
+    | uint8_t     | a 8-bit unsigned integer scalar                         |
+    | u8vec2      | a two-component 8-bit unsigned integer vector           |
+    | u8vec3      | a three-component 8-bit unsigned integer vector         |
+    | u8vec4      | a four-component 8-bit unsigned integer vector          |
     | uint16_t    | a 16-bit unsigned integer scalar                         |
     | u16vec2     | a two-component 16-bit unsigned integer vector           |
     | u16vec3     | a three-component 16-bit unsigned integer vector         |
@@ -127,10 +149,45 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
      vector array subscripting syntax, and do not support any mathematical
      operations.
 
+    Add a new subsection 4.1.X 8-bit Types
+
+     Variables with the types int8_t and uint8_t represent signed integer
+     and unsigned integer types with exactly 8 bits, respectively. The
+     int8_t includes a leading sign bit and is in two's complement form.
+
+     i8vec* and u8vec* are 8-bit vector types where each component is the
+     corresponding 8-bit scalar type. Scalar and vector 8-bit types can be
+     aggregated into arrays and structures. Variables of any basic 8-bit
+     type or aggregate type containing an 8-bit type must not be used to
+     declare variables, unless that variable is a structure with uniform or
+     buffer storage qualifier (see Section 4.3, Storage Qualifiers).
+
+     8-bit scalar or vector types can only be loaded from uniform or buffer
+     memory, stored to buffer memory, or converted to and from 32-bit types
+     via constructors (see Section 5.4.1, Conversion and Scalar Constructors,
+     and Section 5.4.2 Vector and Matrix Constructors). Arrays and structures
+     containing 8-bit types do not have constructors.
+
+     8-bit types do not support implicit conversions (see Section 4.1.10,
+     Implicit Conversions), do not support swizzle, do not support component
+     selection (except to select a scalar from a vector), do not support
+     vector array subscripting syntax, and do not support any mathematical
+     operations.
+
 Changes to Chapter 5 of the OpenGL Shading Language Specification
 
     Modify subsection 5.4.1, Conversion and Scalar Constructors
     (add after the first list of constructor examples)
+
+    int8_t(int)               // convert a int       value to a int8_t
+    int8_t(uint)              // convert a uint      value to a int8_t
+    uint8_t(int)              // convert a int       value to a uint8_t
+    uint8_t(uint)             // convert a uint      value to a uint8_t
+
+    int(int8_t)               // convert a int8_t    value to a int
+    int(uint8_t)              // convert a uint8_t   value to a int
+    uint(int8_t)              // convert a int8_t    value to a uint
+    uint(uint8_t)             // convert a uint8_t   value to a uint
 
     int16_t(int)              // convert a int       value to a int16_t
     int16_t(uint)             // convert a uint      value to a int16_t
@@ -149,10 +206,22 @@ Changes to Chapter 5 of the OpenGL Shading Language Specification
 
     Add to the end of the section:
 
-    Constructors of or using 16-bit vector types must construct from a type
-    with the same number of components. The following is a complete list of
-    such constructors:
+    Constructors of or using 8-bit and 16-bit vector types must construct
+    from a type with the same number of components. The following is a
+    complete list of such constructors:
 
+    i8vec2(ivec2)
+    i8vec3(ivec3)
+    i8vec4(ivec4)
+    ivec2(i8vec2)
+    ivec3(i8vec3)
+    ivec4(i8vec4)
+    u8vec2(uvec2)
+    u8vec3(uvec3)
+    u8vec4(uvec4)
+    uvec2(u8vec2)
+    uvec3(u8vec3)
+    uvec4(u8vec4)
     f16vec2(fvec2)
     f16vec3(fvec3)
     f16vec4(fvec4)
