@@ -1,0 +1,164 @@
+Name
+
+    EXT_subgroupuniform_qualifier
+
+Name Strings
+
+    GL_EXT_subgroupuniform_qualifier
+
+Contact
+
+    Neil Henning (neil.henning 'at' amd.com)
+
+Contributors
+
+    Jeff Bolz, NVIDIA Corporation
+    John Kessenich, Google
+    Nicolai Hähnle, AMD
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date:         September 19, 2018
+    Revision:                   1
+
+Number
+
+    TBD
+
+Dependencies
+
+    This extension requires GL_KHR_vulkan_glsl
+
+Overview
+
+    This extension adds a "subgroupuniformEXT" type qualifier and constructor,
+    such that for each dynamic instance of an object qualified by a subgroup
+    uniform type or constructed with a subgroup uniform constructor, all active
+    invocations in a subgroup compute the same result value.
+
+New Procedures and Functions
+
+    None.
+
+New Tokens
+
+    None.
+
+Modifications to GL_KHR_vulkan_glsl
+
+    Add to the "Mapping to SPIR-V" section
+    
+    Mapping of subgroupuniformEXT type qualifier:
+
+      subgroupuniformEXT -> Uniform decoration on variables
+
+Modifications to the OpenGL Shading Language Specification, Version 4.50
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_EXT_subgroupuniform_qualifier : <behavior>
+
+    where <behavior> is as specified in section 3.3
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+        #define GL_EXT_subgroupuniform_qualifier     1
+
+    Add to section 3.6 Keywords:
+
+        subgroupuniformEXT
+
+    Add a new section:
+      
+      "4.X subgroupuniformEXT qualifier"
+
+      The subgroupuniformEXT qualifier can be used to assert that for a dynamic
+      instance of a variable or expression all active invocations in a subgroup
+      compute the same result value. In a declaration, it is syntactically
+      treated as a qualifier. It can be applied to:
+
+        * variable declarations qualified as *in*
+        * global variable declarations with no storage qualifier
+        * local variable declarations with no storage qualifier
+        * function parameter declarations and function return types.
+
+      Any other use on a declaration results in a compile-time error.
+
+      The subgroupuniformEXT qualifier can also be used with constructor syntax
+      to assert that for a dynamic instance of an expression all active
+      invocations in a subgroup compute the same result value. For example:
+
+          if (subgroupuniformEXT(a < b)) {
+             // All active invocations in the subgroup execute this or none will
+          }
+
+      This constructor syntax takes a single argument of any type and returns
+      the value with the same type, qualified with subgroupuniformEXT.
+
+      Only some operations discussed in Chapter 5 (Operators and Expressions)
+      can be applied to subgroup uniform value(s) and still yield a result that
+      is subgroup uniform. The operations that do so are listed below. When an
+      operator has all operands that are subgroup uniform, the result is
+      implicitly subgroup uniform:
+
+        * All Operators in Section 5.1 (Operators), except for assignment,
+          arithmetic assignment, and sequence
+        * Component selection in Section 5.5
+        * Matrix components in Section 5.6
+        * Structure and Array Operations in Section 5.7, except for the length
+          method and assignment operator.
+
+      Constructors and builtin functions, which all have return types that
+      are not qualified by subgroupuniformEXT, will not generate subgroup
+      uniform results. Shaders need to use the constructor syntax (or assignment
+      to a subgroupuniformEXT-qualified variable) to re-add the
+      subgroupuniformEXT qualifier to the result of builtin functions.
+      Similarly, when a subgroup uniform value is passed as a function
+      parameter, whether it is treated as subgroup uniform inside the function
+      is based solely on the function parameter declaration, and not on whether
+      the value passed in was subgroup uniform.
+
+Changes to the grammar:
+
+    Add the token SUBGROUPUNIFORM
+
+    Add a new rule:
+    
+      subgroup_uniform_qualifier:
+
+        SUBGROUPUNIFORM
+
+    Under the rule for single_type_qualifier, add:
+
+      | subgroup_uniform_qualifier
+
+    Under the rule for function_identifier, add:
+    
+      | subgroup_uniform_qualifier
+
+Errors
+
+    None.
+
+Issues
+
+    (1) Can subgroupuniformEXT be used on structure or block members?
+
+    RESOLVED: No, for the sake of consistency use the same resolution as was
+    taken in the GL_EXT_nonuniform_qualifier.
+
+    (2) What happens if not all dynamic instances of the expression actually
+    compute the same value?
+
+    RESOLVED: If not all dynamic instances of an expression compute the same
+    value, and are thus not subgroup uniform, undefined behavior occurs.
+
+Revision History
+
+    Revision 1
+      - Internal revisions.
