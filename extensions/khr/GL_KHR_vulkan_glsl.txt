@@ -33,8 +33,8 @@ Status
 
 Version
 
-    Last Modified Date: 15-Dec-2017
-    Revision: 45
+    Last Modified Date: 25-Jul-2018
+    Revision: 46
 
 Number
 
@@ -858,7 +858,7 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
       "Sampler Opaque Types
 
           sampler       |    a handle for accessing state describing how to
-                        |    sample a texture (without comparison)"
+                        |    sample a texture"
           ---------------------------------------------------------------------
           samplerShadow |    a handle for accessing state describing how to
                         |    sample a depth texture with comparison"
@@ -888,8 +888,10 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
         and unsigned integer data types. Textures can be combined with a
         variable of type *sampler* or *samplerShadow* to create a sampler type
         (e.g., sampler2D, or sampler2DShadow). This is done with a constructor,
-        e.g., sampler2D(texture2D, sampler) or
-        sampler2DShadow(texture2D, samplerShadow),
+        e.g., sampler2D(texture2D, sampler),
+        sampler2DShadow(texture2D, sampler),
+        sampler2DShadow(texture2D, samplerShadow), or
+        sampler2D(texture2D, samplerShadow)
         and is described in more detail in section 5.4 "Constructors"."
 
         "4.1.7.x Subpass Inputs
@@ -1355,10 +1357,12 @@ Changes to Chapter 5 of the OpenGL Shading Language Specification
            of the texture type must match that of the constructed sampler type
            (that is, the suffixes of the type of the first argument and the
            type of the constructor will be spelled the same way)
-         * the presence or absence of depth comparison (Shadow) must match
-           between the constructed sampler type and the type of the second argument
          * there is no control flow construct (e.g., "?:") that consumes any
            sampler type
+
+         Note: Shadow mismatches are allowed between constructors and the
+         second argument. Non-shadow samplers can be constructed from
+         *samplerShadow* and shadow samplers can be constructed from *sampler*.
 
     Change section 5.9 Expressions
 
@@ -1687,6 +1691,8 @@ Revision History
 
     Rev.    Date         Author    Changes
     ----  -----------    -------  --------------------------------------------
+    46    25-Jul-2018    JohnK    No longer require sampler constructors to
+                                  check shadow matches: mismatches are allowed
     45    15-Dec-2017    TobiasH  moved resource binding examples in from Vulkan API spec
     44    12-Dec-2017    jbolz    Document mapping of barrier/atomic ops to
                                   SPIR-V
