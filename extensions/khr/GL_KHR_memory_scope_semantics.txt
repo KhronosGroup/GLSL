@@ -1,0 +1,557 @@
+Name
+
+    KHR_memory_scope_semantics
+
+Name Strings
+
+    GL_KHR_memory_scope_semantics
+
+Contact
+
+    Jeff Bolz (jbolz 'at' nvidia.com), NVIDIA
+
+Contributors
+
+
+Notice
+
+    Copyright (c) 2018 The Khronos Group Inc. Copyright terms at
+        http://www.khronos.org/registry/speccopyright.html
+
+Status
+
+    Approved by Vulkan working group 10-Jul-2018.
+    Ratified by the Khronos Board of Promoters 24-Aug-2018.
+
+Version
+
+    Last Modified Date: 30-Aug-2018
+    Revision: 1
+
+Number
+
+    TBD.
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.20
+    (#version 420) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    This extension is written against revision 3 of the OpenGL Shading Language
+    version 4.60, dated July 23, 2017.
+
+    This extension interacts with GL_KHR_shader_atomic_int64.
+
+Overview
+
+    This extension document modifies GLSL to add scopes and memory semantics
+    for atomic operations and barriers. For atomics, these are added as
+    optional parameters to the existing atomic built-in functions. For
+    barriers, two new builtin functions are added that correspond to SPIR-V's
+    OpMemoryBarrier and OpControlBarrier.
+
+    The meanings of scopes and semantics are defined in detail in the Vulkan
+    Memory Model section of the Vulkan specification, and those definitions are
+    not reproduced here. But in short:
+    
+      * "Scope" can be used to limit the set of invocations that an atomic
+        operation is atomic respect to, and to limit the set of invocations
+        that a barrier synchronizes with. On some implementations, a smaller
+        scope may be more efficient.
+      * "Storage class semantics" can be used to limit the set of memory
+        storage classes that are synchronized by a release or acquire
+        operation. On some implementations, synchronizing fewer storage
+        classes may be more efficient (e.g. synchronizing shared memory
+        is often cheaper than buffer or image memory).
+      * "Release/Acquire semantics" are used to guarantee ordering between
+        an atomic or barrier and other memory operations that occur before
+        or after it in program order, as observed by other invocations.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-specification), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+        gl_Scope* values are equal to the corresponding SPIR-V Scope enums
+        and can simply be passed through
+
+        gl_StorageSemantics* and gl_Semantics* values should be bitwise
+        ORed together to generate the SPIR-V Semantics enums
+
+        atomicLoad      -> OpAtomicLoad
+        atomicStore     -> OpAtomicStore
+        controlBarrier  -> OpControlBarrier
+        memoryBarrier   -> OpMemoryBarrier
+
+        coherent                -> equivalent to queuefamilycoherent
+        devicecoherent          -> NonPrivate{Pointer,Texel}KHR + Make{Pointer,Texel}{Available,Visible}KHR with scope = Device
+        queuefamilycoherent     -> NonPrivate{Pointer,Texel}KHR + Make{Pointer,Texel}{Available,Visible}KHR with scope = QueueFamilyKHR
+        workgroupcoherent       -> NonPrivate{Pointer,Texel}KHR + Make{Pointer,Texel}{Available,Visible}KHR with scope = Workgroup
+        subgroupcoherent        -> NonPrivate{Pointer,Texel}KHR + Make{Pointer,Texel}{Available,Visible}KHR with scope = Subgroup
+        nonprivate              -> NonPrivate{Pointer,Texel}KHR
+        volatile                -> Volatile (for buffers) or VolatileTexelKHR (for image access)
+
+Modifications to the OpenGL Shading Language Specification, Version 4.50
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_KHR_memory_scope_semantics           : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    A new preprocessor #define is added:
+
+      #define GL_KHR_memory_scope_semantics                1
+
+
+Additions to Chapter 4 of the OpenGL Shading Language Specification
+(Variables and Types)
+
+    Modify Section 4.3.8, Shared Variables
+
+    Replace "Shared variables are implicitly coherent" with
+    "Shared variables are implicitly workgroupcoherent".
+
+    Modify Section 4.10, Memory Qualifiers
+
+    (Add new rows to the table, and update the row for "coherent")
+
+        coherent: alias of queuefamilycoherent
+
+        devicecoherent: memory variable where writes have automatic
+                  availability operations and reads have automatic visibility
+                  operations to the shader domain
+
+        queuefamilycoherent: memory variable where writes have automatic
+                  availability operations and reads have automatic visibility
+                  operations to the queue family instance domain
+
+        workgroupcoherent: memory variable where writes have automatic
+                  availability operations and reads have automatic visibility
+                  operations to the workgroup instance domain
+
+        subgroupcoherent: memory variable where writes have automatic
+                  availability operations and reads have automatic visibility
+                  operations to the subgroup instance domain
+
+        nonprivate: memory variable that is not coherent, but still obeys
+                  inter-invocation ordering requirements
+
+    (Replace the two paragraphs about "coherent")
+
+    Memory accesses to image variables declared using the devicecoherent
+    qualifier have implicit availability or visibility operations which allow
+    them to be used to share data with other shader invocations. In
+    particular, when reading a variable declared as devicecoherent, the
+    values returned will reflect the results of previously completed writes
+    performed by other shader invocations. When writing a variable declared
+    as devicecoherent, the values written will be reflected in subsequent
+    devicecoherent reads performed by other shader invocations.
+
+    Similarly, variables declared using the queuefamilycoherent qualifier
+    have implicit availability or visibility operations which allow them to
+    be used to share data with other shader invocations in the same
+    queue family. However, relative to accesses via invocations in other
+    queue families, such variables behave the same as unqualified (non-coherent)
+    variables.
+
+    Similarly, variables declared using the workgroupcoherent qualifier
+    have implicit availability or visibility operations which allow them to
+    be used to share data with other shader invocations in the same
+    workgroup. However, relative to accesses via invocations in other
+    workgroups, such variables behave the same as unqualified (non-coherent)
+    variables.
+
+    Similarly, variables declared using the subgroupcoherent qualifier
+    have implicit availability or visibility operations which allow them to
+    be used to share data with other shader invocations in the same
+    subgroup. However, relative to accesses via invocations in other
+    subgroups, such variables behave the same as unqualified (non-coherent)
+    variables.
+
+    It is a compile-time error to decorate a variable with more than one of
+    devicecoherent, queuefamilycoherent, workgroupcoherent, and
+    subgroupcoherent.
+
+    As described in section 7.11 "Shader Memory Access" of
+    the OpenGL Specification, shader memory reads and writes complete in a
+    largely undefined order. The built-in function memoryBarrier() can be used
+    if needed to guarantee the completion and relative ordering of memory
+    accesses performed by a single shader invocation.
+
+    When accessing memory using variables not declared as devicecoherent,
+    queuefamilycoherent, workgroupcoherent, or subgroupcoherent, the
+    memory accessed by a shader may be cached by the implementation to service
+    future accesses to the same address. Memory stores may be cached in such a
+    way that the values written might not be visible to other shader
+    invocations accessing the same memory. The implementation may cache the
+    values fetched by memory reads and return the same values to any shader
+    invocation accessing the same memory, even if the underlying memory has
+    been modified since the first memory read. While variables not declared as
+    coherent might not be useful for communicating between shader invocations,
+    using non-coherent accesses may result in higher performance.
+
+    Variables declared using the nonprivate qualifier obey the ordering
+    requirements defined by barriers and atomics. devicecoherent,
+    queuefamilycoherent, workgroupcoherent, and subgroupcoherent
+    variables are all implicitly nonprivate. Accesses to noncoherent private
+    variables can be reordered across barriers and atomics. nonprivate
+    noncoherent variables are primarily useful to avoid write-after-read
+    hazards, where a non-private read must occur before a barrier.
+
+    ...
+
+    The memory qualifiers subgroupcoherent, workgroupcoherent,
+    queuefamilycoherent, devicecoherent, volatile, restrict, readonly,
+    writeonly, and nonprivate may be used in the declaration of buffer
+    variables (i.e., members of shader storage blocks). ...
+
+    ...
+
+    Variables qualified with subgroupcoherent, workgroupcoherent,
+    queuefamilycoherent, devicecoherent, volatile, readonly, writeonly,
+    or nonprivate may not be passed to functions whose formal parameters
+    lack such qualifiers. ...
+
+    (Add to the end of the section)
+
+    Sampler variables and uniform blocks and block members can be decorated
+    with nonprivate, which causes them to obey inter-thread ordering
+    requirements. It is a compile-time error to use any other memory
+    qualifiers on sampler variables or uniform blocks or block members.
+
+
+Additions to Chapter 8 of the OpenGL Shading Language Specification
+(Built-in Functions)
+
+    Modify Section 8.11, Atomic Memory Functions
+
+    (Add devicecoherent, queuefamilycoherent, workgroupcoherent,
+    subgroupcoherent, nonprivate)
+
+    All the built-in functions in this section accept arguments with
+    combinations of restrict, subgroupcoherent, workgroupcoherent,
+    queuefamilycoherent, devicecoherent, volatile, and nonprivate
+    memory qualification, despite not having them listed in the prototypes.
+
+    (Add new variants of atomic built-in functions with additional
+     scope/semantics parameters)
+
+        uint atomicAdd (inout uint mem, uint data, int scope, int storage, int sem)
+         int atomicAdd (inout  int mem,  int data, int scope, int storage, int sem)
+        uint atomicMin (inout uint mem, uint data, int scope, int storage, int sem)
+         int atomicMin (inout  int mem,  int data, int scope, int storage, int sem)
+        uint atomicMax (inout uint mem, uint data, int scope, int storage, int sem)
+         int atomicMax (inout  int mem,  int data, int scope, int storage, int sem)
+        uint atomicAnd (inout uint mem, uint data, int scope, int storage, int sem)
+         int atomicAnd (inout  int mem,  int data, int scope, int storage, int sem)
+        uint atomicOr  (inout uint mem, uint data, int scope, int storage, int sem)
+         int atomicOr  (inout  int mem,  int data, int scope, int storage, int sem)
+        uint atomicXor (inout uint mem, uint data, int scope, int storage, int sem)
+         int atomicXor (inout  int mem,  int data, int scope, int storage, int sem)
+        uint atomicExchange (inout uint mem, uint data, int scope, int storage, int sem)
+         int atomicExchange (inout  int mem,  int data, int scope, int storage, int sem)
+        uint atomicCompSwap (inout uint mem, uint compare, uint data, int scope,
+                             int   storageEqual, int   semEqual,
+                             int storageUnequal, int semUnequal)
+         int atomicCompSwap (inout  int mem,  int compare,  int data, int scope,
+                             int   storageEqual, int   semEqual,
+                             int storageUnequal, int semUnequal)
+
+        uint64_t atomicAdd (inout uint64_t mem, uint64_t data, int scope, int storage, int sem)
+         int64_t atomicAdd (inout  int64_t mem,  int64_t data, int scope, int storage, int sem)
+        uint64_t atomicMin (inout uint64_t mem, uint64_t data, int scope, int storage, int sem)
+         int64_t atomicMin (inout  int64_t mem,  int64_t data, int scope, int storage, int sem)
+        uint64_t atomicMax (inout uint64_t mem, uint64_t data, int scope, int storage, int sem)
+         int64_t atomicMax (inout  int64_t mem,  int64_t data, int scope, int storage, int sem)
+        uint64_t atomicAnd (inout uint64_t mem, uint64_t data, int scope, int storage, int sem)
+         int64_t atomicAnd (inout  int64_t mem,  int64_t data, int scope, int storage, int sem)
+        uint64_t atomicOr  (inout uint64_t mem, uint64_t data, int scope, int storage, int sem)
+         int64_t atomicOr  (inout  int64_t mem,  int64_t data, int scope, int storage, int sem)
+        uint64_t atomicXor (inout uint64_t mem, uint64_t data, int scope, int storage, int sem)
+         int64_t atomicXor (inout  int64_t mem,  int64_t data, int scope, int storage, int sem)
+        uint64_t atomicExchange (inout uint64_t mem, uint64_t data, int scope, int storage, int sem)
+         int64_t atomicExchange (inout  int64_t mem,  int64_t data, int scope, int storage, int sem)
+        uint64_t atomicCompSwap (inout uint64_t mem, uint64_t compare, uint64_t data, int scope,
+                                 int   storageEqual, int   semEqual,
+                                 int storageUnequal, int semUnequal)
+         int64_t atomicCompSwap (inout  int64_t mem,  int64_t compare,  int64_t data, int scope,
+                                 int   storageEqual, int   semEqual,
+                                 int storageUnequal, int semUnequal)
+
+    (Add new built-in functions)
+
+        // Atomically loads the value from <mem> and returns it
+            uint atomicLoad (in     uint mem, int scope, int storage, int sem)
+             int atomicLoad (in      int mem, int scope, int storage, int sem)
+        uint64_t atomicLoad (in uint64_t mem, int scope, int storage, int sem)
+         int64_t atomicLoad (in  int64_t mem, int scope, int storage, int sem)
+
+        // Atomically stores the value of <data> to <mem>
+        void atomicStore (out     uint mem,     uint data, int scope, int storage, int sem)
+        void atomicStore (out      int mem,      int data, int scope, int storage, int sem)
+        void atomicStore (out uint64_t mem, uint64_t data, int scope, int storage, int sem)
+        void atomicStore (out  int64_t mem,  int64_t data, int scope, int storage, int sem)
+
+    The values passed as scope, storage, and sem parameters must all be
+    integer constant expressions. Valid values are listed in the Scope and
+    Semantics section. scope must be a gl_Scope* value, sem* must be a
+    gl_Semantics* value, and storage* must be a combination of
+    gl_StorageSemantics* values.
+
+    (Add a new subsection to the end of this section)
+
+        Scope and Semantics
+
+        gl_Scope*, gl_Semantics*, and gl_StorageSemantics* are constant integer
+        values which can be used for the scope, storage, and sem parameters to
+        atomic built-in functions. For scope and semantics, only the listed
+        values are valid. For storage semantics, any bitwise combination of the
+        listed values is valid.
+
+            const int gl_ScopeDevice      = 1;
+            const int gl_ScopeWorkgroup   = 2;
+            const int gl_ScopeSubgroup    = 3;
+            const int gl_ScopeInvocation  = 4;
+            const int gl_ScopeQueueFamily = 5;
+
+            const int gl_SemanticsRelaxed         = 0x0;
+            const int gl_SemanticsAcquire         = 0x2;
+            const int gl_SemanticsRelease         = 0x4;
+            const int gl_SemanticsAcquireRelease  = 0x8;
+            const int gl_SemanticsMakeAvailable   = 0x2000;
+            const int gl_SemanticsMakeVisible     = 0x4000;
+
+            const int gl_StorageSemanticsNone     = 0x0;
+            const int gl_StorageSemanticsBuffer   = 0x40;
+            const int gl_StorageSemanticsShared   = 0x100;
+            const int gl_StorageSemanticsImage    = 0x800;
+            const int gl_StorageSemanticsOutput   = 0x1000;
+
+        The meaning of these values is defined in the Vulkan Memory Model.
+
+        The following error checks are applied to commands that accept these
+        values. Each results in a compile-time error.
+
+         * gl_SemanticsAcquire must not be used with atomicStore or
+           imageAtomicStore.
+
+         * gl_SemanticsRelease must not be used with atomicLoad or
+           imageAtomicLoad.
+
+         * gl_SemanticsAcquireRelease must not be used with atomicLoad,
+           imageAtomicLoad, atomicStore, or imageAtomicStore.
+
+         * Semantics operands must only have gl_Semantics* bits set.
+
+         * Storage class semantics operands must only have
+           gl_StorageSemantics* bits set.
+
+         * Semantics must not include multiple of gl_SemanticsRelease,
+           gl_SemanticsAcquire, or gl_SemanticsAcquireRelease.
+
+         * memoryBarrier must use exactly one of gl_SemanticsRelease,
+           gl_SemanticsAcquire, or gl_SemanticsAcquireRelease.
+
+         * memoryBarrier must not use storage class semantics of zero.
+
+         * If controlBarrier uses non-zero semantics, then it must not use
+           storage class semantics of zero.
+
+         * atomicCompSwap and imageAtomicCompSwap semUnequal must not use
+           gl_SemanticsRelease or gl_SemanticsAcquireRelease.
+
+         * If semantics includes gl_SemanticsMakeAvailable it must also
+           include gl_SemanticsRelease or gl_SemanticsAcquireRelease.
+
+         * If semantics includes gl_SemanticsMakeVisible it must also
+           include gl_SemanticsAcquire or gl_SemanticsAcquireRelease.
+
+    Modify Section 8.12, Image Functions
+
+    (Add devicecoherent, queuefamilycoherent, workgroupcoherent,
+    subgroupcoherent, nonprivate)
+
+    All the built-in functions in this section accept arguments with
+    combinations of restrict, subgroupcoherent, workgroupcoherent,
+    queuefamilycoherent, devicecoherent, volatile, and nonprivate
+    memory qualification, despite not having them listed in the prototypes.
+
+    (Add new variants of atomic built-in functions with additional
+     scope/semantics parameters)
+
+        uint imageAtomicAdd (IMAGE_PARAMS, uint data, int scope, int storage, int sem)
+         int imageAtomicAdd (IMAGE_PARAMS,  int data, int scope, int storage, int sem)
+        uint imageAtomicMin (IMAGE_PARAMS, uint data, int scope, int storage, int sem)
+         int imageAtomicMin (IMAGE_PARAMS,  int data, int scope, int storage, int sem)
+        uint imageAtomicMax (IMAGE_PARAMS, uint data, int scope, int storage, int sem)
+         int imageAtomicMax (IMAGE_PARAMS,  int data, int scope, int storage, int sem)
+        uint imageAtomicAnd (IMAGE_PARAMS, uint data, int scope, int storage, int sem)
+         int imageAtomicAnd (IMAGE_PARAMS,  int data, int scope, int storage, int sem)
+        uint imageAtomicOr  (IMAGE_PARAMS, uint data, int scope, int storage, int sem)
+         int imageAtomicOr  (IMAGE_PARAMS,  int data, int scope, int storage, int sem)
+        uint imageAtomicXor (IMAGE_PARAMS, uint data, int scope, int storage, int sem)
+         int imageAtomicXor (IMAGE_PARAMS,  int data, int scope, int storage, int sem)
+        uint imageAtomicExchange (IMAGE_PARAMS,  uint data, int scope, int storage, int sem)
+         int imageAtomicExchange (IMAGE_PARAMS,   int data, int scope, int storage, int sem)
+       float imageAtomicExchange (IMAGE_PARAMS, float data, int scope, int storage, int sem)
+        uint imageAtomicCompSwap (IMAGE_PARAMS, uint compare, uint data, int scope,
+                                  int   storageEqual, int   semEqual,
+                                  int storageUnequal, int semUnequal)
+         int imageAtomicCompSwap (IMAGE_PARAMS,  int compare,  int data, int scope,
+                                  int   storageEqual, int   semEqual,
+                                  int storageUnequal, int semUnequal)
+
+    (Add new built-in functions)
+
+        // Atomically loads the value from the image and returns it
+        uint imageAtomicLoad (IMAGE_PARAMS, int scope, int storage, int sem)
+         int imageAtomicLoad (IMAGE_PARAMS, int scope, int storage, int sem)
+
+        // Atomically stores the value of <data> to the image
+        void imageAtomicStore (IMAGE_PARAMS, uint data, int scope, int storage, int sem)
+        void imageAtomicStore (IMAGE_PARAMS,  int data, int scope, int storage, int sem)
+
+    The values passed as scope, storage, and sem parameters must all be
+    integer constant expressions. Valid values are listed in the Scope and
+    Semantics section. scope must be a gl_Scope* value, sem* must be a
+    gl_Semantics* value, and storage* must be a combination of
+    gl_StorageSemantics* values.
+
+    Modify Section 8.16, Shader Invocation Control Functions
+
+    (Replace the table and the second paragraph with the following)
+
+    The following built-in function performs a control barrier as defined in
+    the Vulkan Memory Model:
+
+        void controlBarrier(int execution, int memory, int storage, int sem);
+
+    Informally, a control barrier can be used in conjunction with memory
+    barriers (including those memory barriers optionally performed by
+    controlBarrier itself) to synchronize memory accesses between shader
+    invocations.
+
+    The values passed as execution, memory, storage, and sem parameters must
+    all be integer constant expressions. Valid values are listed in the Scope
+    and Semantics section. execution and memory must be gl_Scope* values, sem*
+    must be a gl_Semantics* value, and storage* must be a combination of
+    gl_StorageSemantics* values.
+
+    The built-in function "void barrier()" in tessellation control shaders can
+    be used to control-barrier-order accesses to output variables. Informally,
+    this means it synchronizes accesses to those variables before the barrier
+    against those after the barrier.
+
+    In compute shaders, barrier() is equivalent to controlBarrier() with
+    execution and memory scope equal to gl_ScopeWorkgroup, storage semantics
+    equal to gl_StorageSemanticsShared, and sem equal to
+    gl_SemanticsAcquireRelease. Informally, this means it synchronizes
+    accesses to shared memory between invocations in the same workgroup.
+
+
+    Replace Section 8.17, Shader Memory Control Functions
+
+    Shaders of all types can read and write the contents of textures and
+    buffer objects using image and buffer variables. The relative order of
+    reads and writes from multiple shader invocations is largely undefined.
+    Memory barrier functions can be used to synchronize memory accesses
+    between invocations as described in the Vulkan Memory Model.
+
+    The following built-in function is a memory barrier as defined in the
+    Vulkan Memory Model:
+
+        void memoryBarrier(int memory, int storage, int sem);
+
+    The above function is a general memory barrier that can synchronize with
+    any supported scope or semantics. Legacy built-in functions that
+    synchronize a subset of memory or with particular scopes are also
+    supported:
+
+    The values passed as memory, storage, and sem parameters must all be
+    integer constant expressions. Valid values are listed in the Scope and
+    Semantics section. memory must be a gl_Scope* value, sem* must be a
+    gl_Semantics* value, and storage* must be a combination of
+    gl_StorageSemantics* values.
+
+        void memoryBarrier()
+        // equivalent to:
+        // memoryBarrier(gl_ScopeQueueFamily,
+        //               gl_StorageSemanticsBuffer |
+        //               gl_StorageSemanticsShared |
+        //               gl_StorageSemanticsImage,
+        //               gl_SemanticsAcquireRelease)
+
+        void memoryBarrierBuffer()
+        // equivalent to:
+        // memoryBarrier(gl_ScopeQueueFamily,
+        //               gl_StorageSemanticsBuffer,
+        //               gl_SemanticsAcquireRelease)
+
+        void memoryBarrierShared()
+        // equivalent to:
+        // memoryBarrier(gl_ScopeQueueFamily,
+        //               gl_StorageSemanticsShared,
+        //               gl_SemanticsAcquireRelease)
+
+        void memoryBarrierImage()
+        // equivalent to:
+        // memoryBarrier(gl_ScopeQueueFamily,
+        //               gl_StorageSemanticsImage,
+        //               gl_SemanticsAcquireRelease)
+
+        void groupMemoryBarrier()
+        // equivalent to:
+        // memoryBarrier(gl_ScopeWorkgroup,
+        //               gl_StorageSemanticsBuffer |
+        //               gl_StorageSemanticsShared |
+        //               gl_StorageSemanticsImage,
+        //               gl_SemanticsAcquireRelease)
+
+Interactions with GL_KHR_shader_atomic_int64
+
+    If GL_KHR_shader_atomic_int64 is not supported, the atomic built-in
+    functions with 64-bit integer parameters and return types are not
+    supported.
+
+Issues
+
+1. Should we extend atomic/barrier built-in functions by adding new
+   parameters with default values to existing functions, or adding
+   new/separate overloads?
+
+   RESOLVED: New overloads, to avoid introducing a new language feature.
+
+2. How hard should we try to informally document how the memory model works
+   and how to use scope and semantics in this extension, vs. just leaving it
+   to the Vulkan Memory Model spec?
+
+   RESOLVED: It's not practical to repeat all the details of how these
+   work, and it is hard to summarize without writing something that's
+   strictly incorrect. Currently, this extension mostly leaves it to the
+   other spec to give meaning to these parameters.
+
+3. Should we add scope/semantics to all the RMW atomics?
+
+   RESOLVED: Yes. It is nice to have these for completeness. Implementation-wise
+   it should not be significant burden since all the atomics behave similarly.
+   But it is potentially a lot of test writing.
+
+4. Should we add workgroup coherence, i.e. an analog of the "coherent"
+   decoration that only makes guarantees at workgroup scope?
+
+   RESOLVED: Yes. This is a feature that exists in other APIs and can give
+   better performance. It will also be added in a SPIR-V extension. We also
+   add "subgroupcoherent" which only makes guarantees at subgroup scope.
+
+Revision History
+
+    Rev.  Date          Author     Changes
+    ----  -----------   --------   -------------------------------------------
+     1    28-Feb-2018    jbolz     Initial revision.
