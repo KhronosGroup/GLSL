@@ -1,0 +1,427 @@
+Name
+
+    NV_compute_shader_derivatives
+
+Name Strings
+
+    GL_NV_compute_shader_derivatives
+
+Contact
+
+    Pat Brown, NVIDIA (pbrown 'at' nvidia.com)
+
+Contributors
+
+    Ashwin Lele, NVIDIA
+    Jeff Bolz, NVIDIA
+
+Status
+
+    Shipping
+
+Version
+
+    Last Modified:      September 13, 2018
+    Revision:           3
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.50
+    (#version 450) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification, version 4.60, dated July 23, 2017.
+
+    This extension interacts with ARB_sparse_texture2.
+
+    This extension interacts with ARB_sparse_texture_clamp.
+
+    This extension interacts with KHR_shader_subgroup.
+
+Overview
+
+    In unextended OpenGL, the GLSL shading language supports derivatives in
+    fragment shaders, which are computed on shader inputs or on other computed
+    values using fragments' (x,y) coordinates as the domain.  Derivatives are
+    not supported in any other shader stage.  However, compute shaders also
+    arrange shader invocations in a three-dimensional array with (x,y,z)
+    coordinates.  This extension provides a mechanism where compute shaders
+    can similarly evaluate derivatives using the x and y coordinates of the
+    local invocation ID across a set of invocations with identical z
+    coordinates.
+
+    This extension, when enabled, allows applications to use derivatives in
+    compute shaders.  It adds compute shader support for built-in derivative
+    functions like dFdx(), automatic level of detail computation in
+    texture lookup functions like texture(), use of the optional LOD bias
+    parameter to adjust the computed level of detail values in texture lookup
+    functions, and the texture level of detail query function
+    textureQueryLod().
+
+    The extension provides new layout qualifiers that support two different
+    arrangements of compute shader invocations for the purpose of derivative
+    computation.  When specifying
+
+      layout(derivative_group_quadsNV) in;
+
+    compute shader invocations are grouped into 2x2x1 arrays whose four local
+    invocation ID values follow the pattern:
+
+        +-----------------+------------------+
+        | (2x+0, 2y+0, z) |  (2x+1, 2y+0, z) |
+        +-----------------+------------------+
+        | (2x+0, 2y+1, z) |  (2x+1, 2y+1, z) |
+        +-----------------+------------------+
+
+    where Y increases from bottom to top.  When specifying
+
+      layout(derivative_group_linearNV) in;
+
+    compute shader invocations are grouped into 2x2x1 arrays whose four local
+    invocation index values follow the pattern:
+
+        +------+------+
+        | 4n+0 | 4n+1 |
+        +------+------+
+        | 4n+2 | 4n+3 |
+        +------+------+
+
+    If neither layout qualifier is specified, derivatives in compute shaders
+    return zero, which is consistent with the handling of built-in texture
+    functions like texture() in GLSL 4.50 compute shaders.
+
+    Unlike fragment shaders, compute shaders never have any "helper"
+    invocations that are only used for derivatives.  As a result, the local
+    work group width and height must be a multiple of two when using the
+    "quads" layout, and the total number of invocations in a local work group
+    must be a multiple of four when using the "linear" layout.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+      derivative_group_quadsNV layout qualifier -> DerivativeGroupQuadsNV Execution Mode
+      derivative_group_linearNV layout qualifier -> DerivativeGroupLinearNV Execution Mode
+
+Modifications to the OpenGL Shading Language Specification, Version 4.50
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_NV_compute_shader_derivatives : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    A new preprocessor #define is added to the OpenGL Shading Language:
+
+      #define GL_NV_compute_shader_derivatives          1
+
+
+    Modify Section 4.4, Layout Qualifiers, p. 56
+
+    (add to supported layout qualifier table, pp. 57-58)
+
+                               Qualifier  Individual        Block   Allowed
+    Layout Qualifier             Only      Variable   Block Member  Interfaces
+    -------------------------  ---------  ----------  ----- ------  ----------
+    derivative_group_quadsNV       X          -         -      -    compute in
+    derivative_group_linearNV      X          -         -      -    compute in
+
+
+    Modify Section 4.4.1.4, Compute Shader Inputs, p. 66
+
+    (add support for new layout qualifiers, p. 66)
+
+    layout-qualifier-id:
+        ...
+        derivative_group_quadsNV
+        derivative_group_linearNV
+
+    ...
+
+    (insert at the end of the section)
+
+    The "derivative_group_quadsNV" and "derivative_group_linearNV" qualifiers
+    are used to specify how compute shader invocations are grouped for the
+    purposes of evaluating derivatives for derivative functions and automatic
+    texture level of detail computation.  It is a compile-time error if both
+    qualifiers are specified.  If neither qualifier is specified, derivatives
+    evaluated for compute shaders will return zero.
+
+    The layout qualifier "derivative_group_quadsNV" specifies that derivatives
+    in compute shaders are evaluated over 2x2 groups of invocations whose
+    gl_LocalInvocationID values are of the form (2x+{0,1}, 2y+{0,1}, z).  It
+    is a compile-time error if this qualifier is used with a local group size
+    whose first or second dimension is not a multiple of two.
+
+    The layout qualifier "derivative_group_linearNV" specifies that
+    derivatives in compute shaders are evaluated over groups of four
+    invocations with consecutive gl_LocalInvocationIndex values of the form
+    4x+{0,1,2,3}.  It is a compile-time error if this qualifier is used with a
+    local group size whose total number of invocations is not a multiple of
+    four.
+
+
+    Modify Section 8.9, Texture Functions, p. 162
+
+    (modify first paragraph of the section, p. 162, to document that automatic
+     level of detail calculations are now supported in compute shaders and to
+     refer to the derivatives section for more information on how derivatives
+     are evaluated)
+
+    Texture lookup functions are available in all shading stages.  However,
+    automatic level of detail computations are performed only for fragment and
+    compute shaders, using derivative computations described in Section
+    8.13.1.  Other shaders...
+
+    (modify first paragraph, p. 163, to allow LOD bias in compute shaders)
+
+    In all functions below, the <bias> parameter is optional for fragment and
+    compute shaders.  ... For a fragment or compute shader, if <bias> is
+    present, it is added...
+
+    (modify third paragraph, p. 163 - Use "automatic level of detail
+     calculation" as in prior language instead of "implicit derivatives".
+     Additionally, drop the "undefined in non-fragment" langauge, since we
+     already defined that case to use zero for the level of detail.)
+
+    Some texture functions (non-"Lod" and non-"Grad" versions) may require
+    automatic level of detail calculations.  The computed level of detail is
+    undefined within non-uniform control flow.
+
+
+    Modify Section 8.9.1, Texture Query Functions, p. 163
+
+    (modify second paragraph of section, p. 163, to allow LOD queries in
+    compute shaders)
+
+    The textureQueryLod functions are available only in fragment and compute
+    shaders. ...
+
+
+    Modify Section 8.13, Fragment Processing Functions, p. 184
+
+    (If this is added to a full specification, sub-section 8.13.1, "Derivative
+     Functions" should be lifted into its own section, since they are also
+     available in compute shaders.  For the purposes of this extension, we
+     simply modify the introductory text in this section.)
+
+    Other than derivative functions, fragment processing functions are only
+    available in fragment shaders.  Derivative functions are available in both
+    fragment and compute shaders.
+
+
+    Modify Section 8.13.1, Derivative Functions, p. 184
+
+    (add introductory text to the beginning of the section)
+
+    Derivative functions are available in fragment and compute shaders, and
+    are used to evaluate derivatives of values computed in these shaders over
+    a two-dimensional domain.  For fragment shaders, derivatives are taken
+    relative to the (x,y) coordinates of the associated fragments.  For
+    compute shaders, derivatives are evaluated over groups of four invocations
+    arranged in a 2x2 grid.
+
+    (add discussion of how derivatives are evaluated in compute shaders,
+     before the next-to-last paragraph, "In some implementations", p. 185)
+
+    Unlike fragment shader invocations, compute shader invocations don't have
+    associated screen-space (x,y) coordinates to use as a domain for
+    derivatives.  Derivatives in compute shaders will be evaluated using
+    differencing over groups of four shader invocations.  When the
+    "derivative_group_quadsNV" layout qualifier is specified in a compute
+    shader, derivatives will be evaluated over groups of four invocations
+    whose gl_LocalInvocationID values are of the form (2x+m, 2y+n, z), where
+    <x>, <y>, and <z> are integers, and <m> and <n> must be zero or one.  When
+    the "derivative_group_linearNV" layout qualifier is specified, derivatives
+    will be evaluated over groups of four invocations whose
+    gl_LocalInvocationIndex values are of the form 4x+2n+m, where <x> is an
+    integer and <m> and <n> must be zero or one.  If neither
+    "derivative_group_quadsNV" nor "derivative_group_linearNV" is specified,
+    derivatives in a compute shader return zero.
+
+    Invocations in each group of four compute shader invocations are assigned
+    (x,y) coordinates of (m,n), where values of <m> and <n> are zero or one as
+    described above.  If F(m,n) specifies the value of F for the invocation at
+    (m,n), fine derivatives with respect to <x> for an invocation at (m,n) are
+    evaluated as
+
+      F(1,n) - F(0,n)
+
+    while fine derivatives with respect to <y> are evaluated as
+
+      F(m,1) - F(m,0).
+
+    As in fragment shaders, coarse derivatives in compute shaders may evaluate
+    a single value for each group of four invocations.
+
+
+Dependencies on ARB_sparse_texture2
+
+    If ARB_sparse_texture2 is supported, the texture lookup functions provided
+    by that extension will support automatic level of detail computation in
+    compute shaders, as defined in this extension.  Supported functions
+    include:
+
+      sparseTextureARB (with or without LOD bias)
+      sparseTextureOffsetARB (with or without LOD bias)
+
+    The following functions using derivatives provided by the shader were
+    already supported in compute shaders prior to this extension:
+
+      sparseTextureGradARB
+      sparseTextureGradOffsetARB
+
+Dependencies on ARB_sparse_texture_clamp
+
+    If ARB_sparse_texture_clamp is supported, the texture lookup functions
+    provided by that extension will support automatic level of detail
+    computation in compute shaders, as defined in this extension.  Supported
+    functions include:
+
+      sparseTextureClampARB (with or without LOD bias)
+      textureClampARB (with or without LOD bias)
+      sparseTextureOffsetClampARB (with or without LOD bias)
+      textureOffsetClampARB (with or without LOD bias)
+
+    The following functions using derivatives provided by the shader were
+    already supported in compute shaders prior to this extension:
+
+      sparseTextureGradClampARB
+      textureGradClampARB
+      sparseTextureGradOffsetClampARB
+      textureGradOffsetClampARB
+
+Dependencies on KHR_shader_subgroup
+
+    If the KHR_shader_subgroup_quads feature of KHR_shader_subgroup is
+    supported, add the following language describing the mapping of
+    invocations to subgroup "quads" in compuote shaders.  This language should
+    be added immediately after similar language for fragment shaders that
+    begins with "In fragment shaders, this quad corresponds to 4 pixels
+    arranged in a 2x2 grid".
+
+      In compute shaders using the "derivative_group_quadsNV" or
+      "derivative_group_linearNV" layout qualifier, this quad corresponds to
+      4 invocations arranged in a 2x2 grid:
+
+          0 | 1
+          --|--
+          2 | 3
+
+      When using "derivative_group_quadsNV", the four invocations are arranged
+      such that:
+
+      - 0th index has a local invocation ID of the form (2x + 0, 2y + 0, z)
+      - 1st index has a local invocation ID of the form (2x + 1, 2y + 0, z)
+      - 2nd index has a local invocation ID of the form (2x + 0, 2y + 1, z)
+      - 3rd index has a local invocation ID of the form (2x + 1, 2y + 1, z)
+
+      for some integer values <x>, <y>, and <z>.  When using
+      "derivative_group_linearNV", the four invocations are arranged such
+      that:
+
+      - 0th index has a local invocation index of the form 4n + 0
+      - 1st index has a local invocation index of the form 4n + 1
+      - 2nd index has a local invocation index of the form 4n + 2
+      - 3rd index has a local invocation index of the form 4n + 3
+
+      for some integer value <n>.
+
+Issues
+
+    (1) Should we provide support for "helper" invocations like we have for
+        fragment shaders?
+
+      RESOLVED:  No, we are not providing any support for automatic "helper"
+      compute shader invocations that would be spawned solely for the purpose
+      of computing derivatives.  When using this feature, the local work group
+      must be fully decomposable into 2x2 "quads" to ensure well-defined
+      derivatives.  Using odd local work group sizes in compute shaders
+      requiring derivatives is not allowed and will result in compile-time
+      errors.  If the natural size of a work group is not a multiple of the
+      2x2 "quad" size, applications can introduce their own "helper"
+      invocations by padding the workgroup size to a multiple of two and
+      manually ensuring that the "extra" invocations don't have unwanted side
+      effects (e.g., undesired writes to memory).
+
+    (2) What mechanisms should we provide to control the packing of compute
+        shader invocations into "quads" for differencing purposes?
+
+      RESOLVED:  We provide two different options, which can be specified via
+      layout qualifier.
+
+      The most natural way to support derivatives is to take the
+      already-existing (x,y,z) coordinates in gl_LocalInvocationID and use the
+      (x,y) coordinates as the domain.  In this model, mapping to the
+      "derivative_group_quadsNV" layout qualifier, we simply arrange invocations
+      into 2x2 "quads" with coordinates of the form (2m+{0,1}, 2n+{0,1}, z).
+
+      The "quads" approach might not work for all use cases that require
+      derivative support.  For example, a shader might want to just use a
+      one-dimensional array of invocations and provide its own interpretation
+      of how each invocation maps to an (x,y) coordinate in the domain.  To
+      support this model, we provide the "derivative_group_linearNV" layout
+      qualifier, where invocations are arranged into groups of four with
+      one-dimensional gl_LocalInvocationIndex values of the form 4n+{0,1,2,3}.
+      Shaders using this layout qualifier need to ensure that (x,y)
+      coordinates used to evaluate the inputs of derivative functions for each
+      invocation in a group are chosen so that differencing-based derivatives
+      make sense.
+
+    (3) Which texture built-in functions automatically compute derivatives
+        with this extension?
+
+      RESOLVED:  In the core profile, computed derivatives are supported for
+      all functions that compute derivatives in fragment shaders:  texture(),
+      textureProj(), textureOffset(), textureProjOffset().  If the
+      compatibility profile is supported, the old legacy built-in functions
+      should also compute derivatives:
+
+        texture1D(), texture1DProj(), texture2D(), texture2DProj(),
+        texture3D(), texture3DProj(), textureCube(), shadow1D(), shadow2D(),
+        shadow1DProj(), and shadow2DProj().
+
+      This extension also produces defined derivatives in texture lookup
+      functions from ARB_sparse_texture2 and ARB_sparse_texture_clamp.
+
+    (4) How are derivatives handled when no "derviative_group" layout
+        qualifier is specified?  How are derivatives handled in divergent flow
+        control?
+
+      RESOLVED:  When no layout qualifier is specified, derivatives evaluated
+      in compute shaders for derivative functions and automatic level of
+      detail computations will return zero.  While derivative functions (e.g.,
+      dFdx) were not supported in compute shaders prior to this extension, the
+      same texture lookup functions that would use derivatives for automatic
+      level of detail computation when called in fragment shaders were
+      supported in compute shaders.  In those functions, the base level of
+      detail (zero) is supposed to be used, which is consistent with the
+      derivatives of zero we specify here.
+
+      In divergent flow control, not all of the four invocations in a given
+      derivative group may be active.  The values used for derivatives may not
+      have been computed for inactive threads, so differencing will produce
+      incorrect results.  While this situation produces undefined results for
+      fragment shaders in the core GLSL specification, NVIDIA's hardware
+      implementation will recognize divergence and produce derivatives of
+      zero.
+
+Revision History
+
+    Revision 3, 2018/09/13 (pbrown)
+    - Add interactions with KHR_shader_subgroup (KHR_shader_subgroup_quads)
+      to explicitly document how invocations are arranged into subgroup quads.
+      We use the same grouping as for derivatives.
+
+    Revision 2, 2018/09/12 (pbrown)
+    - Prepare spec for publication.
+
+    Revision 1
+    - Internal revisions.
