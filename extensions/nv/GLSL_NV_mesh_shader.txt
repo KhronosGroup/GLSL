@@ -30,6 +30,9 @@ Dependencies
     This extension can be applied to OpenGL GLSL versions 4.50
     (#version 450) and higher.
 
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+
     This extension is written against the GLSL 4.50.6 Specification
     (Compatibility Profile), dated April 14, 2016.
 
