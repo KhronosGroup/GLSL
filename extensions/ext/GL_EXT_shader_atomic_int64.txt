@@ -1,0 +1,132 @@
+Name
+
+     EXT_shader_atomic_int64
+
+Name Strings
+
+     GL_EXT_shader_atomic_int64
+
+Contact
+
+     Aaron Hagan, AMD (aaron.hagan 'at' amd.com)
+
+Contributors
+
+     Pat Brown, NVIDIA
+     Jeff Bolz, NVIDIA
+     Cyril Crassin, NVIDIA
+     Christoph Kubisch, NVIDIA
+     Aaron Hagan, AMD
+     Daniel Rakos, AMD
+
+Status
+
+     Complete.
+
+Version
+
+     Last Modified Date:        July 5, 2018
+
+Number
+
+     OpenGL Extension #XXX
+
+Dependencies
+
+     This extension is written against version 4.40 (revision 8) of the OpenGL
+     Shading Language Specification, dated January 22, 2014.
+
+Overview
+
+     This extension provides additional GLSL built-in functions and assembly
+     opcodes allowing shaders to perform additional atomic read-modify-write
+     operations on 64-bit signed and unsigned integers.
+
+New Procedures and Functions
+
+     None.
+
+New Tokens
+
+     None.
+
+Additions to OpenGL 4.4 Specification
+
+     None.
+
+Additions to the AGL/GLX/WGL Specifications
+
+     None.
+
+GLX Protocol
+
+     None.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.40
+(revision 8)
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+       #extension GL_EXT_shader_atomic_int64 : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+       #define GL_EXT_shader_atomic_int64         1
+
+    Modify Section 8.11, Atomic Memory Functions, p. 168
+
+    Add the following new functions to the table on p. 173:
+
+      uint64_t atomicMin(inout uint64_t mem, uint64_t data);
+      uint64_t atomicMax(inout uint64_t mem, uint64_t data);
+      uint64_t atomicAnd(inout uint64_t mem, uint64_t data);
+      uint64_t atomicOr (inout uint64_t mem, uint64_t data);
+      uint64_t atomicXor(inout uint64_t mem, uint64_t data);
+
+      int64_t atomicMin(inout int64_t mem, int64_t data);
+      int64_t atomicMax(inout int64_t mem, int64_t data);
+      int64_t atomicAnd(inout int64_t mem, int64_t data);
+      int64_t atomicOr (inout int64_t mem, int64_t data);
+      int64_t atomicXor(inout int64_t mem, int64_t data);
+
+      uint64_t atomicAdd(inout uint64_t mem, uint64_t data);
+      uint64_t atomicExchange(inout uint64_t mem, uint64_t data);
+      uint64_t atomicCompSwap(inout uint64_t mem, uint64_t compare,
+                              uint64_t data);
+
+      int64_t atomicAdd(inout int64_t mem, int64_t data);
+      int64_t atomicExchange(inout int64_t mem, int64_t data);
+      int64_t atomicCompSwap(inout int64_t mem, int64_t compare,
+                             int64_t data);
+
+Errors
+
+     None.
+
+New State
+
+     None.
+
+New Implementation Dependent State
+
+     None.
+
+Issues
+
+    1. How is this extension related to the NV_shader_atomic_int64 extension?
+
+       RESOLVED: This is a vendor portable superset of that which also
+       includes the 64-bit unsigned integer atomic add, exchange, and
+       compare-exchange operations originally introduced in
+       NV_shader_buffer_store, and can used with the
+       VK_KHR_shader_atomic_int64 Vulkan extension.
+
+Revision History
+
+    Rev.    Date      Author    Changes
+    ----  ----------  --------  -----------------------------------------------
+     1    07/05/2018  ahagan    Internal revisions based on the
+                                GL_NV_shader_atomic_int64 extension.
