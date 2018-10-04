@@ -22,8 +22,8 @@ Status
 
 Version
 
-    Last Modified Date:     September 18, 2018
-    NVIDIA Revision:        2
+    Last Modified Date:     October 4, 2018
+    NVIDIA Revision:        4
 
 Dependencies
 
@@ -571,9 +571,9 @@ Modifications to the OpenGL Shading Language Specification, Version 4.50.6
       Layout Qualifier   | Qualifier | Individual | Block | Block  | Allowed interfaces
                          | only      | variable   |       | Member |
       -------------------+-----------+------------+-------+--------+--------------------
-      local_size_x =     |           |            |       |        |
+      local_size_x =     |           |            |       |        | compute in
       local_size_y =     |     X     |            |       |        | mesh in
-      local_size_z =     |           |            |       |        |
+      local_size_z =     |           |            |       |        | task in
       -------------------+-----------+------------+-------+--------+--------------------
       max_vertices =     |     X     |            |       |        | geometry out
                          |           |            |       |        | mesh out
@@ -1241,6 +1241,10 @@ Issues
       would be necessary to decide if gl_NumWorkGroups should be 5 or 8.
 
 Revision History
+
+    Version 4, October 4, 2018 (pbrown)
+    - Fix incorrect layout qualifier table entries.  "local_size_[xyz]" is
+      legal in task shaders.
 
     Version 3, September 18, 2018 (pbrown)
     - Additional edits preparing for publication.
