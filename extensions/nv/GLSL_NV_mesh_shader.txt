@@ -15,6 +15,7 @@ Contributors
 
     Yury Uralsky, NVIDIA
     Daniel Koch, NVIDIA
+    Sahil Parmar, NVIDIA
 
 Status
 
@@ -22,8 +23,8 @@ Status
 
 Version
 
-    Last Modified Date:     October 5, 2018
-    NVIDIA Revision:        5
+    Last Modified Date:     October 22, 2018
+    NVIDIA Revision:        6
 
 Dependencies
 
@@ -422,7 +423,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.50.6
 
     (add a new example to the second paragraph, p. 48)
 
-      primitive in vec3 triangleNormal;
+      perprimitiveNV in vec3 triangleNormal;
 
     (modify third paragraph, p. 48)
 
@@ -1264,6 +1265,9 @@ Issues
       would be necessary to decide if gl_NumWorkGroups should be 5 or 8.
 
 Revision History
+
+    Version 6, October 22, 2018 (sparmar)
+    - Fix typo for per-primitive fragment shader input example
 
     Version 5, October 5, 2018 (pbrown)
     - Add an interaction with GLSL 4.60 and GL_KHR_vulkan_glsl to allow the
