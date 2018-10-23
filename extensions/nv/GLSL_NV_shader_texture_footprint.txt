@@ -1,0 +1,405 @@
+Name
+
+    NV_shader_texture_footprint
+
+Name Strings
+
+    GL_NV_shader_texture_footprint
+
+Contact
+
+    Chris Lentini, NVIDIA (clentini 'at' nvidia.com)
+    Pat Brown, NVIDIA (pbrown 'at' nvidia.com)
+
+Contributors
+
+    Jeff Bolz, NVIDIA
+    Daniel Koch, NVIDIA
+
+Status
+
+    Shipping
+
+Version
+
+    Last Modified Date:         2018/09/11
+    NVIDIA Revision:            2
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.50
+    (#version 450) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification, Version 4.60 (dated July 23, 2017).
+
+    This extension interacts with ARB_sparse_texture_clamp and
+    EXT_sparse_texture2.
+
+Overview
+
+    This extension adds a new set of texture query functions
+    ("textureFootprint*NV") to the OpenGL Shading Language (GLSL).  These
+    built-in functions prepare to perform a filtered texture lookup based on
+    coordinates and other parameters passed in by the calling code.  However,
+    instead of returning data from the provided texture image, these query
+    functions instead return data identifying the _texture footprint_ for an
+    equivalent texture access.  The texture footprint identifies a set of
+    texels that may be accessed in order to return a filtered result for the
+    texture access.
+
+    The footprint itself is a structure that includes integer values that
+    identify a small neighborhood of texels in the texture being accessed and
+    a bitfield that indicates which texels in that neighborhood would be used.
+    Each bit in the returned bitfield identifies whether any texel in a small
+    aligned block of texels would be fetched by the texture lookup.  The size
+    of each block is specified by an access _granularity_ provided by the
+    shader.  The minimum granularity supported by this extension is 2x2 (for
+    2D textures) and 2x2x2 (for 3D textures); the maximum granularity is
+    256x256 (for 2D textures) or 64x32x32 (for 3D textures).  Each footprint
+    query returns the footprint from a single texture level.  When using
+    minification filters that combine accesses from multiple mipmap levels,
+    shaders must perform separate queries for the two levels accessed ("fine"
+    and "coarse").  The footprint query also returns a flag indicating if the
+    texture lookup would access texels from only one mipmap level or from two
+    neighboring levels.
+
+    This extension should be useful for multi-pass rendering operations that
+    do an initial expensive rendering pass to produce a first image that is
+    then used as a texture for a second pass.  If the second pass ends up
+    accessing only portions of the first image (e.g., due to visibility), the
+    work spent rendering the non-accessed portion of the first image was
+    wasted.  With this feature, an application can limit this waste using an
+    initial pass over the geometry in the second image that performs a
+    footprint query for each visible pixel to determine the set of pixels that
+    it needs from the first image.  This pass would accumulate an aggregate
+    footprint of all visible pixels into a separate "footprint texture" using
+    shader atomics.  Then, when rendering the first image, the application can
+    kill all shading work for pixels not in this aggregate footprint.
+
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs supported by the SPV_NV_shader_image_footprint extension:
+
+    bool textureFootprintNV(gsampler2D sampler, vec2 P, int granularity,
+                            bool coarse, out gl_TextureFootprint2DNV footprint
+                            [, float bias]))
+        -> OpImageSampleFootprintNV(
+             /*Result Type*/struct { bool, flattened gl_TextureFootprint2DNV },
+             /*Sampled Image*/OpTypeSampledImage (with OpTypeImage Dim=2D, Arrayed=0, MS=0),
+             /*Coordinate*/vec2,
+             /*Granularity*/int,
+             /*Coarse*/Boolean
+             [,/*ImageOperands*/ /*Bias*/float])
+
+    bool textureFootprintNV(gsampler3D sampler, vec3 P, int granularity,
+                            bool coarse, out gl_TextureFootprint3DNV footprint
+                            [, float bias]))
+        -> OpImageSampleFootprintNV(
+             /*Result Type*/struct { bool, flattened gl_TextureFootprint3DNV },
+             /*Sampled Image*/OpTypeSampledImage (with OpTypeImage Dim=3D, Arrayed=0, MS=0),
+             /*Coordinate*/vec3,
+             /*Granularity*/int,
+             /*Coarse*/Boolean,
+             [,/*ImageOperands*/ /*Bias*/float])
+
+    bool textureFootprintClampNV(gsampler2D sampler, vec2 P, float lodClamp,
+                                 int granularity, bool coarse,
+                                 out gl_TextureFootprint2DNV footprint
+                                 [, float bias]))
+        -> OpImageSampleFootprintNV(
+             /*Result Type*/struct { bool, flattened gl_TextureFootprint2DNV },
+             /*Sampled Image*/OpTypeSampledImage (with OpTypeImage Dim=2D, Arrayed=0, MS=0),
+             /*Coordinate*/vec2,
+             /*Granularity*/int,
+             /*Coarse*/Boolean,
+             /*ImageOperands*/ [/*Bias*/float,] /*MinLod*/float)
+
+    bool textureFootprintClampNV(gsampler3D sampler, vec3 P, float lodClamp,
+                                 int granularity, bool coarse,
+                                 out gl_TextureFootprint3DNV footprint
+                                 [, float bias])
+        -> OpImageSampleFootprintNV(
+             /*Result Type*/struct { bool, flattened gl_TextureFootprint3DNV },
+             /*Sampled Image*/OpTypeSampledImage (with OpTypeImage Dim=3D, Arrayed=0, MS=0),
+             /*Coordinate*/vec3,
+             /*Granularity*/int,
+             /*Coarse*/Boolean,
+             /*ImageOperands*/ [/*Bias*/float,] /*MinLod*/float)
+
+    bool textureFootprintLodNV(gsampler2D sampler, vec2 P, float lod,
+                               int granularity, bool coarse,
+                               out gl_TextureFootprint2DNV footprint)
+        -> OpImageSampleFootprintNV(
+             /*Result Type*/struct { bool, flattened gl_TextureFootprint2DNV },
+             /*Sampled Image*/OpTypeSampledImage (with OpTypeImage Dim=2D, Arrayed=0, MS=0),
+             /*Coordinate*/vec2,
+             /*Granularity*/int,
+             /*Coarse*/Boolean,
+             /*ImageOperands*/ /*Lod*/float)
+
+    bool textureFootprintLodNV(gsampler3D sampler, vec3 P, float lod,
+                               int granularity, bool coarse,
+                               out gl_TextureFootprint3DNV footprint)
+        -> OpImageSampleFootprintNV(
+             /*Result Type*/struct { bool, flattened gl_TextureFootprint3DNV },
+             /*Sampled Image*/OpTypeSampledImage (with OpTypeImage Dim=3D, Arrayed=0, MS=0),
+             /*Coordinate*/vec3,
+             /*Granularity*/int,
+             /*Coarse*/Boolean,
+             /*ImageOperands*/ /*Lod*/float)
+
+    bool textureFootprintGradNV(gsampler2D sampler, vec2 P, vec2 dx, vec2 dy,
+                                int granularity, bool coarse,
+                                out gl_TextureFootprint2DNV footprint)
+        -> OpImageSampleFootprintNV(
+             /*Result Type*/struct { bool, flattened gl_TextureFootprint2DNV },
+             /*Sampled Image*/OpTypeSampledImage (with OpTypeImage Dim=2D, Arrayed=0, MS=0),
+             /*Coordinate*/vec2,
+             /*Granularity*/int,
+             /*Coarse*/Boolean,
+             /*ImageOperands*/ /*Grad (dx, dy)*/vec2, vec2)
+
+    bool textureFootprintGradClampNV(gsampler2D sampler, vec2 P, vec2 dx, vec2 dy,
+                                     float lodclamp, int granularity, bool coarse,
+                                     out gl_TextureFootprint2DNV footprint)
+        -> OpImageSampleFootprintNV(
+             /*Result Type*/struct { bool, flattened gl_TextureFootprint2DNV },
+             /*Sampled Image*/OpTypeSampledImage (with OpTypeImage Dim=2D, Arrayed=0, MS=0),
+             /*Coordinate*/vec2,
+             /*Granularity*/int,
+             /*Coarse*/Boolean,
+             /*ImageOperands*/ /*Grad (dx, dy)*/vec2, vec2, /*MinLod*/float)
+
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_NV_shader_texture_footprint : <behavior>
+
+    Where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+        #define GL_NV_shader_texture_footprint 1
+
+    (Insert new section before Section 8.9.4, "Compatibility Profile Texture
+     Functions", p. 175)
+
+    Section 8.9.X, Texture Footprint Query Functions
+
+    The texture footprint query functions evaluate the _texture footprint_ for
+    a texture lookup.  The texture footprint identifies the set of texels that
+    would be accessed when making an equivalent texture lookup function using
+    the same parameter values.  The set of footprint functions and their
+    equivalent lookup functions is listed in the following table:
+
+        Texture Footprint Function      Texture Lookup Function
+        ----------------------------    -----------------------
+        textureFootprintNV              texture
+        textureFootprintClampNV         textureClampARB
+        textureFootprintLodNV           textureLod
+        textureFootprintGradNV          textureGrad
+        textureFootprintGradClampNV     textureGradClampARB
+
+    The texture footprint query functions have the same parameters as the
+    equivalent texture lookup function, plus three additional parameters
+    related to the footprint query.  The parameter _granularity_ specifies the
+    granularity used for the footprint query, where each bit in the returned
+    footprint mask corresponds to an aligned block of texels whose size comes
+    from _granularity_.  The parameter _coarse_ specifies whether the
+    footprint should be evaluated for the "coarse" or "fine" level of detail.
+    Some texture lookups will access texels from two different mipmap levels,
+    where information from the higher-resolution image is returned when
+    _coarse_ is false and information from the lower-resolution image is
+    returned when _coarse_ is true.  The output parameter _footprint_ is a
+    structure where the footprint information is returned.  The function
+    returns a "bool" value, where true indicates that the texture lookup uses
+    only a single level of detail and false indicates that the texture lookup
+    uses two levels of detail.
+
+    The texture footprint is returned in a structure using one of the
+    following built-in types:
+
+        struct gl_TextureFootprint2DNV {
+            uvec2 anchor;
+            uvec2 offset;
+            uvec2 mask;
+            uint  lod;
+            uint  granularity;
+         };
+
+         struct gl_TextureFootprint3DNV {
+            uvec3 anchor;
+            uvec3 offset;
+            uvec2 mask;
+            uint  lod;
+            uint  granularity;
+         };
+
+    In this structure, _lod_ indicates the mipmap level number for the coarse
+    or fine image that would be accessed.  _mask_ specifies a 64-bit bitfield,
+    where each bit represents footprint coverage for a group of texels whose
+    size is given by the footprint query's granularity.  For the types
+    gl_TextureFootprint2DNV and gl_TextureFootprint3DNV, the mask indicates
+    footprint coverage for an 8x8 or 4x4x4 neighborhood of texel groups,
+    respectively.  _anchor_ specifies an anchor point in the original texture
+    contained in the neighborhood, whose components are in multiples of 8
+    texel groups.  _offset_ specifies how the bits of _mask_ are mapped to
+    texel groups in the vicinity of the anchor point.  _granularity_ returns
+    the effective granularity of the returned footprint.  The returned
+    granularity will be zero unless the footprint is too large to be expressed
+    as an 8x8 or 4x4x4 neighborhood of texel groups using the granularity
+    passed to the footprint query function.  In that case, the implementation
+    is forced to select a larger granularity and returns the selected
+    granularity in the _granularity_ member.
+
+    For more details on the interpretation of the structure returned by the
+    _footprint_ parameter, please refer to the OpenGL or Vulkan API
+    specification.
+
+    Texture footprint built-in functions are only supported with 2D and 3D
+    textures and the results are undefined if the sampler address mode is
+    not CLAMP_TO_EDGE.
+
+    (add a new table whose "Syntax" column includes prototypes for the
+     following functions)
+
+    Syntax:
+        bool textureFootprintNV(gsampler2D sampler, vec2 P,
+                                int granularity, bool coarse,
+                                out gl_TextureFootprint2DNV footprint
+                                [, float bias]))
+        bool textureFootprintNV(gsampler3D sampler, vec3 P,
+                                int granularity, bool coarse,
+                                out gl_TextureFootprint3DNV footprint
+                                [, float bias]))
+
+    Description:
+      Evaluate the footprint of a lookup using the function:
+
+        texture(sampler, P, [bias])
+
+      using _granularity_ to select the footprint granularity and _coarse_ to
+      determine if results should be returned for the "coarse" or "fine"
+      mipmap level.  Returns the footprint in _footprint_ and returns true if
+      and only if the texture lookup would access texels in only one level of
+      detail.
+
+    Syntax:
+        bool textureFootprintClampNV(gsampler2D sampler, vec2 P,
+                                float lodClamp, int granularity, bool coarse,
+                                out gl_TextureFootprint2DNV footprint
+                                [, float bias]))
+        bool textureFootprintClampNV(gsampler3D sampler, vec3 P,
+                                     float lodClamp, int granularity, bool coarse,
+                                     out gl_TextureFootprint3DNV footprint
+                                     [, float bias])
+
+    Description:
+      Evaluate the footprint of a lookup using the function:
+
+        textureClampARB(sampler, P, lodClamp, [bias])
+
+      using _granularity_ to select the footprint granularity and _coarse_ to
+      determine if results should be returned for the "coarse" or "fine"
+      mipmap level.  Returns the footprint in _footprint_ and returns true if
+      and only if the texture lookup would access texels in only one level of
+      detail.
+
+    Syntax:
+        bool textureFootprintLodNV(gsampler2D sampler, vec2 P,
+                                   float lod, int granularity, bool coarse,
+                                   out gl_TextureFootprint2DNV footprint)
+        bool textureFootprintLodNV(gsampler3D sampler, vec3 P,
+                                   float lod, int granularity, bool coarse,
+                                   out gl_TextureFootprint3DNV footprint)
+
+    Description:
+      Evaluate the footprint of a lookup using the function:
+
+        textureLod(sampler, P, lod)
+
+      using _granularity_ to select the footprint granularity and _coarse_ to
+      determine if results should be returned for the "coarse" or "fine"
+      mipmap level.  Returns the footprint in _footprint_ and returns true if
+      and only if the texture lookup would access texels in only one level of
+      detail.
+
+    Syntax:
+        bool textureFootprintGradNV(gsampler2D sampler, vec2 P,
+                                    vec2 dx, vec2 dy, int granularity, bool coarse,
+                                    out gl_TextureFootprint2DNV footprint)
+
+    Description:
+      Evaluate the footprint of a lookup using the function:
+
+        textureGrad(sampler, P, dx, dy)
+
+      using _granularity_ to select the footprint granularity and _coarse_ to
+      determine if results should be returned for the "coarse" or "fine"
+      mipmap level.  Returns the footprint in _footprint_ and returns true if
+      and only if the texture lookup would access texels in only one level of
+      detail.
+
+    Syntax:
+        bool textureFootprintGradClampNV(gsampler2D sampler, vec2 P,
+                                         vec2 dx, vec2 dy, float lodclamp,
+                                         int granularity, bool coarse,
+                                         out gl_TextureFootprint2DNV footprint)
+
+    Description:
+      Evaluate the footprint of a lookup using the function:
+
+        textureGradClampARB(sampler, P, dx, dy, lodclamp)
+
+      using _granularity_ to select the footprint granularity and _coarse_ to
+      determine if results should be returned for the "coarse" or "fine"
+      mipmap level.  Returns the footprint in _footprint_ and returns true if
+      and only if the texture lookup would access texels in only one level of
+      detail.
+
+
+Interactions with ARB_sparse_texture_clamp and EXT_sparse_texture2
+
+    If neither ARB_sparse_texture_clamp nor EXT_sparse_texture2 is supported,
+    remove the references to textureFootprintClampNV and
+    textureFootprintGradClampNV from this specification.  If only
+    EXT_sparse_texture2 is supported, change the "ARB" suffix to "EXT" in all
+    references to functions defined by ARB_sparse_texture_clamp.
+
+Issues
+
+    (1) What should this extension be named?
+
+      RESOLVED:  "NV_shader_texture_footprint".  We use this name because it
+      allows a *shader* to evaluate the *footprint* (set of texels accessed)
+      of a specific *texture* lookup.
+
+      Note that the Vulkan API and SPIR-V extensions for this feature both use
+      the "image" rather than "texture" in their extension names
+      (VK_NV_shader_image_footprint, SPV_NV_shader_image_footprint).  We used
+      that convention because Vulkan and SPIR-V refers to the objects being
+      accessed by the new functions in this extension as "images".  However,
+      we use "texture" in the OpenGL and GLSL extension names for this feature
+      because it's a better match for OpenGL and GLSL naming conventions.  In
+      particular, the GLSL built-in functions whose footprints are evaluated
+      by the new built-ins in this extension all have "texture" in their
+      names.
+
+Revision History
+
+    Version 2, 2018/09/11 (pbrown)
+    - Minor edits to prepare for publication.
+
+    Version 1, 2018/07/27 (clentini, pbrown)
+    - Internal revisions.

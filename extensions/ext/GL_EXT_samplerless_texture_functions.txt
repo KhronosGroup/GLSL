@@ -1,0 +1,158 @@
+Name
+
+    EXT_samplerless_texture_functions
+
+Name Strings
+
+    GL_EXT_samplerless_texture_functions
+
+Contact
+
+    Alex Smith, Feral Interactive (asmith 'at' feralinteractive.com)
+
+Contributors
+
+    Baldur Karlsson
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date: 23-Jun-2018
+    Revision: 1
+
+Number
+
+    TBD.
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    Requires GL_KHR_vulkan_glsl.
+
+Overview
+
+    This extension allows passing texture objects directly to texture query
+    and lookup functions that do not require a sampler.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.50
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_EXT_samplerless_texture_functions : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+        #define GL_EXT_samplerless_texture_functions     1
+
+    Change the first paragraph of section "8.9 Texture Functions" from:
+
+        "Texture lookup functions are available in all shading stages.
+        However, automatic level of detail is computed only for fragment
+        shaders. Other shaders operate as though the base level of detail
+        were computed as zero. The functions in the table below provide
+        access to textures through samplers, ..."
+
+    to:
+
+        "Texture lookup functions are available in all shading stages.
+        However, automatic level of detail is computed only for fragment
+        shaders. Other shaders operate as though the base level of detail
+        were computed as zero. The functions in the table below provide
+        access to textures directly and through samplers, ..."
+
+    Change the third paragraph from:
+
+        "Texture lookup functions are provided that can return their result
+        as floating point, unsigned integer or signed integer, depending on
+        the sampler type passed to the lookup function."
+
+    to:
+
+        "Texture lookup functions are provided that can return their result
+        as floating point, unsigned integer or signed integer, depending on
+        the texture or sampler type passed to the lookup function."
+
+    Change the first paragraph of subsection "8.9.1 Texture Query Functions"
+    from:
+
+        "The textureSize functions query the dimensions of a specific
+        texture level for a sampler"
+
+    to:
+
+        "The textureSize functions query the dimensions of a specific
+        texture level for a texture or sampler"
+
+    Add to the table at the end of subsection 8.9.1 the following functions:
+
+        int textureSize (gtexture1D texture, int lod)
+        ivec2 textureSize (gtexture2D texture, int lod)
+        ivec3 textureSize (gtexture3D texture, int lod)
+        ivec2 textureSize (gtextureCube texture, int lod)
+        ivec3 textureSize (gtextureCubeArray texture, int lod)
+        ivec2 textureSize (gtexture2DRect texture)
+        ivec2 textureSize (gtexture1DArray texture, int lod)
+        ivec3 textureSize (gtexture2DArray texture, int lod)
+        int textureSize (gtextureBuffer texture)
+        ivec2 textureSize (gtexture2DMS texture)
+        ivec3 textureSize (gtexture2DMSArray texture)
+
+        int textureQueryLevels(gtexture1D texture)
+        int textureQueryLevels(gtexture2D texture)
+        int textureQueryLevels(gtexture3D texture)
+        int textureQueryLevels(gtextureCube texture)
+        int textureQueryLevels(gtexture1DArray texture)
+        int textureQueryLevels(gtexture2DArray texture)
+        int textureQueryLevels(gtextureCubeArray texture)
+
+        int textureSamples(gtexture2DMS texture)
+        int textureSamples(gtexture2DMSArray texture)
+
+    Add to the table in subsection "8.9.2 Texel Lookup Functions" the
+    following functions:
+
+        gvec4 texelFetch (gtexture1D texture, int P, int lod)
+        gvec4 texelFetch (gtexture2D texture, ivec2 P, int lod)
+        gvec4 texelFetch (gtexture3D texture, ivec3 P, int lod)
+        gvec4 texelFetch (gtexture2DRect texture, ivec2 P)
+        gvec4 texelFetch (gtexture1DArray texture, ivec2 P, int lod)
+        gvec4 texelFetch (gtexture2DArray texture, ivec3 P, int lod)
+        gvec4 texelFetch (gtextureBuffer texture, int P)
+        gvec4 texelFetch (gtexture2DMS texture, ivec2 P, int sample)
+        gvec4 texelFetch (gtexture2DMSArray texture, ivec3 P,
+                          int sample)
+
+        gvec4 texelFetchOffset (gtexture1D texture, int P, int lod,
+                                int offset)
+        gvec4 texelFetchOffset (gtexture2D texture, ivec2 P, int lod,
+                                ivec2 offset)
+        gvec4 texelFetchOffset (gtexture3D texture, ivec3 P, int lod,
+                                ivec3 offset)
+        gvec4 texelFetchOffset (gtexture2DRect texture, ivec2 P,
+                                ivec2 offset)
+        gvec4 texelFetchOffset (gtexture1DArray texture, ivec2 P, int lod,
+                                int offset)
+        gvec4 texelFetchOffset (gtexture2DArray texture, ivec3 P, int lod,
+                                ivec2 offset)
+
+Issues
+
+    None
+
+Revision History
+
+    Rev.  Date           Author    Changes
+    ----  -----------    --------  --------------------------------------------
+    1     23-Jun-2018    aejsmith  Initial draft
+                         baldurk
