@@ -16,6 +16,7 @@ Contributors
     Matthew Netsch, Qualcomm
     Jan-Harald Fredriksen, Arm
     Mark Kilgard, NVIDIA
+    Jeff Leger, Qualcomm
 
 Status
 
@@ -23,19 +24,21 @@ Status
 
 Version
 
-    Last Modified:      October 20, 2018
+    Last Modified:      October 30, 2018
     Revision:           1
 
 Dependencies
 
-    This extension can be applied to OpenGL GLSL versions 4.50
+    This extension can be applied to OpenGL Shading Language versions 4.50
     (#version 450) and higher.
 
-    This extension can be applied to OpenGL ES ESSL versions 3.20
-    (#version 320) and higher.
+    This extension can be applied to OpenGL ES Shading Language versions 3.10
+    (#version 310) and higher.
 
     This extension is written against the OpenGL Shading Language
     Specification, version 4.60, dated July 23, 2017.
+
+    This extension interacts with OpenGL ES 3.2 and OES_sample_shading.
 
 Overview
 
@@ -44,18 +47,14 @@ Overview
     those extensions, applications can use a texture to control the number of
     fragment shader invocations that will be spawned for a particular
     neighborhood of covered pixels.  We refer to the density of fragment
-    shader invocations as the "shading rate". Implementations may support
-    shading rates that run one invocation for multiple pixels as well as
-    rates that run multiple invocations for a single pixel.
+    shader invocations as the "fragment invocation density".
 
     This extension provides GLSL built-in variables that allow the fragment
-    shader to determine the shading rate used for a particular invocation.
-    When using a shading rate where a single invocation covers multiple
-    pixels, the built-in gl_FragAreaEXT indicates the size of the rectangle
-    of pixels used for that invocation.  When using a shading rate where
-    multiple invocations can be spawned for each pixel, the built-in
-    gl_FragInvocationCountEXT indicates the number of invocations that will be
-    spawned for a fully covered pixel.
+    shader to determine the fragment density used for a particular invocation.
+    The gl_FragAreaEXT built-in indicates the width and height of the
+    rectangle of pixels that is being shaded by this fragment invocation.
+    The gl_FragInvocationCountEXT built-in indicates the maximum number of
+    fragment invocations that will be executed for each fragment.
 
     Mapping to SPIR-V
     -----------------
@@ -94,36 +93,42 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     pixels corresponding to this fragment shader invocation.  The first
     component is the width of the rectangle (in pixels); the second component
     is the height (in pixels).  When a shading rate image or fragment density
-    map is not used, or when running multiple fragment shader invocations per
-    pixel (multisampling), both components will be one.  When using a shading
+    map is not used, both components will be one.  When using a shading
     rate image or fragment density map, either or both components may be
     greater than one.  When the fragment size is greater than a single pixel,
     the outputs of the shader invocation will be broadcast to all covered
-    pixels/samples in the rectangle.
+    pixels/samples in the rectangle (OR to the associated samples for all
+    covered pixels in the rectangle - TBD).
 
     The input variable gl_FragInvocationCountEXT represents the maximum number
-    of fragment shader invocations executed for each pixel, as derived from
-    the effective shading rate for the fragment.  If a primitive does not
-    fully cover a pixel, the number of fragment shader invocations for its
-    covered pixels may be less than the value of gl_FragInvocationCountEXT.
+    of fragment shader invocations executed for each fragment, as derived from
+    the effective invocation density for the fragment.  If a primitive does
+    not fully cover a fragment, the number of fragment shader invocations for its
+    covered fragments may be less than the value of gl_FragInvocationCountEXT.
     When a shading rate image or fragment density map is not used, this value
     is a function of the framebuffer sample counts and the sample shading
     fraction programmed in the OpenGL API via MinSampleShading or the Vulkan
     API via minSampleShading. When using a shading rate image or fragment
     density map, this value will also be affected by the contents of the
     texture and may depend on the location of the pixel in the framebuffer.
-    If multisampling is disabled, or if the fragment shader invocation covers
-    multiple pixels, the value of this input will be one.
+    If multisampling is disabled, the value of this input will be one.
 
     Modify Section 8.13.1, Derivative Functions, p. 184
 
     (add a new paragraph before the last paragraph "It is typical to consider
     a 2x2 square", p. 184)
 
-    When using a shading rate where each fragment covers multiple columns
-    and/or rows of pixels, the values of dx and/or dy in equations 1b and 2b
-    above will be greater than 1.0.  However, we recommend that
-    implementations approximate derivatives in this case using dx = dy = 1.0.
+    When using an fragment invocation density where each fragment covers
+    multiple columns and/or rows of pixels, the values of dx and/or dy
+    in equations 1b and 2b above will be greater than 1.0.  However,
+    we recommend that implementations approximate derivatives in this case
+    using dx = dy = 1.0.
+
+Dependencies on OpenGL ES 3.2 and OES_sample_shading
+
+    If neither OpenGL ES 3.2 nor OES_sample_shading are supported, ignore
+    all references to per-sample shading and the MinSampleShading API
+    command.
 
 Issues
 
@@ -207,5 +212,5 @@ Issues
 
 Revision History
 
-    Revision 1, 2018/10/20 (dgkoch)
+    Revision 1, 2018/10/30 (dgkoch)
     - Initial version based on NV_shading_rate_image.
