@@ -1,10 +1,10 @@
 Name
 
-    EXT_fragment_area
+    EXT_fragment_invocation_density
 
 Name Strings
 
-    GL_EXT_fragment_area
+    GL_EXT_fragment_invocation_density
 
 Contact
 
@@ -24,7 +24,7 @@ Status
 
 Version
 
-    Last Modified:      October 30, 2018
+    Last Modified:      November 7, 2018
     Revision:           1
 
 Dependencies
@@ -46,12 +46,14 @@ Overview
     extensions "NV_shading_rate_image" and "EXT_fragment_density_map". In
     those extensions, applications can use a texture to control the number of
     fragment shader invocations that will be spawned for a particular
-    neighborhood of covered pixels.  We refer to the density of fragment
-    shader invocations as the "fragment invocation density".
+    neighborhood of covered pixels. We refer to the density of fragment
+    shader invocations as the "fragment invocation density". This
+    extension provides useful functionality on it's own, and does
+    not require either of the companion extensions in order to be used.
 
     This extension provides GLSL built-in variables that allow the fragment
     shader to determine the fragment density used for a particular invocation.
-    The gl_FragAreaEXT built-in indicates the width and height of the
+    The gl_FragSizeEXT built-in indicates the width and height of the
     rectangle of pixels that is being shaded by this fragment invocation.
     The gl_FragInvocationCountEXT built-in indicates the maximum number of
     fragment invocations that will be executed for each fragment.
@@ -61,9 +63,10 @@ Overview
 
     For informational purposes (non-normative), the following is an
     expected way for an implementation to map GLSL constructs to SPIR-V
-    constructs supported by the SPV_NV_shading_rate extension:
+    constructs supported by the SPV_EXT_fragment_invocation_density
+    extension:
 
-    - gl_FragAreaEXT -> FragAreaEXT decorated variable
+    - gl_FragSizeEXT -> FragSizeEXT decorated variable
     - gl_FragInvocationCountEXT -> FragInvocationCountEXT decorated variable
 
 Modifications to the OpenGL Shading Language Specification, Version 4.60
@@ -71,46 +74,47 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     Including the following line in a shader can be used to control the
     language features described in this extension:
 
-      #extension GL_EXT_fragment_area : <behavior>
+      #extension GL_EXT_fragment_invocation_density : <behavior>
 
     where <behavior> is as specified in section 3.3.
 
     New preprocessor #defines are added to the OpenGL Shading Language:
 
-      #define GL_EXT_fragment_area          1
+      #define GL_EXT_fragment_invocation_density          1
 
     Modify Section 7.1, Built-In Language Variables, p. 122
 
     (add to the list of fragment language variables, middle of p. 124)
 
-      in ivec2 gl_FragAreaEXT;
+      in ivec2 gl_FragSizeEXT;
       in int   gl_FragInvocationCountEXT;
 
     (add documentation of the new built-in variables, before
      gl_HelperInvocation discussion at the bottom of p.128)
 
-    The input variable gl_FragAreaEXT represents the size of a rectangle of
+    The input variable gl_FragSizeEXT represents the size of a rectangle of
     pixels corresponding to this fragment shader invocation.  The first
     component is the width of the rectangle (in pixels); the second component
     is the height (in pixels).  When a shading rate image or fragment density
     map is not used, both components will be one.  When using a shading
     rate image or fragment density map, either or both components may be
     greater than one.  When the fragment size is greater than a single pixel,
-    the outputs of the shader invocation will be broadcast to all covered
-    pixels/samples in the rectangle (OR to the associated samples for all
-    covered pixels in the rectangle - TBD).
+    the outputs of the shader invocation will be mapped to all covered
+    pixels/samples in the rectangle, in an implementation-specific manner.
 
     The input variable gl_FragInvocationCountEXT represents the maximum number
     of fragment shader invocations executed for each fragment, as derived from
-    the effective invocation density for the fragment.  If a primitive does
-    not fully cover a fragment, the number of fragment shader invocations for its
-    covered fragments may be less than the value of gl_FragInvocationCountEXT.
+    the effective invocation density for the fragment. (For example, if a
+    primitive does not fully cover a fragment, the number of fragment shader
+    invocations for its covered fragments may be less than the value of
+    gl_FragInvocationCountEXT.)
     When a shading rate image or fragment density map is not used, this value
-    is a function of the framebuffer sample counts and the sample shading
-    fraction programmed in the OpenGL API via MinSampleShading or the Vulkan
-    API via minSampleShading. When using a shading rate image or fragment
-    density map, this value will also be affected by the contents of the
-    texture and may depend on the location of the pixel in the framebuffer.
+    will be no greater than the framebuffer sample counts and may be affected
+    by the sample shading fraction programmed in the OpenGL API via
+    MinSampleShading or the Vulkan API via minSampleShading.
+    When using a shading rate image or fragment density map, this value will
+    also be affected by the contents of the texture and may depend on the
+    location of the pixel in the framebuffer.
     If multisampling is disabled, the value of this input will be one.
 
     Modify Section 8.13.1, Derivative Functions, p. 184
@@ -134,8 +138,10 @@ Issues
 
     (1) How should we name this extension and the builtins?
 
-      RESOLVED:  We are calling this extension "EXT_fragment_area", based
-      on the name we chose for the primary builtin added in this extension.
+      RESOLVED:  We are calling this extension
+      "EXT_fragment_invocation_density", because we are adding two
+      new built-ins which allow an application to determine the
+      "fragment invocation density".
 
       We considered using the terms Size and Area for the builtin. Both had
       merits, and Size would have matched with gl_FragmentSizeNV from the
@@ -143,7 +149,7 @@ Issues
       terminology. Area has the advantage that it matches the Vulkan glossary
       name. One drawback of Area might be that it tends imply a scalar value
       that would be the width x height of a fragment, however Vulkan does also
-      have the concept of renderArea which is a rectangle. In the end, Area
+      have the concept of renderArea which is a rectangle. In the end, Size
       won out.  We also chose to use the "Frag" prefix instead of "Fragment"
       as there are a number of GLSL built-ins that use "Frag" as a prefix
       (gl_FragCoord, gl_FragDepth, gl_FragColor, gl_FragData) and none that
@@ -193,11 +199,11 @@ Issues
 
       If a shader using this feature does need mathematically accurate
       derivatives, it can adjust by dividing through by the X and Y
-      components of gl_FragAreaEXT.
+      components of gl_FragSizeEXT.
 
     (3) How is this extension different from GL_NV_shading_rate_image?
 
-      RESOLVED: In this extension we use the term gl_FragAreaEXT instead
+      RESOLVED: In this extension we use the term gl_FragSizeEXT instead
       of gl_FragmentSizeNV and gl_FragInvocationCountEXT instead of
       gl_InvocationsPerPixelNV, but these are otherwise functionally
       equivalent. This shading language extension is not tightly coupled
@@ -212,5 +218,5 @@ Issues
 
 Revision History
 
-    Revision 1, 2018/10/30 (dgkoch)
+    Revision 1, 2018/11/07 (dgkoch)
     - Initial version based on NV_shading_rate_image.
