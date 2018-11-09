@@ -48,7 +48,7 @@ Overview
     fragment shader invocations that will be spawned for a particular
     neighborhood of covered pixels. We refer to the density of fragment
     shader invocations as the "fragment invocation density". This
-    extension provides useful functionality on it own, and does
+    extension provides useful functionality on its own, and does
     not require either of the companion extensions in order to be used.
 
     This extension provides GLSL built-in variables that allow the fragment
@@ -56,7 +56,7 @@ Overview
     The gl_FragSizeEXT built-in indicates the width and height of the
     rectangle of pixels processed by this fragment shader invocation.
     The gl_FragInvocationCountEXT built-in indicates the maximum number of
-    fragment invocations that will be executed for each fragment.
+    fragment shader invocations that will be executed for each fragment.
 
     Mapping to SPIR-V
     -----------------
