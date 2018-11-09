@@ -14,6 +14,7 @@ Contributors
 
     Ashwin Lele, NVIDIA
     Jeff Bolz, NVIDIA
+    Michael Chock, NVIDIA
 
 Status
 
@@ -21,8 +22,8 @@ Status
 
 Version
 
-    Last Modified:      September 13, 2018
-    Revision:           3
+    Last Modified:      November 9, 2018
+    Revision:           4
 
 Dependencies
 
@@ -38,6 +39,8 @@ Dependencies
     This extension interacts with ARB_sparse_texture2.
 
     This extension interacts with ARB_sparse_texture_clamp.
+
+    This extension interacts with EXT_sparse_texture2.
 
     This extension interacts with KHR_shader_subgroup.
 
@@ -298,6 +301,30 @@ Dependencies on ARB_sparse_texture_clamp
       sparseTextureGradOffsetClampARB
       textureGradOffsetClampARB
 
+Dependencies on EXT_sparse_texture2
+
+    If EXT_sparse_texture2 is supported, the texture lookup functions provided
+    by that extension will support automatic level of detail computation in
+    compute shaders, as defined in this extension.  Supported functions
+    include:
+
+      sparseTextureEXT (with or without LOD bias)
+      sparseTextureClampEXT (with or without LOD bias)
+      textureClampEXT (with or without LOD bias)
+      sparseTextureOffsetEXT (with or without LOD bias)
+      sparseTextureOffsetClampEXT (with or without LOD bias)
+      textureOffsetClampEXT (with or without LOD bias)
+
+    The following functions using derivatives provided by the shader were
+    already supported in compute shaders prior to this extension:
+
+      sparseTextureGradEXT
+      sparseTextureGradClampEXT
+      textureGradClampEXT
+      sparseTextureGradOffsetEXT
+      sparseTextureGradOffsetClampEXT
+      textureGradOffsetClampEXT
+
 Dependencies on KHR_shader_subgroup
 
     If the KHR_shader_subgroup_quads feature of KHR_shader_subgroup is
@@ -389,9 +416,10 @@ Issues
         shadow1DProj(), and shadow2DProj().
 
       This extension also produces defined derivatives in texture lookup
-      functions from ARB_sparse_texture2 and ARB_sparse_texture_clamp.
+      functions from ARB_sparse_texture2, ARB_sparse_texture_clamp, and
+      EXT_sparse_texture2.
 
-    (4) How are derivatives handled when no "derviative_group" layout
+    (4) How are derivatives handled when no "derivative_group" layout
         qualifier is specified?  How are derivatives handled in divergent flow
         control?
 
@@ -414,6 +442,9 @@ Issues
       zero.
 
 Revision History
+
+    Revision 4, 2018/11/09 (mchock)
+    - Add interactions with EXT_sparse_texture2
 
     Revision 3, 2018/09/13 (pbrown)
     - Add interactions with KHR_shader_subgroup (KHR_shader_subgroup_quads)
