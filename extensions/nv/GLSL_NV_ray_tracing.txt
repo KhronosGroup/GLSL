@@ -26,8 +26,8 @@ Status
 
 Version
 
-    Last Modified Date: 2018-11-20
-    Revision: 3
+    Last Modified Date: 2018-11-21
+    Revision: 4
 
 Dependencies
 
@@ -67,10 +67,10 @@ Overview
 
       accelerationStructureNV type -> OpTypeAccelerationStructureNV instruction
 
-      rayPayloadNV storage qualifier -> CallableDataNV storage class
-      rayPayloadInNV storage qualifier -> RayPayloadNV storage class
+      rayPayloadNV storage qualifier -> RayPayloadNV storage class
+      rayPayloadInNV storage qualifier -> IncomingRayPayloadNV storage class
       hitAttributeNV storage qualifier -> HitAttributeNV storage class
-      callableDataNV storage qualifier -> IncomingRayPayloadNV storage class
+      callableDataNV storage qualifier -> CallableDataNV storage class
       callableDataInNV storage qualifier -> IncomingCallableDataNV storage class
 
       shaderRecordNV decorated buffer block -> ShaderRecordBufferNV storage class
@@ -888,6 +888,7 @@ Revision History
 
     Rev.  Date          Author     Changes
     ----  -----------   ------     -------------------------------------------
+     4    21-Nov-2018   dgkoch     Fix storage class SPIR-V mappings.
      3    20-Nov-2018   dgkoch     Add mapping to SPIR-V.
                                    Add issue 6 clarifying use of gl_InstanceID.
      2    1-Oct-2018    alele      Add support for callables
