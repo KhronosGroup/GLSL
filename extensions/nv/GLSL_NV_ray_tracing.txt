@@ -26,8 +26,8 @@ Status
 
 Version
 
-    Last Modified Date: 2018-10-19
-    Revision: 2
+    Last Modified Date: 2018-11-20
+    Revision: 3
 
 Dependencies
 
@@ -50,6 +50,63 @@ Overview
     within GLSL:
 
     - GL_NV_ray_tracing - enables ray tracing stages.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+      ray generation shader -> RayGenerationNV Execution model
+      intersection shader -> IntersectionNV Execution model
+      any-hit shader -> AnyHitNV Execution model
+      closest-hit shader -> ClosestHitNV Execution model
+      miss shader -> MissNV Execution model
+      callable shader -> CallableNV Execution model
+
+      accelerationStructureNV type -> OpTypeAccelerationStructureNV instruction
+
+      rayPayloadNV storage qualifier -> CallableDataNV storage class
+      rayPayloadInNV storage qualifier -> RayPayloadNV storage class
+      hitAttributeNV storage qualifier -> HitAttributeNV storage class
+      callableDataNV storage qualifier -> IncomingRayPayloadNV storage class
+      callableDataInNV storage qualifier -> IncomingCallableDataNV storage class
+
+      shaderRecordNV decorated buffer block -> ShaderRecordBufferNV storage class
+
+      gl_LaunchIDNV -> LaunchIdNV decorated OpVariable
+      gl_LaunchSizeNV -> LaunchSizeNV decorated OpVariable
+      gl_PrimitiveID -> PrimitiveId decorated OpVariable
+      gl_InstanceID -> InstanceId decorated OpVariable
+      gl_InstanceCustomIndexNV -> InstanceCustomIndexNV decorated OpVariable
+      gl_WorldRayOriginNV -> WorldRayOriginNV decorated OpVariable
+      gl_WorldRayDirectionNV -> WorldRayDirectionNV decorated OpVariable
+      gl_ObjectRayOriginNV -> ObjectRayOriginNV decorated OpVariable
+      gl_ObjectRayDirectionNV -> ObjectRayDirectionNV decorated OpVariable
+      gl_RayTminNV -> RayTminNV decorated OpVariable
+      gl_RayTmaxNV -> RayTmaxNV decorated OpVariable
+      gl_IncomingRayFlagsNV -> IncomingRayFlagsNV decorated OpVariable
+      gl_HitTNV -> HitTNV decorated OpVariable
+      gl_HitKindNV -> HitKindNV decorated OpVariable
+      gl_ObjectToWorldNV -> ObjectToWorldNV decorated OpVariable
+      gl_WorldToObjectNV -> WorldToObjectNV decorated OpVariable
+
+      gl_RayFlagsNoneNV -> constant, no semantic needed
+      gl_RayFlagsOpaqueNV -> constant, no semantic needed
+      gl_RayFlagsNoOpaqueNV -> constant, no semantic needed
+      gl_RayFlagsTerminateOnFirstHitNV -> constant, no semantic needed
+      gl_RayFlagsSkipClosestHitShaderNV -> constant, no semantic needed
+      gl_RayFlagsCullBackFacingTrianglesNV -> constant, no semantic needed
+      gl_RayFlagsCullFrontFacingTrianglesNV -> constant, no semantic needed
+      gl_RayFlagsCullOpaqueNV -> constant, no semantic needed
+      gl_RayFlagsCullNoOpaqueNV -> constant, no semantic needed
+
+      traceNV -> OpTraceNV instruction
+      reportIntersectionNV -> OpReportIntersectionNV instruction
+      ignoreIntersectionNV -> OpIgnoreIntersectionNV instruction
+      terminateRayNV -> OpTerminateRayNV instruction
+      executeCallableNV -> OpExecuteCallableNV instruction
 
 Modifications to the OpenGL Shading Language Specification, Version 4.60
 
@@ -407,7 +464,7 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
 
     The "shaderRecordNV" qualifier is used to declare a buffer block and represents a
     buffer within a shader record as defined in the API in Ray Tracing chapter of the Vulkan
-    specification. It is supported only in ray tracing stages. It is a  compile-time error
+    specification. It is supported only in ray tracing stages. It is a compile-time error
     to apply this to any block type other than buffer. A buffer block declared with
     layout(shaderRecordNV) can be optionally declared with an instance. There can be only
     one shaderRecordNV buffer block per stage otherwise a link/compile time error will be
@@ -812,13 +869,27 @@ Issues
     5) Where should we specify how attribute data is passed between the
        different ray tracing stages?
 
-       RESOLVED : rayPayloadNV/rayPayloadInNV/hitAttributeNV/callableDataNV
-                  callableDataInNV
+       RESOLVED: rayPayloadNV/rayPayloadInNV/hitAttributeNV/callableDataNV
+                 callableDataInNV
+
+    6) This extension adds gl_InstanceID for the intersection, any hit, and
+       closest hit shaders, but in KHR_vulkan_glsl, gl_InstanceID is replaced
+       with gl_InstanceIndex. Which should be used for Vulkan in this
+       extension?
+
+       RESOLVED: This extension uses gl_InstanceID and maps it to InstanceId
+       in SPIR-V. It is acknowledged that this is different than other shader
+       stages in Vulkan. There are two main reasons for the difference here:
+       - symmetry with gl_PrimitiveID which is also available in these shaders
+       - there is no "baseInstance" relevant for these shaders, and so ID makes
+         it more obvious that this is zero-based.
 
 Revision History
 
     Rev.  Date          Author     Changes
     ----  -----------   ------     -------------------------------------------
+     3    20-Nov-2018   dgkoch     Add mapping to SPIR-V.
+                                   Add issue 6 clarifying use of gl_InstanceID.
      2    1-Oct-2018    alele      Add support for callables
                                    Add gl_IncomingRayFlags
                                    Allow rayflags in all stages
