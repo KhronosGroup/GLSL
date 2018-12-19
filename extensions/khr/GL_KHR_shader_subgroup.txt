@@ -50,8 +50,8 @@ Status
 
 Version
 
-    Last Modified Date: 28-Feb-2018
-    Revision: 6
+    Last Modified Date: 17-Dec-2018
+    Revision: 7
 
 Number
 
@@ -948,17 +948,7 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     <gl_SubgroupInvocationID> is equal to the current invocation's
     <gl_SubgroupInvocationID> xored with <mask>.  If the calculated index is
     an inactive invocation or is greater than or equal to <gl_SubgroupSize>, an
-    undefined value is returned.  <mask> must be a power of 2.  The <mask> must
-    be an integral constant expression, or if subgroupShuffleXor() is used
-    within a loop:
-
-    - The initial value of the variable to be passed as <mask> (set in or
-      before the loop statement) must be an integral constant expression.
-    - Any operation that increases or decreases the value to be passed as <mask>
-      within the loop statement only modifies <mask> by an integral constant
-      expression.
-    - The variable to be passed as <mask> is not otherwise modified within the
-      loop.
+    undefined value is returned.
 
     Syntax:
 
@@ -1480,6 +1470,7 @@ Revision History
 
     Rev.  Date          Author     Changes
     ----  -----------   --------   -------------------------------------------
+     7    17-Dec-2018   gnl21      Remove restriction on ShuffleXor mask.
      6    28-Feb-2018   nhenning   Add approved and ratification dates.
      5    12-Feb-2018   jbolz/     Add recommended mappings of GLSL builtin
                         nhenning   functions to SPIR-V.
