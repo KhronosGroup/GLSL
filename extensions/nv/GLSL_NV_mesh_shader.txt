@@ -23,8 +23,8 @@ Status
 
 Version
 
-    Last Modified Date:     October 22, 2018
-    NVIDIA Revision:        6
+    Last Modified Date:     February 7, 2019
+    NVIDIA Revision:        7
 
 Dependencies
 
@@ -765,8 +765,6 @@ Modifications to the OpenGL Shading Language Specification, Version 4.50.6
       in uvec3 gl_LocalInvocationID;
       in uvec3 gl_GlobalInvocationID;
       in uint gl_LocalInvocationIndex;
-      in uint gl_MeshViewCountNV;
-      in uint gl_MeshViewIndicesNV[];
 
       out uint gl_TaskCountNV;
 
@@ -887,9 +885,9 @@ Modifications to the OpenGL Shading Language Specification, Version 4.50.6
     "Fragment shaders output values", p. 127, describing new task and mesh
     built-in variables)
 
-    The input variable gl_MeshViewCountNV is only available in the mesh and
-    task languages and defines the number of views processed by the current
-    mesh and task shader invocations.  When using the multi-view API feature,
+    The input variable gl_MeshViewCountNV is only available in the mesh
+    language and defines the number of views processed by the current
+    mesh shader invocation.  When using the multi-view API feature,
     the primitives emitted by the mesh shader will be processed separately for
     each enabled view and sent to a different layer of a layered render
     target.  Mesh shader outputs qualified with "perviewNV" are declared as
@@ -897,10 +895,10 @@ Modifications to the OpenGL Shading Language Specification, Version 4.50.6
     mesh shaders must write values for array elements zero through
     gl_MeshViewCountNV-1 for each such per-view output.
 
-    The input variable gl_MeshViewIndicesNV is only available in the mesh and
-    task languages.  This variable is an array where each element holds the
-    view number of one of the views being processed by the current mesh and
-    task shader invocations.  The array elements with indices greater than or
+    The input variable gl_MeshViewIndicesNV is only available in the mesh
+    language.  This variable is an array where each element holds the
+    view number of one of the views being processed by the current mesh
+    shader invocation.  The array elements with indices greater than or
     equal to the value of gl_MeshViewCountNV are undefined.  If the value of
     gl_MeshViewIndicesNV[i] is <j>, then any outputs qualified with
     "perviewNV" will take on the value of array element <i> when processing
@@ -1182,7 +1180,7 @@ Issues
       for outputs qualified with "perviewNV".  For mesh shaders in Vulkan, the
       view mask of the render pass is used to determine the storage
       requirements of per-view attributes and controls the values of the
-      gl_MeshViewCount and gl_MeshViewIndicesNV built-ins.
+      gl_MeshViewCountNV and gl_MeshViewIndicesNV built-ins.
 
     (5) For outputs declared with "perviewNV", which are arrays with separate
         elements for each view, what are the rules for array sizing and
@@ -1266,8 +1264,12 @@ Issues
 
 Revision History
 
+    Version 7, February 7, 2019 (sparmar)
+    - Remove incorrect support for gl_MeshViewCountNV and gl_MeshViewIndicesNV
+      from task shaders.
+
     Version 6, October 22, 2018 (sparmar)
-    - Fix typo for per-primitive fragment shader input example
+    - Fix typo for per-primitive fragment shader input example.
 
     Version 5, October 5, 2018 (pbrown)
     - Add an interaction with GLSL 4.60 and GL_KHR_vulkan_glsl to allow the
