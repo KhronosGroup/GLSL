@@ -18,7 +18,7 @@ Status
 
 Version
 
-    Last Modified Date:         December 28, 2018
+    Last Modified Date:         February 18, 2019
     Revision:                   1
 
 Number
@@ -80,6 +80,16 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
 
         #define GL_EXT_buffer_reference     1
 
+    Modify section 4.3.2 (Constant Qualifier)
+
+    Change the first paragraph to clarify that the constant qualifier is
+    disallowed on reference types:
+
+      Named compile-time constants or read-only variables can be declared
+      using the const qualifier. The const qualifier can be used with any of
+      the non-void transparent basic data types (this does not include
+      reference types), ...
+
     Modify section 4.3.9 (Interface Blocks)
 
     Add to the end of the section:
@@ -98,10 +108,13 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
       storage type, including as block members, local variables, and function
       parameters and return types. When a reference type is used as a buffer
       or uniform block member, it is treated as an eight byte scalar type
-      for the purposes of the block layout rules.
+      for the purposes of the block layout rules. Reference types are treated
+      as transparent types (but not as a "basic type").
 
       The field selector ( . ) operator is used to access members through a
-      reference.
+      reference. The only operators allowed to operate on reference types are
+      field selector, assignment ( = ), ternary selection ( ?: ), and
+      sequence ( , ).
 
       Additionally, the "buffer_reference" layout qualifier can be used to
       define a forward declaration to the reference type, so it can be used
@@ -169,6 +182,15 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
       value, and a uint64_t value can be constructed from a buffer reference
       type value.
 
+    Modify section 5.9 (Expressions)
+
+    Change the bullet about the equality operators:
+
+      The equality operators equal ( == ), and not equal ( != ) operate on
+      all types except opaque types, aggregates that contain opaque types,
+      subroutine uniforms, aggregates that contain subroutine uniforms,
+      reference types, and aggregates that contain reference types. ...
+
 Errors
 
     None.
@@ -198,7 +220,22 @@ Issues
     RESOLVED: No. Shaders can convert to uint64_t and compare the value
     against the NULL value specified by the API (zero, for Vulkan).
 
+    (3) What operations are supported for reference types?
+
+    RESOLVED: Certain operations are disallowed because they don't have a
+    direct mapping to SPIR-V. Equality == and != are disallowed because there
+    are no pointer comparison instructions in SPIR-V, though it is possible
+    to convert to uint64_t and compare those integer values. The constant
+    qualifier is disallowed because OpConstant doesn't support generating
+    pointer constants (but note that reference types *can* participate in
+    constant expressions).
+
 Revision History
 
     Revision 1
       - Internal revisions.
+    Revision 2
+      - Clarify that reference types are "transparent" types. Clarify that
+        the constant qualifier is forbidden on reference types. Clarify that
+        only assignment, construction, conversion, and field selection
+        operators are supported.
