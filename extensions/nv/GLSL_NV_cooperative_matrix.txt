@@ -1,0 +1,332 @@
+Name
+
+    NV_cooperative_matrix
+
+Name Strings
+
+    GL_NV_cooperative_matrix
+
+Contact
+
+    Jeff Bolz, NVIDIA (jbolz 'at' nvidia.com)
+
+Contributors
+
+Status
+
+    Not yet released
+
+Version
+
+    Last Modified:      January 30, 2019
+    Revision:           1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.50
+    (#version 450) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification, version 4.60, dated July 23, 2017.
+
+    This extension requires GL_KHR_memory_scope_semantics.
+
+    This extension interacts with
+    GL_EXT_shader_explicit_arithmetic_types_float16.
+
+Overview
+
+    This extension adds a new set of types known as "cooperative matrix" types,
+    where the storage for and computations performed on the matrix are spread
+    across a set of invocations such as a subgroup. These types give the
+    implementation freedom in how to optimize matrix multiplies.
+
+    This extension introduces the types and built-in functions, but does not
+    specify rules about what sizes/combinations are valid. This is left to
+    the Vulkan extension specifications, and it is expected that different
+    implementations may support different sizes. To help accommodate this,
+    the dimensions of the cooperative types are parameterized and can be
+    specialized via specialization constants.
+
+    This extension introduces limited support for parameterized types, with
+    the parameters specified as in C++ template syntax. The new built-in type
+    "fcoopmatNV" is the only type that can be parameterized, and its parameters
+    are all integer values that control the component type, scope of the type,
+    and number of rows and columns of the matrix.
+
+    Cooperative matrix types are only supported in certain shader stages, and
+    the supported stages can be queried from the API. There are no compile-time
+    checks to disallow cooperative matrix types in any shader stage.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+      fcoopmatNV -> OpTypeCooperativeMatrixNV
+      fcoopmatNV constructor from scalar value -> OpConstantComposite/OpCompositeConstruct
+      fcoopmatNV constructor from fcoopmatNV -> OpFConvert
+      fcoopmatNV.length() -> OpCooperativeMatrixLengthNV
+      fcoopmatNV[i] -> OpCompositeExtract/OpCompositeInsert/OpAccessChain
+
+      +, -, *, / -> OpFAdd, OpFNegate/OpFSub, OpMatrixTimesScalar, OpFDiv
+
+      coopMatLoadNV -> OpCooperativeMatrixLoadNV
+      coopMatStoreNV -> OpCooperativeMatrixStoreNV
+      coopMatMulAddNV -> OpCooperativeMatrixMulAddNV
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_NV_cooperative_matrix : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+      #define GL_NV_cooperative_matrix         1
+
+
+    Modify Section 3.6, Keywords
+
+    (add to list of keywords)
+
+      fcoopmatNV
+
+
+    Add a new Section 4.1.X, Cooperative Matrix Types
+
+    Cooperative matrix types are matrix types where the storage for and
+    computations performed on the matrix are spread across a set of
+    invocations such as a subgroup. These types give the implementation
+    freedom in how to optimize matrix multiplies.
+
+    Floating-point cooperative matrices (fcoopmatNV) are supported in
+    the language, and are parameterized by four type parameters: bits
+    per component, scope, rows, and columns. The parameters are specified
+    in order between angle brackets ('<' and '>') and comma-separated.
+    The scope, rows, and columns parameters can be constant expressions or
+    specialization constant expressions, and no error checking is performed
+    on their values at compile time. It is left to the Vulkan specification
+    to define what combinations of values are valid post-specialization.
+
+    Example cooperative matrix declarations:
+
+      fcoopmatNV<32, gl_ScopeSubgroup, 8, 8> mat1;  // fp32, subgroup, 8 rows, 8 columns
+      fcoopmatNV<16, gl_ScopeSubgroup, 16, 8> mat2; // fp16, subgroup, 16 rows, 8 columns
+      layout(constant_id = 0) const int scope = 0;
+      layout(constant_id = 1) const int rows = 0;
+      layout(constant_id = 2) const int cols = 0;
+      fcoopmatNV<16, scope, rows, cols> mat3;       // scope/rows/columns specified at pipeline creation time
+
+    Cooperative matrix types can be used as global variables, local
+    variables, function parameters, and function return values. They must not
+    be used in uniform, buffer, or shared memory, or in input/output storage
+    classes.
+
+    There are no implicit type conversions between cooperative matrix types.
+
+
+    Add a new Section 5.4.X, Cooperative Matrix Type Constructors
+
+    Cooperative matrices can be constructed from a single scalar value whose
+    type matches the matrix's component type (or any value that can be
+    implicitly converted to that type). This initializes all components of the
+    matrix to that same value.
+
+    Cooperative matrices can be constructed from another cooperative matrix
+    type with the same scope, number of rows, and number of columns, i.e.
+    only (optionally) changing the number of bits per component. This performs
+    a component-wise type conversion to initialize the new cooperative matrix.
+
+
+    Add a new Section 5.X, Cooperative Matrix Components
+
+    The components of a cooperative matrix are spread across the invocations
+    in its scope, in an implementation-dependent manner. The components owned
+    by a given invocation can be accessed using array subscripting syntax,
+    and the number of components owned by each invocation can be queried
+    using the *length* method. The type returned by *length* is an int, and
+    the value returned is a constant expression. There is no compile-time
+    bounds checking of array indices.
+
+    This can be used, for example, to perform component-wise operations on
+    all components of a cooperative matrix:
+
+      fcoopmatNV<16, gl_ScopeSubgroup, 16, 8> m;
+      ...
+      for (int i = 0; i < m.length(); ++i) {
+          m[i] = f(m[i]);
+      }
+
+
+    Modify Section 5.9, Expressions
+
+    The arithmetic binary operators add (+), subtract (-), and divide (/)
+    operate on cooperative matrix types and perform the operation
+    component-wise.
+
+    The arithmetic binary operator multiply (*) operates on a cooperative
+    matrix type and a scalar (in either order) and perform the multiply
+    component-wise.
+
+    The arithmetic unary operator negate (-) operates on cooperative matrix
+    types and performs the operation component-wise.
+
+
+    Add a new Section 8.X, Cooperative Matrix Functions
+
+    The following functions are used to load and store cooperative matrix
+    values from and to memory. In memory, the matrices are stored as arrays
+    of float or float16_t. In the following functions, the generic type
+    "fcoopmatNV" can accept an fcoopmatNV type with any type parameters. The
+    "buf" arrays must be in either buffer storage or shared storage, and the
+    array that is passed in can be sized or unsized.
+
+    For all of these functions, for a given dynamic instance of the function
+    call, all function parameters must be the same for all invocations in a
+    given scope instance (where the scope is the scope the cooperative matrix
+    type(s) were created with). All invocations in a given scope instance must
+    be active or all must be inactive.
+
+      void coopMatLoadNV(out fcoopmatNV m, volatile coherent float16_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out fcoopmatNV m, volatile coherent float[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out fcoopmatNV m, volatile coherent float64_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out fcoopmatNV m, volatile coherent uint8_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out fcoopmatNV m, volatile coherent uint16_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out fcoopmatNV m, volatile coherent uint[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out fcoopmatNV m, volatile coherent uint64_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out fcoopmatNV m, volatile coherent uvec2[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out fcoopmatNV m, volatile coherent uvec4[] buf, uint element, uint stride, bool colMajor);
+
+      Description: Load a cooperative matrix from buf. colMajor indicates
+      whether the values loaded from memory are arranged in column-major or
+      row-major order. It must be a constant expression, with false
+      indicating row major and true indicating column major.
+
+      If colMajor is false, then elements (row,*) of the result are taken in
+      order from contiguous locations starting at buf[element + row*stride].
+      If colMajor is true, then elements (*,col) of the result are taken in
+      order from contiguous locations starting at buf[element + col*stride].
+
+
+      void coopMatStoreNV(fcoopmatNV m, volatile coherent out float16_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(fcoopmatNV m, volatile coherent out float[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(fcoopmatNV m, volatile coherent out float64_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(fcoopmatNV m, volatile coherent out uint8_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(fcoopmatNV m, volatile coherent out uint16_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(fcoopmatNV m, volatile coherent out uint[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(fcoopmatNV m, volatile coherent out uint64_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(fcoopmatNV m, volatile coherent out uvec2[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(fcoopmatNV m, volatile coherent out uvec4[] buf, uint element, uint stride, bool colMajor);
+
+      Description: Store a cooperative matrix to buf. colMajor indicates
+      whether the values stored to memory are arranged in column-major or
+      row-major order. It must be a constant expression, with false
+      indicating row major and true indicating column major.
+
+      If colMajor is false, then elements (row,*) of m are stored in order to
+      contiguous locations starting at buf[element + row*stride].
+      If colMajor is true, then elements (*,col) of m are stored in order to
+      contiguous locations starting at buf[element + col*stride].
+
+
+      fcoopmatNV coopMatMulAddNV(fcoopmatNV A, fcoopmatNV B, fcoopmatNV C);
+
+      Description: Linear-algebraic matrix multiply of A by B and then
+      component-wise add C. The order of the operations is implementation
+      dependent. The internal precision of the operations is defined by the
+      Vulkan specification.
+
+      The dimensions of A, B, and C, must form a valid matrix multiply (e.g.
+      the number of columns of A must match the number of rows of B). A, B,
+      and C must have the same scope. The type of the result matches the type
+      of C.
+
+
+    Modify Section 9, Shading Language Grammar for Core Profile
+
+    (Add to token list)
+
+        FCOOPMATNV
+
+    (modify type_specifier to add type_parameter_specifier_opt)
+
+        type_specifier:
+            type_specifier_nonarray type_parameter_specifier_opt
+            type_specifier_nonarray type_parameter_specifier_opt array_specifier
+
+    (new rules)
+
+        type_parameter_specifier_opt:
+            type_parameter_specifier
+            /*empty*/
+
+        type_parameter_specifier:
+            LEFT_ANGLE type_parameter_specifier_list RIGHT_ANGLE
+
+        type_parameter_specifier_list:
+            unary_expression
+            type_parameter_specifier_list COMMA unary_expression
+
+Interactions with GL_EXT_shader_explicit_arithmetic_types_float16
+
+    If GL_EXT_shader_explicit_arithmetic_types_float16 is not supported,
+    remove the coopMatLoadNV/coopMatStoreNV overloads that use float16_t.
+
+Issues
+
+    (1) What are the grammar rules for type parameters?
+
+      DISCUSSION: C++ template syntax has a parsing problem, because the
+      rules allow a "conditional_expression" for the template parameters,
+      which creates an ambiguity (shift/reduce conflict) where the parser
+      can't easily tell whether a '>' is a greater-than operator or the end
+      of the type parameter list. This means it's hard to parse something
+      like
+
+        fcoopmatNV<16, gl_ScopeSubgroup, 16, A>B?16:8>
+
+      because it's unclear that the last parameter is a ternary expression
+      without looking ahead. The obvious way to make this example more clear
+      is to add parentheses:
+
+        fcoopmatNV<16, gl_ScopeSubgroup, 16, (A>B?16:8)>
+
+      This can be parsed as a "unary_expression" rather than
+      "conditional_expression", and doesn't really lose any flexibility
+      because unary_expression indirectly includes the pretty general
+      "LEFT_PAREN expression RIGHT_PAREN" rule.
+
+      RESOLVED: We diverge from the C++ grammar and use unary_expression
+      for type parameters rather than conditional_expression.
+
+    (2) What alignment rules should we have for buf/element/stride parameters
+        in the load/store built-in functions?
+
+      RESOLVED: The Vulkan SPIR-V environment appendix is responsible for
+      documenting this. To summarize, the start of the matrix and the stride
+      must be at least as aligned as the smaller of 16B or the size of a
+      row/column of the matrix.
+
+    (3) For the load/store functions, can the component type mismatch the array
+        element type?
+
+      RESOLVED: Yes, this makes it easier to efficiently load matrix data into
+      shared memory. The stride parameter is interpreted in units of the
+      pointed-to type, not in units of the matrix's component type. This
+      extension includes overloads for 8 through 64-bit integers, and
+      uvec2/uvec4.
+
+
+Revision History
+
+    Revision 1
+    - Internal revisions.
