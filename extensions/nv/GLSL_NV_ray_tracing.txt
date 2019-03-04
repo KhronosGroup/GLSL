@@ -26,8 +26,8 @@ Status
 
 Version
 
-    Last Modified Date: 2018-11-21
-    Revision: 4
+    Last Modified Date: 2019-03-04
+    Revision: 5
 
 Dependencies
 
@@ -469,8 +469,9 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
     layout(shaderRecordNV) can be optionally declared with an instance. There can be only
     one shaderRecordNV buffer block per stage otherwise a link/compile time error will be
     generated. It is a compile time error to use layout qualifiers such as binding and set
-    along with shaderRecordNV. These blocks are initialized by a separate API as specified
-    in Ray Tracing chapter of the Vulkan specification.
+    along with shaderRecordNV. These blocks can only be read from and not written to.
+    It is a compile-time error to modify members of such blocks. These blocks are initialized
+    by a separate API as specified in Ray Tracing chapter of the Vulkan specification.
 
 
 Additions to Chapter 7 of the OpenGL Shading Language Specification
@@ -888,6 +889,8 @@ Revision History
 
     Rev.  Date          Author     Changes
     ----  -----------   ------     -------------------------------------------
+     5    04-Mar-2019   alele      Clarify readonly semantics for buffer block
+                                   with shaderRecordNV qualifier.
      4    21-Nov-2018   dgkoch     Fix storage class SPIR-V mappings.
      3    20-Nov-2018   dgkoch     Add mapping to SPIR-V.
                                    Add issue 6 clarifying use of gl_InstanceID.
