@@ -1,0 +1,136 @@
+Name
+
+    EXT_buffer_reference2
+
+Name Strings
+
+    GL_EXT_buffer_reference2
+
+Contact
+
+    Jeff Bolz, NVIDIA Corporation (jbolz 'at' nvidia.com)
+
+Contributors
+
+    Christoph Kubisch, NVIDIA Corporation
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date:         March 7, 2019
+    Revision:                   1
+
+Number
+
+    TBD
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.50
+    (#version 450) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification, version 4.60, dated July 23, 2017.
+
+    This extension requires GL_EXT_buffer_reference.
+
+Overview
+
+    This extension adds additional operator support to
+    GL_EXT_buffer_reference to enable array indexing or "pointer math" on
+    reference types. This can be used to access an array of structures stored
+    consecutively in memory, without having to push the array declaration
+    inside the block type. Array indexing "ref[i]" is similar to "&ref[i]" in
+    C++ (if "ref" were a pointer type), and "ref + i" is equivalent to
+    "(refType)((uint64_t)ref + i*sizeof(refType))".
+
+    The implicit size calculation used in pointer math can also be used to
+    implement a "sizeof" macro for reference structure types:
+
+        #define sizeof(Type) (uint64_t(Type(uint64_t(0))+1))
+
+New Procedures and Functions
+
+    None.
+
+New Tokens
+
+    None.
+
+Modifications to GL_KHR_vulkan_glsl
+
+    Add to the "Mapping to SPIR-V" section
+
+    Buffer reference +/- integer, reference - reference, and
+    reference[integer] can all be implemented in terms of 64-bit
+    integer arithmetic.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_EXT_buffer_reference2 : <behavior>
+
+    where <behavior> is as specified in section 3.3. If
+    GL_EXT_buffer_reference2 is enabled, the
+    GL_EXT_buffer_reference extension is also implicitly enabled.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+        #define GL_EXT_buffer_reference2    1
+
+    Modify section 4.3.9 (Interface Blocks)
+
+    Replace the paragraph about supported operators added by
+    GL_EXT_buffer_reference:
+
+      The field selector ( . ) operator is used to access members through a
+      reference. Reference types can be used with the assignment ( = ),
+      ternary selection ( ?: ), and sequence ( , ) operators. Reference types
+      can also be used in arithmetic expressions of the form
+      "reference + integer", "reference - integer", "integer + reference",
+      "reference += integer", "reference -= integer", and
+      "reference - reference". For arithmetic expressions involving an
+      integer, the result is as if the reference and integer values are both
+      implicitly converted to 64-bit integers, the integer value is scaled by
+      the size of the referent type, the values are added or subtracted, and
+      the result is converted back to the original reference type. For
+      "reference - reference", the result is as if the reference values are
+      both converted to 64-bit signed integers, the second value is
+      subtracted from the first, and the result is divided by the size of the
+      referent type.
+
+      The array subscript operator ([]) can also be used on a reference type,
+      and the result of "reference[int]" is equivalent to "reference + int".
+      Note that this returns a reference value of the same type as the
+      original reference, and does not access the memory pointed to by the
+      result reference.
+
+      The size of the referent type used in the calculations above is
+      computed as the offset of the last member of the structure plus the
+      size of the last member of the structure, rounded up to the next
+      multiple of the buffer_reference_align value for the type. It is a
+      compile-time error to use an operator that computes the size of the
+      referent type if the last member of the type is an unsized array.
+
+      No other operators are supported on reference types.
+
+Errors
+
+    None.
+
+Issues
+
+    None.
+
+Revision History
+
+    Revision 1
+      - Internal revisions.
