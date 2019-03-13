@@ -80,6 +80,14 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
 
         #define GL_EXT_buffer_reference     1
 
+    Modify section 4.1.9 (Arrays)
+
+    Add to the end of the section:
+
+      Is it a compile-time error to use the *length* method on an unsized
+      array member of a shader storage block type declared with the
+      buffer_reference layout.
+      
     Modify section 4.3.2 (Constant Qualifier)
 
     Change the first paragraph to clarify that the constant qualifier is
