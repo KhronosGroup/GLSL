@@ -33,8 +33,8 @@ Status
 
 Version
 
-    Last Modified Date: 25-Jul-2018
-    Revision: 46
+    Last Modified Date: 17-Mar-2018
+    Revision: 47
 
 Number
 
@@ -70,6 +70,8 @@ Overview
         * compatibility-mode-only features
         * gl_DepthRangeParameters and gl_NumSamples
         * gl_VertexID and gl_InstanceID
+        * aliasing of vertex input components
+          (see the Vulkan API specification)
 
     The following features are added:
         * push-constant buffers
@@ -1025,7 +1027,27 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
     or none of its members have a *location* layout qualifier, or a compile-
     time error results."]
 
-    Change section 4.4.1.3 "Fragment Shader Inputs" from
+    Change section 4.4.1 "Input Layout Qualifiers"
+
+      With one exception, location aliasing is allowed only if it does not
+      cause component aliasing
+
+    To
+
+      Location aliasing is allowed only if it does not cause component aliasing
+
+    Remove, from the same paragraph:
+
+      The one exception where component aliasing is permitted is for two input
+      variables (not block members) to a vertex shader, which are allowed to
+      have component aliasing. This vertex-variable component aliasing is
+      intended only to support vertex shaders where each execution path accesses
+      at most one input per each aliased component. Implementations are
+      permitted, but not required, to generate link-time errors if they detect
+      that every path through the vertex shader executable accesses multiple
+      inputs aliased to any single component.
+
+    Change section 4.4.1, under "Fragment Shader Inputs" from
 
       "By default, gl_FragCoord assumes a lower-left origin for window
       coordinates ... For example, the (x, y) location (0.5, 0.5) is
@@ -1691,6 +1713,8 @@ Revision History
 
     Rev.    Date         Author    Changes
     ----  -----------    -------  --------------------------------------------
+    47    17-Mar-2019    JohnK    Add vertex-input aliasing to list of removed
+                                  features
     46    25-Jul-2018    JohnK    No longer require sampler constructors to
                                   check shadow matches: mismatches are allowed
     45    15-Dec-2017    TobiasH  moved resource binding examples in from Vulkan API spec
