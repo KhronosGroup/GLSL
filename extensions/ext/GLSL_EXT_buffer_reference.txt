@@ -84,7 +84,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
 
     Add to the end of the section:
 
-      Is it a compile-time error to use the *length* method on an unsized
+      It is a compile-time error to use the *length* method on an unsized
       array member of a shader storage block type declared with the
       buffer_reference layout.
       
