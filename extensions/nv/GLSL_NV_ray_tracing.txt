@@ -26,8 +26,8 @@ Status
 
 Version
 
-    Last Modified Date: 2019-03-04
-    Revision: 5
+    Last Modified Date: 2019-03-25
+    Revision: 6
 
 Dependencies
 
@@ -565,10 +565,6 @@ Additions to Chapter 7 of the OpenGL Shading Language Specification
         in    uvec3  gl_LaunchIDNV;
         in    uvec3  gl_LaunchSizeNV;
 
-        // Ray parameters
-        in    uint   gl_IncomingRayFlagsNV;
-
-
     Add the following description for gl_LaunchIDNV:
 
     The input variable gl_LaunchIDNV is available in the ray generation,
@@ -634,9 +630,9 @@ Additions to Chapter 7 of the OpenGL Shading Language Specification
 
     Add the following description for gl_IncomingRayFlagsNV:
 
-    gl_IncomingRayFlagsNV is available in intersection, closest-hit, any-hit, miss,
-    and callable shaders to specify the current ray's flags as passed via the 'rayflags'
-    argument of traceNV() call resulting in invocation of current shader stage.
+    gl_IncomingRayFlagsNV is available in intersection, closest-hit, any-hit, and miss,
+    shaders to specify the current ray's flags as passed via the 'rayflags' argument of
+	traceNV() call resulting in invocation of current shader stage.
 
     Add the following description for gl_HitTNV:
 
@@ -889,6 +885,7 @@ Revision History
 
     Rev.  Date          Author     Changes
     ----  -----------   ------     -------------------------------------------
+     6    25-Mar-2019   ewerness   Callables shouldn't have incoming ray flags
      5    04-Mar-2019   alele      Clarify readonly semantics for buffer block
                                    with shaderRecordNV qualifier.
      4    21-Nov-2018   dgkoch     Fix storage class SPIR-V mappings.
