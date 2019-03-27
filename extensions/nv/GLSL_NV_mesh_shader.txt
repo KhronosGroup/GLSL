@@ -23,8 +23,8 @@ Status
 
 Version
 
-    Last Modified Date:     October 22, 2018
-    NVIDIA Revision:        6
+    Last Modified Date:     March 6, 2019
+    NVIDIA Revision:        7
 
 Dependencies
 
@@ -46,6 +46,8 @@ Dependencies
     This extension interacts with NVX_multiview_per_view_attributes.
 
     This extension interacts with ARB_shader_draw_parameters.
+
+    This extension interacts with EXT_clip_cull_distance.
 
 Overview
 
@@ -1106,6 +1108,12 @@ Interactions with ARB_shader_draw_parameters
     task or mesh workgroup. If the vertex or workgroup is not invoked by a
     Multi* form of a draw command, then the value of gl_DrawIDARB is zero.
 
+Interactions with EXT_clip_cull_distance
+
+    If implemented with OpenGL ES ESSL and EXT_clip_cull_distance is not
+    supported, remove references to gl_ClipDistance, gl_CullDistance,
+    gl_ClipDistancePerViewNV and gl_CullDistancePerViewNV.
+
 Issues
 
     (1) What are the matching requirements between mesh outputs declared
@@ -1265,6 +1273,9 @@ Issues
       would be necessary to decide if gl_NumWorkGroups should be 5 or 8.
 
 Revision History
+
+    Version 7, March 6, 2019 (pknowles)
+    - Added EXT_clip_cull_distance interactions.
 
     Version 6, October 22, 2018 (sparmar)
     - Fix typo for per-primitive fragment shader input example
