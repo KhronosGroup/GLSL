@@ -25,8 +25,8 @@ Status
 
 Version
 
-    Last Modified Date: 30-Aug-2018
-    Revision: 1
+    Last Modified Date: 13-Jun-2019
+    Revision: 2
 
 Number
 
@@ -94,7 +94,8 @@ Overview
         workgroupcoherent       -> NonPrivate{Pointer,Texel}KHR + Make{Pointer,Texel}{Available,Visible}KHR with scope = Workgroup
         subgroupcoherent        -> NonPrivate{Pointer,Texel}KHR + Make{Pointer,Texel}{Available,Visible}KHR with scope = Subgroup
         nonprivate              -> NonPrivate{Pointer,Texel}KHR
-        volatile                -> Volatile (for buffers) or VolatileTexelKHR (for image access)
+        volatile                -> Volatile memory operand (for buffers) or VolatileTexelKHR image operand
+                                   (for image access) or Volatile memory semantic (for atomics)
 
 Modifications to the OpenGL Shading Language Specification, Version 4.50
 
@@ -327,6 +328,7 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
             const int gl_SemanticsAcquireRelease  = 0x8;
             const int gl_SemanticsMakeAvailable   = 0x2000;
             const int gl_SemanticsMakeVisible     = 0x4000;
+            const int gl_SemanticsVolatile        = 0x8000;
 
             const int gl_StorageSemanticsNone     = 0x0;
             const int gl_StorageSemanticsBuffer   = 0x40;
@@ -372,6 +374,13 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
          * If semantics includes gl_SemanticsMakeVisible it must also
            include gl_SemanticsAcquire or gl_SemanticsAcquireRelease.
+
+         * gl_SemanticsVolatile must not be used with memoryBarrier or
+           controlBarrier.
+
+         * atomicCompSwap and imageAtomicCompSwap must either include
+           gl_SemanticsVolatile in both semEqual and semUnequal or in
+           neither.
 
     Modify Section 8.12, Image Functions
 
@@ -555,3 +564,4 @@ Revision History
     Rev.  Date          Author     Changes
     ----  -----------   --------   -------------------------------------------
      1    28-Feb-2018    jbolz     Initial revision.
+     2    13-Jun-2019    jbolz     Add gl_SemanticsVolatile.
