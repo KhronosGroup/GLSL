@@ -50,8 +50,8 @@ Status
 
 Version
 
-    Last Modified Date: 17-Dec-2018
-    Revision: 7
+    Last Modified Date: 14-Jul-2019
+    Revision: 8
 
 Number
 
@@ -450,7 +450,8 @@ Additions to Chapter 3 of the OpenGL Shading Language Specification
           if the local workgroup size is not a multiple of the subgroup size.
 
         In fragment shaders, helper invocations participate in subgroup
-        operations.
+        operations. Such as when additional fragment shader invocations are
+        created to fill out a quad partially covered by a primitive.
 
         For each active invocation within a subgroup that reaches the same
         dynamic instance of a subgroup built-in function, all active invocations
@@ -608,7 +609,8 @@ Additions to Chapter 3 of the OpenGL Shading Language Specification
         corresponding to the three neighboring pixels at (x + 1, y), (x, y + 1),
         and (x + 1, y + 1).  These four invocations are arranged in a 2x2 grid,
         that make up the quad.  If the neighbors of a fragment are not covered
-        by the primitive, fragment shader invocations will still be generated.
+        by the primitive, helper fragment shader invocations will still be
+        generated.
 
         Note: in non-fragment shaders, the quad has no defined mapping to
         non-subgroup shader stage state.
@@ -1470,6 +1472,7 @@ Revision History
 
     Rev.  Date          Author     Changes
     ----  -----------   --------   -------------------------------------------
+     8    14-Jul-2019   groth      Clarified behavior of uncovered quad fragments
      7    17-Dec-2018   gnl21      Remove restriction on ShuffleXor mask.
      6    28-Feb-2018   nhenning   Add approved and ratification dates.
      5    12-Feb-2018   jbolz/     Add recommended mappings of GLSL builtin
