@@ -5,6 +5,7 @@ Name
 Name Strings
 
     GL_NV_cooperative_matrix
+    GL_NV_integer_cooperative_matrix
 
 Contact
 
@@ -12,14 +13,16 @@ Contact
 
 Contributors
 
+    Ashwin Lele, NVIDIA
+
 Status
 
-    Not yet released
+    Complete.
 
 Version
 
-    Last Modified:      January 30, 2019
-    Revision:           1
+    Last Modified:      July 12, 2019
+    Revision:           2
 
 Dependencies
 
@@ -35,7 +38,11 @@ Dependencies
     This extension requires GL_KHR_memory_scope_semantics.
 
     This extension interacts with
-    GL_EXT_shader_explicit_arithmetic_types_float16.
+    GL_EXT_shader_explicit_arithmetic_types_float16,
+    GL_EXT_shader_explicit_arithmetic_types_float64,
+    GL_EXT_shader_explicit_arithmetic_types_int8,
+    GL_EXT_shader_explicit_arithmetic_types_int16,
+    GL_EXT_shader_explicit_arithmetic_types_int64.
 
 Overview
 
@@ -52,10 +59,11 @@ Overview
     specialized via specialization constants.
 
     This extension introduces limited support for parameterized types, with
-    the parameters specified as in C++ template syntax. The new built-in type
-    "fcoopmatNV" is the only type that can be parameterized, and its parameters
-    are all integer values that control the component type, scope of the type,
-    and number of rows and columns of the matrix.
+    the parameters specified as in C++ template syntax. The new built-in types
+    fcoopmatNV/icoopmatNV/ucoopmatNV are the only types that can be
+    parameterized, and their parameters are all integer values that control
+    the component type, scope of the type, and number of rows and columns of
+    the matrix.
 
     Cooperative matrix types are only supported in certain shader stages, and
     the supported stages can be queried from the API. There are no compile-time
@@ -68,13 +76,14 @@ Overview
     expected way for an implementation to map GLSL constructs to SPIR-V
     constructs:
 
-      fcoopmatNV -> OpTypeCooperativeMatrixNV
-      fcoopmatNV constructor from scalar value -> OpConstantComposite/OpCompositeConstruct
-      fcoopmatNV constructor from fcoopmatNV -> OpFConvert
-      fcoopmatNV.length() -> OpCooperativeMatrixLengthNV
-      fcoopmatNV[i] -> OpCompositeExtract/OpCompositeInsert/OpAccessChain
+      *coopmatNV -> OpTypeCooperativeMatrixNV
+      *coopmatNV constructor from scalar value -> OpConstantComposite/OpCompositeConstruct
+      *coopmatNV constructor from *coopmatNV -> Op*Convert
+      *coopmatNV.length() -> OpCooperativeMatrixLengthNV
+      *coopmatNV[i] -> OpCompositeExtract/OpCompositeInsert/OpAccessChain
 
       +, -, *, / -> OpFAdd, OpFNegate/OpFSub, OpMatrixTimesScalar, OpFDiv
+                    OpIAdd, OpSNegate/OpISub, OpMatrixTimesScalar, OpUDiv/OpSDiv
 
       coopMatLoadNV -> OpCooperativeMatrixLoadNV
       coopMatStoreNV -> OpCooperativeMatrixStoreNV
@@ -82,16 +91,22 @@ Overview
 
 Modifications to the OpenGL Shading Language Specification, Version 4.60
 
-    Including the following line in a shader can be used to control the
+    Including the following lines in a shader can be used to control the
     language features described in this extension:
 
       #extension GL_NV_cooperative_matrix : <behavior>
+      #extension GL_NV_integer_cooperative_matrix : <behavior>
 
     where <behavior> is as specified in section 3.3.
+    GL_NV_integer_cooperative_matrix must be enabled to use the icoopmatNV
+    and ucoopmatNV types and any built-in functions that use them. If
+    GL_NV_integer_cooperative_matrix is enabled, then
+    GL_NV_cooperative_matrix is implicitly enabled.
 
     New preprocessor #defines are added to the OpenGL Shading Language:
 
-      #define GL_NV_cooperative_matrix         1
+      #define GL_NV_cooperative_matrix              1
+      #define GL_NV_integer_cooperative_matrix      1
 
 
     Modify Section 3.6, Keywords
@@ -99,6 +114,8 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     (add to list of keywords)
 
       fcoopmatNV
+      icoopmatNV
+      ucoopmatNV
 
 
     Add a new Section 4.1.X, Cooperative Matrix Types
@@ -108,14 +125,15 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     invocations such as a subgroup. These types give the implementation
     freedom in how to optimize matrix multiplies.
 
-    Floating-point cooperative matrices (fcoopmatNV) are supported in
-    the language, and are parameterized by four type parameters: bits
-    per component, scope, rows, and columns. The parameters are specified
-    in order between angle brackets ('<' and '>') and comma-separated.
-    The scope, rows, and columns parameters can be constant expressions or
-    specialization constant expressions, and no error checking is performed
-    on their values at compile time. It is left to the Vulkan specification
-    to define what combinations of values are valid post-specialization.
+    Floating-point cooperative matrices (fcoopmatNV) and integer cooperative
+    matrices (icoopmatNV/ucoopmatNV) are supported in the language, and are
+    parameterized by four type parameters: bits per component, scope, rows,
+    and columns. The parameters are specified in order between angle brackets
+    ('<' and '>') and comma-separated. The scope, rows, and columns
+    parameters can be constant expressions or specialization constant
+    expressions, and no error checking is performed on their values at
+    compile time. It is left to the Vulkan specification to define what
+    combinations of values are valid post-specialization.
 
     Example cooperative matrix declarations:
 
@@ -143,8 +161,9 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
 
     Cooperative matrices can be constructed from another cooperative matrix
     type with the same scope, number of rows, and number of columns, i.e.
-    only (optionally) changing the number of bits per component. This performs
-    a component-wise type conversion to initialize the new cooperative matrix.
+    only (optionally) changing the number of bits per component and type of
+    the component. This performs a component-wise type conversion to
+    initialize the new cooperative matrix.
 
 
     Add a new Section 5.X, Cooperative Matrix Components
@@ -185,10 +204,10 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
 
     The following functions are used to load and store cooperative matrix
     values from and to memory. In memory, the matrices are stored as arrays
-    of float or float16_t. In the following functions, the generic type
-    "fcoopmatNV" can accept an fcoopmatNV type with any type parameters. The
-    "buf" arrays must be in either buffer storage or shared storage, and the
-    array that is passed in can be sized or unsized.
+    of scalars. In the following functions, the generic type fcoopmatNV
+    (or icoopmatNV/ucoopmatNV) can accept an fcoopmatNV type with any type
+    parameters. The "buf" arrays must be in either buffer storage or shared
+    storage, and the array that is passed in can be sized or unsized.
 
     For all of these functions, for a given dynamic instance of the function
     call, all function parameters must be the same for all invocations in a
@@ -205,6 +224,32 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
       void coopMatLoadNV(out fcoopmatNV m, volatile coherent uint64_t[] buf, uint element, uint stride, bool colMajor);
       void coopMatLoadNV(out fcoopmatNV m, volatile coherent uvec2[] buf, uint element, uint stride, bool colMajor);
       void coopMatLoadNV(out fcoopmatNV m, volatile coherent uvec4[] buf, uint element, uint stride, bool colMajor);
+
+      void coopMatLoadNV(out icoopmatNV m, volatile coherent int8_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out icoopmatNV m, volatile coherent int16_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out icoopmatNV m, volatile coherent int[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out icoopmatNV m, volatile coherent int64_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out icoopmatNV m, volatile coherent ivec2[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out icoopmatNV m, volatile coherent ivec4[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out icoopmatNV m, volatile coherent uint8_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out icoopmatNV m, volatile coherent uint16_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out icoopmatNV m, volatile coherent uint[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out icoopmatNV m, volatile coherent uint64_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out icoopmatNV m, volatile coherent uvec2[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out icoopmatNV m, volatile coherent uvec4[] buf, uint element, uint stride, bool colMajor);
+
+      void coopMatLoadNV(out ucoopmatNV m, volatile coherent int8_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out ucoopmatNV m, volatile coherent int16_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out ucoopmatNV m, volatile coherent int[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out ucoopmatNV m, volatile coherent int64_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out ucoopmatNV m, volatile coherent ivec2[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out ucoopmatNV m, volatile coherent ivec4[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out ucoopmatNV m, volatile coherent uint8_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out ucoopmatNV m, volatile coherent uint16_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out ucoopmatNV m, volatile coherent uint[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out ucoopmatNV m, volatile coherent uint64_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out ucoopmatNV m, volatile coherent uvec2[] buf, uint element, uint stride, bool colMajor);
+      void coopMatLoadNV(out ucoopmatNV m, volatile coherent uvec4[] buf, uint element, uint stride, bool colMajor);
 
       Description: Load a cooperative matrix from buf. colMajor indicates
       whether the values loaded from memory are arranged in column-major or
@@ -227,6 +272,32 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
       void coopMatStoreNV(fcoopmatNV m, volatile coherent out uvec2[] buf, uint element, uint stride, bool colMajor);
       void coopMatStoreNV(fcoopmatNV m, volatile coherent out uvec4[] buf, uint element, uint stride, bool colMajor);
 
+      void coopMatStoreNV(icoopmatNV m, volatile coherent out int8_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(icoopmatNV m, volatile coherent out int16_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(icoopmatNV m, volatile coherent out int[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(icoopmatNV m, volatile coherent out int64_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(icoopmatNV m, volatile coherent out ivec2[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(icoopmatNV m, volatile coherent out ivec4[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(icoopmatNV m, volatile coherent out uint8_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(icoopmatNV m, volatile coherent out uint16_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(icoopmatNV m, volatile coherent out uint[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(icoopmatNV m, volatile coherent out uint64_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(icoopmatNV m, volatile coherent out uvec2[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(icoopmatNV m, volatile coherent out uvec4[] buf, uint element, uint stride, bool colMajor);
+
+      void coopMatStoreNV(ucoopmatNV m, volatile coherent out int8_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(ucoopmatNV m, volatile coherent out int16_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(ucoopmatNV m, volatile coherent out int[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(ucoopmatNV m, volatile coherent out int64_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(ucoopmatNV m, volatile coherent out ivec2[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(ucoopmatNV m, volatile coherent out ivec4[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(ucoopmatNV m, volatile coherent out uint8_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(ucoopmatNV m, volatile coherent out uint16_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(ucoopmatNV m, volatile coherent out uint[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(ucoopmatNV m, volatile coherent out uint64_t[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(ucoopmatNV m, volatile coherent out uvec2[] buf, uint element, uint stride, bool colMajor);
+      void coopMatStoreNV(ucoopmatNV m, volatile coherent out uvec4[] buf, uint element, uint stride, bool colMajor);
+
       Description: Store a cooperative matrix to buf. colMajor indicates
       whether the values stored to memory are arranged in column-major or
       row-major order. It must be a constant expression, with false
@@ -239,6 +310,8 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
 
 
       fcoopmatNV coopMatMulAddNV(fcoopmatNV A, fcoopmatNV B, fcoopmatNV C);
+      icoopmatNV coopMatMulAddNV(icoopmatNV A, icoopmatNV B, icoopmatNV C);
+      ucoopmatNV coopMatMulAddNV(ucoopmatNV A, ucoopmatNV B, ucoopmatNV C);
 
       Description: Linear-algebraic matrix multiply of A by B and then
       component-wise add C. The order of the operations is implementation
@@ -256,6 +329,8 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     (Add to token list)
 
         FCOOPMATNV
+        ICOOPMATNV
+        UCOOPMATNV
 
     (modify type_specifier to add type_parameter_specifier_opt)
 
@@ -280,6 +355,29 @@ Interactions with GL_EXT_shader_explicit_arithmetic_types_float16
 
     If GL_EXT_shader_explicit_arithmetic_types_float16 is not supported,
     remove the coopMatLoadNV/coopMatStoreNV overloads that use float16_t.
+
+Interactions with GL_EXT_shader_explicit_arithmetic_types_float64
+
+    If GL_EXT_shader_explicit_arithmetic_types_float64 is not supported,
+    remove the coopMatLoadNV/coopMatStoreNV overloads that use float64_t.
+
+Interactions with GL_EXT_shader_explicit_arithmetic_types_int8
+
+    If GL_EXT_shader_explicit_arithmetic_types_int8 is not supported,
+    remove the coopMatLoadNV/coopMatStoreNV overloads that use int8_t
+    and uint8_t.
+
+Interactions with GL_EXT_shader_explicit_arithmetic_types_int16
+
+    If GL_EXT_shader_explicit_arithmetic_types_int16 is not supported,
+    remove the coopMatLoadNV/coopMatStoreNV overloads that use int16_t
+    and uint16_t.
+
+Interactions with GL_EXT_shader_explicit_arithmetic_types_int64
+
+    If GL_EXT_shader_explicit_arithmetic_types_int64 is not supported,
+    remove the coopMatLoadNV/coopMatStoreNV overloads that use int64_t
+    and uint64_t.
 
 Issues
 
@@ -330,3 +428,5 @@ Revision History
 
     Revision 1
     - Internal revisions.
+    Revision 2
+    - Added integer types, under GL_NV_integer_cooperative_matrix.
