@@ -1282,7 +1282,7 @@ Revision History
 
     Version 5, October 5, 2018 (pbrown)
     - Add an interaction with GLSL 4.60 and GL_KHR_vulkan_glsl to allow the
-      use of "local_size_[xyz]_in" where applicable.
+      use of "local_size_[xyz]_id" where applicable.
 
     Version 4, October 4, 2018 (pbrown)
     - Fix incorrect layout qualifier table entries.  "local_size_[xyz]" is
