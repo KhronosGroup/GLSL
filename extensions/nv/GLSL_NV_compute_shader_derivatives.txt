@@ -22,8 +22,8 @@ Status
 
 Version
 
-    Last Modified:      November 9, 2018
-    Revision:           4
+    Last Modified:      September 4, 2019
+    Revision:           5
 
 Dependencies
 
@@ -43,6 +43,8 @@ Dependencies
     This extension interacts with EXT_sparse_texture2.
 
     This extension interacts with KHR_shader_subgroup.
+
+    This extension interacts with ARB_compute_variable_group_size.
 
 Overview
 
@@ -159,16 +161,16 @@ Modifications to the OpenGL Shading Language Specification, Version 4.50
 
     The layout qualifier "derivative_group_quadsNV" specifies that derivatives
     in compute shaders are evaluated over 2x2 groups of invocations whose
-    gl_LocalInvocationID values are of the form (2x+{0,1}, 2y+{0,1}, z).  It
-    is a compile-time error if this qualifier is used with a local group size
-    whose first or second dimension is not a multiple of two.
+    gl_LocalInvocationID values are of the form (2x+{0,1}, 2y+{0,1}, z).  It is
+    a compile- or link-time error if this qualifier is used with a local group
+    size whose first or second dimension is not a multiple of two.
 
     The layout qualifier "derivative_group_linearNV" specifies that
     derivatives in compute shaders are evaluated over groups of four
     invocations with consecutive gl_LocalInvocationIndex values of the form
-    4x+{0,1,2,3}.  It is a compile-time error if this qualifier is used with a
-    local group size whose total number of invocations is not a multiple of
-    four.
+    4x+{0,1,2,3}.  It is a compile- or link-time error if this qualifier is
+    used with a local group size whose total number of invocations is not a
+    multiple of four.
 
 
     Modify Section 8.9, Texture Functions, p. 162
@@ -361,6 +363,23 @@ Dependencies on KHR_shader_subgroup
 
       for some integer value <n>.
 
+Dependencies on ARB_compute_variable_group_size
+
+    If ARB_compute_variable_group_size is supported, modify the language
+    specifying a compile- or link-time error for "bad" workgroup sizes to not
+    apply if the "local_size_variable" layout qualifier is specified.
+
+      The layout qualifier "derivative_group_quadsNV" ...  It is a compile- or
+      link-time error if this qualifier is used in a compute shader that does
+      not use the "local_size_variable" layout qualifier and whose local group
+      size has a first or second dimension that is not a multiple of two.
+
+      The layout qualifier "derivative_group_linearNV" ...  It is a compile- or
+      link-time error if this qualifier is used in a compute shader that does
+      not use the "local_size_variable" layout qualifier and whose local group
+      size has a total number of invocations that is not a multiple of four.
+
+
 Issues
 
     (1) Should we provide support for "helper" invocations like we have for
@@ -441,7 +460,25 @@ Issues
       implementation will recognize divergence and produce derivatives of
       zero.
 
+    (5) How does this extension interact with ARB_compute_variable_group_size?
+
+      RESOLVED:  When derivatives are used with a compute shader with a variable
+      local group size, it is not possible to enforce a compile- or link-time
+      error that complains about "bad" local group sizes.  For OpenGL, we will
+      instead enforce this restriction at dispatch time by throwing an
+      INVALID_VALUE error.  As of September 2019, variable local group sizes are
+      not supported in Vulkan or SPIR-V.
+
+
 Revision History
+
+    Revision 5, 2019/09/04 (pbrown)
+    - Add interactions with ARB_compute_variable_group_size, where a compile-
+      or link-time error for bad local group sizes is not possible.  Also, fix
+      the language to specify that such errors can be either compile-time or
+      link-time -- it's not possible to throw a compile-time error if the
+      derivative mode is specified in one compilation unit and the local group
+      size is specified in another.
 
     Revision 4, 2018/11/09 (mchock)
     - Add interactions with EXT_sparse_texture2
