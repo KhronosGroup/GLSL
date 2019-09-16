@@ -1,0 +1,915 @@
+Name
+
+    EXT_shader_subgroup_extended_types
+
+Name Strings
+
+    GL_EXT_shader_subgroup_extended_types_int8
+    GL_EXT_shader_subgroup_extended_types_int16
+    GL_EXT_shader_subgroup_extended_types_int64
+    GL_EXT_shader_subgroup_extended_types_float16
+
+Contact
+
+    Neil Henning (neil.henning 'at' amd.com), AMD
+
+Contributors
+
+    Jeff Bolz, NVIDIA
+    Neil Henning, AMD
+    Graeme Leese, Broadcom
+
+Notice
+
+    Copyright (c) 2019 The Khronos Group Inc. Copyright terms at
+        http://www.khronos.org/registry/speccopyright.html
+
+Status
+
+Number
+
+    TBD
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    This extension is written against revision 6 of the OpenGL Shading Language
+    version 4.50, dated April 14, 2016.
+
+    This extension depends on revision 1 of the
+    GL_EXT_shader_explicit_arithmetic_types extension, dated July 3, 2017.
+
+    This extension interacts with revision 7 of the GL_KHR_shader_subgroup
+    extension, dated December 17, 2018.
+
+    This extension interacts with revision 1 of the
+    GL_NV_shader_subgroup_partitioned extension, dated December 26, 2017.
+
+Overview
+
+    This extension document modifies GLSL to allow subgroup functionality for
+    8 bit integer, 16 bit integer, 64 bit integer, and 16 bit floating point
+    types.
+
+    This extension document adds support for the following extensions to be used
+    within GLSL:
+
+    - GL_EXT_shader_subgroup_extended_types_int8 - enable subgroup
+      operations for 8 bit integer types.
+    - GL_EXT_shader_subgroup_extended_types_int16 - enable subgroup
+      operations for 16 bit integer types.
+    - GL_EXT_shader_subgroup_extended_types_int64 - enable subgroup
+      operations for 64 bit integer types.
+    - GL_EXT_shader_subgroup_extended_types_float16 - enable subgroup
+      operations for 16 bit floating point types.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.50
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_shader_subgroup_extended_types_int8    : <behavior>
+      #extension GL_EXT_shader_subgroup_extended_types_int16   : <behavior>
+      #extension GL_EXT_shader_subgroup_extended_types_int64   : <behavior>
+      #extension GL_EXT_shader_subgroup_extended_types_float16 : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    If GL_EXT_shader_subgroup_extended_types_int8 is enabled
+    GL_EXT_shader_explicit_arithmetic_types_int8 is also implicitly enabled.
+
+    If GL_EXT_shader_subgroup_extended_types_int16 is enabled
+    GL_EXT_shader_explicit_arithmetic_types_int16 is also implicitly enabled.
+
+    If GL_EXT_shader_subgroup_extended_types_int64 is enabled
+    GL_EXT_shader_explicit_arithmetic_types_int64 is also implicitly enabled.
+
+    If GL_EXT_shader_subgroup_extended_types_float16 is enabled
+    GL_EXT_shader_explicit_arithmetic_types_float16 is also implicitly enabled.
+
+    New preprocessor #defines are added:
+
+      #define GL_EXT_shader_subgroup_extended_types_int8     1
+      #define GL_EXT_shader_subgroup_extended_types_int16    1
+      #define GL_EXT_shader_subgroup_extended_types_int64    1
+      #define GL_EXT_shader_subgroup_extended_types_float16  1
+
+    Such that if using a GL_EXT_shader_subgroup_extended_types_*
+    extension is supported, the corresponding
+    GL_EXT_shader_subgroup_extended_types_* #define is defined.
+
+Modifications of the additions in the GL_KHR_shader_subgroup extension to
+Chapter 3 of the OpenGL Shading Language Specification
+(basics)
+
+Add to the table documenting the identity values for corresponding types:
+
+            <op> |   type   | I()
+            --------------------------
+            Add  |  genI8Type | 0
+            Add  |  genU8Type | 0
+            Add  | genI16Type | 0
+            Add  | genU16Type | 0
+            Add  | genI64Type | 0
+            Add  | genU64Type | 0
+            Add  | genF16Type | +0.0
+            Mul  |  genI8Type | 1
+            Mul  |  genU8Type | 1
+            Mul  | genI16Type | 1
+            Mul  | genU16Type | 1
+            Mul  | genI64Type | 1
+            Mul  | genU64Type | 1
+            Mul  | genF16Type | 1.0
+            Min  |  genI8Type | INT8_MAX
+            Min  |  genU8Type | UINT8_MAX
+            Min  | genI16Type | INT16_MAX
+            Min  | genU16Type | UINT16_MAX
+            Min  | genI64Type | INT64_MAX
+            Min  | genU64Type | UINT64_MAX
+            Min  | genF16Type | +INF
+            Max  |  genI8Type | INT8_MIN
+            Max  |  genU8Type | 0
+            Max  | genI16Type | INT16_MIN
+            Max  | genU16Type | 0
+            Max  | genI64Type | INT64_MIN
+            Max  | genU64Type | 0
+            Max  | genF16Type | -INF
+            And  |  genI8Type | ~0
+            And  |  genU8Type | ~0
+            And  | genI16Type | ~0
+            And  | genU16Type | ~0
+            And  | genI64Type | ~0
+            And  | genU64Type | ~0
+            Or   |  genI8Type | 0
+            Or   |  genU8Type | 0
+            Or   | genI16Type | 0
+            Or   | genU16Type | 0
+            Or   | genI64Type | 0
+            Or   | genU64Type | 0
+            Xor  |  genI8Type | 0
+            Xor  |  genU8Type | 0
+            Xor  | genI16Type | 0
+            Xor  | genU16Type | 0
+            Xor  | genI64Type | 0
+            Xor  | genU64Type | 0
+
+Add at the end of the section:
+
+    Subgroup built-ins that have a parameter or return of the genI8Type or
+    genU8Type types are only usable if the extension
+    GL_EXT_shader_subgroup_extended_types_int8 is enabled.
+
+    Subgroup built-ins that have a parameter or return of the genI16Type or
+    genU16Type types are only usable if the extension
+    GL_EXT_shader_subgroup_extended_types_int16 is enabled.
+
+    Subgroup built-ins that have a parameter or return of the genI64Type or
+    genU64Type types are only usable if the extension
+    GL_EXT_shader_subgroup_extended_types_int64 is enabled.
+
+    Subgroup built-ins that have a parameter or return of the genF16Type
+    types are only usable if the extension
+    GL_EXT_shader_subgroup_extended_types_float16 is enabled.
+
+Modifications of the additions in the GL_KHR_shader_subgroup extension to
+Chapter 8 of the OpenGL Shading Language Specification
+(Built-in Functions)
+
+Add to the list of built-ins for subgroupAllEqual:
+
+    Syntax:
+
+        bool subgroupAllEqual(genI8Type value);
+        bool subgroupAllEqual(genU8Type value);
+        bool subgroupAllEqual(genI16Type value);
+        bool subgroupAllEqual(genU16Type value);
+        bool subgroupAllEqual(genI64Type value);
+        bool subgroupAllEqual(genU64Type value);
+        bool subgroupAllEqual(genF16Type value);
+
+Add to the list of built-ins for subgroupBroadcast:
+
+    Syntax:
+
+        genI8Type  subgroupBroadcast(genI8Type value,  uint id);
+        genU8Type  subgroupBroadcast(genU8Type value,  uint id);
+        genI16Type subgroupBroadcast(genI16Type value, uint id);
+        genU16Type subgroupBroadcast(genU16Type value, uint id);
+        genI64Type subgroupBroadcast(genI64Type value, uint id);
+        genU64Type subgroupBroadcast(genU64Type value, uint id);
+        genF16Type subgroupBroadcast(genF16Type value, uint id);
+
+Add to the list of built-ins for subgroupBroadcastFirst:
+
+    Syntax:
+
+        genI8Type  subgroupBroadcastFirst(genI8Type value);
+        genU8Type  subgroupBroadcastFirst(genU8Type value);
+        genI16Type subgroupBroadcastFirst(genI16Type value);
+        genU16Type subgroupBroadcastFirst(genU16Type value);
+        genI64Type subgroupBroadcastFirst(genI64Type value);
+        genU64Type subgroupBroadcastFirst(genU64Type value);
+        genF16Type subgroupBroadcastFirst(genF16Type value);
+
+Add to the list of built-ins for subgroupShuffle:
+
+    Syntax:
+
+        genI8Type  subgroupShuffle(genI8Type value,  uint id);
+        genU8Type  subgroupShuffle(genU8Type value,  uint id);
+        genI16Type subgroupShuffle(genI16Type value, uint id);
+        genU16Type subgroupShuffle(genU16Type value, uint id);
+        genI64Type subgroupShuffle(genI64Type value, uint id);
+        genU64Type subgroupShuffle(genU64Type value, uint id);
+        genF16Type subgroupShuffle(genF16Type value, uint id);
+
+Add to the list of built-ins for subgroupShuffleXor:
+
+    Syntax:
+
+        genI8Type  subgroupShuffleXor(genI8Type value,  uint mask);
+        genU8Type  subgroupShuffleXor(genU8Type value,  uint mask);
+        genI16Type subgroupShuffleXor(genI16Type value, uint mask);
+        genU16Type subgroupShuffleXor(genU16Type value, uint mask);
+        genI64Type subgroupShuffleXor(genI64Type value, uint mask);
+        genU64Type subgroupShuffleXor(genU64Type value, uint mask);
+        genF16Type subgroupShuffleXor(genF16Type value, uint mask);
+
+Add to the list of built-ins for subgroupShuffleUp:
+
+    Syntax:
+
+        genI8Type  subgroupShuffleUp(genI8Type value,  uint delta);
+        genU8Type  subgroupShuffleUp(genU8Type value,  uint delta);
+        genI16Type subgroupShuffleUp(genI16Type value, uint delta);
+        genU16Type subgroupShuffleUp(genU16Type value, uint delta);
+        genI64Type subgroupShuffleUp(genI64Type value, uint delta);
+        genU64Type subgroupShuffleUp(genU64Type value, uint delta);
+        genF16Type subgroupShuffleUp(genF16Type value, uint delta);
+
+Add to the list of built-ins for subgroupShuffleDown:
+
+    Syntax:
+
+        genI8Type  subgroupShuffleDown(genI8Type value,  uint delta);
+        genU8Type  subgroupShuffleDown(genU8Type value,  uint delta);
+        genI16Type subgroupShuffleDown(genI16Type value, uint delta);
+        genU16Type subgroupShuffleDown(genU16Type value, uint delta);
+        genI64Type subgroupShuffleDown(genI64Type value, uint delta);
+        genU64Type subgroupShuffleDown(genU64Type value, uint delta);
+        genF16Type subgroupShuffleDown(genF16Type value, uint delta);
+
+Add to the list of built-ins for subgroupAdd:
+
+    Syntax:
+
+        genI8Type  subgroupAdd(genI8Type value);
+        genU8Type  subgroupAdd(genU8Type value);
+        genI16Type subgroupAdd(genI16Type value);
+        genU16Type subgroupAdd(genU16Type value);
+        genI64Type subgroupAdd(genI64Type value);
+        genU64Type subgroupAdd(genU64Type value);
+        genF16Type subgroupAdd(genF16Type value);
+
+Add to the list of built-ins for subgroupMul:
+
+    Syntax:
+
+        genI8Type  subgroupMul(genI8Type value);
+        genU8Type  subgroupMul(genU8Type value);
+        genI16Type subgroupMul(genI16Type value);
+        genU16Type subgroupMul(genU16Type value);
+        genI64Type subgroupMul(genI64Type value);
+        genU64Type subgroupMul(genU64Type value);
+        genF16Type subgroupMul(genF16Type value);
+
+Add to the list of built-ins for subgroupMin:
+
+    Syntax:
+
+        genI8Type  subgroupMin(genI8Type value);
+        genU8Type  subgroupMin(genU8Type value);
+        genI16Type subgroupMin(genI16Type value);
+        genU16Type subgroupMin(genU16Type value);
+        genI64Type subgroupMin(genI64Type value);
+        genU64Type subgroupMin(genU64Type value);
+        genF16Type subgroupMin(genF16Type value);
+
+Add to the list of built-ins for subgroupMax:
+
+    Syntax:
+
+        genI8Type  subgroupMax(genI8Type value);
+        genU8Type  subgroupMax(genU8Type value);
+        genI16Type subgroupMax(genI16Type value);
+        genU16Type subgroupMax(genU16Type value);
+        genI64Type subgroupMax(genI64Type value);
+        genU64Type subgroupMax(genU64Type value);
+        genF16Type subgroupMax(genF16Type value);
+
+Add to the list of built-ins for subgroupAnd:
+
+    Syntax:
+
+        genI8Type  subgroupAnd(genI8Type value);
+        genU8Type  subgroupAnd(genU8Type value);
+        genI16Type subgroupAnd(genI16Type value);
+        genU16Type subgroupAnd(genU16Type value);
+        genI64Type subgroupAnd(genI64Type value);
+        genU64Type subgroupAnd(genU64Type value);
+
+Add to the list of built-ins for subgroupOr:
+
+    Syntax:
+
+        genI8Type  subgroupOr(genI8Type value);
+        genU8Type  subgroupOr(genU8Type value);
+        genI16Type subgroupOr(genI16Type value);
+        genU16Type subgroupOr(genU16Type value);
+        genI64Type subgroupOr(genI64Type value);
+        genU64Type subgroupOr(genU64Type value);
+
+Add to the list of built-ins for subgroupXor:
+
+    Syntax:
+
+        genI8Type  subgroupXor(genI8Type value);
+        genU8Type  subgroupXor(genU8Type value);
+        genI16Type subgroupXor(genI16Type value);
+        genU16Type subgroupXor(genU16Type value);
+        genI64Type subgroupXor(genI64Type value);
+        genU64Type subgroupXor(genU64Type value);
+
+Add to the list of built-ins for subgroupInclusiveAdd:
+
+    Syntax:
+
+        genI8Type  subgroupInclusiveAdd(genI8Type value);
+        genU8Type  subgroupInclusiveAdd(genU8Type value);
+        genI16Type subgroupInclusiveAdd(genI16Type value);
+        genU16Type subgroupInclusiveAdd(genU16Type value);
+        genI64Type subgroupInclusiveAdd(genI64Type value);
+        genU64Type subgroupInclusiveAdd(genU64Type value);
+        genF16Type subgroupInclusiveAdd(genF16Type value);
+
+Add to the list of built-ins for subgroupInclusiveMul:
+
+    Syntax:
+
+        genI8Type  subgroupInclusiveMul(genI8Type value);
+        genU8Type  subgroupInclusiveMul(genU8Type value);
+        genI16Type subgroupInclusiveMul(genI16Type value);
+        genU16Type subgroupInclusiveMul(genU16Type value);
+        genI64Type subgroupInclusiveMul(genI64Type value);
+        genU64Type subgroupInclusiveMul(genU64Type value);
+        genF16Type subgroupInclusiveMul(genF16Type value);
+
+Add to the list of built-ins for subgroupInclusiveMin:
+
+    Syntax:
+
+        genI8Type  subgroupInclusiveMin(genI8Type value);
+        genU8Type  subgroupInclusiveMin(genU8Type value);
+        genI16Type subgroupInclusiveMin(genI16Type value);
+        genU16Type subgroupInclusiveMin(genU16Type value);
+        genI64Type subgroupInclusiveMin(genI64Type value);
+        genU64Type subgroupInclusiveMin(genU64Type value);
+        genF16Type subgroupInclusiveMin(genF16Type value);
+
+Add to the list of built-ins for subgroupInclusiveMax:
+
+    Syntax:
+
+        genI8Type  subgroupInclusiveMax(genI8Type value);
+        genU8Type  subgroupInclusiveMax(genU8Type value);
+        genI16Type subgroupInclusiveMax(genI16Type value);
+        genU16Type subgroupInclusiveMax(genU16Type value);
+        genI64Type subgroupInclusiveMax(genI64Type value);
+        genU64Type subgroupInclusiveMax(genU64Type value);
+        genF16Type subgroupInclusiveMax(genF16Type value);
+
+Add to the list of built-ins for subgroupInclusiveAnd:
+
+    Syntax:
+
+        genI8Type  subgroupInclusiveAnd(genI8Type value);
+        genU8Type  subgroupInclusiveAnd(genU8Type value);
+        genI16Type subgroupInclusiveAnd(genI16Type value);
+        genU16Type subgroupInclusiveAnd(genU16Type value);
+        genI64Type subgroupInclusiveAnd(genI64Type value);
+        genU64Type subgroupInclusiveAnd(genU64Type value);
+
+Add to the list of built-ins for subgroupInclusiveOr:
+
+    Syntax:
+
+        genI8Type  subgroupInclusiveOr(genI8Type value);
+        genU8Type  subgroupInclusiveOr(genU8Type value);
+        genI16Type subgroupInclusiveOr(genI16Type value);
+        genU16Type subgroupInclusiveOr(genU16Type value);
+        genI64Type subgroupInclusiveOr(genI64Type value);
+        genU64Type subgroupInclusiveOr(genU64Type value);
+
+Add to the list of built-ins for subgroupInclusiveXor:
+
+    Syntax:
+
+        genI8Type  subgroupInclusiveXor(genI8Type value);
+        genU8Type  subgroupInclusiveXor(genU8Type value);
+        genI16Type subgroupInclusiveXor(genI16Type value);
+        genU16Type subgroupInclusiveXor(genU16Type value);
+        genI64Type subgroupInclusiveXor(genI64Type value);
+        genU64Type subgroupInclusiveXor(genU64Type value);
+
+Add to the list of built-ins for subgroupExclusiveAdd:
+
+    Syntax:
+
+        genI8Type  subgroupExclusiveAdd(genI8Type value);
+        genU8Type  subgroupExclusiveAdd(genU8Type value);
+        genI16Type subgroupExclusiveAdd(genI16Type value);
+        genU16Type subgroupExclusiveAdd(genU16Type value);
+        genI64Type subgroupExclusiveAdd(genI64Type value);
+        genU64Type subgroupExclusiveAdd(genU64Type value);
+        genF16Type subgroupExclusiveAdd(genF16Type value);
+
+Add to the list of built-ins for subgroupExclusiveMul:
+
+    Syntax:
+
+        genI8Type  subgroupExclusiveMul(genI8Type value);
+        genU8Type  subgroupExclusiveMul(genU8Type value);
+        genI16Type subgroupExclusiveMul(genI16Type value);
+        genU16Type subgroupExclusiveMul(genU16Type value);
+        genI64Type subgroupExclusiveMul(genI64Type value);
+        genU64Type subgroupExclusiveMul(genU64Type value);
+        genF16Type subgroupExclusiveMul(genF16Type value);
+
+Add to the list of built-ins for subgroupExclusiveMin:
+
+    Syntax:
+
+        genI8Type  subgroupExclusiveMin(genI8Type value);
+        genU8Type  subgroupExclusiveMin(genU8Type value);
+        genI16Type subgroupExclusiveMin(genI16Type value);
+        genU16Type subgroupExclusiveMin(genU16Type value);
+        genI64Type subgroupExclusiveMin(genI64Type value);
+        genU64Type subgroupExclusiveMin(genU64Type value);
+        genF16Type subgroupExclusiveMin(genF16Type value);
+
+Add to the list of built-ins for subgroupExclusiveMax:
+
+    Syntax:
+
+        genI8Type  subgroupExclusiveMax(genI8Type value);
+        genU8Type  subgroupExclusiveMax(genU8Type value);
+        genI16Type subgroupExclusiveMax(genI16Type value);
+        genU16Type subgroupExclusiveMax(genU16Type value);
+        genI64Type subgroupExclusiveMax(genI64Type value);
+        genU64Type subgroupExclusiveMax(genU64Type value);
+        genF16Type subgroupExclusiveMax(genF16Type value);
+
+Add to the list of built-ins for subgroupExclusiveAnd:
+
+    Syntax:
+
+        genI8Type  subgroupExclusiveAnd(genI8Type value);
+        genU8Type  subgroupExclusiveAnd(genU8Type value);
+        genI16Type subgroupExclusiveAnd(genI16Type value);
+        genU16Type subgroupExclusiveAnd(genU16Type value);
+        genI64Type subgroupExclusiveAnd(genI64Type value);
+        genU64Type subgroupExclusiveAnd(genU64Type value);
+
+Add to the list of built-ins for subgroupExclusiveOr:
+
+    Syntax:
+
+        genI8Type  subgroupExclusiveOr(genI8Type value);
+        genU8Type  subgroupExclusiveOr(genU8Type value);
+        genI16Type subgroupExclusiveOr(genI16Type value);
+        genU16Type subgroupExclusiveOr(genU16Type value);
+        genI64Type subgroupExclusiveOr(genI64Type value);
+        genU64Type subgroupExclusiveOr(genU64Type value);
+
+Add to the list of built-ins for subgroupExclusiveXor:
+
+    Syntax:
+
+        genI8Type  subgroupExclusiveXor(genI8Type value);
+        genU8Type  subgroupExclusiveXor(genU8Type value);
+        genI16Type subgroupExclusiveXor(genI16Type value);
+        genU16Type subgroupExclusiveXor(genU16Type value);
+        genI64Type subgroupExclusiveXor(genI64Type value);
+        genU64Type subgroupExclusiveXor(genU64Type value);
+
+Add to the list of built-ins for subgroupClusteredAdd:
+
+    Syntax:
+
+        genI8Type  subgroupClusteredAdd(genI8Type value);
+        genU8Type  subgroupClusteredAdd(genU8Type value);
+        genI16Type subgroupClusteredAdd(genI16Type value);
+        genU16Type subgroupClusteredAdd(genU16Type value);
+        genI64Type subgroupClusteredAdd(genI64Type value);
+        genU64Type subgroupClusteredAdd(genU64Type value);
+        genF16Type subgroupClusteredAdd(genF16Type value);
+
+Add to the list of built-ins for subgroupClusteredMul:
+
+    Syntax:
+
+        genI8Type  subgroupClusteredMul(genI8Type value);
+        genU8Type  subgroupClusteredMul(genU8Type value);
+        genI16Type subgroupClusteredMul(genI16Type value);
+        genU16Type subgroupClusteredMul(genU16Type value);
+        genI64Type subgroupClusteredMul(genI64Type value);
+        genU64Type subgroupClusteredMul(genU64Type value);
+        genF16Type subgroupClusteredMul(genF16Type value);
+
+Add to the list of built-ins for subgroupClusteredMin:
+
+    Syntax:
+
+        genI8Type  subgroupClusteredMin(genI8Type value);
+        genU8Type  subgroupClusteredMin(genU8Type value);
+        genI16Type subgroupClusteredMin(genI16Type value);
+        genU16Type subgroupClusteredMin(genU16Type value);
+        genI64Type subgroupClusteredMin(genI64Type value);
+        genU64Type subgroupClusteredMin(genU64Type value);
+        genF16Type subgroupClusteredMin(genF16Type value);
+
+Add to the list of built-ins for subgroupClusteredMax:
+
+    Syntax:
+
+        genI8Type  subgroupClusteredMax(genI8Type value);
+        genU8Type  subgroupClusteredMax(genU8Type value);
+        genI16Type subgroupClusteredMax(genI16Type value);
+        genU16Type subgroupClusteredMax(genU16Type value);
+        genI64Type subgroupClusteredMax(genI64Type value);
+        genU64Type subgroupClusteredMax(genU64Type value);
+        genF16Type subgroupClusteredMax(genF16Type value);
+
+Add to the list of built-ins for subgroupClusteredAnd:
+
+    Syntax:
+
+        genI8Type  subgroupClusteredAnd(genI8Type value);
+        genU8Type  subgroupClusteredAnd(genU8Type value);
+        genI16Type subgroupClusteredAnd(genI16Type value);
+        genU16Type subgroupClusteredAnd(genU16Type value);
+        genI64Type subgroupClusteredAnd(genI64Type value);
+        genU64Type subgroupClusteredAnd(genU64Type value);
+
+Add to the list of built-ins for subgroupClusteredOr:
+
+    Syntax:
+
+        genI8Type  subgroupClusteredOr(genI8Type value);
+        genU8Type  subgroupClusteredOr(genU8Type value);
+        genI16Type subgroupClusteredOr(genI16Type value);
+        genU16Type subgroupClusteredOr(genU16Type value);
+        genI64Type subgroupClusteredOr(genI64Type value);
+        genU64Type subgroupClusteredOr(genU64Type value);
+
+Add to the list of built-ins for subgroupClusteredXor:
+
+    Syntax:
+
+        genI8Type  subgroupClusteredXor(genI8Type value);
+        genU8Type  subgroupClusteredXor(genU8Type value);
+        genI16Type subgroupClusteredXor(genI16Type value);
+        genU16Type subgroupClusteredXor(genU16Type value);
+        genI64Type subgroupClusteredXor(genI64Type value);
+        genU64Type subgroupClusteredXor(genU64Type value);
+
+Add to the list of built-ins for subgroupQuadBroadcast:
+
+    Syntax:
+
+        genI8Type  subgroupQuadBroadcast(genI8Type value,  uint id);
+        genU8Type  subgroupQuadBroadcast(genU8Type value,  uint id);
+        genI16Type subgroupQuadBroadcast(genI16Type value, uint id);
+        genU16Type subgroupQuadBroadcast(genU16Type value, uint id);
+        genI64Type subgroupQuadBroadcast(genI64Type value, uint id);
+        genU64Type subgroupQuadBroadcast(genU64Type value, uint id);
+        genF16Type subgroupQuadBroadcast(genF16Type value, uint id);
+
+Add to the list of built-ins for subgroupQuadSwapHorizontal:
+
+    Syntax:
+
+        genI8Type  subgroupQuadSwapHorizontal(genI8Type value);
+        genU8Type  subgroupQuadSwapHorizontal(genU8Type value);
+        genI16Type subgroupQuadSwapHorizontal(genI16Type value);
+        genU16Type subgroupQuadSwapHorizontal(genU16Type value);
+        genI64Type subgroupQuadSwapHorizontal(genI64Type value);
+        genU64Type subgroupQuadSwapHorizontal(genU64Type value);
+        genF16Type subgroupQuadSwapHorizontal(genF16Type value);
+
+Add to the list of built-ins for subgroupQuadSwapVertical:
+
+    Syntax:
+
+        genI8Type  subgroupQuadSwapVertical(genI8Type value);
+        genU8Type  subgroupQuadSwapVertical(genU8Type value);
+        genI16Type subgroupQuadSwapVertical(genI16Type value);
+        genU16Type subgroupQuadSwapVertical(genU16Type value);
+        genI64Type subgroupQuadSwapVertical(genI64Type value);
+        genU64Type subgroupQuadSwapVertical(genU64Type value);
+        genF16Type subgroupQuadSwapVertical(genF16Type value);
+
+Add to the list of built-ins for subgroupQuadSwapDiagonal:
+
+    Syntax:
+
+        genI8Type  subgroupQuadSwapDiagonal(genI8Type value);
+        genU8Type  subgroupQuadSwapDiagonal(genU8Type value);
+        genI16Type subgroupQuadSwapDiagonal(genI16Type value);
+        genU16Type subgroupQuadSwapDiagonal(genU16Type value);
+        genI64Type subgroupQuadSwapDiagonal(genI64Type value);
+        genU64Type subgroupQuadSwapDiagonal(genU64Type value);
+        genF16Type subgroupQuadSwapDiagonal(genF16Type value);
+
+Modifications of the additions in the GL_NV_shader_subgroup_partitioned
+extension to Chapter 8 of the OpenGL Shading Language Specification
+(Built-in Functions)
+
+Add to the list of built-ins for subgroupPartitionedAddNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedAddNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedAddNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedAddNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedAddNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedAddNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedAddNV(genU64Type value, uvec4 ballot);
+        genF16Type subgroupPartitionedAddNV(genF16Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedMulNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedMulNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedMulNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedMulNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedMulNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedMulNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedMulNV(genU64Type value, uvec4 ballot);
+        genF16Type subgroupPartitionedMulNV(genF16Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedMinNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedMinNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedMinNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedMinNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedMinNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedMinNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedMinNV(genU64Type value, uvec4 ballot);
+        genF16Type subgroupPartitionedMinNV(genF16Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedMaxNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedMaxNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedMaxNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedMaxNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedMaxNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedMaxNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedMaxNV(genU64Type value, uvec4 ballot);
+        genF16Type subgroupPartitionedMaxNV(genF16Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedAndNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedAndNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedAndNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedAndNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedAndNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedAndNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedAndNV(genU64Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedOrNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedOrNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedOrNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedOrNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedOrNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedOrNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedOrNV(genU64Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedXorNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedXorNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedXorNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedXorNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedXorNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedXorNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedXorNV(genU64Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedInclusiveAddNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedInclusiveAddNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedInclusiveAddNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedInclusiveAddNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedInclusiveAddNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedInclusiveAddNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedInclusiveAddNV(genU64Type value, uvec4 ballot);
+        genF16Type subgroupPartitionedInclusiveAddNV(genF16Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedInclusiveMulNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedInclusiveMulNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedInclusiveMulNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedInclusiveMulNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedInclusiveMulNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedInclusiveMulNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedInclusiveMulNV(genU64Type value, uvec4 ballot);
+        genF16Type subgroupPartitionedInclusiveMulNV(genF16Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedInclusiveMinNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedInclusiveMinNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedInclusiveMinNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedInclusiveMinNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedInclusiveMinNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedInclusiveMinNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedInclusiveMinNV(genU64Type value, uvec4 ballot);
+        genF16Type subgroupPartitionedInclusiveMinNV(genF16Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedInclusiveMaxNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedInclusiveMaxNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedInclusiveMaxNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedInclusiveMaxNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedInclusiveMaxNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedInclusiveMaxNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedInclusiveMaxNV(genU64Type value, uvec4 ballot);
+        genF16Type subgroupPartitionedInclusiveMaxNV(genF16Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedInclusiveAndNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedInclusiveAndNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedInclusiveAndNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedInclusiveAndNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedInclusiveAndNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedInclusiveAndNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedInclusiveAndNV(genU64Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedInclusiveOrNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedInclusiveOrNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedInclusiveOrNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedInclusiveOrNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedInclusiveOrNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedInclusiveOrNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedInclusiveOrNV(genU64Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedInclusiveXorNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedInclusiveXorNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedInclusiveXorNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedInclusiveXorNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedInclusiveXorNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedInclusiveXorNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedInclusiveXorNV(genU64Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedExclusiveAddNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedExclusiveAddNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedExclusiveAddNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedExclusiveAddNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedExclusiveAddNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedExclusiveAddNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedExclusiveAddNV(genU64Type value, uvec4 ballot);
+        genF16Type subgroupPartitionedExclusiveAddNV(genF16Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedExclusiveMulNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedExclusiveMulNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedExclusiveMulNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedExclusiveMulNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedExclusiveMulNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedExclusiveMulNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedExclusiveMulNV(genU64Type value, uvec4 ballot);
+        genF16Type subgroupPartitionedExclusiveMulNV(genF16Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedExclusiveMinNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedExclusiveMinNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedExclusiveMinNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedExclusiveMinNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedExclusiveMinNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedExclusiveMinNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedExclusiveMinNV(genU64Type value, uvec4 ballot);
+        genF16Type subgroupPartitionedExclusiveMinNV(genF16Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedExclusiveMaxNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedExclusiveMaxNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedExclusiveMaxNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedExclusiveMaxNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedExclusiveMaxNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedExclusiveMaxNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedExclusiveMaxNV(genU64Type value, uvec4 ballot);
+        genF16Type subgroupPartitionedExclusiveMaxNV(genF16Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedExclusiveAndNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedExclusiveAndNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedExclusiveAndNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedExclusiveAndNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedExclusiveAndNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedExclusiveAndNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedExclusiveAndNV(genU64Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedExclusiveOrNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedExclusiveOrNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedExclusiveOrNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedExclusiveOrNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedExclusiveOrNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedExclusiveOrNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedExclusiveOrNV(genU64Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionedExclusiveXorNV:
+
+    Syntax:
+
+        genI8Type  subgroupPartitionedExclusiveXorNV(genI8Type value, uvec4 ballot);
+        genU8Type  subgroupPartitionedExclusiveXorNV(genU8Type value, uvec4 ballot);
+        genI16Type subgroupPartitionedExclusiveXorNV(genI16Type value, uvec4 ballot);
+        genU16Type subgroupPartitionedExclusiveXorNV(genU16Type value, uvec4 ballot);
+        genI64Type subgroupPartitionedExclusiveXorNV(genI64Type value, uvec4 ballot);
+        genU64Type subgroupPartitionedExclusiveXorNV(genU64Type value, uvec4 ballot);
+
+Add to the list of built-ins for subgroupPartitionNV:
+
+    Syntax:
+
+        uvec4 subgroupPartitionNV(genI8Type value);
+        uvec4 subgroupPartitionNV(genU8Type value);
+        uvec4 subgroupPartitionNV(genI16Type value);
+        uvec4 subgroupPartitionNV(genU16Type value);
+        uvec4 subgroupPartitionNV(genI64Type value);
+        uvec4 subgroupPartitionNV(genU64Type value);
+        uvec4 subgroupPartitionNV(genF16Type value);
+
+Interactions with GL_KHR_shader_subgroup
+
+    If GL_KHR_shader_subgroup is not supported, the portion of this extension
+    that adds new types to existing subgroup* built-ins should be removed.
+
+Interactions with GL_NV_shader_subgroup_partitioned
+
+    If GL_NV_shader_subgroup_partitioned is not supported, the portion of this
+    extension that adds new types to existing subgroupPartition* built-ins
+    should be removed.
+
+Issues
+
+Revision History
+
+    Rev.  Date          Author     Changes
+    ----  -----------   --------   -------------------------------------------
+     1    08-Jan-2019   nhenning   Initial revision.
