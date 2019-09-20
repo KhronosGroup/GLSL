@@ -18,8 +18,8 @@ Status
 
 Version
 
-    Last Modified Date:         June 06, 2019
-    Revision:                   1
+    Last Modified Date:         September 19, 2019
+    Revision:                   2
 
 Number
 
@@ -27,7 +27,16 @@ Number
 
 Dependencies
 
-    This extension requires GL_KHR_vulkan_glsl
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification, version 4.50 (revision 7), dated May 10, 2017.
+
+    Interacts with GL_KHR_vulkan_glsl.
 
 Overview
 
@@ -125,6 +134,9 @@ Issues
     None.
 
 Revision History
+
+    Revision 2
+      - Change dependencies so extension can be used with OpenGL.
 
     Revision 1
       - Internal revisions.
