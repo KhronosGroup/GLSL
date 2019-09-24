@@ -800,9 +800,11 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     Only usable if the extension GL_KHR_shader_subgroup_ballot is enabled.
 
     The function subgroupBroadcast() returns the <value> from the invocation
-    whose <gl_SubgroupInvocationID> is equal to <id>.  <id> must be an integral
-    constant expression.  If the <id> is an inactive invocation or is
-    greater than or equal to <gl_SubgroupSize>, an undefined value is returned.
+    whose <gl_SubgroupInvocationID> is equal to <id>. <id> must be an integral
+    constant expression when targeting SPIR-V 1.4 and below, otherwise it must
+    be dynamically uniform within the subgroup.  If the <id> is an inactive
+    invocation or is greater than or equal to <gl_SubgroupSize>, an undefined
+    value is returned.
 
     Syntax:
 
@@ -1370,8 +1372,10 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
     The function subgroupQuadBroadcast() returns the <value> from the invocation
     within the quad whose <gl_SubgroupInvocationID> % 4 is equal to <id>.  <id>
-    must be an integral constant expression.  If the <id> is an inactive
-    invocation or is greater than or equal to 4, an undefined value is returned.
+    must be an integral constant expression when targeting SPIR-V 1.4 and
+    below, otherwise it must be dynamically uniform within the quad.  If the <id>
+    is an inactive invocation or is greater than or equal to 4, an undefined value
+    is returned.
 
     Syntax:
 
