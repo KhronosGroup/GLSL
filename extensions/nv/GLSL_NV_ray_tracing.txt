@@ -822,7 +822,7 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
        traceNV(acc, gl_RayFlagsOpaqueNV, 0xff, sbtOffset,
                     sbtStride, missIndex, rayOrigin, 0.0,
                     computeDir(rayDir), 100.0f, 0 /* payload */);
-       executeCallable(callableSbtIndex, 0 /* blendColor */);
+       executeCallableNV(callableSbtIndex, 0 /* blendColor */);
        imgColor = payload + vec4(blendColor) ;
        imageStore(img, ivec2(gl_LaunchIDNV), imgColor);
 
@@ -835,8 +835,8 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     layout(location = 0) callableDataInNV float outColor;
     layout(shaderRecordNV) buffer block
     {
-         uint blendWeight;
-    }
+         uvec2 blendWeight;
+    };
     void main()
     {
         outColor = float((blendWeight.x >> 5U) & 0x7U + blendWeight.y & 0x3U);
