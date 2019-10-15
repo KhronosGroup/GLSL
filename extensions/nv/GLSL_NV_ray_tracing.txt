@@ -26,8 +26,8 @@ Status
 
 Version
 
-    Last Modified Date: 2019-03-25
-    Revision: 6
+    Last Modified Date: 2019-10-15
+    Revision: 7
 
 Dependencies
 
@@ -338,6 +338,8 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
     stages where this qualifier is permitted. If multiple variables are present
     results of accessing these variables are undefined.
     It is a compile-time error to declare unsized arrays of this type.
+    The type of this variable must match the type of rayPayloadNV as passed
+    by the upstream shader, otherwise the results are undefined.
 
 
     4.3.X callableDataNV Variables
@@ -355,8 +357,10 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
     cannot have any other storage qualifiers. There can be only a single variable
     at global scope with this qualifier. If multiple variables are present, result
     of accessing these variables is undefined. It is a compile-time error to declare
-    unsized arrays of this type. Type of this variable must match the type of callableDataNV
-    as passed by parent shader invoking this callable otherwise results are undefined.
+    unsized arrays of this type.
+    The type of this variable must match the type of callableDataNV as passed
+    by the parent shader invoking this callable, otherwise the results are
+    undefined.
 
 
     Add following to Section 4.3.4 (Input Variables)
@@ -818,7 +822,7 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
        traceNV(acc, gl_RayFlagsOpaqueNV, 0xff, sbtOffset,
                     sbtStride, missIndex, rayOrigin, 0.0,
                     computeDir(rayDir), 100.0f, 0 /* payload */);
-       executeCallable(callableSbtIndex, 0 /* blendColor */);
+       executeCallableNV(callableSbtIndex, 0 /* blendColor */);
        imgColor = payload + vec4(blendColor) ;
        imageStore(img, ivec2(gl_LaunchIDNV), imgColor);
 
@@ -831,8 +835,8 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     layout(location = 0) callableDataInNV float outColor;
     layout(shaderRecordNV) buffer block
     {
-         uint blendWeight;
-    }
+         uvec2 blendWeight;
+    };
     void main()
     {
         outColor = float((blendWeight.x >> 5U) & 0x7U + blendWeight.y & 0x3U);
@@ -885,6 +889,7 @@ Revision History
 
     Rev.  Date          Author     Changes
     ----  -----------   ------     -------------------------------------------
+     7    15-Oct-2019   dgkoch     Fix github issues #93, #95
      6    25-Mar-2019   ewerness   Callables shouldn't have incoming ray flags
      5    04-Mar-2019   alele      Clarify readonly semantics for buffer block
                                    with shaderRecordNV qualifier.
