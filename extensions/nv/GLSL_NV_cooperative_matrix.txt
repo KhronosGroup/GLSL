@@ -49,7 +49,7 @@ Overview
     This extension adds a new set of types known as "cooperative matrix" types,
     where the storage for and computations performed on the matrix are spread
     across a set of invocations such as a subgroup. These types give the
-    implementation freedom in how to optimize matrix multiplies.
+    implementation freedom in how to optimize matrix multiplications.
 
     This extension introduces the types and built-in functions, but does not
     specify rules about what sizes/combinations are valid. This is left to
@@ -123,7 +123,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     Cooperative matrix types are matrix types where the storage for and
     computations performed on the matrix are spread across a set of
     invocations such as a subgroup. These types give the implementation
-    freedom in how to optimize matrix multiplies.
+    freedom in how to optimize matrix multiplications.
 
     Floating-point cooperative matrices (fcoopmatNV) and integer cooperative
     matrices (icoopmatNV/ucoopmatNV) are supported in the language, and are
