@@ -95,7 +95,7 @@ version 4.30 (Built-in functions)
     |      gsubpassInputMS subpass)     |                                     |
     +-----------------------------------+-------------------------------------+
     | gvec4 fragmentFetchAMD(           | Fetches a color fragment with a     |
-    |       gsampler2DMS sampler,       | correspoding fragment mask value.   |
+    |       gsampler2DMS sampler,       | corresponding fragment mask value.  |
     |       ivec2        P,             |                                     |
     |       uint         fragIndex)     |                                     |
     |                                   |                                     |
