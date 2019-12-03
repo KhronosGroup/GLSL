@@ -697,7 +697,9 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
      |                     | the range [0.5, 2.0].                         |
      | sqrt ()             | Inherited from 1.0 / inversesqrt().           |
      | inversesqrt ()      | 2 ULP.                                        |
-     | implicit and explicit conversions between types | Correctly rounded |
+     | implicit and        |                                               |
+     | explicit conversions|                                               |
+     | between types       | Correctly rounded                             |
      -----------------------------------------------------------------------
 
     Add the following sentence after the table with precision requirements for
@@ -1001,31 +1003,31 @@ Changes to Chapter 8 of the OpenGL Shading Language Specification:
      type with double-precision components."
 
     Add subsection 8.x Integer Pack and Unpack Functions.
-    ----------------------------------------------------------------------------
-    | Function            | Description                                        |
-    ----------------------------------------------------------------------------
-    | int64_t  pack64(i32vec2 v) | The pack functions return a signed or       |
-    | uint64_t pack64(u32vec2 v) | unsigned integer of the given return type   |
-    | int64_t  pack64(i16vec4 v) | obtained by packing the components of a     |
-    | uint64_t pack64(u16vec4 v) | signed or unsigned integer vector.          |
-    | int32_t  pack32(i16vec2 v) | The bits of the result are laid out exactly |
-    | uint32_t pack32(u16vec2 v) | as if the vector components were laid       |
-    | int32_t  pack32(i8vec4 v)  | contiguously starting with the first        |
-    | uint32_t pack32(u8vec4 v)  | component                                   |
-    | int16_t  pack16(i8vec2 v)  |                                             |
-    | uint16_t pack16(u8vec2 v)  |                                             |
-    ----------------------------------------------------------------------------
-    | i32vec2 unpack32(int64_t v)  | The unpack functions return a signed or   |
-    | u32vec2 unpack32(uint64_t v) | unsigned integer vector of the return type|
-    | i16vec4 unpack16(int64_t v)  | built from a given integer scalar.        |
-    | u16vec4 unpack16(uint64_t v) | The first of the  vector contains the 8-, |
-    | i16vec2 unpack16(int32_t v)  | 16-, or 32- least significant bits of the |
-    | u16vec2 unpack16(uint32_t v) | input; the last component contains the 8- |
-    | i8vec4  unpack8(int32_t v)   | 16, or 32- most significant bits.         |
-    | u8vec4  unpack8(uint32_t v)  | The other components follow the natural   |
-    | i8vec2  unpack8(int16_t v )  | order of bits.                            |
-    | u8vec2  unpack8(uint16_t v)  |                                           |
-    ----------------------------------------------------------------------------
+    ------------------------------------------------------------------------------
+    | Function                     | Description                                 |
+    ------------------------------------------------------------------------------
+    | int64_t  pack64(i32vec2 v)   | The pack functions return a signed or       |
+    | uint64_t pack64(u32vec2 v)   | unsigned integer of the given return type   |
+    | int64_t  pack64(i16vec4 v)   | obtained by packing the components of a     |
+    | uint64_t pack64(u16vec4 v)   | signed or unsigned integer vector.          |
+    | int32_t  pack32(i16vec2 v)   | The bits of the result are laid out exactly |
+    | uint32_t pack32(u16vec2 v)   | as if the vector components were laid       |
+    | int32_t  pack32(i8vec4 v)    | contiguously starting with the first        |
+    | uint32_t pack32(u8vec4 v)    | component                                   |
+    | int16_t  pack16(i8vec2 v)    |                                             |
+    | uint16_t pack16(u8vec2 v)    |                                             |
+    ------------------------------------------------------------------------------
+    | i32vec2 unpack32(int64_t v)  | The unpack functions return a signed or     |
+    | u32vec2 unpack32(uint64_t v) | unsigned integer vector of the return type  |
+    | i16vec4 unpack16(int64_t v)  | built from a given integer scalar.          |
+    | u16vec4 unpack16(uint64_t v) | The first of the  vector contains the 8-,   |
+    | i16vec2 unpack16(int32_t v)  | 16-, or 32- least significant bits of the   |
+    | u16vec2 unpack16(uint32_t v) | input; the last component contains the 8-   |
+    | i8vec4  unpack8(int32_t v)   | 16, or 32- most significant bits.           |
+    | u8vec4  unpack8(uint32_t v)  | The other components follow the natural     |
+    | i8vec2  unpack8(int16_t v )  | order of bits.                              |
+    | u8vec2  unpack8(uint16_t v)  |                                             |
+    ------------------------------------------------------------------------------
 
     ---------------------------------------------------------------------------
     | Function                          | Desciption                          |
@@ -1040,40 +1042,40 @@ Changes to Chapter 8 of the OpenGL Shading Language Specification:
     Changes to subsection 8.3 Common Functions.
     Modify the description of the following functions to say:
 
-    -------------------------------------------------------------------------------
-    | Function                                    | Description                   |
-    -------------------------------------------------------------------------------
-    | genFType frexp(genFType x, out genI32Type exp) |  Unchanged                 |
-    -------------------------------------------------------------------------------
-    | genFType ldexp(genFType x, in genI32Type exp)  |  Unchanged                 |
-    -------------------------------------------------------------------------------
-    | genI16Type halfBitsToInt16(genF16Type value) | Returns a signed or unsigned |
-    | genU16Type halfBitsToUInt16(genF16Type value)| integer value representing   |
-    | genI32Type floatBitsToInt(genF32Type value)  | the encoding of a floating   |
-    | genU32Type floatBitsToUint(genF32Type value) | point value.  The floating   |
-    | genI64Type doubleBitsToInt64(genDType value) | point value's bit-level      |
-    | genU64Type doubleBitsToUint64(genDType value)| representation is preserved. |
-    | genI16Type float16BitsToInt16(genF16Type value) |                           |
-    | genU16Type float16BitsToUint16(genF16Type value)|                           |
-    -------------------------------------------------------------------------------
-    | genF16Type int16BitsToHalf(genI16Type value)  | Returns a floating point    |
-    | genF16Type uint16BitsToHalf(genU16Type value) | value corresponding to a    |
-    | genF32Type intBitsToFloat(genI32Type value)   | signed  or unsigned integer |
-    | genF32Type uintBitsToFloat(genU32Type value)  | encoding of a floating point|
-    | genDType int64BitsToDouble(genI64Type value)  | value. If a NaN is passed   |
-    | genDType uint64BitsToDouble(genU64Type value) | in it will not signal, and  |
-    | genF16Type int16BitsToFloat16(genI16Type value) | the resulting value is    |
-    | genF16Type uint16BitsToFloat16(genU16Type value)| unspecified. If an Inf is |
-    |                                               | passed in, the resulting    |
-    |                                               | value is the corresponding  |
-    |                                               | Inf.                        |
-    -------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------
+    | Function                                        | Description                  |
+    ----------------------------------------------------------------------------------
+    | genFType frexp(genFType x, out genI32Type exp)  |  Unchanged                   |
+    ----------------------------------------------------------------------------------
+    | genFType ldexp(genFType x, in genI32Type exp)   |  Unchanged                   |
+    ----------------------------------------------------------------------------------
+    | genI16Type halfBitsToInt16(genF16Type value)    | Returns a signed or unsigned |
+    | genU16Type halfBitsToUInt16(genF16Type value)   | integer value representing   |
+    | genI32Type floatBitsToInt(genF32Type value)     | the encoding of a floating   |
+    | genU32Type floatBitsToUint(genF32Type value)    | point value.  The floating   |
+    | genI64Type doubleBitsToInt64(genDType value)    | point value's bit-level      |
+    | genU64Type doubleBitsToUint64(genDType value)   | representation is preserved. |
+    | genI16Type float16BitsToInt16(genF16Type value) |                              |
+    | genU16Type float16BitsToUint16(genF16Type value)|                              |
+    ----------------------------------------------------------------------------------
+    | genF16Type int16BitsToHalf(genI16Type value)    | Returns a floating point     |
+    | genF16Type uint16BitsToHalf(genU16Type value)   | value corresponding to a     |
+    | genF32Type intBitsToFloat(genI32Type value)     | signed  or unsigned integer  |
+    | genF32Type uintBitsToFloat(genU32Type value)    | encoding of a floating point |
+    | genDType int64BitsToDouble(genI64Type value)    | value. If a NaN is passed    |
+    | genDType uint64BitsToDouble(genU64Type value)   | in it will not signal, and   |
+    | genF16Type int16BitsToFloat16(genI16Type value) | the resulting value is       |
+    | genF16Type uint16BitsToFloat16(genU16Type value)| unspecified. If an Inf is    |
+    |                                                 | passed in, the resulting     |
+    |                                                 | value is the corresponding   |
+    |                                                 | Inf.                         |
+    ----------------------------------------------------------------------------------
 
     Changes to subsection 8.4, Floating-Point and Integer Pack and Unpack Functions
     (add to the table of pack and unpack functions on p. 149)
 
     --------------------------------------------------------------------------------------------
-    | Syntax                           | Description                                           |
+    | Syntax                            | Description                                          |
     --------------------------------------------------------------------------------------------
     | uint32_t packFloat2x16(f16vec2 v) | Returns an unsigned 32-bit integer obtained by       |
     |                                   | packing the components of a two-component half-      |
