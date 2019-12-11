@@ -502,7 +502,7 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
       | i32vec2    | u32vec2, i64vec2, u64vec2                                |
       | i32vec3    | u32vec3, i64vec3, u64vec3                                |
       | i32vec4    | u32vec4, i64vec4, u64vec4                                |
-      | uint32_t   | uint64_t, uint64_t                                       |
+      | uint32_t   | int64_t, uint64_t                                        |
       | u32vec2    | i64vec2, u64vec2                                         |
       | u32vec3    | i64vec3, u64vec3                                         |
       | u32vec4    | i64vec4, u64vec4                                         |
