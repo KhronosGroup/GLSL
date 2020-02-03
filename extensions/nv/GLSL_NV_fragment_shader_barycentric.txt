@@ -152,7 +152,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     input variable (or input block, see interface blocks below) needs to be
     declared as an array. For example,
 
-      in float foo[]; // geometry shader input for vertex “out float foo”
+      in float foo[]; // geometry shader input for vertex "out float foo"
 
     (modify fourth paragraph, p. 46, to document how the array size for
      "arrayed" inputs is obtained for tessellation shaders and per-vertex
