@@ -62,3 +62,4 @@ which normatively accepts SPIR-V but does not normatively consume a high-level s
 - [GL_EXT_shader_realtime_clock](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_shader_realtime_clock.txt)
 - [GLSL_EXT_buffer_reference_uvec2](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_buffer_reference_uvec2.txt)
 - [GL_EXT_shader_subgroup_extended_types](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_shader_subgroup_extended_types.txt)
+- [GL_EXT_debug_printf](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_debug_printf.txt)
