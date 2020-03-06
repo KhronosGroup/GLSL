@@ -183,7 +183,7 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
     a dynamically uniform integral expression, otherwise results are undefined.
 
     [[If GL_EXT_nonuniform_qualifier is supported
-    When aggregated into arrays within a shader, accelerationStructureEXT can
+    When aggregated into arrays within a shader, rayQueryEXT can
     be indexed with a non-uniform integral expressions, when decorated with the
     nonuniformEXT qualifier.
     [[end]]
@@ -477,4 +477,4 @@ Revision History
      2    2019-12-05    dgkoch     rename to ray query, address feedback from tobias
      3    2020-02-12    tobias     Updates as per vulkan issue 1989 to better represent mapping to SPIR-V
      4    2020-02-25    tobias     Added missing (and fairly important!) rayQueryGetIntersectionTEXT
-     5    2020-03-06    alele      Rename RayWorld to WorldRay for some builtins (#20)
+     5    2020-03-06    alele      Rename RayWorld to WorldRay for some builtins (#20), fix typo (!50)
