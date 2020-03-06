@@ -22,8 +22,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-02-25
-    Revision: 4
+    Last Modified Date: 2020-03-06
+    Revision: 5
 
 Dependencies
 
@@ -94,8 +94,8 @@ Overview
 
       rayQueryGetRayTMinEXT -> OpRayQueryGetRayTMinKHR
       rayQueryGetRayFlagsEXT -> OpRayQueryGetRayFlagsKHR
-      rayQueryGetRayWorldOriginEXT -> OpRayQueryGetRayWorldOriginKHR
-      rayQueryGetRayWorldDirectionEXT -> OpRayQueryGetRayWorldDirectionKHR
+      rayQueryGetWorldRayOriginEXT -> OpRayQueryGetWorldRayOriginKHR
+      rayQueryGetWorldRayDirectionEXT -> OpRayQueryGetWorldRayDirectionKHR
 
       rayQueryGetIntersectionTEXT -> OpRayQueryGetIntersectionTKHR instruction
       rayQueryGetIntersectionInstanceCustomIndexEXT -> OpRayQueryGetIntersectionInstanceCustomIndexKHR instruction
@@ -321,13 +321,13 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
     Syntax:
     
-        vec3 rayQueryGetRayWorldOriginEXT(rayQueryEXT q);
+        vec3 rayQueryGetWorldRayOriginEXT(rayQueryEXT q);
 
     Returns the world-space origin of ray for the ray query.
 
     Syntax:
     
-        vec3 rayQueryGetRayWorldDirectionEXT(rayQueryEXT q);
+        vec3 rayQueryGetWorldRayDirectionEXT(rayQueryEXT q);
 
     Returns the world-space direction of ray for the ray query.
 
@@ -477,3 +477,4 @@ Revision History
      2    2019-12-05    dgkoch     rename to ray query, address feedback from tobias
      3    2020-02-12    tobias     Updates as per vulkan issue 1989 to better represent mapping to SPIR-V
      4    2020-02-25    tobias     Added missing (and fairly important!) rayQueryGetIntersectionTEXT
+     5    2020-03-06    alele      Rename RayWorld to WorldRay for some builtins (#20)
