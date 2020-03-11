@@ -103,6 +103,15 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
      - \xhh ->  'hh' interpreted as a hexadecimal number
      - \nnn ->  'nnn' interpreted as an octal number
 
+    Octal escape sequences consist of one, two, or three octal digits, and end
+    at the first character that is not an octal digit or at the third octal
+    digit, whichever comes first.
+
+    Hexadecimal escape sequences have one or more hex digits, and end at the
+    first character that is not a hex digit.
+
+    If the octal or hexadecimal value is greater than 127, then the escape
+    sequence has an undefined value.
 
     Add a new section 8.X Debug Functions:
 
