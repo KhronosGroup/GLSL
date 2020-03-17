@@ -33,8 +33,8 @@ Status
 
 Version
 
-    Last Modified Date: 17-Mar-2018
-    Revision: 47
+    Last Modified Date: 16-Mar-2020
+    Revision: 48
 
 Number
 
@@ -1557,6 +1557,11 @@ Changes to Chapter 8 of the OpenGL Shading Language Specification
 
     Remove section 8.14 Noise Functions
 
+    Remove the entry from the table in section 8.17 Shader Memory Control
+    Functions:
+
+        void memoryBarrierAtomicCounter()
+
     Add a section
 
       "8.X Subpass Functions
@@ -1713,6 +1718,7 @@ Revision History
 
     Rev.    Date         Author    Changes
     ----  -----------    -------  --------------------------------------------
+    48    16-Mar-2020    jbolz    Remove memoryBarrierAtomicCounter()
     47    17-Mar-2019    JohnK    Add vertex-input aliasing to list of removed
                                   features
     46    25-Jul-2018    JohnK    No longer require sampler constructors to
