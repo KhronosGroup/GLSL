@@ -110,8 +110,8 @@ Unresolved:
     Atomic Integers
     ---------------
     
-    atomic_uint declarations will be silently functions inteacting with them
-    will be silently converted to use SSBOs and related atomic functions.
+    atomic_uint declarations and functions inteacting with them will be
+    silently converted to use SSBOs and related atomic functions.
    
 Changes to Chapter 3 of the OpenGL Shading Language Specification
 
