@@ -58,13 +58,14 @@ Unsure yet:
         * atomic-counters (those based on atomic_uint)
         
     The previous feature changes are re-changed:
-        * gl_FragColor will still indicate an implicit broadcast
         * the default origin remains origin_lower_left
         
     New features:
         * The type of backing used for a block, push constant or uniform
           buffer, and the layout of the block, can be changed at compile
-          type by the user of the GLSL front-end.
+          time by the user of the GLSL front-end.
+        * The set which a uniform belongs to can be changed at compile time
+          by the user of the GLSL front-end.
 
     Each of these is discussed in more detail below.
 
@@ -86,322 +87,29 @@ Unsure yet:
     reject shaders not adhering to this specification, and accept those that
     do. Implementation-dependent maximums and capabilities are supplied to, or
     part of, the front-end, so it can do error checking against them.
-
-    
-    Storage Images
-    --------------
-    
-    Storage images are declared in GLSL shader source using uniform image
-    variables of the appropriate dimensionality as well as a format layout
-    qualifier (if necessary):
-    
-        layout (set=m, binding=n, r32f) uniform image2D myStorageImage;
-
-    Which maps to the following SPIR-V:
-    
-             ...
-        %1 = OpExtInstImport "GLSL.std.450"
-             ...
-               OpName %9 "myStorageImage"
-             OpDecorate %9 DescriptorSet m
-             OpDecorate %9 Binding n
-        %2 = OpTypeVoid
-        %3 = OpTypeFunction %2
-        %6 = OpTypeFloat 32
-        %7 = OpTypeImage %6 2D 0 0 0 2 R32f
-        %8 = OpTypePointer UniformConstant %7
-        %9 = OpVariable %8 UniformConstant
-             ...
-
-    Samplers
-    --------
-    
-    Samplers are declared in GLSL shader source using uniform sampler
-    variables, where the sampler type has no associated texture
-    dimensionality:
-
-        layout (set=m, binding=n) uniform sampler mySampler;
-
-    Which maps to the following SPIR-V:
-    
-             ...
-        %1 = OpExtInstImport "GLSL.std.450"
-             ...
-             OpName %8 "mySampler"
-             OpDecorate %8 DescriptorSet m
-             OpDecorate %8 Binding n
-        %2 = OpTypeVoid
-        %3 = OpTypeFunction %2
-        %6 = OpTypeSampler
-        %7 = OpTypePointer UniformConstant %6
-        %8 = OpVariable %7 UniformConstant
-             ...
-    
-    Textures (Sampled Images)
-    -------------------------
-
-    Textures are declared in GLSL shader source using uniform texture
-    variables of the appropriate dimensionality:
-
-        layout (set=m, binding=n) uniform texture2D mySampledImage;
-
-    Which maps to the following SPIR-V:
-
-             ...
-        %1 = OpExtInstImport "GLSL.std.450"
-             ...
-             OpName %9 "mySampledImage"
-             OpDecorate %9 DescriptorSet m
-             OpDecorate %9 Binding n
-        %2 = OpTypeVoid
-        %3 = OpTypeFunction %2
-        %6 = OpTypeFloat 32
-        %7 = OpTypeImage %6 2D 0 0 0 1 Unknown
-        %8 = OpTypePointer UniformConstant %7
-        %9 = OpVariable %8 UniformConstant
-             ...
-
-    Combined Texture + Samplers
-    ---------------------------
-    
-    Combined textures and samplers are declared in GLSL shader source using
-    uniform sampler variables of the appropriate dimensionality:
-
-        layout (set=m, binding=n) uniform sampler2D myCombinedImageSampler;
-
-    Which maps to the following SPIR-V:
-    
-             ...
-        %1 = OpExtInstImport "GLSL.std.450"
-             ...
-             OpName %10 "myCombinedImageSampler"
-             OpDecorate %10 DescriptorSet m
-             OpDecorate %10 Binding n
-        %2 = OpTypeVoid
-        %3 = OpTypeFunction %2
-        %6 = OpTypeFloat 32
-        %7 = OpTypeImage %6 2D 0 0 0 1 Unknown
-        %8 = OpTypeSampledImage %7
-        %9 = OpTypePointer UniformConstant %8
-        %10 = OpVariable %9 UniformConstant
-             ...
-    
-    Note that a combined image sampler descriptor can be referred to as just
-    an image or sampler in the shader as per the above sections.
-
-    Combining separate samplers and textures
-    ----------------------------------------
-
-    A sampler, declared with the keyword 'sampler', contains just filtering
-    information, containing neither a texture nor an image:
-
-        uniform sampler s;    // a handle to filtering information
-
-    A texture, declared with keywords like 'texture2D', contains just image
-    information, not filtering information:
-
-        uniform texture2D t;  // a handle to a texture (an image in SPIR-V)
-
-    Constructors can then be used to combine a sampler and a texture at the
-    point of making a texture lookup call:
-
-        texture(sampler2D(t, s), ...);
-
-    Note, layout() information is omitted above for clarity of this feature.
-        
-    Texture Buffers (Uniform Texel Buffers)
-    ---------------------------------------
-
-    Texture buffers are declared in GLSL shader source using uniform
-    textureBuffer variables:
-
-        layout (set=m, binding=n) uniform textureBuffer myUniformTexelBuffer;
-
-    Which maps to the following SPIR-V:
-             ...
-        %1 = OpExtInstImport "GLSL.std.450"
-             ...
-             OpName %9 "myUniformTexelBuffer"
-             OpDecorate %9 DescriptorSet m
-             OpDecorate %9 Binding n
-        %2 = OpTypeVoid
-        %3 = OpTypeFunction %2
-        %6 = OpTypeFloat 32
-        %7 = OpTypeImage %6 Buffer 0 0 0 1 Unknown
-        %8 = OpTypePointer UniformConstant %7
-        %9 = OpVariable %8 UniformConstant
-             ...
-
-    Image Buffers (Storage Texel Buffers)
-    -------------------------------------
-    
-    Image buffers are declared in GLSL shader source using uniform
-    imageBuffer variables:
-
-        layout (set=m, binding=n, r32f) uniform imageBuffer myStorageTexelBuffer;
-
-    Which maps to the following SPIR-V:
-
-             ...
-        %1 = OpExtInstImport "GLSL.std.450"
-             ...
-             OpName %9 "myStorageTexelBuffer"
-             OpDecorate %9 DescriptorSet m
-             OpDecorate %9 Binding n
-        %2 = OpTypeVoid
-        %3 = OpTypeFunction %2
-        %6 = OpTypeFloat 32
-        %7 = OpTypeImage %6 Buffer 0 0 0 2 R32f
-        %8 = OpTypePointer UniformConstant %7
-        %9 = OpVariable %8 UniformConstant
-             ...
-
-    Storage Buffers
-    ---------------
-    
-    Storage buffers are declared in GLSL shader source using buffer storage
-    qualifier and block syntax:
-
-        layout (set=m, binding=n) buffer myStorageBuffer
-        {
-            vec4 myElement[];
-        };
-
-    Which maps to the following SPIR-V:
-    
-             ...
-        %1 = OpExtInstImport "GLSL.std.450"
-             ...
-             OpName %9 "myStorageBuffer"
-             OpMemberName %9 0 "myElement"
-             OpName %11 ""
-             OpDecorate %8 ArrayStride 16
-             OpMemberDecorate %9 0 Offset 0
-             OpDecorate %9 BufferBlock
-             OpDecorate %11 DescriptorSet m
-             OpDecorate %11 Binding n
-        %2 = OpTypeVoid
-        %3 = OpTypeFunction %2
-        %6 = OpTypeFloat 32
-        %7 = OpTypeVector %6 4
-        %8 = OpTypeRuntimeArray %7
-        %9 = OpTypeStruct %8
-        %10 = OpTypePointer Uniform %9
-        %11 = OpVariable %10 Uniform
-             ...
              
-    Uniform Buffers
+    Default Uniforms
     ---------------
     
-    Uniform buffers are declared in GLSL shader source using the uniform storage
-    qualifier and block syntax:
+    All default uniforms will be silently grouped into a single anonymous
+    uniform block. The type name of the block, the backing, set, and binding
+    location can all be controlled via options to the GLSL front-end.  
 
-        layout (set=m, binding=n) uniform myUniformBuffer
-        {
-            vec4 myElement[32];
-        };
-
-    Which maps to the following SPIR-V:
-             ...
-        %1 = OpExtInstImport "GLSL.std.450"
-             ...
-             OpName %11 "myUniformBuffer"
-             OpMemberName %11 0 "myElement"
-             OpName %13 ""
-             OpDecorate %10 ArrayStride 16
-             OpMemberDecorate %11 0 Offset 0
-             OpDecorate %11 Block
-             OpDecorate %13 DescriptorSet m
-             OpDecorate %13 Binding n
-        %2 = OpTypeVoid
-        %3 = OpTypeFunction %2
-        %6 = OpTypeFloat 32
-        %7 = OpTypeVector %6 4
-        %8 = OpTypeInt 32 0
-        %9 = OpConstant %8 32
-        %10 = OpTypeArray %7 %9
-        %11 = OpTypeStruct %10
-        %12 = OpTypePointer Uniform %11
-        %13 = OpVariable %12 Uniform
-             ...
+    Shared and Packed Block Layouts
+    -------------------------------
     
-    Subpass Inputs
-    --------------
-
-    Within a rendering pass, a subpass can write results to an output target
-    that can then be read by the next subpass as an input subpass.  The
-    "Subpass Input" feature regards the ability to read an output target.
-
-    Subpasses are read through a new set of types, available only
-    to fragment shaders:
-
-         subpassInput
-         subpassInputMS
-        isubpassInput
-        isubpassInputMS
-        usubpassInput
-        usubpassInputMS
-
-    Unlike sampler and image objects, subpass inputs are implicitly addressed
-    by the fragment's (x, y, layer) coordinate.
-                 
-    Input attachments are decorated with their input attachment index in
-    addition to descriptor set and binding numbers.
-
-        layout (input_attachment_index=i, set=m, binding=n) uniform subpassInput myInputAttachment;
-
-    Which maps to the following SPIR-V:
-
-             ...
-        %1 = OpExtInstImport "GLSL.std.450"
-             ...
-             OpName %9 "myInputAttachment"
-             OpDecorate %9 DescriptorSet m
-             OpDecorate %9 Binding n
-             OpDecorate %9 InputAttachmentIndex i
-        %2 = OpTypeVoid
-        %3 = OpTypeFunction %2
-        %6 = OpTypeFloat 32
-        %7 = OpTypeImage %6 SubpassData 0 0 0 2 Unknown
-        %8 = OpTypePointer UniformConstant %7
-        %9 = OpVariable %8 UniformConstant
-             ...
-
-    An input_attachment_index of i selects the ith entry in the input pass
-    list. (See API specification for more information.)
-
-    These objects support reading the subpass input through the following
-    functions:
-
-        gvec4 subpassLoad(gsubpassInput   subpass);
-        gvec4 subpassLoad(gsubpassInputMS subpass, int sample);
-
-    gl_FragColor
-    ------------
-
-    The fragment-stage built-in gl_FragColor, which implies a broadcast to all
-    outputs, is not present in SPIR-V. Shaders where writing to gl_FragColor
-    is allowed can still write to it, but it only means to write to an output:
-     - of the same type as gl_FragColor
-     - decorated with location 0
-     - not decorated as a built-in variable.
-    There is no implicit broadcast.
-
-    gl_VertexIndex and gl_InstanceIndex
-    -----------------------------------
-
-    Adds two new built-in variables, gl_VertexIndex and gl_InstanceIndex to
-    replace the existing built-in variables gl_VertexID and gl_InstanceID.
-
-    In the situations where the indexing is relative to some base offset,
-    these built-in variables are defined, for Vulkan, to take on values as
-    follows:
-
-        gl_VertexIndex             base, base+1, base+2, ...
-        gl_InstanceIndex           base, base+1, base+2, ...
-
-    Where it depends on the situation what the base actually is.
+    If a block is declared with shared or packed layouts, those layouts will
+    be ignored and instead the default layout for that block type will be used.
     
+    gl_VertexID and gl_InstanceID
+    -----------------------------
+
+    Built-in variables gl_VertexID and gl_InstanceID are accepted, but are
+    simply aliases to gl_VertexIndex and gl_InstanceIndex which were introduced
+    in GL_EXT_vulkan_glsl. They will include the base offset like the
+    GL_EXT_vulkan_glsl behavior.
+    
+   
     Mapping to SPIR-V
     -----------------
 
