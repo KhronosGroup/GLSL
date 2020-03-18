@@ -53,16 +53,17 @@ Overview
         * shared and packed block layouts, but they are silently ignored.
         * gl_VertexID and gl_InstanceID
         * atomic-counters (those based on atomic_uint)
-        
-    The previous feature changes are re-changed:
-        * the default origin remains origin_lower_left
-        
+             
     New features:
         * The type of backing used for a block, push constant or uniform
           buffer, and the layout of the block, can be changed at compile
           time by the user of the GLSL front-end.
         * The set which a uniform belongs to can be changed at compile time
           by the user of the GLSL front-end.
+          
+Unresolved:
+    The previous feature changes are re-changed:
+        * the default origin remains origin_lower_left (is this possible with Vulan SPIRV-V?)
 
     Each of these is discussed in more detail below.
 
@@ -105,6 +106,12 @@ Overview
     simply aliases to gl_VertexIndex and gl_InstanceIndex which were introduced
     in GL_EXT_vulkan_glsl. They will include the base offset like the
     GL_EXT_vulkan_glsl behavior.
+    
+    Atomic Integers
+    ---------------
+    
+    atomic_uint declarations will be silently functions inteacting with them
+    will be silently converted to use SSBOs and related atomic functions.
    
 Changes to Chapter 3 of the OpenGL Shading Language Specification
 
@@ -115,260 +122,14 @@ Changes to Chapter 3 of the OpenGL Shading Language Specification
 
 Changes to Chapter 4 of the OpenGL Shading Language Specification
 
-    Add into the tables in section 4.1 Basic Types, interleaved with the
-    existing types, using the existing descriptions (when not supplied
-    below):
-
-        Floating-Point Opaque Types
-
-            texture1D
-            texture2D
-            texture3D
-            textureCube
-            texture2DRect
-            texture1DArray
-            texture2DArray
-            textureBuffer
-            texture2DMS
-            texture2DMSArray
-            textureCubeArray
-            subpassInput            | a handle for accessing a floating-point
-                                    | subpass input
-            subpassInputMS          | a handle for accessing a multi-sampled
-                                    | floating-point subpass input
-
-        Signed Integer Opaque Types
-
-            itexture1D
-            itexture2D
-            itexture3D
-            itextureCube
-            itexture2DRect
-            itexture1DArray
-            itexture2DArray
-            itextureBuffer
-            itexture2DMS
-            itexture2DMSArray
-            itextureCubeArray
-            isubpassInput     | a handle for accessing an integer subpass input
-            isubpassInputMS   | a handle for accessing a multi-sampled integer
-                              | subpass input
-
-        Unsigned Integer Opaque Types
-
-            utexture1D
-            utexture2D
-            utexture3D
-            utextureCube
-            utexture2DRect
-            utexture1DArray
-            utexture2DArray
-            utextureBuffer
-            utexture2DMS
-            utexture2DMSArray
-            utextureCubeArray
-            usubpassInput     | a handle for accessing an unsigned integer
-                              | subpass input
-            usubpassInputMS   | a handle for accessing a multi-sampled unsigned
-                              | integer subpass input
-
-    Remove the entry from the table in section 4.1 Basic Types:
+    Re-add the entry from the table in section 4.1 Basic Types:
 
         atomic_uint
 
-    Add a new category in this section
+    Re-add the section 4.1.7.3 Atomic Counters
 
-      "Sampler Opaque Types
-
-          sampler       |    a handle for accessing state describing how to
-                        |    sample a texture"
-          ---------------------------------------------------------------------
-          samplerShadow |    a handle for accessing state describing how to
-                        |    sample a depth texture with comparison"
-
-    Remove "structure member selection" from 4.1.7 and instead add a sentence
-    "Opaque types cannot be declared or nested in a structure (struct)."
-
-    Modify subsection 4.1.3 Integers, for desktop versions of GLSL, to say:
-
-        "Highp unsigned integers have exactly 32 bits of precision.  Highp
-        signed integers use 32 bits, including a sign bit, in two's complement
-        form. Mediump and lowp integers are as defined by the RelaxedPrecision
-        decoration in SPIR-V."
-
-    Add a subsection to 4.1.7 Opaque Types:
-
-        "4.1.7.x Texture, *sampler*, and *samplerShadow* Types
-
-        "Texture (e.g., *texture2D*), *sampler*, and *samplerShadow* types are opaque
-        types, declared and behaving as described above for opaque types.  When
-        aggregated into arrays within a shader, these types can only be indexed
-        with a dynamically uniform expression, or texture lookup will result in
-        undefined values. Texture variables are handles to one-, two-, and
-        three-dimensional textures, cube maps, etc., as enumerated in the basic
-        types tables. There are distinct
-        texture types for each texture target, and for each of float, integer,
-        and unsigned integer data types. Textures can be combined with a
-        variable of type *sampler* or *samplerShadow* to create a sampler type
-        (e.g., sampler2D, or sampler2DShadow). This is done with a constructor,
-        e.g., sampler2D(texture2D, sampler),
-        sampler2DShadow(texture2D, sampler),
-        sampler2DShadow(texture2D, samplerShadow), or
-        sampler2D(texture2D, samplerShadow)
-        and is described in more detail in section 5.4 "Constructors"."
-
-        "4.1.7.x Subpass Inputs
-
-        "Subpass input types (e.g., subpassInput) are opaque types, declared
-        and behaving as described above for opaque types.  When aggregated into
-        arrays within a shader, they can only be indexed with a dynamically
-        uniform integral expression, otherwise results are undefined.
-
-        "Subpass input types are handles to two-dimensional single sampled or
-        multi-sampled images, with distinct types for each of float, integer,
-        and unsigned integer data types.
-
-        "Subpass input types are only available in fragment shaders.  It is a
-        compile-time error to use them in any other stage."
-
-    Remove the section 4.1.7.3 Atomic Counters
-
-    Change section 4.3.3 Constant Expressions:
-
-      Add a new very first sentence to this section:
-
-        "SPIR-V specialization constants are expressed in GLSL as const, with
-        a layout qualifier identifier of constant_id, as described in section
-        4.4.x Specialization-Constant Qualifier."
-
-      Add to this sentence:
-
-        "A constant expression is one of...
-          * a variable declared with the const qualifier and an initializer,
-            where the initializer is a constant expression"
-
-      To make it say:
-
-        "A constant expression is one of...
-          * a variable declared with the const qualifier and an initializer,
-            where the initializer is a constant expression; this includes both
-            const declared with a specialization-constant layout qualifier,
-            e.g., 'layout(constant_id = ...)' and those declared without a
-            specialization-constant layout qualifier"
-
-      Add to "including getting an element of a constant array," that
-
-        "an array access with a specialization constant as an index does
-        not result in a constant expression"
-
-      Add to this sentence:
-
-        "A constant expression is one of...
-          * the value returned by a built-in function..."
-
-      To make it say:
-
-        "A constant expression is one of...
-          * for non-specialization-constants only: the value returned by a
-            built-in function... (when any function is called with an argument
-            that is a specialization constant, the result is not a constant
-            expression)"
-
-      Rewrite the last half of the last paragraph to be its own paragraph
-      saying:
-
-        "Non-specialization constant expressions may be evaluated by the
-        compiler's host platform, and are therefore not required ...
-        [rest of paragraph stays the same]"
-
-      Add a paragraph
-
-        "Specialization constant expressions are never evaluated by the
-        front-end, but instead retain the operations needed to evaluate them
-        later on the host."
-
-    Add to the table in section 4.4 Layout Qualifiers:
-
-                             | Individual Variable | Block | Allowed Interface
-      ------------------------------------------------------------------------
-      constant_id =          |     scalar only     |       |      const
-      ------------------------------------------------------------------------
-      push_constant          |                     |   X   |      uniform
-      ------------------------------------------------------------------------
-      set =                  |     opaque only     |   X   |      uniform
-      ------------------------------------------------------------------------
-      input_attachment_index | subpass types only  |       |      uniform
-
-    (The other columns remain blank.)
-
-    Also add to this table:
-
-                         | Qualifier Only | Allowed Interface
-      -------------------------------------------------------
-      local_size_x_id =  |        X       |       in
-      local_size_y_id =  |        X       |       in
-      local_size_z_id =  |        X       |       in
-
-    (The other columns remain blank.)
-
-    Expand this sentence in section 4.4.1 Input Layout Qualifiers:
-
-      "Where integral-constant-expression is defined in section 4.3.3 Constant
-      Expressions as 'integral constant expression'"
-
-    To include the following:
-
-      ", with it being a compile-time error for integer-constant-expression to
-      be a specialization constant:  The constant used to set a layout
-      identifier X in layout(layout-qualifier-name = X) must evaluate to a
-      front-end constant containing no specialization constants."
-
-    Change the rules about locations and inputs for doubles, by removing
-
-      "If a vertex shader input is any scalar or vector type, it will consume
-      a single location. If a non-vertex shader input is a scalar or vector
-      type other than dvec3 or dvec4..."
-
-    Replacing the above with
-
-      "If an input is a scalar or vector type other than dvec3 or dvec4..."
-
-    (Making all stages have the same rule that dvec3 takes two locations...)
-
-    At the end of the paragraphs describing the *location* rules, add this
-    paragraph:
-
-      "When generating SPIR-V, all *in* and *out* qualified user-declared
-      (non built-in) variables and blocks (or all their members) must have a
-      shader-specified *location*. Otherwise, a compile-time error is
-      generated."
-
-    [Note that an earlier existing rule just above this says "If a block has
-    no block-level *location* layout qualifier, it is required that either all
-    or none of its members have a *location* layout qualifier, or a compile-
-    time error results."]
-
-    Change section 4.4.1 "Input Layout Qualifiers"
-
-      With one exception, location aliasing is allowed only if it does not
-      cause component aliasing
-
-    To
-
-      Location aliasing is allowed only if it does not cause component aliasing
-
-    Remove, from the same paragraph:
-
-      The one exception where component aliasing is permitted is for two input
-      variables (not block members) to a vertex shader, which are allowed to
-      have component aliasing. This vertex-variable component aliasing is
-      intended only to support vertex shaders where each execution path accesses
-      at most one input per each aliased component. Implementations are
-      permitted, but not required, to generate link-time errors if they detect
-      that every path through the vertex shader executable accesses multiple
-      inputs aliased to any single component.
-
-    Change section 4.4.1, under "Fragment Shader Inputs" from
+*******************
+    Change section 4.4.1, under "Fragment Shader Inputs" back to
 
       "By default, gl_FragCoord assumes a lower-left origin for window
       coordinates ... For example, the (x, y) location (0.5, 0.5) is
@@ -384,282 +145,13 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
       explicitly set by redeclaring gl_FragCoord with the origin_upper_left
       identifier.  It is a compile-time error to change it to
       origin_lower_left."
-
-    Add to the end of section 4.4.3 Uniform Variable Layout Qualifiers:
-
-      "The /push_constant/ identifier is used to declare an entire block, and
-      represents a set of "push constants", as defined by the API.  It is a
-      compile-time error to apply this to anything other than a uniform block
-      declaration.  The values in the block will be initialized through the
-      API, as per the Vulkan API specification.  A block declared with
-      layout(push_constant) may optionally include an /instance-name/.
-      There can be only one push_constant
-      block per stage, or a compile-time or link-time error will result. A
-      push-constant array can only be indexed with dynamically uniform indexes.
-      Uniform blocks declared with push_constant use different resources
-      than those without; and are accounted for separately.  See the API
-      specification for more detail."
-
-    After the paragraphs about binding ("The binding identifier..."), add
-
-      "The /set/ identifier specifies the descriptor set this object belongs to.
-      It is a compile-time error to apply /set/ to a standalone qualifier or to
-      a member of a block.  It is a compile-time error to apply /set/ to a block
-      qualified as a push_constant.  By default, any non-push_constant uniform
-      or shader storage block declared without a /set/ identifier is assigned to
-      descriptor set 0.  Similarly, any sampler, texture, or subpass input type
-      declared as a uniform, but without a /set/ identifier is also assigned
-      to descriptor set 0.
-
-      "If applied to an object declared as an array, all elements of the array
-      belong to the specified /set/.
-
-      "It is a compile-time error for either the /set/ or /binding/ value
-      to exceed a front-end-configuration supplied maximum value."
-
-    Remove mention of subroutine throughout section 4.4 Layout Qualifiers,
-    including removal of section 4.4.4 Subroutine Function Layout Qualifiers.
-
-    Change section 4.4.5 Uniform and Shader Storage Block Layout Qualifiers:
-
-      Change
-
-      "If the binding identifier is used with a uniform or shader storage block
-      instanced as an array, the first element of the array takes the specified
-      block binding and each subsequent element takes the next consecutive
-      uniform block binding point. For an array of arrays, each element (e.g.,
-      6 elements for a[2][3]) gets a binding point, and they are ordered per the
-      array-of-array ordering described in section 4.1.9 'Arrays.'"
-"
-
-      To
-
-      "If the binding identifier is used with a uniform block or buffer block
-      instanced as an array, the entire array takes only the provided binding
-      number.  The next consecutive binding number is available for a different
-      object. For an array of arrays, descriptor set array element numbers used
-      in descriptor set accesses are ordered per the array-of-array ordering
-      described in section 4.1.9 'Arrays.'"
-
-    Change section 4.4.6 Opaque-Uniform Layout Qualifiers:
-
-      Change
-
-      "If the binding identifier is used with an array, the first element of
-      the array takes the specified unit and each subsequent element takes the
-      next consecutive unit."
-
-      To
-
-      "If the binding identifier is used with an array, the entire array
-      takes only the provided binding number.  The next consecutive binding
-      number is available for a different object."
-
-    Remove section 4.4.6.1 Atomic Counter Layout Qualifiers
-
-    Add a new subsection at the end of section 4.4:
-
-      "4.4.x Specialization-Constant Qualifier
-
-      "Specialization constants are declared using "layout(constant_id=...)".
-      For example:
-
-        layout(constant_id = 17) const int arraySize = 12;
-
-      "The above makes a specialization constant with a default value of 12.
-      17 is the ID by which the API or other tools can later refer to
-      this specific specialization constant. If it is never changed before
-      final lowering, it will retain the value of 12. It is a compile-time
-      error to use the constant_id qualifier on anything but a scalar bool,
-      int, uint, float, or double.
-
-      "Built-in constants can be declared to be specialization constants.
-      For example,
-
-        layout(constant_id = 31) gl_MaxClipDistances;  // add specialization id
-
-      "The declaration uses just the name of the previously declared built-in
-      variable, with a constant_id layout declaration.  It is a compile-time
-      error to do this after the constant has been used: Constants are strictly
-      either non-specialization constants or specialization constants, not
-      both.
-
-      "The built-in constant vector gl_WorkGroupSize can be specialized using
-      the local_size_{xyz}_id qualifiers, to individually give the components
-      an id. For example:
-
-          layout(local_size_x_id = 18, local_size_z_id = 19) in;
-
-      "This leaves gl_WorkGroupSize.y as a non-specialization constant, with
-      gl_WorkGroupSize being a partially specialized vector.  Its x and z
-      components can be later specialized using the ids 18 and 19.  These ids
-      are declared independently from declaring the work-group size:
-
-        layout(local_size_x = 32, local_size_y = 32) in;   // size is (32,32,1)
-        layout(local_size_x_id = 18) in;                   // constant_id for x
-        layout(local_size_z_id = 19) in;                   // constant_id for z
-
-      "Existing rules for declaring local_size_x, local_size_y, and
-      local_size_z are not changed by this extension. For the local-size ids,
-      it is a compile-time error to provide different id values for the same
-      local-size id, or to provide them after any use.  Otherwise, order,
-      placement, number of statements, and replication do not cause errors.
-
-      "Two arrays sized with specialization constants are the same type only if
-      sized with the same symbol, involving no operations.
-
-        layout(constant_id = 51) const int aSize = 20;
-        const int pad = 2;
-        const int total = aSize + pad; // specialization constant
-        int a[total], b[total];        // a and b have the same type
-        int c[22];                     // different type than a or b
-        int d[aSize + pad];            // different type than a, b, or c
-        int e[aSize + 2];              // different type than a, b, c, or d
-
-      "Types containing arrays sized with a specialization constant cannot be
-      compared, assigned as aggregates, declared with an initializer, or used
-      as an initializer.  They can, however, be passed as arguments to
-      functions having formal parameters of the same type.
-
-      "Arrays inside a block may be sized with a specialization constant, but
-      the block will have a static layout.  Changing the specialized size will
-      not re-layout the block. In the absence of explicit offsets, the layout
-      will be based on the default size of the array."
-
-    Add a new subsection at the end of section 4.4:
-
-      "4.4.y Subpass Qualifier
-
-      "Subpasses are declared with the basic 'subpassInput' types.  However,
-      they must have the layout qualifier "input_attachment_index" declared
-      with them, or a compile-time error results.  For example:
-
-        layout(input_attachment_index = 2, ...) uniform subpassInput t;
-
-      This selects which subpass input is being read from. The value assigned
-      to 'input_attachment_index', say i (input_attachment_index = i), selects
-      that entry (ith entry) in the input list for the pass.  See the API
-      documentation for more detail about passes and the input list.
-
-      "If an array of size N is declared, it consume N consecutive
-      input_attachment_index values, starting with the one provided.
-
-      "It is a compile-time or link-time error to have different variables
-      declared with the same input_attachment_index.  This includes any overlap
-      in the implicit input_attachment_index consumed by array declarations.
-
-      "It is a compile-time error if the value assigned to an
-      input_attachment_index is greater than or equal to
-      gl_MaxInputAttachments."
-
+**********************
     Remove all mention of the 'shared' and 'packed' layout qualifiers.
-
-    Change section 4.4.5 Uniform and Shader Storage Block Layout Qualifiers
-
-      "The initial state of compilation is as if the following were declared:
-
-        layout(std140, column_major) uniform;  // without push_constant
-        layout(std430, column_major) buffer;
-
-      "However, when push_constant is declared, the default layout of the
-      buffer will be std430. There is no method to globally set this default."
-
-    Add to this statement:
-
-      "The std430 qualifier is supported only for shader storage blocks; using
-      std430 on a uniform block will result in a compile-time error"
-
-    the following phrase:
-
-      "unless it is also declared with push_constant"
-
-    Add to section 4.4.5 Uniform and Shader Storage Block Layout Qualifiers,
-    for versions not having 'offset' and 'align' description language,
-    or replace with the following for versions that do have 'offset' and
-    'align' description language:
-
-      "The 'offset' qualifier can only be used on block members of 'uniform' or
-      'buffer' blocks. The 'offset' qualifier forces the qualified member to
-      start at or after the specified integral-constant-expression, which will
-      be its byte offset from the beginning of the buffer. It is a compile-time
-      error to have any offset, explicit or assigned, that lies within another
-      member of the block. Two blocks linked together in the same program with
-      the same block name must have the exact same set of members qualified
-      with 'offset' and their integral-constant-expression values must be the
-      same, or a link-time error results. The specified 'offset' must be a
-      multiple of the base alignment of the type of the block member it
-      qualifies, or a compile-time error results.
-
-      "The 'align' qualifier can only be used on block members of 'uniform' or
-      'buffer' blocks. The 'align' qualifier makes the start of each block
-      buffer have a minimum byte alignment. It does not affect the internal
-      layout within each member, which will still follow the std140 or std430
-      rules. The specified alignment must be greater than 0 and a power of 2,
-      or a compile-time error results.
-
-      "The actual alignment of a member will be the greater of the specified
-      'align' alignment and the standard (e.g., std140) base alignment for the
-      member's type. The actual offset of a member is computed as follows:
-      If 'offset' was declared, start with that offset, otherwise start with
-      the offset immediately following the preceding member (in declaration
-      order). If the resulting offset is not a multiple of the actual
-      alignment, increase it to the first offset that is a multiple of the
-      actual alignment. This results in the actual offset the member will have.
-
-      "When 'align' is applied to an array, it affects only the start of the
-      array, not the array's internal stride. Both an 'offset' and an 'align'
-      qualifier can be specified on a declaration.
-
-      "The 'align' qualifier, when used on a block, has the same effect as
-      qualifying each member with the same 'align' value as declared on the
-      block, and gets the same compile-time results and errors as if this had
-      been done. As described in general earlier, an individual member can
-      specify its own 'align', which overrides the block-level 'align', but
-      just for that member."
-
-    Remove the following preamble from section 4.7, which exists for desktop
-    versions, but not ES versions.  Removal:
-
-      "Precision qualifiers are added for code portability with OpenGL ES, not
-      for functionality. They have the same syntax as in OpenGL ES, as
-      described below, but they have no semantic meaning, which includes no
-      effect on the precision used to store or operate on variables.
-
-      "If an extension adds in the same semantics and functionality in the
-      OpenGL ES 2.0 specification for precision qualifiers, then the extension
-      is allowed to reuse the keywords below for that purpose.
-
-      "For the purposes of determining if an output from one shader stage
-      matches an input of the next stage, the precision qualifier need not
-      match."
-
-    Add:
-
-      "For interface matching, uniform variables and uniform and buffer block
-      members must have the same precision qualification. For matching *out*
-      variables or block members to *in* variables and block members, the
-      precision qualification does not have to match.
-
-      "Global variables declared in different compilation units linked into the
-      same shader stage must be declared with the same precision qualification."
-
-    More generally, all versions will follow OpenGL ES semantic rules for
-    precision qualifiers.
-
-    Section 4.7.2 Precision Qualifiers (desktop only)
-
-      Replace the table saying "none" for all precisions with this statement:
-
-        "Mediump and lowp floating-point values have the precision defined by
-        the RelaxedPrecision decoration in SPIR-V."
-
-    Section 4.7.4 Default Precision Qualifiers:
-
-      For desktop versions, replace the last three paragraphs that state the
-      default precisions with the following instead:
-
-        "All stages have default precision qualification of highp for all types
-        that accept precision qualifiers."
+    
+    Add a new paragaph stating:
+      "shared and packed layout qualifiers will be accepted but ignored.
+      The layout of the block will instead be the default layout for that
+      block type".
 
 Changes to Chapter 5 of the OpenGL Shading Language Specification
 
