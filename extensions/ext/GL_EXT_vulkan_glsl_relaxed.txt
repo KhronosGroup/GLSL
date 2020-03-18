@@ -153,146 +153,27 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
       The layout of the block will instead be the default layout for that
       block type".
 
-Changes to Chapter 5 of the OpenGL Shading Language Specification
-
-    Add a new subsection at the end of section 5.4 "Constructors":
-
-        "5.4.x Sampler Constructors
-
-        "Sampler types, like *sampler2D* can be declared with an initializer
-        that is a constructor of the same type, and consuming a texture and a
-        sampler.  For example:
-
-          layout(...) uniform sampler s;   // handle to filtering information
-          layout(...) uniform texture2D t; // handle to a texture
-          layout(...) in vec2 tCoord;
-          ...
-          texture(sampler2D(t, s), tCoord);
-
-        The result of a sampler constructor cannot be assigned to a variable:
-
-          ... sampler2D sConstruct = sampler2D(t, s);  // ERROR
-
-        Sampler constructors can only be consumed by a function parameter.
-
-        Sampler constructors of arrays are illegal:
-
-          layout(...) uniform texture2D tArray[6];
-          ...
-          ... sampler2D[](tArray, s) ...  // ERROR
-
-        Formally:
-         * every sampler type can be used as a constructor
-         * the type of the constructor must match the type of the
-           variable being declared
-         * the constructor's first argument must be a texture type
-         * the constructor's second argument must be a scalar of type
-           *sampler* or *samplerShadow*
-         * the dimensionality (1D, 2D, 3D, Cube, Rect, Buffer, MS, and Array)
-           of the texture type must match that of the constructed sampler type
-           (that is, the suffixes of the type of the first argument and the
-           type of the constructor will be spelled the same way)
-         * there is no control flow construct (e.g., "?:") that consumes any
-           sampler type
-
-         Note: Shadow mismatches are allowed between constructors and the
-         second argument. Non-shadow samplers can be constructed from
-         *samplerShadow* and shadow samplers can be constructed from *sampler*.
-
-    Change section 5.9 Expressions
-
-      Add under "The sequence (,) operator..."
-
-        "Texture and sampler types cannot be used with the sequence (,)
-        operator."
-
-      Change under "The ternary selection operator (?:)..."
-
-        "The second and third expressions can be any type, as long their types
-        match."
-
-      To
-
-        "The second and third expressions can be any type, as long their types
-        match, except for texture and sampler types, which result in a
-        compile-time error."
-
-    Add a section at the end of section 5
-
-      "5.x Specialization Constant Operations"
-
-      Only some operations discussed in this section may be applied to a
-      specialization constant and still yield a result that is as
-      specialization constant.  The operations allowed are listed below.
-      When a specialization constant is operated on with one of these
-      operators and with another constant or specialization constant, the
-      result is implicitly a specialization constant.
-
-       - int(), uint(), and bool() constructors for type conversions
-         from any of the following types to any of the following types:
-           * int
-           * uint
-           * bool
-       - vector versions of the above conversion constructors
-       - allowed implicit conversions of the above
-       - swizzles (e.g., foo.yx)
-       - The following when applied to integer or unsigned integer types:
-           * unary negative ( - )
-           * binary operations ( + , - , * , / , % )
-           * shift ( <<, >> )
-           * bitwise operations ( & , | , ^ )
-       - The following when applied to integer or unsigned integer scalar types:
-           * comparison ( == , != , > , >= , < , <= )
-       - The following when applied to the Boolean scalar type:
-           * not ( ! )
-           * logical operations ( && , || , ^^ )
-           * comparison ( == , != )
-       - The ternary operator ( ? : )
-
-Changes to Chapter 6 of the OpenGL Shading Language Specification
-
-    Remove mention of subroutine throughout, including removal of
-    section 6.1.2 Subroutines.
-
 Changes to Chapter 7 of the OpenGL Shading Language Specification
 
     Changes to section 7.1 Built-In Language Variables
 
-      Replace gl_VertexID and gl_InstanceID, for non-ES with:
+      Specify for non-ES with:
 
+        "in int gl_VertexID;"
+        "in int gl_InstanceID;"
+        are aliases for:
+        
         "in int gl_VertexIndex;"
         "in int gl_InstanceIndex;"
 
       For ES, add:
 
+        "in highp int gl_VertexID;"
+        "in highp int gl_InstanceID;"
+        are aliases for:
+        
         "in highp int gl_VertexIndex;"
         "in highp int gl_InstanceIndex;"
-
-      The following definition for gl_VertexIndex should replace the definition
-      for gl_VertexID:
-
-        "The variable gl_VertexIndex is a vertex language input variable that
-        holds an integer index for the vertex, [See issue 7 regarding which
-        name goes with which semantics] relative to a base.  While the
-        variable gl_VertexIndex is always present, its value is not always
-        defined.  See XXX in the API specification."
-
-      The following definition for gl_InstanceIndex should replace the definition
-      for gl_InstanceID:
-
-        "The variable gl_InstanceIndex is a vertex language input variable that
-        holds the instance number of the current primitive in an instanced draw
-        call, relative to a base. If the current primitive does not come from
-        an instanced draw call, the value of gl_InstanceIndex is zero."
-        [See issue 7 regarding which name goes with which semantics]
-
-    Changes to section 7.3 Built-In Constants
-
-      Add
-
-        "const int gl_MaxInputAttachments = 1;"
-
-    Remove section 7.4 Built-In Uniform State (there is none in Vulkan).
 
 Changes to Chapter 8 of the OpenGL Shading Language Specification
 
