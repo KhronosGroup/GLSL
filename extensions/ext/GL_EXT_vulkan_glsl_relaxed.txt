@@ -1,40 +1,28 @@
 Name
 
-    KHR_vulkan_glsl
+    EXT_vulkan_glsl_relaxed
 
 Name Strings
 
-    GL_KHR_vulkan_glsl
+    GL_EXT_vulkan_glsl_relaxed
 
 Contact
 
-    John Kessenich (johnkessenich 'at' google.com), Google
+    Malcolm Bechard (malcolm 'at' derivative.ca), Derivative
 
 Contributors
 
-    Jeff Bolz, NVIDIA
-    Kerch Holt, NVIDIA
-    Kenneth Benzie, Codeplay
-    Neil Henning, Codeplay
-    Neil Hickey, ARM
-    Daniel Koch, NVIDIA
-    Timothy Lottes, Epic Games
-    David Neto, Google
+    William Brown, Derivative
+    Malcolm Bechard, Derivative
 
 Notice
 
-    Copyright (c) 2015 The Khronos Group Inc. Copyright terms at
+    Copyright (c) 2020 The Khronos Group Inc. Copyright terms at
         http://www.khronos.org/registry/speccopyright.html
 
 Status
 
-    Approved by Vulkan working group 03-Dec-2015.
-    Ratified by the Khronos Board of Promoters 15-Jan-2016.
-
 Version
-
-    Last Modified Date: 16-Mar-2020
-    Revision: 48
 
 Number
 
@@ -42,6 +30,8 @@ Number
 
 Dependencies
 
+    This extension requires GL_KHR_vulkan_glsl.
+    
     This extension can be applied to OpenGL GLSL versions 1.40
     (#version 140) and higher.
 
@@ -53,44 +43,28 @@ Dependencies
 
 Overview
 
-    This is version 100 of the GL_KHR_vulkan_glsl extension.
+    This extension is built upon the new language features added by
+    GL_KHR_vulkan_glsl, but relaxes some of it's changes and restrictions
+    to allow for compiling existing OpenGL GLSL and ESSL legal shaders
+    without requiring any edits for Vulkan compliance.
 
-    This extension modifies GLSL to be used as a high-level language for the
-    Vulkan API.  GLSL is compiled down to SPIR-V, which the Vulkan API
-    consumes.
-
-    The following features are removed:
-        * default uniforms (uniform variables not inside a uniform block),
-          except for opaque types
-        * atomic-counters (those based on atomic_uint)
-        * subroutines
-        * shared and packed block layouts
-        * the already deprecated texturing functions (e.g., texture2D())
-        * the already deprecated noise functions (e.g., noise1())
-        * compatibility-mode-only features
-        * gl_DepthRangeParameters and gl_NumSamples
+    The following previously removed features are re-added:
+        * default uniforms (uniform variables not inside a uniform block).
+        * shared and packed block layouts, but they are silently ignored.
         * gl_VertexID and gl_InstanceID
-        * aliasing of vertex input components
-          (see the Vulkan API specification)
-
-    The following features are added:
-        * push-constant buffers
-        * shader-combining of separate textures and samplers
-        * descriptor sets
-        * specialization constants
-        * gl_VertexIndex and gl_InstanceIndex
-        * subpass inputs
-        * 'offset' and 'align' layout qualifiers for uniform/buffer blocks for
-          versions that did not support them
-
-    The following features are changed:
-        * precision qualifiers (mediump and lowp) will be respected for all
-          versions, not dropped for desktop versions (default precision for
-          desktop versions is highp for all types)
-        * gl_FragColor will no longer indicate an implicit broadcast
-        * arrays of uniforms and buffer blocks take only one binding number for
-          the entire object, not one per array element
-        * the default origin is origin_upper_left instead of origin_lower_left
+          
+Unsure yet:
+        * subroutines
+        * atomic-counters (those based on atomic_uint)
+        
+    The previous feature changes are re-changed:
+        * gl_FragColor will still indicate an implicit broadcast
+        * the default origin remains origin_lower_left
+        
+    New features:
+        * The type of backing used for a block, push constant or uniform
+          buffer, and the layout of the block, can be changed at compile
+          type by the user of the GLSL front-end.
 
     Each of these is discussed in more detail below.
 
@@ -106,145 +80,13 @@ Overview
     mode that has it generate SPIR-V for Vulkan.  Such tool use is outside the
     scope of using the Vulkan API and outside the definition of GLSL and this
     extension. See the documentation of the compiler to see how to request
-    generation of SPIR-V for Vulkan.
+    generation of SPIR-V for Vulkan using these rules.
 
     When a front-end is used to accept this extension, it must error check and
     reject shaders not adhering to this specification, and accept those that
-    do.  Implementation-dependent maximums and capabilities are supplied to, or
+    do. Implementation-dependent maximums and capabilities are supplied to, or
     part of, the front-end, so it can do error checking against them.
 
-    A shader can query the level of Vulkan support available, using the
-    predefined
-
-        #define VULKAN 100
-
-    This allows shader code to say, for example,
-
-        #ifdef VULKAN
-            layout(set = 1, binding = 0) uniform sampler s;
-            layout(set = 1, binding = 1) uniform texture2D t;
-            #if VULKAN > 100
-                ...
-            #endif
-        #else
-            layout(binding = 0) uniform sampler2D ts;
-        #endif
-
-    Specialization Constants
-    ------------------------
-
-    SPIR-V specialization constants, which can be set later by the client API,
-    can be declared using "layout(constant_id=...)". For example, to make a
-    specialization constant with a default value of 12:
-
-        layout(constant_id = 17) const int arraySize = 12;
-
-    Above, "17" is the ID by which the API or other tools can later refer to
-    this specific specialization constant.  The API or an intermediate tool can
-    then change its value to another constant integer before it is fully
-    lowered to executable code.  If it is never changed before final lowering,
-    it will retain the value of 12.
-
-    Specialization constants have const semantics, except they don't fold.
-    Hence, an array can be declared with 'arraySize' from above:
-
-        vec4 data[arraySize];  // legal, even though arraySize might change
-
-    Specialization constants can be in expressions:
-
-        vec4 data2[arraySize + 2];
-
-    This will make data2 be sized by 2 more than whatever constant value
-    'arraySize' has when it is time to lower the shader to executable code.
-
-    An expression formed with specialization constants also behaves in the
-    shader like a specialization constant, not a like a constant.
-
-        arraySize + 2       // a specialization constant (with no constant_id)
-
-    Such expressions can be used in the same places as a constant.
-
-    The constant_id can only be applied to a scalar *int*, a scalar *float*
-    or a scalar *bool*.
-
-    Only basic operators and constructors can be applied to a specialization
-    constant and still result in a specialization constant:
-
-        layout(constant_id = 17) const int arraySize = 12;
-        sin(float(arraySize));    // result is not a specialization constant
-
-    While SPIR-V specialization constants are only for scalars, a vector
-    can be made by operations on scalars:
-
-        layout(constant_id = 18) const int scX = 1;
-        layout(constant_id = 19) const int scZ = 1;
-        const vec3 scVec = vec3(scX, 1, scZ);  // partially specialized vector
-
-    A built-in variable can have a 'constant_id' attached to it:
-
-        layout(constant_id = 18) gl_MaxImageUnits;
-
-    This makes it behave as a specialization constant.  It is not a full
-    redeclaration; all other characteristics are left intact from the
-    original built-in declaration.
-
-    The built-in vector gl_WorkGroupSize can be specialized using special
-    layout local_size_{xyz}_id's applied to the "in" qualifier.  For example:
-
-        layout(local_size_x_id = 18, local_size_z_id = 19) in;
-
-    This leaves gl_WorkGroupSize.y as a non-specialization constant, with
-    gl_WorkGroupSize being a partially specialized vector.  Its x and z
-    components can be later specialized using the ID's 18 and 19.
-
-    Push Constants
-    --------------
-
-    Push constants reside in a uniform block declared using the new
-    layout-qualifier-id "push_constant" applied to a uniform-block declaration.
-    The API writes a set of constants to a push-constant buffer, and the shader
-    reads them from a push_constant block:
-
-        layout(push_constant) uniform BlockName {
-            int member1;
-            float member2;
-            ...
-        } InstanceName; // optional instance name
-
-        ... = InstanceName.member2; // read a push constant
-
-    The memory accounting used for the push_constant uniform block is different
-    than for other uniform blocks:  There is a separate small pool of memory
-    it must fit within.  By default, a push_constant buffer follows the std430
-    packing rules.
-
-    Descriptor Sets
-    ---------------
-
-    Each shader resource in a descriptor set is assigned a tuple of (set
-    number, binding number, array element) that defines its location within
-    a descriptor set layout.
-    In GLSL, the set number and binding number are assigned via the "set"
-    and "binding" layout qualifiers respectively, and the array element is
-    implicitly assigned consecutively starting with index equal to zero for
-    the first element of an array (and array element is zero for non-array
-    variables):
-    
-        // Assign set number = M, binding number = N, array element = 0
-        layout (set=M, binding=N) uniform sampler2D variableName;
-
-        // Assign set number = M, binding number = N for all array elements,
-        // and array element = i for the ith member of an array of size I.
-        layout (set=M, binding=N) uniform sampler2D variableNameArray[I];
-
-    For example, two combined texture/sampler objects can be declared in two
-    different descriptor sets as follows
-
-        layout(set = 0, binding = 0) uniform sampler2D ts3;
-        layout(set = 1, binding = 0) uniform sampler2D ts4;
-
-    See the API documentation for more detail on the operation model of
-    descriptor sets.
     
     Storage Images
     --------------
@@ -1716,75 +1558,4 @@ Issues
 
 Revision History
 
-    Rev.    Date         Author    Changes
-    ----  -----------    -------  --------------------------------------------
-    48    16-Mar-2020    jbolz    Remove memoryBarrierAtomicCounter()
-    47    17-Mar-2019    JohnK    Add vertex-input aliasing to list of removed
-                                  features
-    46    25-Jul-2018    JohnK    No longer require sampler constructors to
-                                  check shadow matches: mismatches are allowed
-    45    15-Dec-2017    TobiasH  moved resource binding examples in from Vulkan API spec
-    44    12-Dec-2017    jbolz    Document mapping of barrier/atomic ops to
-                                  SPIR-V
-    43    25-Oct-2017    JohnK    remove the already deprecated noise functions
-    42    07-Jul-2017    JohnK    arrays of buffers consume only one binding
-    41    05-Jul-2017    JohnK    allow std430 on push_constant declarations
-    40    21-May-2017    JohnK    Require in/out explicit locations
-    39    14-Apr-2017    JohnK    Update overview for StorageBuffer storage
-                                  class.
-    38    14-Apr-2017    JohnK    Fix Vulkan public issue #466: texture2D typo.
-    37    26-Mar-2017    JohnK    Fix glslang issue #369: remove gl_NumSamples.
-    36    13-Feb-2017    JohnK    Fix public bug 428: allow anonymous
-                                  push_constant blocks.
-    35    07-Feb-2017    JohnK    Add 'offset' and 'align' to all versions
-    34    26-Jan-2017    JohnK    Allow the ternary operator to result in a
-                                  specialization constant
-    33    30-Aug-2016    JohnK    Allow out-of-order offsets in a block
-    32     1-Aug-2016    JohnK    Remove atomic_uint and more fully subroutine
-    31    20-Jul-2016    JohnK    Have desktop versions respect mediump/lowp
-    30    12-Apr-2016    JohnK    Restrict spec-const operations to non-float
-    29     5-Apr-2016    JohnK    Clarify disallowance of spec-const arrays in
-                                  initializers
-    28     7-Mar-2016    JohnK    Make push_constants not have sets
-    27    28-Feb-2016    JohnK    Make the default by origin_upper_left
-    26    17-Feb-2016    JohnK    Expand specialized array semantics
-    25    10-Feb-2016    JohnK    Incorporate resolutions from the face to face
-    24    28-Jan-2016    JohnK    Update the resolutions from the face to face
-    23     6-Jan-2016    Piers    Remove support for gl_VertexID and
-                                  gl_InstanceID since they aren't supported by
-                                  Vulkan.
-    22    29-Dec-2015    JohnK    support old versions and add semantic mapping
-    21    09-Dec-2015    JohnK    change spelling *subpass* -> *subpassInput* and
-                                  include this and other texture/sample types in
-                                  the descriptor-set-0 default scheme
-    20    01-Dec-2015    JohnK    push_constant default to std430, opaque types
-                                  can only aggregate as arrays
-    19    25-Nov-2015    JohnK    Move "Shadow" from texture types to samplerShadow
-    18    23-Nov-2015    JohnK    Bug 15206 - Indexing of push constant arrays
-    17    18-Nov-2015    JohnK    Bug 15066: std140/std43 defaults
-    16    18-Nov-2015    JohnK    Bug 15173: subpass inputs as arrays
-    15    07-Nov-2015    JohnK    Bug 14683: new rules for separate texture/sampler
-    14    07-Nov-2015    JohnK    Add specialization operators, local_size_*_id
-                                  rules, and input dvec3/dvec4 always use two
-                                  locations
-    13    29-Oct-2015    JohnK    Rules for input att. numbers, constant_id,
-                                  and no subpassLoadMS()
-    12    29-Oct-2015    JohnK    Explain how gl_FragColor is handled
-    11     9-Oct-2015    JohnK    Add issue: where can sampler constructors be
-    10     7-Sep-2015    JohnK    Add first draft specification language
-     9     5-Sep-2015    JohnK    - make specialization id's scalar only, and
-                                    add local_size_x_id... for component-level
-                                    workgroup size setting
-                                  - address several review comments
-     8     2-Sep-2015    JohnK    switch to using the *target* style of target
-                                  types (bug 14304)
-     7    15-Aug-2015    JohnK    add overview for input targets
-     6    12-Aug-2015    JohnK    document gl_VertexIndex and gl_InstanceIndex
-     5    16-Jul-2015    JohnK    push_constant is a layout qualifier
-                                  VULKAN is the only versioning macro
-                                  constantID  -> constant_id
-     4    12-Jul-2015    JohnK    Rewrite for clarity, with proper overview,
-                                  and prepare to add full semantics
-     3    14-May-2015    JohnK    Minor changes from meeting discussion
-     2    26-Apr-2015    JohnK    Add controlling features/capabilities
-     1    26-Mar-2015    JohnK    Initial revision
+
