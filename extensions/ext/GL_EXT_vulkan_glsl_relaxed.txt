@@ -60,10 +60,6 @@ Overview
           time by the user of the GLSL front-end.
         * The set which a uniform belongs to can be changed at compile time
           by the user of the GLSL front-end.
-          
-Unresolved:
-    The previous feature changes are re-changed:
-        * the default origin remains origin_lower_left (is this possible with Vulan SPIRV-V?)
 
     Each of these is discussed in more detail below.
 
