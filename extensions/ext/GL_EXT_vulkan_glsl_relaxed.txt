@@ -124,26 +124,6 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
 
     Re-add the section 4.1.7.3 Atomic Counters
 
-*******************
-    Change section 4.4.1, under "Fragment Shader Inputs" back to
-
-      "By default, gl_FragCoord assumes a lower-left origin for window
-      coordinates ... For example, the (x, y) location (0.5, 0.5) is
-      returned for the lowerleft-most pixel in a window. The origin can be
-      changed by redeclaring gl_FragCoord with the
-      origin_upper_left identifier."
-
-    To
-
-      "The gl_FragCoord built-in variable assumes an upper-left origin for
-      window coordinates ... For example, the (x, y) location (0.5, 0.5) is
-      returned for the upper-left-most pixel in a window. The origin can be
-      explicitly set by redeclaring gl_FragCoord with the origin_upper_left
-      identifier.  It is a compile-time error to change it to
-      origin_lower_left."
-**********************
-    Remove all mention of the 'shared' and 'packed' layout qualifiers.
-    
     Add a new paragaph stating:
       "shared and packed layout qualifiers will be accepted but ignored.
       The layout of the block will instead be the default layout for that
