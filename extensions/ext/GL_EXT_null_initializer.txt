@@ -1,0 +1,150 @@
+Name
+
+  EXT_null_initializer
+
+Name Strings
+
+  GL_EXT_null_initializer
+
+Contact
+
+  Alan Baker, Google (alanbaker 'at' google.com)
+
+Contributors
+
+  Alan Baker, Google
+  Jeff Bolz, NVIDIA
+  Jason Ekstrand, Intel
+  John Kessenich, Google
+  Daniel Koch, NVIDIA
+
+Status
+
+  Draft
+
+Version
+
+  Last Modified Date:      June 11, 2020
+  Revision:                3
+
+Number
+
+  TBD
+
+Depenendencies
+
+  This extension can be applied to OpenGL GLSL versions 1.40
+  (#version 140) and higher.
+
+  This extension can be applied to OpenGL ES ESSL versions 3.10
+  (#version 310) and higher.
+
+  This extension is written against the OpenGL Shading Language
+  Specification, version 4.60 (revision 7), dated July 10, 2019
+
+  This extension requires GL_KHR_vulkan_glsl
+
+Overview
+
+  This extension adds a null initializer to GLSL and allow shared variables in
+  compute shaders to be null initiailzed. Null initializers are specified using
+  a new syntax of empty braces.
+
+New Procedures and Functions
+
+  None.
+
+New Tokens
+
+  None.
+
+Modifications to GL_KHR_vulkan_glsl
+
+  Add to the "Mapping to SPIR-V" section
+
+  Mapping shared variable initializers:
+
+    Null initializers should be generated as OpConstantNull of the variable's type.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+  Including the following line in a shader can be used to control the language
+  features described in this extension:
+
+    #extension GL_EXT_null_initialize_shared_memory : <behavior>
+
+  where <behavior> is as specified in section 3.3.
+
+  New preprocessor #defines are added to the OpenGL Shading Language:
+
+    #define GL_EXT_null_initialize_shared_memory    1
+
+  Add a new section 4.1.11.1 Null Initializers:
+
+    A null initializer is defined for the following types:
+
+    - bool: false
+    - Scalar integers: 0
+    - Scalar floating point: +0.0 (all bits 0)
+    - Composites: each member is recursively defined to be null according to their
+      constituent types
+
+   Null initialization can be achieved by using an empty brace expression. Null
+   initializers may only be used to initialize sized-types.
+
+   For example,
+
+    vec4 x = { };
+
+  In section 4.3.8 Shared Variables:
+
+  Replace the paragraph:
+
+    Variables declared as shared may not have initializers and their contents are
+    undefined at the beginning of shader execution. Any data written to shared
+    variables will be visible to other work items (executing the same shader)
+    within the same workgroup.
+
+  With:
+
+    Variables declared as shared may only have null initializers (see section 4.3.8.1).
+    Uninitialized shared variables' contents are undefined at the beginning of shader
+    execution. Any data written to shared variables will be visible to other work items
+    (executing the same shader) within the same workgroup.
+
+  In section 9 Shading Language Grammar:
+
+  Add the following rule to "initializer: ...":
+
+    initializer :
+      LEFT_BRACE RIGHT_BRACE
+
+Issues
+
+  1. How should the null initializer be specified?
+
+  Discussion: Common idioms include "{ }", "{ 0 }" and default constructors.
+  "{ 0 }" is problematic when considering structs nested inside structs.
+
+  RESOLVED. Only allow empty braces as a null initializer.
+
+  2. To what extent should null initializers be allowed?
+
+  Discussion: The tooling requirements to support null initializers is error
+  prone if they are accepted as a general initializer. Additionally, they are
+  useful beyond just shared variables.
+
+  RESOLVED. Allow null initializers generally.
+
+Revision History
+
+  Revision 1 (Alan Baker)
+    - Internal revision
+
+  Revision 2 (Alan Baker)
+    - Clarify null initializers
+
+  Revision 3 (Alan Baker)
+    - Rename extension from GL_EXT_null_initialize_shared_memory
+    - Allow null initializers generally
+    - Restrict null initializers to sized types
