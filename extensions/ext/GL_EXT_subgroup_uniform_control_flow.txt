@@ -1,0 +1,111 @@
+Name
+
+  EXT_subgroup_uniform_control_flow
+
+Name Strings
+
+  GL_EXT_subgroup_uniform_control_flow
+
+Contact
+
+  Alan Baker, Google LLC (alanbaker 'at' google.com)
+
+Contributors
+
+  Alan Baker, Google LLC
+
+Status
+
+  Draft.
+
+Version
+
+  Last Modified Date:   May 28, 2020
+  Revision: 2
+
+Number
+
+  TBD.
+
+Dependencies
+
+  This extension can be applied to OpenGL GLSL versions 1.40
+  (#version 140) and higher.
+
+  This extension can be applied to OpenGL ES ESSL versions 3.10
+  (#version 310) and higher.
+
+  This extension is written against the OpenGL Shading Language
+  Specification, version 4.60 (revision 7), dated July 10, 2019.
+
+  Interacts with GL_KHR_vulkan_glsl.
+
+  Interacts with GL_EXT_control_flow_attributes.
+
+Overview
+
+  This extension adds the ability to annotate entry points via an attribute to
+  indicate that subgroups should reconverge in the same way as invocation
+  groups.
+
+  This is done through the attribute syntax "[[ ... ]]" syntax. For example,
+    
+    void main() [[subgroup_uniform_control_flow]] { ...  }
+
+Modifications to GL_KHR_vulkan_glsl
+
+  Add to the "Mapping to SPIR-V" section:
+
+  [[subgroup_uniform_control_flow]] maps to the SubgroupUniformControlFlowKHR
+  execution mode on the entry point where the attribute is specified.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60 (revision 7)
+
+  Including the following line in a shader can be used to control the
+  language features described in this extension:
+
+    #extension GL_EXT_subgroup_uniform_control_flow : <behavior>
+
+  where <behavior> is as specified in section 3.3.
+
+  New preprocessor #defines are added to the OpenGL Shading Language:
+
+    #define GL_EXT_subgroup_uniform_control_flow     1
+
+  In Section 6.1 Function Definitions, add the paragraph:
+
+    The "subgroup_uniform_control_flow" attribute can be added to an entry
+    point definition by including the attribute between the function prototype
+    and the function body.
+
+  In Chapter 9 Shading Language Grammar:
+
+  Change the definition of function_prototype to:
+
+    function_prototype:
+      function_declarator RIGHT_PAREN
+      function_declarator RIGHT_PAREN attribute
+      attribute function_declarator RIGHT_PAREN
+      attribute function_declarator RIGHT_PAREN attribute
+
+  Add:
+
+    attribute:
+      LEFT_BRACKET LEFT_BRACKET attribute_list RIGHT_BRACKET RIGHT_BRACKET
+
+    attribute_list:
+      single_attribute
+      attribute_list COMMA single_attribute
+
+    single_attribute:
+      IDENTIFIER
+      IDENTIFIER LEFT_PAREN constant_expression RIGHT_PAREN
+
+Issues
+
+Revision History
+
+  Revision 1
+    - Internal revision
+  Revision 2
+    - Rename extension from GL_EXT_subgroup_reconvergence
