@@ -58,7 +58,7 @@ Overview
         * The type of backing used for a block, push constant or uniform
           buffer, and the layout of the block, can be changed at compile
           time by the user of the GLSL front-end.
-        * The set which a uniform belongs to can be changed at compile time
+        * The set which a uniform blocks belong to can be changed at compile time
           by the user of the GLSL front-end.
 
     Each of these is discussed in more detail below.
