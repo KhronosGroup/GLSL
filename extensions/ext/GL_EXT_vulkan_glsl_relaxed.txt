@@ -87,7 +87,8 @@ Overview
     
     All default uniforms will be silently grouped into a single anonymous
     uniform block. The type name of the block, the backing, set, and binding
-    location can all be controlled via options to the GLSL front-end.  
+    location can all be controlled via options to the GLSL front-end. If no
+    name is given, the block name will be 'gl_DefaultUniformBlock'. 
 
     Shared and Packed Block Layouts
     -------------------------------
