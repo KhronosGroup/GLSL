@@ -22,8 +22,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-03-06
-    Revision: 5
+    Last Modified Date: 2020-04-01
+    Revision: 6
 
 Dependencies
 
@@ -37,6 +37,8 @@ Dependencies
     extension, dated October 25, 2017.
 
     This extension interacts with GLSL_EXT_ray_tracing.
+
+    This extension interacts with GLSL_EXT_ray_flags_primitive_culling.
 
 Overview
 
@@ -69,8 +71,6 @@ Overview
       gl_RayFlagsCullFrontFacingTrianglesEXT -> CullFrontFacingTrianglesKHR ray flag
       gl_RayFlagsCullOpaqueEXT -> CullOpaqueKHR ray flag
       gl_RayFlagsCullNoOpaqueEXT -> CullNoOpaqueKHR ray flag
-      gl_RayFlagsSkipTrianglesEXT -> SkipTrianglesKHR ray flag
-      gl_RayFlagsSkipAABBEXT -> SkipAABBsKHR ray flag
 
       gl_RayQueryCommittedIntersectionEXT -> RayQueryCommittedIntersectionKHR enum
       gl_RayQueryCandidateIntersectionEXT -> RayQueryCandidateIntersectionKHR enum
@@ -110,11 +110,6 @@ Overview
       rayQueryGetIntersectionObjectRayOriginEXT -> OpRayQueryGetIntersectionObjectRayOriginKHR instruction
       rayQueryGetIntersectionObjectToWorldEXT -> OpRayQueryGetIntersectionObjectToWorldKHR instruction
       rayQueryGetIntersectionWorldToObjectEXT -> OpRayQueryGetIntersectionWorldToObjectKHR instruction
-
-    In addition, using this extension defines the <RayQueryProvisionalKHR>
-    capability.
-    Using the gl_RayFlagsSkipAABBEXT or gl_RayFlagsSkipTrianglesEXT flags
-    defines the <RayTraversalPrimitiveCullingProvisionalKHR> capability.
 
 Modifications to the OpenGL Shading Language Specification, Version 4.60
 
@@ -211,8 +206,6 @@ Additions to Chapter 7 of the OpenGL Shading Language Specification
     const uint gl_RayFlagsCullFrontFacingTrianglesEXT = 32U;
     const uint gl_RayFlagsCullOpaqueEXT = 64U;
     const uint gl_RayFlagsCullNoOpaqueEXT = 128U;
-    const uint gl_RayFlagsSkipTrianglesEXT = 256U;
-    const uint gl_RayFlagsSkipAABBEXT = 512U;
 
     These can be used as flags for the 'rayflags' argument for
     traceRayEXT()/rayQueryInitializeEXT() call or for comparing values to
@@ -465,6 +458,12 @@ Interactions with GLSL_EXT_ray_tracing
     definitions, and can be enabled by either extension, for use with the
     instructions added by that extension.
 
+Interactions with GL_EXT_ray_flags_primitive_culling
+
+    If GL_EXT_ray_flags_primitive_culling is supported, ray flags added
+    by this extension can be used as flags for the 'rayflags' argument
+    for rayQueryInitializeEXT() call, or the result of rayQueryGetRayFlagsEXT.
+
 Issues
 
     TBD
@@ -478,3 +477,4 @@ Revision History
      3    2020-02-12    tobias     Updates as per vulkan issue 1989 to better represent mapping to SPIR-V
      4    2020-02-25    tobias     Added missing (and fairly important!) rayQueryGetIntersectionTEXT
      5    2020-03-06    alele      Rename RayWorld to WorldRay for some builtins (#20), fix typo (!50)
+     6    2020-04-01    alele      Remove primitive culling ray flags (vulkan issue 2073)
