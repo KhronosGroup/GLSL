@@ -86,7 +86,7 @@ Overview
 
       rayQueryInitializeEXT -> OpRayQueryInitializeKHR instruction
       rayQueryProceedEXT -> OpRayQueryProceedKHR instruction
-      rayQueryTerminateEXT -> OpReportIntersectionKHR instruction
+      rayQueryTerminateEXT -> OpRayQueryTerminateKHR instruction
       rayQueryGenerateIntersectionEXT -> OpRayQueryGenerateIntersectionKHR instruction
       rayQueryConfirmIntersectionEXT -> OpRayQueryConfirmIntersectionKHR instruction
 
