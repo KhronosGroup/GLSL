@@ -53,7 +53,7 @@ Overview
     constructs:
 
         clockRealtime2x32EXT -> OpReadClockKHR with a Scope of Device, Result type of uvec2
-        clockRealtimeEXT -> OpReadClockKHR with a Scope of Device, Result type of uitn64_t
+        clockRealtimeEXT -> OpReadClockKHR with a Scope of Device, Result type of uint64_t
 
 New Procedures and Functions
 
