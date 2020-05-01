@@ -124,6 +124,7 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
         atomic_uint
 
     Re-add the section 4.1.7.3 Atomic Counters
+    Re-add the section 4.4.6.1 Atomic Counter Layout Qualifiers
 
     Add a new paragaph stating:
       "shared and packed layout qualifiers will be accepted but ignored.
