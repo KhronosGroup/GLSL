@@ -109,15 +109,17 @@ Overview
     
     atomic_uint declarations and functions inteacting with them will be
     silently converted to use storage buffers and related atomic functions.
-    The block name of the block, set, and binding location can all be 
-    controlled via options to the GLSL front-end. If no name is given,
-    the block name start with 'gl_AtomicBufferBlock'. For each binding 
-    used for the atomic_uint variables, a different buffer block will
-    be allocated and the variables will be placed within that buffer
-    using the variable's offset. For any variables with explicit bindings
-    set, the block name will have a _<binding> appended to it. Variables
-    with no explicit binding will be included in a block simply named
-    'gl_AtomicBufferBlock'.
+    For each binding used for the atomic_uint variables, a different 
+    buffer block will be allocated and the variables will be placed
+    within that buffer using the variable's offset. The block name of
+    the block and set number can all be controlled via options to the
+    GLSL front-end. If no name is given, the block name will start with
+    'gl_AtomicBufferBlock'. The block name will suffixed with '_<bindingNumber>'.
+    Where <bindingNumber> is the original binding specified for the
+    atomic_uints contained within that block. The actual binding of the
+    block may be different than what was originally specified in the shader.
+    Reflection should be used to find the final binding locations of these
+    blocks.
    
 Changes to Chapter 3 of the OpenGL Shading Language Specification
 
