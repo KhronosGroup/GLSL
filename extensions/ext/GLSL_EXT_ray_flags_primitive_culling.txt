@@ -58,8 +58,8 @@ Overview
       gl_RayFlagsSkipTrianglesEXT -> SkipTrianglesKHR ray flag
       gl_RayFlagsSkipAABBEXT -> SkipAABBsKHR ray flag
 
-    Using this extension defines the <RayTraversalPrimitiveCullingProvisionalKHR> 
-    capability.
+    Using this extension and declaring 'layout(primitive_culling)' enables
+    the <RayTraversalPrimitiveCullingProvisionalKHR> capability.
 
 Modifications to the OpenGL Shading Language Specification, Version 4.60
 
@@ -99,6 +99,11 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
     Add a new subsection to Section 4.4
 
     4.4.10 Primitive Culling Layout Qualifier
+
+    This layout qualifier enables <RayTraversalPrimitiveCullingProvisionalKHR>
+    capability which allows use of gl_RayFlagsSkipTrianglesEXT and
+    gl_RayFlagsSkipAABBEXT or their corresponding constant values. Behavior
+    is undefined if these values are used without the layout qualifier.
 
     This layout qualifier can only be applied at global scope
     and without an interface-qualifier.
