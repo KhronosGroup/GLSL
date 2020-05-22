@@ -100,12 +100,12 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
 
     4.4.10 Primitive Culling Layout Qualifier
 
-    This layout qualifier can only be applied only at global scope
+    This layout qualifier can only be applied at global scope
     and without an interface-qualifier.
 
     It is a compile-time error to use this qualifier with an
-    interface-qualifier, on a block or member, or with any other
-    layout qualifiers.
+    interface-qualifier, on an interface block or member of an interface
+    block, or with any other layout qualifiers.
 
 
 Additions to Chapter 7 of the OpenGL Shading Language Specification
