@@ -190,6 +190,16 @@ Changes to Chapter 12 of the OpenGL Shading Language Specification
         version 4.5 or above.)
       * gl_VertexID and gl_InstanceID (more detail follows)
   
+  Modify section 12.2.5. (Mapping Variables)
+  
+  Changes the lines:
+    in gl_VertexID (OpenGL only)
+    in gl_InstanceID (OpenGL only)
+    
+  to:
+    in gl_VertexID (Alias for gl_VertexIndex)
+    in gl_InstanceID (Alias for gl_InstanceIndex)
+  
 Revision History
 
 
