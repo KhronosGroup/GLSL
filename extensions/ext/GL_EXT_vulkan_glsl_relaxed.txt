@@ -40,6 +40,9 @@ Dependencies
 
     All these versions map GLSL/ESSL semantics to the same SPIR-V 1.0
     semantics (approximating the most recent versions of GLSL/ESSL).
+    
+    This extension is written against the OpenGL Shading Language
+    Specification, Version 4.60.7, Wed, 10 Jul 2019.
 
 Overview
 
