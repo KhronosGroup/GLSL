@@ -157,7 +157,7 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
 
 Changes to Chapter 7 of the OpenGL Shading Language Specification
 
-    Changes to section 7.1.1 (Built-In Language Variables)
+    Modify section 7.1.1 (Built-In Language Variables)
 
       Replace the lines for non-ES with:
 
@@ -174,6 +174,21 @@ Changes to Chapter 7 of the OpenGL Shading Language Specification
      Add the paragraph:
        gl_VertexID and gl_InstanceID are aliases for gl_VertexIndex and
        gl_InstanceIndex respectively.
+       
+Changes to Chapter 12 of the OpenGL Shading Language Specification
+
+  Modify section 12.1 (Feature Comparisons)
+    
+    Remove the line:
+    
+      * shared and packed block layouts
+
+    Remove the lines:
+      * Default uniforms, for non-opaque types: The UniformConstant storage class can 
+        be used on individual variables at global scope. (That is, uniforms don’t have 
+        to be in a block, unless they are built-in members that are in block in GLSL
+        version 4.5 or above.)
+      * gl_VertexID and gl_InstanceID (more detail follows)
   
 Revision History
 
