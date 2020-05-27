@@ -107,7 +107,7 @@ Overview
     in GL_EXT_vulkan_glsl. They will include the base offset like the
     GL_EXT_vulkan_glsl behavior.
     
-    Atomic Integers
+    Atomic Counters
     ---------------
     
     atomic_uint declarations and functions inteacting with them will be
@@ -124,26 +124,29 @@ Overview
     Reflection should be used to find the final binding locations of these
     blocks.
    
-Changes to Chapter 3 of the OpenGL Shading Language Specification
-
-    Move the following keywords in section 3.6 Keywords back out of
-    reserved section:
-
-        atomic_uint
-
 Changes to Chapter 4 of the OpenGL Shading Language Specification
 
-    Re-add the entry from the table in section 4.1 Basic Types:
+    Modify section 4.1.7 (Opaque Types)
+    In the seciotn 'Atomic Counters', remove the line
 
-        atomic_uint
+      Atomic counter types are not available when targeting Vulkan.
 
-    Re-add the section 4.1.7.3 Atomic Counters
-    Re-add the section 4.4.6.1 Atomic Counter Layout Qualifiers
+    Modify section 4.4.5 (Uniform and Shader Storage Block Layout Qualifiers)
+      
+    Remove the paragraphs describing the of the 'shared' and 'packed' layout qualifiers.
+      
+    Add the paragraph:
+      
+      Use of the 'shared' and 'packed' layout qualifiers will be silently ignored. The
+      default layout for the block type will be used when these qualifiers are encountered.
+      
+    Modify the section 4.4.7 (Atomic Counter Layout Qualifiers)
 
-    Add a new paragaph stating:
-      "shared and packed layout qualifiers will be accepted but ignored.
-      The layout of the block will instead be the default layout for that
-      block type".
+    Add a paragraph at the end:
+    
+      Atomic Conters will be grouped into storage blocks with a name prefixed with
+      gl_AtomicBufferBlock_ and the suffix being the binding number of the uniforms
+      that were grouped into that block.
 
 Changes to Chapter 7 of the OpenGL Shading Language Specification
 
@@ -166,15 +169,7 @@ Changes to Chapter 7 of the OpenGL Shading Language Specification
         
         "in highp int gl_VertexIndex;"
         "in highp int gl_InstanceIndex;"
-
-    Re-add section 8.10 Atomic-Counter Functions
-
-    Re-add the entry from the table in section 8.17 Shader Memory Control
-    Functions:
-
-        void memoryBarrierAtomicCounter()
-
-    
+  
 Revision History
 
 
