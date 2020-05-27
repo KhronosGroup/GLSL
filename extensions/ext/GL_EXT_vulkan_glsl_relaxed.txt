@@ -157,25 +157,23 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
 
 Changes to Chapter 7 of the OpenGL Shading Language Specification
 
-    Changes to section 7.1 Built-In Language Variables
+    Changes to section 7.1.1 (Built-In Language Variables)
 
-      Specify for non-ES with:
+      Replace the lines for non-ES with:
 
-        "in int gl_VertexID;"
-        "in int gl_InstanceID;"
-        are aliases for:
+        in int gl_VertexID; // only present when not targeting Vulkan
+        in int gl_InstanceID; // only present when not targeting Vulkan
         
-        "in int gl_VertexIndex;"
-        "in int gl_InstanceIndex;"
-
-      For ES, add:
-
-        "in highp int gl_VertexID;"
-        "in highp int gl_InstanceID;"
-        are aliases for:
+      with:
         
-        "in highp int gl_VertexIndex;"
-        "in highp int gl_InstanceIndex;"
+        in int gl_VertexID; // Alias for gl_VertexIndex when targetting Vulkan
+        in int gl_InstanceID; // Alias for gl_InstanceIndex when targetting Vulkan
+        
+     Remove the paragraphs defining gl_VertexID and gl_InstanceID.
+     
+     Add the paragraph:
+       gl_VertexID and gl_InstanceID are aliases for gl_VertexIndex and
+       gl_InstanceIndex respectively.
   
 Revision History
 
