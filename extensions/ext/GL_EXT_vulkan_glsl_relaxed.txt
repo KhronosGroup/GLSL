@@ -127,9 +127,16 @@ Overview
 Changes to Chapter 4 of the OpenGL Shading Language Specification
 
     Modify section 4.1.7 (Opaque Types)
-    In the seciotn 'Atomic Counters', remove the line
+    In the seciotn 'Atomic Counters', remove the line:
 
       Atomic counter types are not available when targeting Vulkan.
+
+    Modify the section 4.3.5 (Uniform Variables)
+    
+    Remove the line:
+      
+      When targeting Vulkan, it is a compile-time error to declare uniform
+      variables outside a block.
 
     Modify section 4.4.5 (Uniform and Shader Storage Block Layout Qualifiers)
       
