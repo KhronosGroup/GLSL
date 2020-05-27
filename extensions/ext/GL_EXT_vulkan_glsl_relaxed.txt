@@ -137,6 +137,11 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
       
       When targeting Vulkan, it is a compile-time error to declare uniform
       variables outside a block.
+      
+    Add the line:
+      
+      Uniforms variables delcared outside a block will implicitly be grouped into
+      a uniform block named 'gl_DefaultUniformBlock'.
 
     Modify section 4.4.5 (Uniform and Shader Storage Block Layout Qualifiers)
       
