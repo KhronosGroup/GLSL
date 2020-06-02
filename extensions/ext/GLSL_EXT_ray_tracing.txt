@@ -31,7 +31,7 @@ Status
 Version
 
     Last Modified Date: 2020-06-05
-    Revision: 13
+    Revision: 14
 
 Dependencies
 
@@ -63,6 +63,8 @@ Dependencies
     This extension interacts with GL_EXT_nonuniform_qualifier.
 
     This extension interacts with GL_EXT_ray_flags_primitive_culling.
+
+    This extension interacts with GL_NV_shader_sm_builtins.
 
 Overview
 
@@ -140,6 +142,18 @@ Overview
 
       shadercallcoherent -> NonPrivate{Pointer,Texel}KHR + Make{Pointer,Texel}{Available,Visible}KHR with scope = ShaderCallKHR
 
+      Any of the following built-in variables:
+        - gl_SubgroupInvocationID, gl_SubgroupEqMask, gl_SubgroupGeMask,
+          gl_SubgroupGtMask, gl_SubgroupLeMask, and gl_SubgroupLtMask,
+        - gl_SubGroupInvocationARB, gl_SubGroupEqMaskARB, gl_SubGroupGeMaskARB,
+          gl_SubGroupGtMaskARB, gl_SubGroupLeMaskARB, gl_SubGroupLtMaskARB
+        - gl_WarpIDNV, gl_SMIDNV
+      used in the ray generation, closest-hit, miss, intersection, and callable
+      shader stages should also
+        - be decorated with Volatile if GL_KHR_memory_scope_semantics is not
+          enabled
+        - use the Volatile memory semantics for any OpLoad into one of these
+          variables if GL_KHR_memory_scope_semantics is enabled
 
 Modifications to the OpenGL Shading Language Specification, Version 4.60
 
@@ -774,6 +788,17 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     The results of subgroup operations (such as ballot) and invocation-level
     clock operations may not be consistent across an invocation repack function
     and care must be exercised when using these with shader calls.
+    [[if GL_KHR_shader_subgroup is supported::]]
+    The gl_SubgroupInvocationID, gl_SubgroupEqMask, gl_SubgroupGeMask,
+    gl_SubgroupGtMask, gl_SubgroupLeMask, and gl_SubgroupLtMask variables must
+    be treated as volatile across shader calls.
+    [[if GL_ARB_shader_ballot is supported::]]
+    The gl_SubGroupInvocationARB, gl_SubGroupEqMaskARB, gl_SubGroupGeMaskARB,
+    gl_SubGroupGtMaskARB, gl_SubGroupLeMaskARB, gl_SubGroupLtMaskARB variables
+    must be treated as volatile across shader calls.
+    [[if GL_NV_shader_sm_builtins is supported::]]
+    The gl_WarpIDNV and gl_SMIDNV variables must be treated as volatile across
+    shader calls.
     [[end]]
 
     Syntax:
@@ -1015,6 +1040,12 @@ Interactions with GL_NV_shader_subgroup_partitioned
     the ray generation, intersection, any-hit, closest-hit, miss, and callable
     shading languages.
 
+Interactions with GL_NV_shaders_sm_builtins
+
+    If GL_NV_shader_sm_builtins is supported, the builtin variables added by
+    this extension are available in the ray generation, intersection, any-hit,
+    closest-hit, miss, and callable shading languages.
+
 Interactions with GL_ARB_shader_ballot
 
     If GL_ARB_shader_ballow is supported, the builtin variables and functions
@@ -1139,3 +1170,5 @@ Revision History
                                    and callableDataEXT/callableDataInEXT, grammatical fixes
     13    2020-06-05    dgkoch     further grammatical and typo fixes, fix descriptions of
                                    gl_LaunchIDEXT and gl_LaunchSizeEXT, fix example.
+    14    2020-06-02    dgkoch     Add interactions with GL_NV_shader_sm_builtins.
+                                   Add volatile recommendations for subgroup and sm builtins.
