@@ -1,0 +1,145 @@
+Name
+
+    EXT_ray_flags_primitive_culling
+
+Name Strings
+
+    GL_EXT_ray_flags_primitive_culling
+
+Contact
+
+    Daniel Koch (dkoch 'at' nvidia.com), NVIDIA
+
+Contributors
+
+    Ashwin Lele, NVIDIA
+    Tobias Hector, AMD
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date: 2020-05-21
+    Revision: 2
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.60
+    (#version 460) and higher.
+
+    This extension is written against revision 5 of the OpenGL Shading Language
+    version 4.60, dated September 4, 2017.
+
+    This extension interacts with GL_EXT_ray_tracing.
+
+    This extension interacts with GL_EXT_ray_query.
+
+Overview
+
+    This extension document modifies GLSL to add a layout qualifier and
+    additional integer constants which can be used as ray flags under ray
+    tracing or ray query extensions.
+    
+
+    This extension document adds support for the following extensions to be used
+    within GLSL:
+
+    - GL_EXT_ray_flags_primitive_culling - 
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+      gl_RayFlagsSkipTrianglesEXT -> SkipTrianglesKHR ray flag
+      gl_RayFlagsSkipAABBEXT -> SkipAABBsKHR ray flag
+
+    Using this extension and declaring 'layout(primitive_culling)' enables
+    the <RayTraversalPrimitiveCullingProvisionalKHR> capability.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_ray_flags_primitive_culling : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+    New preprocessor #defines are added:
+
+      #define GL_EXT_ray_flags_primtive_culling          1
+
+
+Additions to Chapter 4 of the OpenGL Shading Language Specification
+(Variables and Types)
+
+    Modify Section 4.4, Layout Qualifiers
+
+    Modify the sentence that begins with "They can also appear with
+    just an interface-qualifier" to add "or even without one"
+
+    (Add additional line)
+    layout-qualifier;
+
+
+    Modify table in Section 4.4 (Layout Qualifiers)
+
+
+    Layout Qualifier    Qualifier  Individual   Block    Block      Allowed
+                          Only      Variable             Member    Interface
+    -----------------   ---------  ----------   ------   ------    ---------
+
+    primitive_culling      X                                         None
+
+
+    Add a new subsection to Section 4.4
+
+    4.4.10 Primitive Culling Layout Qualifier
+
+    This layout qualifier enables <RayTraversalPrimitiveCullingProvisionalKHR>
+    capability which allows use of gl_RayFlagsSkipTrianglesEXT and
+    gl_RayFlagsSkipAABBEXT or their corresponding constant values. Behavior
+    is undefined if these values are used without the layout qualifier.
+
+    This layout qualifier can only be applied at global scope
+    and without an interface-qualifier.
+
+    It is a compile-time error to use this qualifier with an
+    interface-qualifier, on an interface block or member of an interface
+    block, or with any other layout qualifiers.
+
+
+Additions to Chapter 7 of the OpenGL Shading Language Specification
+(Built-in Variables)
+
+    Modify Section 7.3, Built-in Constants
+
+    Add a new subsection 7.3.x, "Fixed Constants"
+
+    The following constants are provided in all shader stages when this
+    extension is enabled
+
+    const uint gl_RayFlagsSkipTrianglesEXT = 256U;
+    const uint gl_RayFlagsSkipAABBEXT = 512U;
+
+
+Interactions with GL_EXT_ray_tracing/GL_EXT_ray_query
+
+    Ray flags added by this extension can be used as flags for 'rayflags'
+    argument for  traceRayEXT()/rayQueryInitializeEXT() call or for comparing 
+    values to gl_IncomingRayFlagsEXT or the result of rayQueryGetRayFlagsEXT.
+
+Issues
+
+    TBD
+
+Revision History
+
+    Rev.  Date          Author     Changes
+    ----  -----------   ------     -------------------------------------------
+     2    2020-05-21    alele      Add 'primitive_culling' layout qualifier
+     1    2020-04-01    alele      Initial draft

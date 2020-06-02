@@ -29,8 +29,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-02-22
-    Revision: 10
+    Last Modified Date: 2020-04-01
+    Revision: 11
 
 Dependencies
 
@@ -60,6 +60,8 @@ Dependencies
     This extension interacts with GL_KHR_memory_scope_semantics.
 
     This extension interacts with GL_EXT_nonuniform_qualifier.
+
+    This extension interacts with GL_EXT_ray_flags_primitive_culling.
 
 Overview
 
@@ -125,8 +127,6 @@ Overview
       gl_RayFlagsCullFrontFacingTrianglesEXT -> CullFrontFacingTrianglesKHR ray flag
       gl_RayFlagsCullOpaqueEXT -> CullOpaqueKHR ray flag
       gl_RayFlagsCullNoOpaqueEXT -> CullNoOpaqueKHR ray flag
-      gl_RayFlagsSkipTrianglesEXT -> SkipTrianglesKHR ray flag
-      gl_RayFlagsSkipAABBEXT -> SkipAABBsKHR ray flag
 
       gl_HitKindFrontFacingTriangleEXT -> HitKindFrontFacingTriangleKHR hit kind
       gl_HitKindBackFacingTriangleEXT -> HitKindBackFacingTriangleKHR hit kind
@@ -139,10 +139,6 @@ Overview
 
       shadercallcoherent -> NonPrivate{Pointer,Texel}KHR + Make{Pointer,Texel}{Available,Visible}KHR with scope = ShaderCallKHR
 
-    In addition, using this extension defines the <RayTracingProvisionalKHR>
-    capability.
-    Using the gl_RayFlagsSkipAABBEXT or gl_RayFlagsSkipTrianglesEXT flags
-    defines the <RayTraversalPrimitiveCullingProvisionalKHR> capability.
 
 Modifications to the OpenGL Shading Language Specification, Version 4.60
 
@@ -740,8 +736,6 @@ Additions to Chapter 7 of the OpenGL Shading Language Specification
     const uint gl_RayFlagsCullFrontFacingTrianglesEXT = 32U;
     const uint gl_RayFlagsCullOpaqueEXT = 64U;
     const uint gl_RayFlagsCullNoOpaqueEXT = 128U;
-    const uint gl_RayFlagsSkipTrianglesEXT = 256U;
-    const uint gl_RayFlagsSkipAABBEXT = 512U;
 
     These can be used as flags for the 'rayflags' argument for traceRayEXT() call,
     or for comparing value to gl_IncomingRayFlagsEXT.
@@ -1041,6 +1035,12 @@ Interactions with GL_EXT_nonuniform_qualifier
     accelerationStructureEXT can be indexed with non-unform integral
     expressions when they are decorated with the nonuniformEXT qualifier.
 
+Interactions with GL_EXT_ray_flags_primitive_culling
+
+    If GL_EXT_ray_flags_primitive_culling is supported, ray flags added
+    by this extension can be used as flags for the 'rayflags' argument
+    for traceRayEXT() call, or for comparing value to gl_IncomingRayFlagsEXT.
+
 Issues
 
     1) Do we need to specify the GL_EXT_ray_tracing as enabled for these new
@@ -1117,10 +1117,10 @@ Revision History
                                    Add gl_HitKind*FacingTriangleEXT constants.
      5    2019-11-24    dgkoch     Add interactions with KHR_memory_scope_semantics.
      6    2019-11-27    dgkoch     Allow arrays of acceleration structures to have
-                                   non-uniform indexing (vulkan #1673)
                                    non-uniform indexing (vulkan #1673).
      7    2020-02-19    alele      Added mat3x4 versions of gl_ObjectToWorld and
                                    gl_WorldToObject (GLSL #17)
      8    2020-02-20    ewerness   Miss shaders do not have gl_ObjectRay* parameters (GLSL #18)
      9    2020-02-21    tobias     Clarified interactions with GLSL_EXT_ray_query
     10    2020-02-22    tobias     gl_HitTEXT now maps to RayTmaxKHR
+    11    2020-04-01    alele      Remove primitive culling ray flags (vulkan issue 2073)
