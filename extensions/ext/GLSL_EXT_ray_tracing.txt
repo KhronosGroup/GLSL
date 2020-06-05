@@ -22,6 +22,7 @@ Contributors
     Daniel Koch, NVIDIA
     Tobias Hector, AMD
     Boris Zanin, Mobica
+    Tyler Nowicki, Huawei
 
 Status
 
@@ -29,8 +30,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-04-01
-    Revision: 11
+    Last Modified Date: 2020-06-05
+    Revision: 13
 
 Dependencies
 
@@ -342,9 +343,9 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
 
     4.3.X rayPayloadEXT Variables
 
-    These are allowed only in ray generation, closest-hit, and miss shaders only. 
+    These are allowed only in ray generation, closest-hit, and miss shaders.
     It is a compile time error to use them in any other stage. They can be both read
-    to and written in ray generation, closest-hit, and miss shaders. They cannot have
+    from and written to in ray generation, closest-hit, and miss shaders. They cannot have
     any other storage qualifiers. It is a compile-time error to declare unsized arrays
     of this type.
 
@@ -353,8 +354,9 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
 
     These are allowed only in intersection, any-hit, and closest-hit shaders.
     It is a compile-time error to use them in any other stage. They can be read
-    in any-hit, and closest-hit shaders. They can be written to only in intersection
-    shaders. There can be only a single variable at global scope with this qualifier
+    in any-hit, and closest-hit shaders. They can be written to and read from
+    only in intersection shaders (values are undefined before being written to).
+    There can be only a single variable at global scope with this qualifier
     in stages where this qualifier is permitted. If multiple variables are present,
     the results of reportIntersectionEXT() are undefined. They cannot have any other
     storage qualifiers. It is a compile-time error to declare unsized arrays
@@ -373,9 +375,9 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
 
     4.3.X rayPayloadInEXT Variables
 
-    These are allowed only in any-hit, closest-hit, and miss shaders only.
+    These are allowed only in any-hit, closest-hit, and miss shaders.
     It is a compile-time error to use them in any other stage.
-    They can be read to and written in any-hit, closest-hit, and miss shaders
+    They can be read from and written to in any-hit, closest-hit, and miss shaders
     There can be only a single variable at global scope with this qualifier in
     stages where this qualifier is permitted. If multiple variables are present
     results of accessing these variables are undefined.
@@ -387,17 +389,17 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
 
     4.3.X callableDataEXT Variables
 
-    These are allowed only in ray generation, closest-hit, miss and callable shaders
-    only. It is a compile-time error to use them in any other stage. They can be
-    both read and written to in supported stages. They cannot have any other storage
+    These are allowed only in ray generation, closest-hit, miss and callable shaders.
+    It is a compile-time error to use them in any other stage. They can be both read
+    from and written to in the supported stages. They cannot have any other storage
     qualifiers. It is a compile-time error to declare unsized arrays of this type.
 
 
     4.3.X callableDataInEXT Variables
 
     These are allowed only in callable shaders. It is a compile-time error to use them
-    in any other stage. They can be both read and written to in callable shaders. They
-    cannot have any other storage qualifiers. There can be only a single variable
+    in any other stage. They can be both read from and written to in callable shaders.
+    They cannot have any other storage qualifiers. There can be only a single variable
     at global scope with this qualifier. If multiple variables are present, result
     of accessing these variables is undefined. It is a compile-time error to declare
     unsized arrays of this type.
@@ -619,16 +621,18 @@ Additions to Chapter 7 of the OpenGL Shading Language Specification
     Add the following description for gl_LaunchIDEXT:
 
     The input variable gl_LaunchIDEXT is available in the ray generation,
-    intersection, any-hit, closest-hit, and miss languages to specify the index
-    of the work item being processed. One work item is generated for each of
-    the width times height times depth items dispatched by a vkCmdTraceRaysKHR call.
+    intersection, any-hit, closest-hit, miss, and callable languages to
+    specify the index of the work item being processed. One work item is
+    generated for each of the <width> times <height> times <depth> items
+    dispatched by a vkCmdTraceRaysKHR call.
     All shader invocations inherit the same value for gl_LaunchIDEXT.
 
     Add the following description for gl_LaunchSizeEXT:
 
-    gl_LaunchSizeEXT is available in the ray generation, intersection, any-hit,
-    closest-hit, and miss shaders to specify the <width> and <height>
-    dimensions passed into a vkCmdTraceRaysKHR call.
+    The input variable gl_LaunchSizeEXT is available in the ray generation,
+    intersection, any-hit, closest-hit, miss, and callable languages to
+    specify the <width> and <height> and <depth> dimensions passed into a
+    vkCmdTraceRaysKHR call.
 
     Add the following description for gl_PrimitiveID:
 
@@ -869,7 +873,7 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     shader binding table. Refer to Ray Tracing chapter of Vulkan specification
     for details.
 
-    <callable> is a compile-time constant used to select an shader defined structure
+    <callable> is a compile-time constant used to select a shader defined structure
     containing data that will be passed to a callable shader stage and can be accessed
     for reading and writing by the callable. It is possible for a shader to contain
     multiple invocations of executeCallableEXT() using different types, as long as the
@@ -890,7 +894,7 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     layout(location = 0) callableDataEXT float blendColor;
     layout(binding = 0, set = 0) uniform accelerationStructureEXT acc;
     layout(binding = 1, rgba32f) uniform image2D img;
-    layout(binding = 1, set = 0) uniform rayParams
+    layout(binding = 2, set = 0) uniform rayParams
     {
         vec3 rayOrigin;
         vec3 rayDir;
@@ -972,7 +976,7 @@ Interactions with GL_KHR_memory_scope_semantics
     Modify the new section "Scope and Semantics" and add the following constant
     integer value:
 
-        const inst gl_ScopeShaderCallEXT = 6;
+        const int gl_ScopeShaderCallEXT = 6;
 
     Modify section 8.12 Image Functions and add "shadercallcoherent" to the
     list of memory qualifiers that are implicitly accepted.
@@ -1130,3 +1134,8 @@ Revision History
      9    2020-02-21    tobias     Clarified interactions with GLSL_EXT_ray_query
     10    2020-02-22    tobias     gl_HitTEXT now maps to RayTmaxKHR
     11    2020-04-01    alele      Remove primitive culling ray flags (vulkan issue 2073)
+    12    2020-06-04    tnowicki   Remove mentions of any-hit shader being able to access
+                                   rayPayloadEXT, clarify relationships rayPayloadEXT/rayPayloadInEXT
+                                   and callableDataEXT/callableDataInEXT, grammatical fixes
+    13    2020-06-05    dgkoch     further grammatical and typo fixes, fix descriptions of
+                                   gl_LaunchIDEXT and gl_LaunchSizeEXT, fix example.
