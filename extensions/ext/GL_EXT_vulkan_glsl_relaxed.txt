@@ -156,7 +156,7 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
 
     Add a paragraph at the end:
     
-      Atomic Conters will be grouped into storage blocks with a name prefixed with
+      Atomic Counters will be grouped into storage blocks with a name prefixed with
       gl_AtomicBufferBlock_ and the suffix being the binding number of the uniforms
       that were grouped into that block.
 
