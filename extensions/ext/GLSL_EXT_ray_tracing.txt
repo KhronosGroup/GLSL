@@ -30,8 +30,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-06-05
-    Revision: 14
+    Last Modified Date: 2020-06-09
+    Revision: 15
 
 Dependencies
 
@@ -141,6 +141,8 @@ Overview
       executeCallableEXT -> OpExecuteCallableKHR instruction
 
       shadercallcoherent -> NonPrivate{Pointer,Texel}KHR + Make{Pointer,Texel}{Available,Visible}KHR with scope = ShaderCallKHR
+
+      accelerationStructureEXT constructor -> OpConvertUToAccelerationStructureKHR
 
       Any of the following built-in variables:
         - gl_SubgroupInvocationID, gl_SubgroupEqMask, gl_SubgroupGeMask,
@@ -535,6 +537,37 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
     along with shaderRecordEXT. These blocks can only be read from and not written to.
     It is a compile-time error to modify members of such blocks. These blocks are initialized
     by a separate API as specified in Ray Tracing chapter of the Vulkan specification.
+
+
+Modifications to Chapter 5 of the OpenGL Shading Language Specification
+(Operators and Expressions)
+
+    Modify section 5.4.1 (Conversion and Scalar Constructors)
+
+    Add to the end of the section:
+
+      Acceleration structure types can be constructed only from a single uint64_t
+      value or from a uvec2 value. Other types cannot be constructed from
+      acceleration structure types.
+
+      example:
+
+        layout(shaderRecordEXT) buffer sbt
+        {
+            uint64_t as_va;
+            uvec2    as_va2;
+        };
+
+        void main()
+        {
+            ...
+            if (some_condition) {
+                traceRayEXT(accelerationStructureEXT(as_va), ... );
+            } else {
+                traceRayEXT(accelerationStructureEXT(as_va2), ... );
+            }
+            ...
+        }
 
 
 Additions to Chapter 7 of the OpenGL Shading Language Specification
@@ -1172,3 +1205,5 @@ Revision History
                                    gl_LaunchIDEXT and gl_LaunchSizeEXT, fix example.
     14    2020-06-02    dgkoch     Add interactions with GL_NV_shader_sm_builtins.
                                    Add volatile recommendations for subgroup and sm builtins.
+    15    2020-06-09    dgkoch     Add the ability to construct accelerationStructureEXT type from
+                                   uint64_t or uvec2.
