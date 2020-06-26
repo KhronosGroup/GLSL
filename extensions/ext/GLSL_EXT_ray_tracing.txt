@@ -145,10 +145,12 @@ Overview
       accelerationStructureEXT constructor -> OpConvertUToAccelerationStructureKHR
 
       Any of the following built-in variables:
-        - gl_SubgroupInvocationID, gl_SubgroupEqMask, gl_SubgroupGeMask,
-          gl_SubgroupGtMask, gl_SubgroupLeMask, and gl_SubgroupLtMask,
-        - gl_SubGroupInvocationARB, gl_SubGroupEqMaskARB, gl_SubGroupGeMaskARB,
-          gl_SubGroupGtMaskARB, gl_SubGroupLeMaskARB, gl_SubGroupLtMaskARB
+        - gl_SubgroupSize, gl_SubgroupInvocationID, gl_SubgroupEqMask,
+          gl_SubgroupGeMask, gl_SubgroupGtMask, gl_SubgroupLeMask,
+          gl_SubgroupLtMask,
+        - gl_SubGroupSizeARB, gl_SubGroupInvocationARB, gl_SubGroupEqMaskARB,
+          gl_SubGroupGeMaskARB, gl_SubGroupGtMaskARB, gl_SubGroupLeMaskARB,
+          gl_SubGroupLtMaskARB
         - gl_WarpIDNV, gl_SMIDNV
       used in the ray generation, closest-hit, miss, intersection, and callable
       shader stages should also
@@ -822,13 +824,15 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     clock operations may not be consistent across an invocation repack function
     and care must be exercised when using these with shader calls.
     [[if GL_KHR_shader_subgroup is supported::]]
-    The gl_SubgroupInvocationID, gl_SubgroupEqMask, gl_SubgroupGeMask,
-    gl_SubgroupGtMask, gl_SubgroupLeMask, and gl_SubgroupLtMask variables must
-    be treated as volatile across shader calls.
+    The gl_SubgroupSize, gl_SubgroupInvocationID, gl_SubgroupEqMask,
+    gl_SubgroupGeMask, gl_SubgroupGtMask, gl_SubgroupLeMask, and
+    gl_SubgroupLtMask variables must be treated as volatile across shader
+    calls.
     [[if GL_ARB_shader_ballot is supported::]]
-    The gl_SubGroupInvocationARB, gl_SubGroupEqMaskARB, gl_SubGroupGeMaskARB,
-    gl_SubGroupGtMaskARB, gl_SubGroupLeMaskARB, gl_SubGroupLtMaskARB variables
-    must be treated as volatile across shader calls.
+    The gl_SubGroupSizeARB, gl_SubGroupInvocationARB, gl_SubGroupEqMaskARB,
+    gl_SubGroupGeMaskARB, gl_SubGroupGtMaskARB, gl_SubGroupLeMaskARB, and
+    gl_SubGroupLtMaskARB variables must be treated as volatile across shader
+    calls.
     [[if GL_NV_shader_sm_builtins is supported::]]
     The gl_WarpIDNV and gl_SMIDNV variables must be treated as volatile across
     shader calls.
