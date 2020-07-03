@@ -22,8 +22,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-04-01
-    Revision: 6
+    Last Modified Date: 2020-07-03
+    Revision: 7
 
 Dependencies
 
@@ -59,7 +59,7 @@ Overview
     expected way for an implementation to map GLSL constructs to SPIR-V
     constructs:
 
-      rayQueryEXT type -> OpTypeRayQueryProvisionalKHR instruction
+      rayQueryEXT type -> OpTypeRayQueryKHR instruction
       accelerationStructureEXT type -> OpTypeAccelerationStructureKHR instruction
 
       gl_RayFlagsNoneEXT -> NoneKHR ray flag
@@ -82,7 +82,7 @@ Overview
       gl_RayQueryCandidateIntersectionTriangleEXT -> RayQueryCandidateIntersectionTriangleKHR flag
       gl_RayQueryCandidateIntersectionAABBEXT -> RayQueryCandidateIntersectionAABBKHR flag
 
-      rayQueryEXT variable -> OpVariable instruction with type OpTypeRayQueryProvisionalKHR
+      rayQueryEXT variable -> OpVariable instruction with type OpTypeRayQueryKHR
 
       rayQueryInitializeEXT -> OpRayQueryInitializeKHR instruction
       rayQueryProceedEXT -> OpRayQueryProceedKHR instruction
@@ -478,3 +478,4 @@ Revision History
      4    2020-02-25    tobias     Added missing (and fairly important!) rayQueryGetIntersectionTEXT
      5    2020-03-06    alele      Rename RayWorld to WorldRay for some builtins (#20), fix typo (!50)
      6    2020-04-01    alele      Remove primitive culling ray flags (vulkan issue 2073)
+     7    2020-07-03    dgkoch     Fix SPIR-V mapping for rayQueryEXT
