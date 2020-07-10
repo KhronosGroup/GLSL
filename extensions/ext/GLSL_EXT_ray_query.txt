@@ -22,8 +22,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-07-03
-    Revision: 7
+    Last Modified Date: 2020-07-10
+    Revision: 8
 
 Dependencies
 
@@ -249,8 +249,9 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     <rayFlags> is any combination of built-in constants as defined in
     Section 7.3.x "Fixed Constants"
 
-    <cullMask> is an 8 bit mask which specifies the instances to be intersected
-    i.e visible to the traced ray. This mask will be combined with the mask field
+    <cullMask> is a mask which specifies the instances to be intersected
+    i.e visible to the traced ray. Only the 8 least-significant bits are used;
+    other bits are ignored. This mask will be combined with the mask field
     specified in VkGeometryInstanceKHR as defined in the Ray Traversal chapter of
     Vulkan Specification using a bitwise AND operation. The instance is visible 
     only if the result of the operation is non-zero. The upper 24 bits of this 
@@ -479,3 +480,4 @@ Revision History
      5    2020-03-06    alele      Rename RayWorld to WorldRay for some builtins (#20), fix typo (!50)
      6    2020-04-01    alele      Remove primitive culling ray flags (vulkan issue 2073)
      7    2020-07-03    dgkoch     Fix SPIR-V mapping for rayQueryEXT
+     8    2020-07-10    tobias     Clarify valid bits for some parameters (GLSL !63)

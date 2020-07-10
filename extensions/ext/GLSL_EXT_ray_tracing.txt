@@ -30,8 +30,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-06-09
-    Revision: 15
+    Last Modified Date: 2020-07-10
+    Revision: 16
 
 Dependencies
 
@@ -868,8 +868,9 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     <rayFlags> is any combination of built-in constants as defined in
     Section 7.3.2 "Built-In Constants".
 
-    <cullMask> is an 8 bit mask which specifies the instances to be intersected
-    i.e visible to the traced ray. This mask will be combined with the mask field
+    <cullMask> is a mask which specifies the instances to be intersected
+    i.e visible to the traced ray. Only the 8 least-significant bits are used;
+    other bits are ignored. This mask will be combined with the mask field
     specified in VkGeometryInstanceKHR as defined in the Ray Tracing chapter of Vulkan
     Specification using a bitwise AND operation. The instance is visible only if
     the result of the operation is non-zero. The upper 24 bits of this value are
@@ -888,11 +889,13 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
     The <sbtRecordOffset> and <sbtRecordStride> parameters influence the
     computation of record indices of the <shader binding table> that locate
-    the intersection, any-hit, and closest-hit shaders during a trace query. See
+    the intersection, any-hit, and closest-hit shaders during a trace query. Only
+    the 4 least-significant bits are used; other bits are ignored. See
     the Ray Tracing chapter of the Vulkan specification for more information.
 
     The <missIndex> parameter influences computation of indices into the
-    <shader binding table> to locate a miss shader during a trace query. See
+    <shader binding table> to locate a miss shader during a trace query. Only
+    the 16 least-significant bits are used; other bits are ignored. See
     the Ray Tracing chapter of the vulkan specification for more information.
 
     Syntax:
@@ -1211,3 +1214,4 @@ Revision History
                                    Add volatile recommendations for subgroup and sm builtins.
     15    2020-06-09    dgkoch     Add the ability to construct accelerationStructureEXT type from
                                    uint64_t or uvec2.
+    16    2020-07-10    tobias     Clarify valid bits for some parameters (GLSL !63)
