@@ -1,0 +1,1020 @@
+Name
+
+    EXT_spirv_intrinsics
+
+Name Strings
+
+    GL_EXT_spirv_intrinsics
+
+Contact
+
+    Tobias Hector, AMD (tobias.hector 'at' amd.com)
+
+Contributors
+
+    Tobias Hector, AMD
+    Matthaeus Chajdas, AMD
+    Rex Xu, AMD
+    Qun Lin, AMD
+    Nicolai Haehnle, AMD
+    Jason Ekstrand, Intel
+    Christoph Kubisch, NVidia
+    Alan Baker, Google
+    Contributors to the GLSL_EXT_debug_printf extension (for literal string grammar)
+
+Status
+
+    Draft.
+
+Version
+
+    Revision: 7
+    Last Modified Date: 2021-03-02
+
+Dependencies
+
+    This extension is written against version 4.60.7 of the
+    OpenGL Shading Language Specification, dated July 10, 2019.
+
+Overview
+
+    This extension allows shaders to invoke SPIR-V features that have
+    not been integrated into GLSL directly or even understood by the GLSL
+    compiler, via use of new qualifiers for instructions, types, execution
+    modes, decorations, capabilities, and extensions.
+    
+    It does not add the ability to define new shader types, or any language
+    features that don't have a reasonable match between the languages.
+    
+    The intent of this extension is to improve the iteration time when
+    developing a new feature - new functionality can be used in GLSL
+    without having to modify glslang, beyond defining a "header" file.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60.7
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_EXT_spirv_intrinsics : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+        #define GL_EXT_spirv_intrinsics         1
+
+Additions to Chapter 3 of the OpenGL Shading Language Specification
+(Basics)
+
+    Modify Section 3.1 Character Set and Phases of Compilation
+
+    Add to the list of supported characters:
+
+        single quote ('), double quote ("), backslash (\)
+
+    Replace the paragraph "There are no character or string data types, so
+    no quoting characters are included" with:
+
+        There are no character or string data types, but literal strings can be
+        used. A literal string is an initial double quote character, followed by
+        a sequence of characters and escape sequences, followed by a final double
+        quote character. An escape sequence is a short sequence of characters
+        contained within a string literal where the first character of the
+        sequence is a backslash. The escape sequences and character they are
+        treated as are:
+
+         - \'   ->  single quote
+         - \"   ->  double quote
+         - \?   ->  question mark
+         - \\   ->  backslash
+         - \a   ->  alert (ASCII 0x07)
+         - \b   ->  backspace (ASCII 0x08)
+         - \f   ->  page break (ASCII 0x0C)
+         - \n   ->  new line (ASCII 0x0A)
+         - \r   ->  carriage return (ASCII 0x0D)
+         - \t   ->  horizontal tab (ASCII 0x09)
+         - \v   ->  vertical tab (ASCII 0x0B)
+         - \xhh ->  'hh' interpreted as a hexadecimal number
+         - \nnn ->  'nnn' interpreted as an octal number
+
+        Octal escape sequences consist of one, two, or three octal digits, and end
+        at the first character that is not an octal digit or at the third octal
+        digit, whichever comes first.
+
+        Hexadecimal escape sequences have one or more hex digits, and end at the
+        first character that is not a hex digit.
+
+        If the octal or hexadecimal value is greater than 127, then the escape
+        sequence has an undefined value.
+
+    Modify Section 3.3, Preprocessor
+    
+    Change the following sentence on page 11 to include the "GL_" prefix,
+    from:
+    
+        By convention, all macro names containing two consecutive
+        underscores (__) are reserved for use by underlying software layers.
+        
+    to:
+        
+        By convention, all macro names containing two consecutive
+        underscores (__) or prefixed with “GL_” (“GL” followed by a single
+        underscore) are reserved for use by underlying software layers.
+
+    Remove the following sentence on page 11:
+    
+        All macro names prefixed with “GL_” (“GL” followed by a single
+        underscore) are also reserved, and defining or undefining such a
+        name results in a compile-time error.
+
+    Add the following to the end of this section:
+
+        Additional compiler macros are available indicating the current shader type.
+
+        When compiling a vertex shader, the following predefined macro is available:
+
+            #define GL_VERTEX_SHADER 1
+
+        When compiling a fragment shader, the following predefined macro is available:
+
+            #define GL_FRAGMENT_SHADER 1
+
+        When compiling a geometry shader, the following predefined macro is available:
+
+            #define GL_GEOMETRY_SHADER 1
+
+        When compiling a tessellation control shader, the following predefined macro is available:
+
+            #define GL_TESSELLATION_CONTROL_SHADER 1
+
+        When compiling a tessellation evaluation shader, the following predefined macro is available:
+
+            #define GL_TESSELLATION_EVALUATION_SHADER 1
+
+    [[If GL_EXT_ray_tracing is supported]]
+        When compiling a ray generation shader, the following predefined macro is available:
+
+            #define GL_RAY_GENERATION_SHADER_EXT 1
+
+        When compiling an intersection shader, the following predefined macro is available:
+
+            #define GL_INTERSECTION_SHADER_EXT 1
+
+        When compiling an any-hit shader, the following predefined macro is available:
+
+            #define GL_ANY_HIT_SHADER_EXT 1
+
+        When compiling a closest hit shader, the following predefined macro is available:
+
+            #define GL_CLOSEST_HIT_SHADER_EXT 1
+
+        When compiling a miss shader, the following predefined macro is available:
+
+            #define GL_MISS_SHADER_EXT 1
+
+        When compiling a callable shader, the following predefined macro is available:
+
+            #define GL_CALLABLE_SHADER_EXT 1
+
+    [[End GL_EXT_ray_tracing]]
+
+    [[If GL_NV_mesh_shader is supported]]
+        When compiling a task shader, the following predefined macro is available:
+
+            #define GL_TASK_SHADER_NV 1
+
+        When compiling a mesh shader, the following predefined macro is available:
+
+            #define GL_MESH_SHADER_NV 1
+
+    [[End GL_NV_mesh_shader]]
+
+    Modify Section 3.6, Keywords
+
+    Add the following keywords:
+
+        spirv_instruction spirv_execution_mode spirv_execution_mode_id
+        spirv_decorate spirv_decorate_id spirv_decorate_string
+        spirv_type spirv_storage_class spirv_by_reference
+        spirv_literal
+        
+    Modify Section 3.7, Identifiers:
+    
+    Remove the following paragraph on page 21:
+
+        Identifiers starting with “gl_” are reserved, and in general, may
+        not be declared in a shader; this results in a compile-time error.
+        However, as noted in the specification, there are some cases where
+        previously declared variables can be redeclared, and predeclared
+        “gl_” names are allowed to be redeclared in a shader only for these
+        specific purposes.
+        
+    Add a new paragraph at the end of section 3.7:
+
+        By convention, all identifiers prefixed with “gl_” are reserved for
+        use by underlying software layers.
+        Defining such an identifier in a shader does not itself result in
+        an error, but may result in unintended behaviors that stem from
+        having multiple definitions of the same name.
+        However, as noted in the specification, there are some cases where
+        previously declared variables can be redeclared, and predeclared
+        “gl_” names are allowed to be redeclared in a shader for these
+        specific purposes with defined behavior.
+
+    Add a new section 3.9, SPIR-V Requirements
+    
+        SPIR-V intrinsics used by a shader may be defined by extensions, or
+        guarded by capabilities.
+        Each intrinsic can take a list of extensions and capabilities which
+        must be enabled in the generated spir-v in order to use that
+        intrinsic.
+    
+        spirv-requirements-list:
+            spirv-requirements-parameter
+            spirv-requirements-parameter , spirv-requirements-list
+        
+        spirv-requirements-parameter:
+            capabilities = [ spirv-capability-list ]
+            extensions = [ spirv-extension-list ]
+
+        spirv-capability-list:
+
+            integer-constant
+            integer-constant , spirv-capability-list
+
+        spirv-extension-list:
+
+            literal-string
+            literal-string , spirv-extension-list
+
+        The `extensions` qualifier declares a list of SPIR-V extensions
+        that are required to use this instruction.
+        An *OpExtension* instruction will be inserted into the generated
+        SPIR-V code for each declared extension with the string parameter
+        as its `Name` operand, if it is not already present.
+
+        The `capabilities` qualifier declares a list of SPIR-V capabilities
+        that are required to use this instruction.
+        An *OpCapability* instruction will be inserted into the generated
+        SPIR-V code for each declared capability with the integer parameter
+        as its `Capability` operand, if it is not already present.
+
+    Add a new section 3.9, SPIR-V Execution Mode Declarations
+
+        The `spirv_execution_mode` and `spirv_execution_mode_id` qualifiers
+        can be used to define specific execution modes used by the
+        generated SPIR-V.
+        These qualifiers must be declared at global scope.
+
+        spirv_execution_mode-qualifier:
+        
+            `spirv_execution_mode` ( integer-constant-expression )
+            `spirv_execution_mode` ( integer-constant-expression, spirv_execution_mode-parameter-list )
+            `spirv_execution_mode` ( spirv-requirements-list, integer-constant-expression )
+            `spirv_execution_mode` ( spirv-requirements-list, integer-constant-expression, spirv_execution_mode-parameter-list )
+            
+            `spirv_execution_mode_id` ( integer-constant-expression )
+            `spirv_execution_mode_id` ( integer-constant-expression, spirv_execution_mode_id-parameter-list )
+            `spirv_execution_mode_id` ( spirv-requirements-list, integer-constant-expression )
+            `spirv_execution_mode_id` ( spirv-requirements-list, integer-constant-expression, spirv_execution_mode_id-parameter-list )
+
+        spirv_execution_mode-parameter-list:
+
+            spirv_execution_mode-parameter
+            spirv_execution_mode-parameter , spirv_execution_mode-parameter-list
+
+        spirv_execution_mode-parameter:
+
+            floating-constant
+            integer-constant
+            bool-constant
+            literal-string
+
+        spirv_execution_mode_id-parameter-list:
+
+            constant-expression
+            constant-expression , spirv_execution_mode_id-parameter-list
+
+        The `spirv_execution_mode` qualifier declares a SPIR-V execution mode
+        used by this shader.
+        An *OpExecutionMode* instruction will be inserted into the generated
+        SPIR-V code taking the first integer parameter as its `Mode` operand,
+        and subsequent operands used as its `Extra Operands`, in the same
+        order they are declared.
+
+        The `spirv_execution_mode_id` qualifier is similar to
+        `spirv_execution_mode`, but allows the use of constant expressions
+        rather than only literals, and generates an *OpExecutionModeId*
+        instruction instead.
+        Parameters to this qualifier must be constant expressions as defined
+        in section 4.3.3, Constant Expressions. 
+
+        Any extensions or capabilities needed by the execution mode
+        must be declared using SPIR-V Requirements Declarations
+        (see section 3.9).
+
+Additions to Chapter 4 of the OpenGL Shading Language Specification
+(Variables and Types)
+
+    Modify section 4.3, editing the first table in this section to include
+    the following entry:
+
+        +-----------------------+----------------------------------------+
+        | Storage Qualifier     | Meaning                                |
+        +-----------------------+----------------------------------------+
+        | spirv_storage_class() | Storage class defined for SPIR-V only. |
+        +-----------------------+----------------------------------------+
+
+    Modify section 4.3.9. Interface Blocks, adding the following to the
+    definition of interface-qualifier:
+
+        interface-qualifier:
+            `spirv_storage_class` ( integer-constant-expression )
+            `spirv_storage_class` ( spirv-requirements-list, integer-constant-expression )
+
+    Add new subsection 4.3.10. SPIR-V Storage Classes
+
+        SPIR-V storage classes not known to or exposed by the GLSL compiler
+        can be applied to variables declared at global scope by use of the
+        `spirv_storage_class` qualifier.
+
+        This functionality is only available when generating SPIR-V.
+
+        The `spirv_storage_class` qualifier can only be used on variable
+        declarations at global scope.
+
+        spirv_storage_class-qualifier:
+
+            `spirv_storage_class` ( integer-constant-expression )
+            `spirv_storage_class` ( spirv-requirements-list, integer-constant-expression )
+
+        The `spirv_storage_class` modifies the *StorageClass* operand of
+        declared variables to be the storage class defined for the
+        *StorageClass* enumeration equal to the integer value provided.
+
+        Any extensions or capabilities needed by the storage class must be
+        declared using SPIR-V Requirements Declarations (see section 3.9).
+
+    Add a new section 4.14. SPIR-V Decorations
+
+        SPIR-V decorations not known to or exposed by the GLSL compiler can
+        be added by use of the `spirv_decorate`, `spirv_decorate_id`, or
+        `spirv_decorate_string` qualifiers.
+
+        This functionality is only available when generating SPIR-V.
+
+        The `spirv_decorate`, `spirv_decorate_id`, and
+        `spirv_decorate_string` qualifiers can be used on variable
+        declarations, function parameters, function return types,
+        and expressions (with "constructor" syntax).
+        `spirv_decorate_id` must not be used on structure member
+        declarations, but `spirv_decorate` and `spirv_decorate_string` can.
+
+        spirv_decorate-qualifier:
+
+            `spirv_decorate` ( integer-constant, spirv_decorate-parameter-list )
+            `spirv_decorate` ( spirv-requirements-list , integer-constant, spirv_decorate-parameter-list )
+            `spirv_decorate_id` ( integer-constant, spirv_decorate_id-parameter-list  )
+            `spirv_decorate_id` ( spirv-requirements-list , integer-constant, spirv_decorate_id-parameter-list  )
+            `spirv_decorate_string` ( integer-constant, spirv_decorate_string-parameter-list )
+            `spirv_decorate_string` ( spirv-requirements-list , integer-constant, spirv_decorate_string-parameter-list )
+
+        spirv_decorate-parameter-list:
+
+            spirv_decorate-parameter
+            spirv_decorate-parameter , spirv_decorate-parameter-list
+
+        spirv_decorate-parameter:
+
+            floating-constant
+            integer-constant
+            bool-constant
+
+        spirv_decorate_id-parameter-list:
+
+            constant-expression
+            constant-expression , spirv_decorate_id-parameter-list
+
+        spirv_decorate_string-parameter-list:
+
+            literal-string
+            literal-string , spirv_decorate_string-parameter-list
+
+        The `spirv_decorate` qualifier inserts an *OpDecorate* or
+        *OpMemberDecorate* instruction into the generated SPIR-V code,
+        taking the first integer parameter as its `Decoration` operand,
+        and further parameters as `Extra Operands`.
+        If the `spirv_decorate` qualifier is applied to a struct member,
+        *OpMemberDecorate* is inserted, otherwise *OpDecorate* is.
+        Integer and floating point values used must be expressible in a
+        32-bit range.
+        An error will be generated if the front-end compiler detects a
+        value outside of the 32-bit range.
+
+        The `spirv_decorate_id` qualifier inserts an *OpDecorateId*
+        instruction into the generated SPIR-V code, taking the first
+        integer parameter as its `Decoration` operand, and further
+        parameters as `Extra Operands`.
+        Parameters to this qualifier must be constant expressions as defined
+        in section 4.3.3, Constant Expressions.
+
+        The `spirv_decorate_string` qualifier inserts an *OpDecorateString*
+        or *OpMemberDecorateString* instruction into the generated SPIR-V
+        code, taking the first integer parameter as its `Decoration`
+        operand, the first string as the first `Literal` string argument,
+        and string parameters as `Optional Literals`.
+        If the `spirv_decorate_string` qualifier is applied to a struct
+        member, *OpMemberDecorateString* is inserted, otherwise
+        *OpDecorateString* is.
+
+        Any extensions or capabilities needed by the decoration must be
+        declared using SPIR-V Requirements Declarations (see section 3.9).
+
+        Multiple `spirv_decoration` qualifiers can be added to a single
+        declaration or expression.
+
+    Add a new section 4.14. SPIR-V Types
+
+        SPIR-V types not known to or exposed by the GLSL compiler can
+        be added by use of the `spirv_type` specifier.
+
+        This functionality is only available when generating SPIR-V.
+
+        The `spirv_type()` specifier can be used in place of a type name
+        for variable declarations.
+
+        spirv_type-specifier:
+
+            `spirv_type` ( spirv_instruction-qualifier-list )
+            `spirv_type` ( spirv_instruction-qualifier-list, spirv_type-parameter-list )
+            `spirv_type` ( spirv-requirements-list, spirv_instruction-qualifier-list )
+            `spirv_type` ( spirv-requirements-list, spirv_instruction-qualifier-list, spirv_type-parameter-list )
+
+        spirv_type-parameter-list:
+
+            spirv_type-parameter
+            spirv_type-parameter , spirv_type-parameter-list
+
+        spirv_type-parameter:
+
+            constant-expression
+            literal
+
+        spirv_instruction-qualifier-list:
+
+            spirv_instruction-qualifier
+            spirv_instruction-qualifier , spirv_instruction-qualifier-list
+
+        spirv_instruction-qualifier:
+
+            set = literal-string
+            id = integer-constant-expression
+
+        The `set` qualifier indicates the name of an extended
+        instruction set that the type's instruction belongs to.
+        If the `set` qualifier is omitted, or the string is empty,
+        no extended instruction set will be imported, and the instruction will
+        be selected from the core instruction set.
+
+        The `id` is the id of the type instruction in the selected
+        instruction set.
+
+        Parameters to this qualifier must be either literal values, or constant
+        expressions as defined in section 4.3.3, Constant Expressions.
+
+        When generating SPIR-V, the compiler will generate type
+        instructions for these types in the following manner:
+
+          * If any variable is declared with a SPIR-V type that requires an
+            extended instruction set (declared with the `set` qualifier),
+            it will add an *OpExtInstImport* instruction with the same
+            literal string.
+          * For variables declared with a SPIR-V type that requires an
+            extended instruction set, an *OpExtInst* instruction will be
+            inserted into the resulting SPIR-V, declaring the type.
+          * For variables declared with a SPIR-V type that is defined by
+            instructions in the core instruction set, an instruction with
+            the declared `id` will be inserted into the resulting SPIR-V.
+
+        Any extensions or capabilities needed by the type must be declared
+        using SPIR-V Requirements Declarations (see section 3.9).
+
+        Types declared in this way do not implicitly allow any usage other
+        than variable declaration and as function parameters, and cannot be
+        l-values.
+        When used as parameters in user-defined functions, spir-v will
+        always use pass-by-reference semantics (as if all the declaration
+        used the `spirv_by_reference` qualifier).
+        The `spirv_by_reference` qualifier must: still be present on
+        functions defined by the `spirv_instruction` qualifier that require
+        it.
+
+Additions to Chapter 6 of the OpenGL Shading Language Specification
+(Statements and Structure)
+
+    Modify section 6.1.1, Function Calling Conventions
+    
+        In the definition of `parameter-qualifier`, add the following:
+        
+            spirv_by_reference spirv_literal
+            
+        At the end of this section, add the following text:
+
+            When generating SPIR-V, the `spirv_by_reference` qualifier indicates
+            to the compiler that the variable should be passed as a SPIR-V
+            pointer rather than generating *OpLoad*/*OpStore* instructions
+            for the underlying object.
+            
+            When generating SPIR-V, the `spirv_literal` qualifier indicates
+            to the compiler that the variable should be compiled to a literal
+            value rather than a variable or constant with an id. Values passed
+            to such a parameter must be integer, boolean, or floating-point
+            constant expressions in the 32-bit range which can be evaluated by
+            the compiler front-end, and must not involve specialization
+            constants.
+            An error will be generated if the front-end compiler cannot generate
+            a literal 32-bit value.
+            Unlike `spirv_by_reference`, `spirv_literal` can only be used on
+            functions defined with `spirv_instruction`, and are invalid on
+            user-defined functions.
+
+    Add a new section 6.1.3, SPIR-V Instructions
+
+        SPIR-V instructions not known to or exposed by the GLSL compiler can be
+        accessed by use of the `spirv_instruction` qualifier, provided the shader
+        author knows the function signature and the id for the instruction
+        they want to use.
+        If the instruction is part of an extended instruction set, its name must
+        also be provided.
+
+        This functionality is only available when generating SPIR-V.
+
+        The `spirv_instruction` qualifier must always be used with a function
+        declaration that has a return type and parameters matching those of the
+        desired instruction.
+        If any parameters of the instruction should be passed by pointer
+        rather than by object, those parameters should additionally be
+        decorated with `spirv_by_reference`.
+        If any parameters of the instruction are literals, those parameters
+        should additionally be decorated with `spirv_literal`.
+
+        spirv_instruction-qualifier:
+
+            `spirv_instruction` ( spirv_instruction-qualifier-list )
+            `spirv_instruction` ( spirv-requirements-list, spirv_instruction-qualifier-list )
+
+        spirv_instruction-qualifier-list:
+
+            spirv_instruction-qualifier-id
+            spirv_instruction-qualifier-id , spirv_instruction-qualifier-list
+
+        spirv_instruction-qualifier-id:
+
+            set = literal-string
+            id = integer-constant-expression
+
+        The `set` qualifier indicates the name of an extended
+        instruction set that the instruction belongs to.
+        If the `set` qualifier is omitted, or the string is empty,
+        no extended instruction set will be imported, and the instruction will
+        be selected from the core instruction set.
+
+        The `id` is the id of the instruction in the selected instruction
+        set.
+
+        When generating SPIR-V, the compiler will generate additional
+        instructions for these instructions in the following manner:
+
+          * If any instruction requires an extended instruction set (declared
+            with the `set` qualifier), it will add an
+            *OpExtInstImport* instruction with the same literal string.
+          * For instructions requiring an extended instruction set, an
+            *OpExtInst* instruction will be inserted into the resulting SPIR-V.
+          * For instructions in the core instruction set, an instruction with
+            the declared `id` will be inserted into the resulting SPIR-V.
+
+        Any extensions or capabilities needed by the instruction must be
+        declared using SPIR-V Requirements Declarations (see section 3.9).
+
+Additions to Chapter 9 of the OpenGL Shading Language Specification
+(Shading Language Grammar)
+
+    Add the following tokens:
+
+        SPIRV_INSTRUCTION SPIRV_EXECUTION_MODE SPIRV_EXECUTION_MODE_ID
+        SPIRV_DECORATE SPIRV_DECORATE_ID SPIRV_DECORATE_STRING
+        SPIRV_STORAGE_CLASS SPIRV_BY_REFERENCE SPIRV_LITERAL
+
+    Add the following new rules:
+
+        spirv-requirements-list:
+            spirv-requirements-parameter
+            spirv-requirements-parameter COMMA spirv-requirements-list
+        
+        spirv-requirements-parameter:
+            IDENTIFIER EQUAL LEFT_BRACKET spirv-extension-list RIGHT_BRACKET
+            IDENTIFIER EQUAL LEFT_BRACKET spirv-capability-list RIGHT_BRACKET
+
+        spirv-capability-list:
+            INTCONSTANT
+            INTCONSTANT COMMA spirv-capability-list
+            
+        spirv-extension-list:
+            STRING_LITERAL
+            STRING_LITERAL COMMA spirv-extension-list
+        
+        spirv_execution_mode-qualifier:
+
+            SPIRV_EXECUTION_MODE LEFT_PAREN INTCONSTANT RIGHT_PAREN
+            SPIRV_EXECUTION_MODE LEFT_PAREN INTCONSTANT COMMA spirv_execution_mode-parameter-list RIGHT_PAREN
+            SPIRV_EXECUTION_MODE LEFT_PAREN spirv-requirements-list COMMA INTCONSTANT  RIGHT_PAREN
+            SPIRV_EXECUTION_MODE LEFT_PAREN spirv-requirements-list COMMA INTCONSTANT COMMA spirv_execution_mode-parameter-list RIGHT_PAREN
+            SPIRV_EXECUTION_MODE_ID LEFT_PAREN INTCONSTANT RIGHT_PAREN
+            SPIRV_EXECUTION_MODE_ID LEFT_PAREN INTCONSTANT COMMA spirv_execution_mode_id-parameter-list RIGHT_PAREN
+            SPIRV_EXECUTION_MODE_ID LEFT_PAREN INTCONSTANT COMMA spirv-requirements-list RIGHT_PAREN
+            SPIRV_EXECUTION_MODE_ID LEFT_PAREN INTCONSTANT COMMA spirv-requirements-list COMMA spirv_execution_mode_id-parameter-list RIGHT_PAREN
+
+        spirv_execution_mode-parameter-list:
+
+            spirv_execution_mode-parameter
+            spirv_execution_mode-parameter COMMA spirv_execution_mode-parameter-list
+
+        spirv_execution_mode-parameter:
+
+            FLOATCONSTANT
+            INTCONSTANT
+            UINTCONSTANT
+            BOOLCONSTANT
+            STRING_LITERAL
+
+        spirv_execution_mode_id-parameter-list:
+
+            constant-expression
+            constant-expression COMMA spirv_execution_mode_id-parameter-list
+
+        spirv_decorate-qualifier:
+
+            SPIRV_DECORATE LEFT_PAREN integer-constant COMMA spirv_decorate-parameter-list RIGHT_PAREN
+            SPIRV_DECORATE LEFT_PAREN spirv-requirements-list COMMA integer-constant COMMA spirv_decorate-parameter-list RIGHT_PAREN
+            SPIRV_DECORATE_ID LEFT_PAREN integer-constant COMMA spirv_decorate_id-parameter-list  RIGHT_PAREN
+            SPIRV_DECORATE_ID LEFT_PAREN spirv-requirements-list COMMA integer-constant COMMA spirv_decorate_id-parameter-list  RIGHT_PAREN
+            SPIRV_DECORATE_STRING LEFT_PAREN integer-constant COMMA spirv_decorate_string-parameter-list RIGHT_PAREN
+            SPIRV_DECORATE_STRING LEFT_PAREN spirv-requirements-list COMMA integer-constant COMMA spirv_decorate_string-parameter-list RIGHT_PAREN
+
+        spirv_decorate-parameter-list:
+
+            spirv_decorate-parameter
+            spirv_decorate-parameter COMMA spirv_decorate-parameter-list
+
+        spirv_decorate-parameter:
+
+            FLOATCONSTANT
+            INTCONSTANT
+            UINTCONSTANT
+            BOOLCONSTANT
+
+        spirv_decorate_id-parameter-list:
+
+            constant-expression
+            spirv_decorate_id-parameter-list COMMA constant-expression
+
+        spirv_decorate_string-parameter-list:
+
+            STRING_LITERAL
+            STRING_LITERAL COMMA spirv_decorate_string-parameter-list
+
+        spirv_type-specifier:
+
+            SPIRV_TYPE LEFT_PAREN spirv_instruction-qualifier-list RIGHT_PAREN
+            SPIRV_TYPE LEFT_PAREN spirv_instruction-qualifier-list COMMA spirv_type-parameter-list RIGHT_PAREN
+            SPIRV_TYPE LEFT_PAREN spirv-requirements-list COMMA spirv_instruction-qualifier-list RIGHT_PAREN
+            SPIRV_TYPE LEFT_PAREN spirv-requirements-list COMMA spirv_instruction-qualifier-list COMMA spirv_type-parameter-list RIGHT_PAREN
+
+        spirv_type-parameter-list:
+
+            spirv_type-parameter
+            spirv_type-parameter COMMA spirv_type-parameter-list
+
+        spirv_type-parameter:
+
+            constant-expression
+            INTCONSTANT
+            UINTCONSTANT
+            FLOATCONSTANT
+            BOOLCONSTANT
+            DOUBLECONSTANT
+
+        spirv_instruction-qualifier:
+
+            SPIRV_INSTRUCTION LEFT_PAREN spirv_instruction-qualifier-list RIGHT_PAREN
+            SPIRV_INSTRUCTION LEFT_PAREN spirv-requirements-list COMMA spirv_instruction-qualifier-list RIGHT_PAREN
+
+        spirv_instruction-qualifier-list:
+
+            spirv_instruction-qualifier-id
+            spirv_instruction-qualifier-id COMMA spirv_instruction-qualifier-list
+
+        spirv_instruction-qualifier-id:
+
+            IDENTIFIER EQUAL STRING_LITERAL
+            IDENTIFIER EQUAL constant_expression
+
+        spirv_storage_class-qualifier:
+            `spirv_storage_class` LEFT_PAREN integer-constant-expression RIGHT_PAREN
+            `spirv_storage_class` LEFT_PAREN spirv-requirements-list COMMA integer-constant-expression RIGHT_PAREN
+
+    Under the rule for storage_qualifier, add:
+    
+        spirv_storage_class-qualifier
+
+    Under the rule for single_type_qualifier, add:
+
+        spirv_storage_class-qualifier
+        spirv_decorate-qualifier
+        SPIRV_BY_REFERENCE
+        SPIRV_LITERAL
+
+    Under the rule for function_identifier, add:
+
+        spirv_decorate-qualifier
+
+    Under the rule for declaration, add:
+
+        spirv_instruction-qualifier function_prototype SEMICOLON
+        spirv_execution_mode-qualifier SEMICOLON
+
+    Under the rule for type_specifier_nonarray, add:
+
+        spirv_type-specifier
+
+Examples
+
+    Defining GL_ARB_shader_stencil_export via this extension:
+
+        #if defined(GL_FRAGMENT_SHADER)
+        #define GL_ARB_shader_stencil_export 1
+
+        spirv_execution_mode(extensions = ["SPV_EXT_shader_stencil_export"], capabilities = [5013], 5027);     
+
+        spirv_decorate (extensions = ["SPV_EXT_shader_stencil_export"], capabilities = [5013], 11, 5014)        
+        out int gl_FragStencilRefARB; 
+        #endif
+
+    Defining GL_EXT_shader_realtime_clock via this extension:
+
+        #define GL_EXT_shader_realtime_clock 1
+
+        uvec2 clockRealtime2x32EXT(void) {
+            spirv_instruction (extensions = ["SPV_KHR_shader_clock"], capabilities = [5055], id = 5056);
+            uvec2 clockRealtime2x32EXT_internal(uint scope);
+            
+            return clockRealtime2x32EXT_internal(1 /*Device scope*/);
+        }
+
+        #if defined(GL_EXT_shader_explicit_arithmetic_types_int64) || defined(GL_ARB_gpu_shader_int64) || defined(GL_AMD_gpu_shader_int64)
+        uint64_t clockRealtimeEXT(void) {
+            spirv_instruction (extensions = ["SPV_KHR_shader_clock"], capabilities = [5055], id = 5056);
+            uint64_t clockRealtimeEXT_internal(uint scope);
+            
+            return clockRealtimeEXT_internal(1 /*Device scope*/);
+        }
+        #endif
+
+    Defining GL_AMD_shader_trinary_minmax via this extension:
+
+        #define GL_AMD_shader_trinary_minmax 1
+
+        spirv_instruction (extensions = ["SPV_AMD_shader_trinary_minmax"], set = "SPV_AMD_shader_trinary_minmax", id = 1)
+        float min3(float x, float y, float z);
+        spirv_instruction (extensions = ["SPV_AMD_shader_trinary_minmax"], set = "SPV_AMD_shader_trinary_minmax", id = 1)
+        vec2 min3(vec2 x, vec2 y, vec2 z);
+        spirv_instruction (extensions = ["SPV_AMD_shader_trinary_minmax"], set = "SPV_AMD_shader_trinary_minmax", id = 1)
+        vec3 min3(vec3 x, vec3 y, vec3 z);
+        spirv_instruction (extensions = ["SPV_AMD_shader_trinary_minmax"], set = "SPV_AMD_shader_trinary_minmax", id = 1)
+        vec4 min3(vec4 x, vec4 y, vec4 z);
+
+        ...
+
+        // Note: This extension has more than 200 instruction variants, and for brevity they are not all listed here.
+
+    Defining GL_AMD_shader_explicit_vertex_parameter via this extension:
+
+        #if defined(GL_FRAGMENT_SHADER)
+        #define GL_AMD_shader_explicit_vertex_parameter 1
+
+        spirv_decorate (extensions = ["SPV_AMD_shader_explicit_vertex_parameter"], 11, 4992)
+        in vec2 gl_BaryCoordNoPerspAMD;
+        spirv_decorate (extensions = ["SPV_AMD_shader_explicit_vertex_parameter"], 11, 4993)
+        in vec2 gl_BaryCoordNoPerspCentroidAMD;
+        spirv_decorate (extensions = ["SPV_AMD_shader_explicit_vertex_parameter"], 11, 4994)
+        in vec2 gl_BaryCoordNoPerspSampleAMD;
+        spirv_decorate (extensions = ["SPV_AMD_shader_explicit_vertex_parameter"], 11, 4995)
+        in vec2 gl_BaryCoordSmoothAMD;
+        spirv_decorate (extensions = ["SPV_AMD_shader_explicit_vertex_parameter"], 11, 4996)
+        in vec2 gl_BaryCoordSmoothCentroidAMD;
+        spirv_decorate (extensions = ["SPV_AMD_shader_explicit_vertex_parameter"], 11, 4997)
+        in vec2 gl_BaryCoordSmoothSampleAMD;
+        spirv_decorate (extensions = ["SPV_AMD_shader_explicit_vertex_parameter"], 11, 4998)
+        in vec3 gl_BaryCoordPullModelAMD
+
+        #define __explicitInterpAMD spirv_decorate(extensions = ["SPV_AMD_shader_explicit_vertex_parameter"], 4999)
+
+        spirv_instruction (extensions = ["SPV_AMD_shader_explicit_vertex_parameter"], set = "SPV_AMD_shader_explicit_vertex_parameter", id = 1)
+        float interpolateAtVertexAMD(float interpolant, uint vertexIdx);
+        spirv_instruction (extensions = ["SPV_AMD_shader_explicit_vertex_parameter"], set = "SPV_AMD_shader_explicit_vertex_parameter", id = 1)
+        vec2 interpolateAtVertexAMD(vec2 interpolant, uint vertexIdx);
+        spirv_instruction (extensions = ["SPV_AMD_shader_explicit_vertex_parameter"], set = "SPV_AMD_shader_explicit_vertex_parameter", id = 1) 
+        vec3 interpolateAtVertexAMD(vec3 interpolant, uint vertexIdx);
+        spirv_instruction (extensions = ["SPV_AMD_shader_explicit_vertex_parameter"], set = "SPV_AMD_shader_explicit_vertex_parameter", id = 1)
+        vec4 interpolateAtVertexAMD(vec4 interpolant, uint vertexIdx);
+
+        ...
+
+        // Note: This extension has more than 200 instruction variants, and for brevity they are not all listed here.
+
+    Defining GLSL_EXT_ray_query via this extension:
+
+        #define GL_EXT_ray_query 1
+
+        #ifndef accelerationStructureEXT
+         // This definition conflicts with the GL_EXT_ray_tracing definition, but it should cause no problems in practice
+        #define accelerationStructureEXT spirv_type(extensions = ["SPV_KHR_ray_query"], capabilities = [4472], id = 5341)
+        #endif
+        
+        #define rayQueryEXT spirv_type (extensions = ["SPV_KHR_ray_query"], capabilities = [4472], id = 4472)
+
+        ...
+
+        spirv_instruction (extensions = ["SPV_KHR_ray_query"], capabilities = [4471, 4478], id = 4473)
+        void rayQueryInitializeEXT(spirv_by_reference rayQueryEXT rayQuery, accelerationStructureEXT topLevel, uint rayFlags, uint cullMask, vec3 origin, float tMin, vec3 direction, float tMax);
+
+        spirv_instruction (extensions = ["SPV_KHR_ray_query"], capabilities = [4472], id = 4477)
+        bool rayQueryProceedEXT(spirv_by_reference rayQueryEXT q);
+
+        ...
+
+        // Note: This extension also has a number of constants and intrinsic functions which are not all listed here.
+
+    Defining GLSL_EXT_ray_tracing via this extension:
+
+        #if defined(GL_RAY_GENERATION_SHADER_EXT) || defined(GL_INTERSECTION_SHADER_EXT) || defined(GL_ANY_HIT_SHADER_EXT) || defined(GL_CLOSEST_HIT_SHADER_EXT) || defined(GL_MISS_SHADER_EXT) || defined(GL_CALLABLE_SHADER_EXT)
+        #define GL_EXT_ray_tracing 1
+
+        #ifndef accelerationStructureEXT
+        // This definition conflicts with the GL_EXT_ray_query definition, but it should cause no problems in practice
+        #define accelerationStructureEXT spirv_type(extensions = ["SPV_KHR_ray_tracing"], capabilities = [5353], id = 5341)
+        #endif
+
+        #if defined(GL_RAY_GENERATION_SHADER_EXT) || defined(GL_CLOSEST_HIT_SHADER_EXT) || defined(GL_MISS_SHADER_EXT)
+        #define rayPayloadEXT spirv_storage_class(extensions = ["SPV_KHR_ray_tracing"], capabilities = [5353], 5338)
+        #endif
+        #if defined(GL_ANY_HIT_SHADER_EXT) || defined(GL_CLOSEST_HIT_SHADER_EXT) || defined(GL_MISS_SHADER_EXT)
+        #define rayPayloadInEXT spirv_storage_class(extensions = ["SPV_KHR_ray_tracing"], capabilities = [5353], 5342)
+        #endif
+        #if defined(GL_ANY_HIT_SHADER_EXT) || defined(GL_CLOSEST_HIT_SHADER_EXT) || defined(GL_INTERSECTION_SHADER_EXT)
+        #define hitAttributeEXT spirv_storage_class(extensions = ["SPV_KHR_ray_tracing"], capabilities = [5353], 5339)
+        #endif
+        #if defined(GL_RAY_GENERATION_SHADER_EXT) || defined(GL_CLOSEST_HIT_SHADER_EXT) || defined(GL_MISS_SHADER_EXT) || defined((GL_CALLABLE_SHADER)
+        #define callableDataEXT spirv_storage_class(extensions = ["SPV_KHR_ray_tracing"], capabilities = [5353], 5328)
+        #endif
+        #ifdef(GL_CALLABLE_SHADER)
+        #define callableDataInEXT spirv_storage_class(extensions = ["SPV_KHR_ray_tracing"], capabilities = [5353], 5329)
+        #endif
+        #define shaderRecordEXT spirv_storage_class(extensions = ["SPV_KHR_ray_tracing"], capabilities = [5353], 5343)
+
+        ...
+
+        // Note: This extension also has a number of constants, built-ins, and intrinsic functions which are not all listed here.
+        
+    Defining the modf instruction via this extension:
+    
+        spirv_instruction (set = "GLSL.std.450", id = 35) // modf
+        float modf(float x, spirv_by_reference float i);
+    
+    Example shader using spirv_literal:
+    
+        #version 450 core
+
+        #extension GL_EXT_spirv_intrinsics: enable
+
+        spirv_instruction(id = 61)
+        vec4 load(spirv_by_reference vec4 pointer, spirv_literal int memoryOperands);
+
+        spirv_instruction(id = 62)
+        void store(spirv_by_reference vec4 pointer, vec4 object, spirv_literal int memoryOperands);
+
+        layout(location = 0) in vec4 vec4In;
+        layout(location = 1) out vec4 vec4Out;
+
+        void main()
+        {
+            store(vec4Out, load(vec4In, /*None=*/0x0), /*Volatile=*/0x1);
+        }
+
+
+Issues
+
+    1) Are new layout qualifiers the right way to handle extensions,
+       capabilities, decorations, and execution modes?
+
+    PROPOSED: Yes
+
+    There are a number of other ways this could be done, but other
+    obvious alternatives had drawbacks.
+    Initially pragmas or other preprocessor methods were considered but these
+    could not be used with features such as specialization constants, which
+    are legal with things like *OpExecutionModeId*.
+
+    Pragmas and preprocessor mechanisms like #extension also don't allow
+    macro expansion, so you wouldn't be able to make user-friendly
+    definitions for the various otherwise unnamed integer parameters in the
+    API.
+
+    2) Are there any other things that could be added this way?
+
+    PROPOSED
+
+    Memory, Execution, and Addressing Models could be potentially
+    advertised, but these could result in quite drastic changes to the
+    generated SPIR-V, so it's not clear that it makes sense to do this way.
+
+    In addition, memory and execution model are both handled outside of the
+    language with current GLSL tools and compilers - this would need
+    resolution in some way.
+
+    3) How does error handling in GLSL factor in?
+
+    PROPOSED
+
+    GLSL can perform basic syntax checks with the instructions and built-ins
+    based on the user provided definitions, but is unable to validate that
+    any of these are used correctly with regards to the SPIR-V
+    specification.
+    
+    One particular example would be that there is no validation that the
+    right capabilities and extensions are enabled for the functionality
+    being used.
+
+    Shader authors using this extension directly thus need to take care
+    that the output is valid, and it is strongly recommended that the
+    generated SPIR-V is validated by a tool such as spirv-val to ensure
+    correct output.
+
+    4) Would this enable SPIR-V extensions to be used by generating a simple
+    header file?
+
+    PROPOSED
+
+    For many extensions, and indeed this is the intent.
+    There are some limitations as per issues 2 and 6, and there's less
+    error checking than a native implementation as per issue 3, but most
+    extensions could be defined this way.
+    A GLSL specification would also still be necessary to describe the
+    behavior properly.
+
+    5) Is this new use of "set" the right approach?
+
+    PROPOSED
+
+    Initially "set" and "id" were "instruction_set" and "instruction_id",
+    but these make the qualifier lines unnecessarily long for something
+    that is already known by context to both the compiler and readers.
+    "inst_set" and "inst_id" have also been considered.
+
+    6) Are there any known limitations in extension definitions that would be hard to resolve?
+
+    RESOLVED: Yes
+
+    The main issue spotted so far is any keywords that are applied to a variable
+    (e.g. `shadercallcoherent`) in GLSL but are applied to particular
+    operations in SPIR-V (e.g. `ShaderCallKHR` scope).
+
+    This extension isn't designed as a replacement for language features
+    however, so this type of restriction seems fine. The functionality in
+    the example can be achieved directly by adding a new "scope" constant.
+
+Revision History
+
+    Rev.    Date      Author   Changes
+    ----  ----------  -------  -----------------------------------------------
+     1    2020-08-21  thector  Initial revision
+     2    2021-01-21  thector  Added spirv_literal qualifier
+     3    2021-01-21  thector  Moved extension/capabilities to be specified on
+                               intrinsics as requirements rather than preamble  
+     4    2021-02-22  thector  Allowed GL_* macros to be defined.
+                               Added missing spirv_execution_mode rule.
+                               Fixed parameter ordering for spirv_execution_mode
+                               and spirv_decorate.
+                               Fixed ARB_shader_stencil_export example.
+     5    2021-02-26  thector  Allowed gl_* identifiers to be defined.
+                               Fixed ray query capability number.
+                               Modified instruction/type qualifiers to accept
+                               requirements lists in the same manner as other
+                               qualifiers.
+                               Added spirv_literal example to spec text.
+     6    2021-03-02  thector  Fixed spirv_storage_class grammar, added
+                               requirements declarations.
+                               Restricted spirv_literal parameters further.
+                               Removed broken spirv_literal example.
+     7    2021-03-02  thector  Added spirv_literal example.
+                               Updated contributor list.
