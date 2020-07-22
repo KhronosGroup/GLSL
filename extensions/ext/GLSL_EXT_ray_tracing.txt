@@ -30,8 +30,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-07-10
-    Revision: 16
+    Last Modified Date: 2020-07-22
+    Revision: 17
 
 Dependencies
 
@@ -153,7 +153,9 @@ Overview
           gl_SubGroupLtMaskARB
         - gl_WarpIDNV, gl_SMIDNV
       used in the ray generation, closest-hit, miss, intersection, and callable
-      shader stages should also
+      shader stages, or
+        - gl_RayTmaxEXT
+      used in an intersection shader should also
         - be decorated with Volatile if GL_KHR_memory_scope_semantics is not
           enabled
         - use the Volatile memory semantics for any OpLoad into one of these
@@ -636,9 +638,9 @@ Additions to Chapter 7 of the OpenGL Shading Language Specification
         in    vec3   gl_ObjectRayDirectionEXT;
 
         // Ray parameters
-        in    float  gl_RayTminEXT;
-        in    float  gl_RayTmaxEXT;
-        in    uint   gl_IncomingRayFlagsEXT;
+        in          float  gl_RayTminEXT;
+        in volatile float  gl_RayTmaxEXT;
+        in          uint   gl_IncomingRayFlagsEXT;
 
         // Transform matrices
         in    mat4x3 gl_ObjectToWorldEXT;
@@ -1215,3 +1217,5 @@ Revision History
     15    2020-06-09    dgkoch     Add the ability to construct accelerationStructureEXT type from
                                    uint64_t or uvec2.
     16    2020-07-10    tobias     Clarify valid bits for some parameters (GLSL !63)
+    17    2020-07-22    dgkoch     Mark gl_RayTmaxEXT volatile in intersection shaders
+                                   (vulkan #2268)
