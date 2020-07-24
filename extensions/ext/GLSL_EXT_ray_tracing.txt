@@ -867,6 +867,10 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     and the valid parametric range on which intersections can occur is
     specified by <Tmin> and <Tmax>.
 
+    The components of <origin> and <direction> must all be finite values.
+    <tMin> and <tMax> must be non-negative, and <tMin> must be less than or equal to <tMax>.  
+    The parameters <origin>, <direction>, <tMin>, or <tMax> may not contain Nans.
+
     <rayFlags> is any combination of built-in constants as defined in
     Section 7.3.2 "Built-In Constants".
 
