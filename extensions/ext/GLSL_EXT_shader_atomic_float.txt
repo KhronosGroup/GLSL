@@ -1,0 +1,172 @@
+Name
+
+    EXT_shader_atomic_float
+
+Name Strings
+
+    GL_EXT_shader_atomic_float
+
+Contact
+    Vikram Kushwaha, NVIDIA (vkushwaha 'at' nvidia.com)
+
+Contributors
+
+    Daniel Koch, NVIDIA
+    Jeff Bolz, NVIDIA
+    Vikram Kushwaha, NVIDIA
+
+Status
+
+    Complete
+
+Version
+
+    Last Modified Date:        April 9, 2020
+
+Number
+
+    OpenGL Extension #XXX
+
+Dependencies
+
+    This extension is written against version 4.60.7 of the OpenGL
+    Shading Language Specification, dated July 10, 2019.
+
+    This extension interacts with GL_KHR_memory_scope_semantics.
+
+Overview
+
+    This extension provides additional GLSL built-in functions allowing shaders to
+    perform additional atomic read-modify-write operations on floating point numbers.
+    These operations are limited to add, exchange, load and store.
+
+    Atomic add allows shaders to atomically accumulate the sum of floating-point
+    values into a memory location across multiple (possibly concurrent)
+    shader invocations. Similarly, atomic exchange exchanges floating point
+    data with a memory location atomically.
+
+    Atomic load and store gets and sets the data respectively from memory atomically.
+
+    Some of these functions also have variants that specify the scopes and memory
+    semantics for atomic operations. The meanings of scopes and semantics are defined in
+    detail in the Vulkan Memory Model section of the Vulkan specification.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-specification), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+        atomicAdd    -> OpAtomicIAdd or OpAtomicFAdd, depending on the data type
+
+New Tokens
+
+    None.
+
+Additions to OpenGL 4.60 Specification
+
+    None.
+
+Additions to the AGL/GLX/WGL Specifications
+
+    None.
+
+GLX Protocol
+
+    None.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60.7
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_shader_atomic_float : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+      #define GL_EXT_shader_atomic_float         1
+
+    Additions to Chapter 8 of the OpenGL Shading Language Specification
+        (Built-in Functions)
+
+    Modify Section 8.11, Atomic Memory Functions, p. 192
+
+        Add the following new functions to the table on p. 193:
+
+          float atomicAdd(inout float mem, float data);
+          float atomicAdd(inout float mem, float data, int scope, int storage, int sem);
+          double atomicAdd(inout double mem, double data);
+          double atomicAdd(inout double mem, double data, int scope, int storage, int sem);
+
+          float atomicExchange(inout float mem, float data);
+          float atomicExchange(inout float mem, float data, int scope, int storage, int sem);
+          double atomicExchange(inout double mem, double data);
+          double atomicExchange(inout double mem, double data, int scope, int storage, int sem);
+
+          float atomicLoad(inout float mem, int scope, int storage, int sem);
+          double atomicLoad(inout double mem, int scope, int storage, int sem);
+
+          void  atomicStore(inout float mem, float data, int scope, int storage, int sem);
+          void  atomicStore(inout double mem, double data, int scope, int storage, int sem);
+
+        The values passed as scope, storage, and sem parameters must all be integer
+        constant expressions. Valid values are listed in the Scope and Semantics section
+        of the GL_KHR_memory_scope_semantics extension. scope must be a gl_Scope* value,
+        sem* must be a gl_Semantics* value, and storage* must be a combination of
+        gl_StorageSemantics* values.
+
+
+    Modify Section 8.12, Image Functions
+
+        Change the 3rd bullet about float image variables to:
+
+          a float image variable (type starts 'image') and a format qualifier of
+          r32f, used with a data argument of type float.
+
+        Modify the rows in table on p. 196 to include:
+
+            float imageAtomicAdd(IMAGE_PARAMS, float data);
+            float imageAtomicAdd(IMAGE_PARAMS, float data, int scope, int storage, int sem);
+
+            float imageAtomicExchange(IMAGE_PARAMS, float data, int scope, int storage, int sem);
+
+        Add new rows to table on p. 196:
+
+            Syntax                                                 Description
+            float imageAtomicLoad(readonly IMAGE_PARAMS,           Returns the contents of texel atomically.
+                int scope, int storage, int sem);
+
+            void imageAtomicStore(writeonly IMAGE_PARAMS,          Stores data into the texel atomically.
+                float data, int scope, int storage, int sem);
+
+        The values passed as scope, storage, and sem parameters must all be integer
+        constant expressions. Valid values are listed in the Scope and Semantics section
+        of the GL_KHR_memory_scope_semantics extension. scope must be a gl_Scope* value,
+        sem* must be a gl_Semantics* value, and storage* must be a combination of
+        gl_StorageSemantics* values.
+
+Errors
+
+    None.
+
+New State
+
+    None.
+
+New Implementation Dependent State
+
+    None.
+
+Issues
+
+    None.
+
+Revision History
+
+    Rev.  Date          Author           Changes
+    ----  -----------   ------           -------------------------------------------
+     1    2020-04-09    vkushwaha-nv     Internal revision.
+
