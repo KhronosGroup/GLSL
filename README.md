@@ -33,7 +33,7 @@ which normatively accepts SPIR-V but does not normatively consume a high-level s
 ## Extension Specifications in this Repository
 
 - [GL_KHR_vulkan_glsl](https://github.com/KhronosGroup/GLSL/blob/master/extensions/khr/GL_KHR_vulkan_glsl.txt)
-- [GL_KHR_vulkan_glsl_relaxed](https://github.com/KhronosGroup/GLSL/blob/master/extensions/khr/GL_KHR_vulkan_glsl_relaxed.txt)
+- [GL_EXT_vulkan_glsl_relaxed](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_vulkan_glsl_relaxed.txt)
 - [GL_EXT_control_flow_attributes](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_control_flow_attributes.txt)
 - [GL_EXT_device_group](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_device_group.txt)
 - [GL_EXT_multiview](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_multiview.txt)
