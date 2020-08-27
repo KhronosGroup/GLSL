@@ -926,7 +926,8 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     the current ray interval, the any-hit shader corresponding to the current
     intersection shader is invoked. If the intersection is not ignored in the
     any-hit shader, <hitT> is committed as the new gl_RayTmaxEXT value of the
-    current ray and <hitKind> is committed as the new value for gl_HitKindEXT.
+    current ray, <hitKind> is committed as the new value for gl_HitKindEXT, and
+    true is returned. If either of those checks fails, then false is returned.
 
     Syntax:
 
