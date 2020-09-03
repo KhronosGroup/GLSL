@@ -23,8 +23,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-07-24
-    Revision: 9
+    Last Modified Date: 2020-09-11
+    Revision: 10
 
 Dependencies
 
@@ -151,6 +151,18 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
                                     query traversal information.
 
 
+    Change the following sentence in the first paragraph of 4.1.7 (Opaque
+    Types) from
+
+        They can only be declared as function parameters or in uniform-
+        qualified variables (see “Uniform  Variables”).
+
+    to
+
+        With the exception of rayQueryEXT (see "Ray Query Types"), they can
+        only be declared as function parameters or in uniform-qualified
+        variables (see “Uniform  Variables”).
+
     Add two new sub-sections under Section 4.1.7 (Opaque Types)
 
     4.1.7.x Acceleration Structure Types
@@ -170,13 +182,15 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
     This type is used in the rayQueryInitializeEXT() builtin described in Section 8.19
     Members of structures cannot be declared with this type.
 
-    4.1.7.x Ray Query Types
+    4.1.7.y Ray Query Types
 
     rayQueryEXT is an opaque type representing a ray query object used to
     traverse acceleration structure and return traversal information.
     It is declared and behaves like above described opaque types. When aggregated
     into arrays within a shader, rayQueryEXT can only be indexed with
     a dynamically uniform integral expression, otherwise results are undefined.
+    Unlike other opaque types, rayQueryEXT variables are declared with no storage
+    qualifiers, either in the global scope or within function scope.
 
     [[If GL_EXT_nonuniform_qualifier is supported
     When aggregated into arrays within a shader, rayQueryEXT can
@@ -372,7 +386,7 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     Syntax:
         int rayQueryGetIntersectionGeometryIndexEXT(rayQueryEXT q, bool committed);
 
-    Returns implementation defined index of geomertry for current
+    Returns implementation defined index of geometry for current
     intersection.
 
     If committed is 'true'  returns value for committed intersection
@@ -485,5 +499,6 @@ Revision History
      5    2020-03-06    alele      Rename RayWorld to WorldRay for some builtins (#20), fix typo (!50)
      6    2020-04-01    alele      Remove primitive culling ray flags (vulkan issue 2073)
      7    2020-07-03    dgkoch     Fix SPIR-V mapping for rayQueryEXT
-     8    2020-07-10    tobias     Clarify valid bits for some parameters (GLSL !63)
+     8    2020-07-10    tobias     Clarify valid bits for some parameters (GLSL!63)
      9    2020-07-24    jbarczack  Add numeric limits on ray parameters (vulkan issue 2235)
+    10    2020-09-11    tobias     Clarify ray query storage class (GLSL!70), fix typo (github!135)
