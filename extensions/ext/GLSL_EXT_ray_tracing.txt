@@ -23,6 +23,7 @@ Contributors
     Tobias Hector, AMD
     Boris Zanin, Mobica
     Tyler Nowicki, Huawei
+    Joshua Barczak, Intel
 
 Status
 
@@ -30,8 +31,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-07-22
-    Revision: 17
+    Last Modified Date: 2020-08-21
+    Revision: 19
 
 Dependencies
 
@@ -65,6 +66,8 @@ Dependencies
     This extension interacts with GL_EXT_ray_flags_primitive_culling.
 
     This extension interacts with GL_NV_shader_sm_builtins.
+
+    This extension interacts with GL_EXT_scalar_block_layout.
 
 Overview
 
@@ -531,17 +534,25 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
 
     Add to end of section 4.4.5, Uniform and Shader Storage Block Layout Qualifiers
 
-    The "shaderRecordEXT" qualifier is used to declare a buffer block and represents a
-    buffer within a shader record as defined in the API in Ray Tracing chapter of the Vulkan
-    specification. It is supported only in ray tracing stages. It is a compile-time error
-    to apply this to any block type other than buffer. A buffer block declared with
-    layout(shaderRecordEXT) can be optionally declared with an instance. There can be only
-    one shaderRecordEXT buffer block per stage otherwise a link/compile time error will be
-    generated. It is a compile time error to use layout qualifiers such as binding and set
-    along with shaderRecordEXT. These blocks can only be read from and not written to.
-    It is a compile-time error to modify members of such blocks. These blocks are initialized
-    by a separate API as specified in Ray Tracing chapter of the Vulkan specification.
+    The "shaderRecordEXT" qualifier is used to declare a buffer block and
+    represents a buffer within a shader record as defined in the API in Ray
+    Tracing chapter of the Vulkan specification. It is supported only in ray
+    tracing stages. It is a compile-time error to apply this to any block type
+    other than buffer. A buffer block declared with layout(shaderRecordEXT)
+    can be optionally declared with an instance.
 
+    There can be only one shaderRecordEXT buffer block per stage otherwise a
+    link/compile time error will be generated. It is a compile time error to
+    use the "binding" and "set" layout qualifiers along with shaderRecordEXT.
+    All other layout qualifiers (including std430, std140, and scalar) can be
+    used along with shaderRecordEXT to affect the placement of variables in
+    the block and the global default layouts apply as with any other shader
+    storage block.
+
+    These blocks can only be read from and not written to. It is a compile-time
+    error to modify members of such blocks. These blocks are initialized
+    by a separate API as specified in Ray Tracing chapter of the Vulkan
+    specification.
 
 Modifications to Chapter 5 of the OpenGL Shading Language Specification
 (Operators and Expressions)
@@ -1122,6 +1133,12 @@ Interactions with GL_EXT_nonuniform_qualifier
     accelerationStructureEXT can be indexed with non-unform integral
     expressions when they are decorated with the nonuniformEXT qualifier.
 
+Interactions with GL_EXT_scalar_block_layout
+
+    If GL_EXT_scalar_block_layout is supported, buffer blocks with
+    a layout of shaderRecordEXT can also be laid out using the scalar
+    block layout.
+
 Interactions with GL_EXT_ray_flags_primitive_culling
 
     If GL_EXT_ray_flags_primitive_culling is supported, ray flags added
@@ -1223,3 +1240,7 @@ Revision History
     16    2020-07-10    tobias     Clarify valid bits for some parameters (GLSL !63)
     17    2020-07-22    dgkoch     Mark gl_RayTmaxEXT volatile in intersection shaders
                                    (vulkan #2268)
+    18    2020-07-24    jbarczack  Add numeric limits on ray parameters (vulkan issue 2235)
+    19    2020-08-21    dgkoch     Clarify that shaderRecordEXT can be used with most other layout
+                                   qualifiers to control block layout, and add interactions with
+                                   GL_EXT_scalar_block_layout (Vulkan issue 2230)
