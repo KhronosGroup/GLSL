@@ -366,7 +366,7 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     Syntax:
         int rayQueryGetIntersectionGeometryIndexEXT(rayQueryEXT q, bool committed);
 
-    Returns implementation defined index of geomertry for current
+    Returns implementation defined index of geometry for current
     intersection.
 
     If committed is 'true'  returns value for committed intersection
