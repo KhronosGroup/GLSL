@@ -23,8 +23,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-09-11
-    Revision: 10
+    Last Modified Date: 2020-09-16
+    Revision: 11
 
 Dependencies
 
@@ -265,8 +265,12 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     <tMin> and <tMax> must be non-negative, and <tMin> must be less than or equal to <tMax>.
     The parameters <origin>, <direction>, <tMin>, or <tMax> may not contain Nans.
 
-    <rayFlags> is any combination of built-in constants as defined in
-    Section 7.3.x "Fixed Constants"
+    <rayFlags> is a bit-wise combination of the built-in constants as defined
+    in  Section 7.3.x "Fixed Constants". Behavior is undefined if more than
+    one of the gl_RayFlagsOpaqueEXT, gl_RayFlagsNoOpaqueEXT,
+    gl_RayFlagsCullOpaqueEXT, or gl_RayFlagsCullNoOpaqueEXT are set, or if both
+    gl_RayFlagsCullBackFacingTrianglesEXT and
+    gl_RayFlagsCullFrontFacingTrianglesEXT are set.
 
     <cullMask> is a mask which specifies the instances to be intersected
     i.e visible to the traced ray. Only the 8 least-significant bits are used;
@@ -502,3 +506,4 @@ Revision History
      8    2020-07-10    tobias     Clarify valid bits for some parameters (GLSL!63)
      9    2020-07-24    jbarczack  Add numeric limits on ray parameters (vulkan issue 2235)
     10    2020-09-11    tobias     Clarify ray query storage class (GLSL!70), fix typo (github!135)
+    11    2020-09-16    dgkoch     Document ray flag exclusive combinations (vulkan #2286)
