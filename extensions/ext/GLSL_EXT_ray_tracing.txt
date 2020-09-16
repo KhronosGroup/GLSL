@@ -706,10 +706,11 @@ Additions to Chapter 7 of the OpenGL Shading Language Specification
     Add the following description for gl_InstanceCustomIndexEXT:
 
     gl_InstanceCustomIndex is available in the intersection, any-hit and
-    closest-hit shaders to specify the application defined value of the instance
-    that intersects the current ray. Only lower 24 bits are valid, upper 8 bits
-    will be ignored. See the Ray Tracing chapter of the Vulkan specification for
-    more details.
+    closest-hit shaders to specify the application defined value of the
+    instance that intersects the current ray. The value provided in this
+    built-in is obtained from the lower 24 bits of the variable, the upper
+    8 bits are zero. See the Ray Tracing chapter of the Vulkan specification
+    for more details.
 
     Add the following description for gl_GeometryIndexEXT:
 
@@ -1250,3 +1251,4 @@ Revision History
                                    qualifiers to control block layout, and add interactions with
                                    GL_EXT_scalar_block_layout (Vulkan issue 2230)
     20    2020-09-16    dgkoch     Document ray flag exclusive combinations (vulkan #2286)
+                                   Clarity valid bits for gl_InstanceCustomIndex (GLSL #19)
