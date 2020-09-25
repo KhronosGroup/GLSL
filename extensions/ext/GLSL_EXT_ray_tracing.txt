@@ -31,7 +31,7 @@ Status
 
 Version
 
-    Last Modified Date: 2020-09-16
+    Last Modified Date: 2020-09-24
     Revision: 20
 
 Dependencies
@@ -933,6 +933,8 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     any-hit shader, <hitT> is committed as the new gl_RayTmaxEXT value of the
     current ray, <hitKind> is committed as the new value for gl_HitKindEXT, and
     true is returned. If either of those checks fails, then false is returned.
+    If the value of <hitT> falls outside the current ray interval, the hit is
+    rejected and false is returned.
 
     Syntax:
 
@@ -1250,5 +1252,6 @@ Revision History
     19    2020-08-21    dgkoch     Clarify that shaderRecordEXT can be used with most other layout
                                    qualifiers to control block layout, and add interactions with
                                    GL_EXT_scalar_block_layout (Vulkan issue 2230)
-    20    2020-09-16    dgkoch     Document ray flag exclusive combinations (vulkan #2286)
+    20    2020-09-24    dgkoch     Document ray flag exclusive combinations (vulkan #2286)
                                    Clarity valid bits for gl_InstanceCustomIndex (GLSL #19)
+                                   Clarify reportIntersectionEXT behaviour when hitT out of range (vulkan #2359)
