@@ -31,8 +31,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-09-24
-    Revision: 20
+    Last Modified Date: 2020-10-21
+    Revision: 21
 
 Dependencies
 
@@ -139,8 +139,8 @@ Overview
 
       traceRayEXT -> OpTraceRayKHR instruction
       reportIntersectionEXT -> OpReportIntersectionKHR instruction
-      ignoreIntersectionEXT -> OpIgnoreIntersectionKHR instruction
-      terminateRayEXT -> OpTerminateRayKHR instruction
+      ignoreIntersectionEXT keyword -> OpIgnoreIntersectionKHR instruction
+      terminateRayEXT keyword -> OpTerminateRayKHR instruction
       executeCallableEXT -> OpExecuteCallableKHR instruction
 
       shadercallcoherent -> NonPrivate{Pointer,Texel}KHR + Make{Pointer,Texel}{Available,Visible}KHR with scope = ShaderCallKHR
@@ -297,6 +297,8 @@ Changes to Chapter 3 of The OpenGL Shading Language Specification, Version 4.60
     hitAttributeEXT
     callableDataEXT
     callableDataInEXT
+    ignoreIntersectionEXT
+    terminateRayEXT
 
 Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
 
@@ -584,6 +586,25 @@ Modifications to Chapter 5 of the OpenGL Shading Language Specification
             ...
         }
 
+Modifications to Chapter 6 of the OpenGL Shading Language Specification
+(Statements and Structure)
+
+    Modify section 6.4 (Jumps)
+
+    Add to the jump_statement rule:
+
+        ignoreIntersectionEXT ; // in the any-hit shading language only
+        terminateRayEXT ;       // in the any-hit shading language only
+
+    Add to the end of the section:
+
+    The `ignoreIntersectionEXT` keyword is only allowed within any-hit shaders.
+    This keyword terminates the calling any-hit shader and continues the ray
+    query without modifying gl_RayTmaxEXT and gl_HitKindEXT.
+
+    The `terminateRayEXT` keyword is only allowed within any-hit shaders.
+    This keyword terminates the calling any-hit shader, stops the ray
+    traversal, and invokes the closest-hit shader.
 
 Additions to Chapter 7 of the OpenGL Shading Language Specification
 (Built-in Variables)
@@ -938,24 +959,6 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
     Syntax:
 
-        void ignoreIntersectionEXT();
-
-    This function is only available in an any-hit shader.
-
-    Terminates the calling any-hit shader and continues the ray query without
-    modifying gl_RayTmaxEXT and gl_HitKindEXT.
-
-    Syntax:
-
-        void terminateRayEXT();
-
-    This function is only available in an any-hit shader.
-
-    Terminates the calling any-hit shader, stops the ray traversal, and invokes
-    the closest-hit shader.
-
-    Syntax:
-
         void executeCallableEXT(uint sbtRecordIndex, int callable)
 
     This function is available only in ray generation, closest-hit, miss, and
@@ -973,7 +976,18 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     qualified variables having the same value for the location layout qualifier.
 
 
-    Example :
+Additions to Chapter 9 of the OpenGL Shading Language Specification
+(Shading Language Grammar)
+
+    Add the tokens IGNORE_INTERSECTION and TERMINATE_RAY.
+
+    Under the rule for jump_statement, add:
+
+        | IGNORE_INTERSECTION SEMICOLON // any-hit shader only
+        | TERMINATE_RAY SEMICOLON       // any-hit shader only
+
+
+Example :
 
 
     Ray Generation Shader :
@@ -1255,3 +1269,5 @@ Revision History
     20    2020-09-24    dgkoch     Document ray flag exclusive combinations (vulkan #2286)
                                    Clarity valid bits for gl_InstanceCustomIndex (GLSL #19)
                                    Clarify reportIntersectionEXT behaviour when hitT out of range (vulkan #2359)
+    21    2020-20-21    dgkoch     ignoreIntersectionEXT and terminateRayEXT are jump statements
+                                   instead of builtin functions (vulkan #2374)
