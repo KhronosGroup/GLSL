@@ -69,3 +69,4 @@ which normatively accepts SPIR-V but does not normatively consume a high-level s
 - [GL_EXT_ray_flags_primitive_culling](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_ray_flags_primitive_culling.txt)
 - [GL_EXT_shader_atomic_float](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_shader_atomic_float.txt)
 - [GL_EXT_fragment_shading_rate](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_fragment_shading_rate.txt)
+- [GL_NV_primitive_shading_rate](https://github.com/KhronosGroup/GLSL/blob/master/extensions/nv/GLSL_NV_primitive_shading_rate.txt)
