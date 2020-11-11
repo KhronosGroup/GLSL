@@ -1,0 +1,369 @@
+Name
+
+    EXT_shader_image_int64
+
+Name Strings
+
+    GL_EXT_shader_image_int64
+
+Contact
+
+    Tobias Hector, AMD (tobias.hector 'at' amd.com)
+
+Contributors
+
+    Tobias Hector, AMD
+    Jason Ekstrand, Intel
+    Jeff Bolz, Nvidia
+
+Status
+
+    Complete.
+
+Version
+
+    Revision: 2
+    Last Modified Date: 2020-07-15
+
+Dependencies
+
+    This extension is written against version 4.60.7 of the
+    OpenGL Shading Language Specification, dated July 10, 2019.
+    
+    This extension can be applied to OpenGL GLSL versions 4.20
+    (#version 420) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+    
+    This extension requires GL_EXT_shader_atomic_int64.
+    
+    This extension requires GL_ARB_gpu_shader_int64.
+    
+    Interacts with GL_AMD_shader_image_load_store_lod.
+    
+    Interacts with GL_KHR_memory_scope_semantics.
+    
+    Interacts with GL_ARB_sparse_texture2.
+
+Overview
+
+    This extension allows the declaration of single-component 64-bit
+    integer image types, enabling loads, stores, and atomic operations on
+    images with r64i/r64ui formats.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60.7
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_EXT_shader_image_int64 : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+        #define GL_EXT_shader_image_int64         1
+
+Additions to Chapter 3 of the OpenGL Shading Language Specification
+(Basics)
+
+    Modify Section 3.6, Keywords
+    
+    Add the following keywords:
+    
+        i64image1D u64image1D
+
+        i64image1DArray u64image1DArray
+
+        i64image2D u64image2D
+
+        i64image2DArray u64image2DArray
+
+        i64image2DRect u64image2DRect
+
+        i64image2DMS u64image2DMS
+
+        i64image2DMSArray u64image2DMSArray
+
+        i64image3D u64image3D
+
+        i64imageCube u64imageCube
+
+        i64imageCubeArray u64imageCubeArray
+
+        i64imageBuffer u64imageBuffer
+
+
+Additions to Chapter 4 of the OpenGL Shading Language Specification
+(Variables and Types)
+
+    Modify Section 4.1, Basic Types
+    
+    Add a new "64-bit integer opaque types" section as follows:
+    
+        +-------------------+-----------------------------------------------------------------------------+
+        | Type              | Meaning                                                                     |
+        +-------------------+-----------------------------------------------------------------------------+
+        | i64image1D        | a handle for accessing a 64-bit integer 1D image                            |
+        +-------------------+-----------------------------------------------------------------------------+
+        | i64image1DArray   | a handle for accessing a 64-bit integer 1D array image                      |
+        +-------------------+-----------------------------------------------------------------------------+
+        | i64image2D        | a handle for accessing a 64-bit integer 2D image                            |
+        +-------------------+-----------------------------------------------------------------------------+
+        | i64image2DArray   | a handle for accessing a 64-bit integer 2D array image                      |
+        +-------------------+-----------------------------------------------------------------------------+
+        | i64image2DRect    | a handle for accessing a 64-bit integer 2D rectangle image                  |
+        +-------------------+-----------------------------------------------------------------------------+
+        | i64image2DMS      | a handle for accessing a 64-bit integer 2D multisample image                |
+        +-------------------+-----------------------------------------------------------------------------+
+        | i64image2DMSArray | a handle for accessing a 64-bit integer 2D multisample array image          |
+        +-------------------+-----------------------------------------------------------------------------+
+        | i64image3D        | a handle for accessing a 64-bit integer 3D image                            |
+        +-------------------+-----------------------------------------------------------------------------+
+        | i64imageCube      | a handle for accessing a 64-bit integer cube mapped image                   |
+        +-------------------+-----------------------------------------------------------------------------+
+        | i64imageCubeArray | a handle for accessing a 64-bit integer cube map array image                |
+        +-------------------+-----------------------------------------------------------------------------+
+        | i64imageBuffer    | a handle for accessing a 64-bit integer buffer image                        |
+        +-------------------+-----------------------------------------------------------------------------+
+        
+    Add a new "64-bit unsigned integer opaque types" section as follows:
+    
+        +-------------------+-----------------------------------------------------------------------------+
+        | Type              | Meaning                                                                     |
+        +-------------------+-----------------------------------------------------------------------------+
+        | u64image1D        | a handle for accessing a 64-bit unsigned integer 1D image                   |
+        +-------------------+-----------------------------------------------------------------------------+
+        | u64image1DArray   | a handle for accessing a 64-bit unsigned integer 1D array image             |
+        +-------------------+-----------------------------------------------------------------------------+
+        | u64image2D        | a handle for accessing a 64-bit unsigned integer 2D image                   |
+        +-------------------+-----------------------------------------------------------------------------+
+        | u64image2DArray   | a handle for accessing a 64-bit unsigned integer 2D array image             |
+        +-------------------+-----------------------------------------------------------------------------+
+        | u64image2DRect    | a handle for accessing a 64-bit unsigned integer 2D rectangle image         |
+        +-------------------+-----------------------------------------------------------------------------+
+        | u64image2DMS      | a handle for accessing a 64-bit unsigned integer 2D multisample image       |
+        +-------------------+-----------------------------------------------------------------------------+
+        | u64image2DMSArray | a handle for accessing a 64-bit unsigned integer 2D multisample array image |
+        +-------------------+-----------------------------------------------------------------------------+
+        | u64image3D        | a handle for accessing a 64-bit unsigned integer 3D image                   |
+        +-------------------+-----------------------------------------------------------------------------+
+        | u64imageCube      | a handle for accessing a 64-bit unsigned integer cube mapped image          |
+        +-------------------+-----------------------------------------------------------------------------+
+        | u64imageCubeArray | a handle for accessing a 64-bit unsigned integer cube map array image       |
+        +-------------------+-----------------------------------------------------------------------------+
+        | u64imageBuffer    | a handle for accessing a 64-bit unsigned integer buffer image               |
+        +-------------------+-----------------------------------------------------------------------------+
+
+    Modify Section 4.4, Layout Qualifiers
+    
+    Add the following layout qualifiers to the end of the table on p. 66:
+    
+        |--------------------------------------------------------------------|
+        | Layout    | Qualifier | Individual   | Block | Block  | Allowed    |
+        | Qualifier | Only      | Variable     |       | Member | Interfaces |
+        |--------------------------------------------------------------------|
+        | r64i      |           | 64-bit image |       |        |            |
+        | r64ui     |           | types only   |       |        | Uniform    |
+        |--------------------------------------------------------------------|
+    
+    Modify Section 4.4.8, Format Layout Qualifiers
+    
+    Add the following to the list of layout-qualifier-id:
+    
+       int64-image-format-qualifier
+       uint64-image-format-qualifier
+    
+    Add the following new lists:
+    
+        int64-image-format-qualifier :
+        
+            r64i
+            
+        uint64-image-format-qualifier :
+        
+            r64ui
+            
+    Modify the paragraph at the end of page 93 describing format layout
+    qualifiers to add 64-bit image types as follows:
+    
+        For image variables with floating-point component types (keywords
+        starting with “image”), signed integer component types (keywords
+        starting with “iimage”), unsigned integer component types (keywords
+        starting with “uimage”), signed 64-bit integer component types
+        (keywords starting with “i64image”), unsigned 64-bit integer
+        component types (keywords starting with “u64image”), the format
+        qualifier used must match the float-image-format-qualifier,
+        int-image-format-qualifier, uint-image-format-qualifier,
+        int64-image-format-qualifier, or uint64-image-format-qualifier,
+        grammar rules respectively.
+
+Additions to Chapter 8 of the OpenGL Shading Language Specification
+(Built-in Functions)
+
+    Modify Section 8.12, Image Functions
+
+    After the description of IMAGE_PARAMS, add the following:
+
+        Similarly, the IMAGE64_PARAMS in the prototypes below is a
+        placeholder representing further function variants for the two
+        types of 64-bit image variable.
+        The data types below starting `g64image` serve as placeholders
+        meaning types starting either “i64image”, or “u64image” in the
+        same way as "gimage".
+        The IMAGE64_PARAMS placeholder is replaced by parameter lists
+        matching those of IMAGE_PARAMS, but with `g64image` instead of
+        `gimage`.
+
+    Add the following two bullets to the list describing the subset of image
+    variable types upon which atomic operations can be used:
+    
+      • a signed 64-bit integer image variable (type starts "i64image”) and
+        a format qualifier of r64i, used with a data argument of type
+        int64_t, or
+      
+      • an unsigned 64-bit integer image variable (type starts "u64image”)
+        and a format qualifier of r64ui, used with a data argument of type
+        uint64_t.
+
+    Add the following new function variants to the table on p. 195:
+    
+       u64vec4 imageLoad(readonly IMAGE64_PARAMS);
+       i64vec4 imageLoad(readonly IMAGE64_PARAMS);
+       
+          void imageStore(writeonly IMAGE64_PARAMS, u64vec4);
+          void imageStore(writeonly IMAGE64_PARAMS, i64vec4);
+      
+      uint64_t imageAtomicAdd(IMAGE64_PARAMS, uint64_t data);
+       int64_t imageAtomicAdd(IMAGE64_PARAMS,  int64_t data);
+      
+      uint64_t imageAtomicMin(IMAGE64_PARAMS, uint64_t data);
+       int64_t imageAtomicMin(IMAGE64_PARAMS,  int64_t data);
+      
+      uint64_t imageAtomicMax(IMAGE64_PARAMS, uint64_t data);
+       int64_t imageAtomicMax(IMAGE64_PARAMS,  int64_t data);
+      
+      uint64_t imageAtomicAnd(IMAGE64_PARAMS, uint64_t data);
+       int64_t imageAtomicAnd(IMAGE64_PARAMS,  int64_t data);
+      
+      uint64_t imageAtomicOr (IMAGE64_PARAMS, uint64_t data);
+       int64_t imageAtomicOr (IMAGE64_PARAMS,  int64_t data);
+      
+      uint64_t imageAtomicXor(IMAGE64_PARAMS, uint64_t data);
+       int64_t imageAtomicXor(IMAGE64_PARAMS,  int64_t data);
+
+      uint64_t imageAtomicExchange(IMAGE64_PARAMS, uint64_t data);
+       int64_t imageAtomicExchange(IMAGE64_PARAMS,  int64_t data);
+
+      uint64_t imageAtomicCompSwap(IMAGE64_PARAMS, uint64_t compare, uint64_t data);
+       int64_t imageAtomicCompSwap(IMAGE64_PARAMS,  int64_t compare,  int64_t data);
+
+    Modify the description of imageLoad to include "u64vec4 and i64vec4" in the
+    list of formats the value will be converted to.
+
+Additions to Chapter 9 of the OpenGL Shading Language Specification
+(Shading Language Grammar)
+
+    Add the following lexical tokens:
+    
+        I64IMAGE1D U64IMAGE1D
+
+        I64IMAGE1DARRAY U64IMAGE1DARRAY
+
+        I64IMAGE2D U64IMAGE2D
+
+        I64IMAGE2DARRAY U64IMAGE2DARRAY
+
+        I64IMAGE2DRECT U64IMAGE2DRECT
+
+        I64IMAGE2DMS U64IMAGE2DMS
+
+        I64IMAGE2DMSARRAY U64IMAGE2DMSARRAY
+
+        I64IMAGE3D U64IMAGE3D
+
+        I64IMAGECUBE U64IMAGECUBE
+
+        I64IMAGECUBEARRAY U64IMAGECUBEARRAY
+
+        I64IMAGEBUFFER U64IMAGEBUFFER
+
+    Add all of the above tokens to the list of "type_specifier_nonarray"
+
+Interactions with GL_AMD_shader_image_load_store_lod
+
+    Add the following to the description of IMAGE_LOD_PARAMS
+    
+        The IMAGE64_LOD_PARAMS placeholder is replaced by parameter lists
+        matching those of IMAGE_LOD_PARAMS, but with `g64image` instead of
+        `gimage`.
+
+    Add the following new function variants:
+    
+       u64vec4 imageLoadLodAMD(readonly IMAGE64_LOD_PARAMS);
+       i64vec4 imageLoadLodAMD(readonly IMAGE64_LOD_PARAMS);
+       
+          void imageStoreLodAMD(writeonly IMAGE64_LOD_PARAMS, u64vec4 data);
+          void imageStoreLodAMD(writeonly IMAGE64_LOD_PARAMS, i64vec4 data);
+
+    Modify the description of imageLoadLodAMD to include "u64vec4 and i64vec4" in the
+    list of formats the value will be converted to.
+
+Interactions with GL_KHR_memory_scope_semantics
+
+    Add the following additional function variants:
+    
+        uint64_t imageAtomicAdd (IMAGE64_PARAMS, uint64_t data, int scope, int storage, int sem)
+         int64_t imageAtomicAdd (IMAGE64_PARAMS,  int64_t data, int scope, int storage, int sem)
+         
+        uint64_t imageAtomicMin (IMAGE64_PARAMS, uint64_t data, int scope, int storage, int sem)
+         int64_t imageAtomicMin (IMAGE64_PARAMS,  int64_t data, int scope, int storage, int sem)
+         
+        uint64_t imageAtomicMax (IMAGE64_PARAMS, uint64_t data, int scope, int storage, int sem)
+         int64_t imageAtomicMax (IMAGE64_PARAMS,  int64_t data, int scope, int storage, int sem)
+         
+        uint64_t imageAtomicAnd (IMAGE64_PARAMS, uint64_t data, int scope, int storage, int sem)
+         int64_t imageAtomicAnd (IMAGE64_PARAMS,  int64_t data, int scope, int storage, int sem)
+         
+        uint64_t imageAtomicOr  (IMAGE64_PARAMS, uint64_t data, int scope, int storage, int sem)
+         int64_t imageAtomicOr  (IMAGE64_PARAMS,  int64_t data, int scope, int storage, int sem)
+         
+        uint64_t imageAtomicXor (IMAGE64_PARAMS, uint64_t data, int scope, int storage, int sem)
+         int64_t imageAtomicXor (IMAGE64_PARAMS,  int64_t data, int scope, int storage, int sem)
+         
+        uint64_t imageAtomicExchange (IMAGE64_PARAMS,  uint64_t data, int scope, int storage, int sem)
+         int64_t imageAtomicExchange (IMAGE64_PARAMS,   int64_t data, int scope, int storage, int sem)
+         
+        uint64_t imageAtomicCompSwap (IMAGE64_PARAMS, uint64_t compare, uint64_t data, int scope,
+                                  int   storageEqual, int   semEqual,
+                                  int storageUnequal, int semUnequal)
+         int64_t imageAtomicCompSwap (IMAGE64_PARAMS,  int64_t compare,  int64_t data, int scope,
+                                  int   storageEqual, int   semEqual,
+                                  int storageUnequal, int semUnequal)
+                                  
+        uint64_t imageAtomicLoad(IMAGE64_PARAMS, int scope, int storage, int sem)
+         int64_t imageAtomicLoad(IMAGE64_PARAMS, int scope, int storage, int sem)
+
+        void imageAtomicStore (IMAGE64_PARAMS, uint64_t data, int scope, int storage, int sem)
+        void imageAtomicStore (IMAGE64_PARAMS,  int64_t data, int scope, int storage, int sem)
+
+Interactions with GL_ARB_sparse_texture2
+
+    Add the following new function variants:
+    
+        int sparseImageLoadARB(readonly IMAGE64_PARAMS, out i64vec4 texel);
+        int sparseImageLoadARB(readonly IMAGE64_PARAMS, out u64vec4 texel);
+
+Issues
+
+    1. Are imageStore and imageStoreLodAMD supported for 64-bit operations?
+    
+    RESOLVED: Yes, but there's no language updates needed to assert this.
+
+Revision History
+
+    Rev.    Date      Author   Changes
+    ----  ----------  -------  -----------------------------------------------
+     1    2020-02-04  thector  Initial revision
+     2    2020-07-15  thector  Added 64-bit image type
