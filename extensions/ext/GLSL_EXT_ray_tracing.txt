@@ -27,12 +27,12 @@ Contributors
 
 Status
 
-    Draft
+    Complete
 
 Version
 
-    Last Modified Date: 2020-10-21
-    Revision: 21
+    Last Modified Date: 2020-11-10
+    Revision: 22
 
 Dependencies
 
@@ -914,10 +914,11 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     <cullMask> is a mask which specifies the instances to be intersected
     i.e visible to the traced ray. Only the 8 least-significant bits are used;
     other bits are ignored. This mask will be combined with the mask field
-    specified in VkGeometryInstanceKHR as defined in the Ray Tracing chapter of Vulkan
-    Specification using a bitwise AND operation. The instance is visible only if
-    the result of the operation is non-zero. The upper 24 bits of this value are
-    ignored. If the value is zero, no instances are visible.
+    specified in VkAccelerationStructureInstanceKHR as defined in the Ray
+    Traversal chapter of Vulkan Specification using a bitwise AND operation.
+    The instance is visible only if the result of the operation is non-zero.
+    The upper 24 bits of this value are ignored. If the value is zero, no
+    instances are visible.
 
     Associated with the ray is <payload> which is a compile-time constant to select
     a shader defined structure containing data that will be passed to other
@@ -1268,6 +1269,9 @@ Revision History
                                    GL_EXT_scalar_block_layout (Vulkan issue 2230)
     20    2020-09-24    dgkoch     Document ray flag exclusive combinations (vulkan #2286)
                                    Clarity valid bits for gl_InstanceCustomIndex (GLSL #19)
-                                   Clarify reportIntersectionEXT behaviour when hitT out of range (vulkan #2359)
-    21    2020-20-21    dgkoch     ignoreIntersectionEXT and terminateRayEXT are jump statements
+                                   Clarify reportIntersectionEXT behaviour when hitT is out of
+                                   range (vulkan #2359)
+    21    2020-10-21    dgkoch     ignoreIntersectionEXT and terminateRayEXT are jump statements
                                    instead of builtin functions (vulkan #2374)
+    22    2020-11-10    dgkoch     correct reference to Vulkan structure containing the mask
+                                   (vulkan #2414)

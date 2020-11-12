@@ -19,12 +19,12 @@ Contributors
 
 Status
 
-    Draft
+    Complete
 
 Version
 
-    Last Modified Date: 2020-09-16
-    Revision: 11
+    Last Modified Date: 2020-11-10
+    Revision: 12
 
 Dependencies
 
@@ -275,10 +275,11 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     <cullMask> is a mask which specifies the instances to be intersected
     i.e visible to the traced ray. Only the 8 least-significant bits are used;
     other bits are ignored. This mask will be combined with the mask field
-    specified in VkGeometryInstanceKHR as defined in the Ray Traversal chapter of
-    Vulkan Specification using a bitwise AND operation. The instance is visible 
-    only if the result of the operation is non-zero. The upper 24 bits of this 
-    value are ignored. If the value is zero, no instances are visible.
+    specified in VkAccelerationStructureInstanceKHR as defined in the Ray
+    Traversal chapter of Vulkan Specification using a bitwise AND operation.
+    The instance is visible only if the result of the operation is non-zero.
+    The upper 24 bits of this value are ignored. If the value is zero, no
+    instances are visible.
 
 
     Syntax:
@@ -507,3 +508,5 @@ Revision History
      9    2020-07-24    jbarczack  Add numeric limits on ray parameters (vulkan issue 2235)
     10    2020-09-11    tobias     Clarify ray query storage class (GLSL!70), fix typo (github!135)
     11    2020-09-16    dgkoch     Document ray flag exclusive combinations (vulkan #2286)
+    12    2020-11-10    dgkoch     correct reference to Vulkan structure containing the mask
+                                   (vulkan #2414)
