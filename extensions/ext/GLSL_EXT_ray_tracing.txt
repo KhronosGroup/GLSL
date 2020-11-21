@@ -23,15 +23,16 @@ Contributors
     Tobias Hector, AMD
     Boris Zanin, Mobica
     Tyler Nowicki, Huawei
+    Joshua Barczak, Intel
 
 Status
 
-    Draft
+    Complete
 
 Version
 
-    Last Modified Date: 2020-06-05
-    Revision: 13
+    Last Modified Date: 2020-11-10
+    Revision: 22
 
 Dependencies
 
@@ -63,6 +64,10 @@ Dependencies
     This extension interacts with GL_EXT_nonuniform_qualifier.
 
     This extension interacts with GL_EXT_ray_flags_primitive_culling.
+
+    This extension interacts with GL_NV_shader_sm_builtins.
+
+    This extension interacts with GL_EXT_scalar_block_layout.
 
 Overview
 
@@ -134,12 +139,30 @@ Overview
 
       traceRayEXT -> OpTraceRayKHR instruction
       reportIntersectionEXT -> OpReportIntersectionKHR instruction
-      ignoreIntersectionEXT -> OpIgnoreIntersectionKHR instruction
-      terminateRayEXT -> OpTerminateRayKHR instruction
+      ignoreIntersectionEXT keyword -> OpIgnoreIntersectionKHR instruction
+      terminateRayEXT keyword -> OpTerminateRayKHR instruction
       executeCallableEXT -> OpExecuteCallableKHR instruction
 
       shadercallcoherent -> NonPrivate{Pointer,Texel}KHR + Make{Pointer,Texel}{Available,Visible}KHR with scope = ShaderCallKHR
 
+      accelerationStructureEXT constructor -> OpConvertUToAccelerationStructureKHR
+
+      Any of the following built-in variables:
+        - gl_SubgroupSize, gl_SubgroupInvocationID, gl_SubgroupEqMask,
+          gl_SubgroupGeMask, gl_SubgroupGtMask, gl_SubgroupLeMask,
+          gl_SubgroupLtMask,
+        - gl_SubGroupSizeARB, gl_SubGroupInvocationARB, gl_SubGroupEqMaskARB,
+          gl_SubGroupGeMaskARB, gl_SubGroupGtMaskARB, gl_SubGroupLeMaskARB,
+          gl_SubGroupLtMaskARB
+        - gl_WarpIDNV, gl_SMIDNV
+      used in the ray generation, closest-hit, miss, intersection, and callable
+      shader stages, or
+        - gl_RayTmaxEXT
+      used in an intersection shader should also
+        - be decorated with Volatile if GL_KHR_memory_scope_semantics is not
+          enabled
+        - use the Volatile memory semantics for any OpLoad into one of these
+          variables if GL_KHR_memory_scope_semantics is enabled
 
 Modifications to the OpenGL Shading Language Specification, Version 4.60
 
@@ -274,6 +297,8 @@ Changes to Chapter 3 of The OpenGL Shading Language Specification, Version 4.60
     hitAttributeEXT
     callableDataEXT
     callableDataInEXT
+    ignoreIntersectionEXT
+    terminateRayEXT
 
 Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
 
@@ -511,17 +536,75 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
 
     Add to end of section 4.4.5, Uniform and Shader Storage Block Layout Qualifiers
 
-    The "shaderRecordEXT" qualifier is used to declare a buffer block and represents a
-    buffer within a shader record as defined in the API in Ray Tracing chapter of the Vulkan
-    specification. It is supported only in ray tracing stages. It is a compile-time error
-    to apply this to any block type other than buffer. A buffer block declared with
-    layout(shaderRecordEXT) can be optionally declared with an instance. There can be only
-    one shaderRecordEXT buffer block per stage otherwise a link/compile time error will be
-    generated. It is a compile time error to use layout qualifiers such as binding and set
-    along with shaderRecordEXT. These blocks can only be read from and not written to.
-    It is a compile-time error to modify members of such blocks. These blocks are initialized
-    by a separate API as specified in Ray Tracing chapter of the Vulkan specification.
+    The "shaderRecordEXT" qualifier is used to declare a buffer block and
+    represents a buffer within a shader record as defined in the API in Ray
+    Tracing chapter of the Vulkan specification. It is supported only in ray
+    tracing stages. It is a compile-time error to apply this to any block type
+    other than buffer. A buffer block declared with layout(shaderRecordEXT)
+    can be optionally declared with an instance.
 
+    There can be only one shaderRecordEXT buffer block per stage otherwise a
+    link/compile time error will be generated. It is a compile time error to
+    use the "binding" and "set" layout qualifiers along with shaderRecordEXT.
+    All other layout qualifiers (including std430, std140, and scalar) can be
+    used along with shaderRecordEXT to affect the placement of variables in
+    the block and the global default layouts apply as with any other shader
+    storage block.
+
+    These blocks can only be read from and not written to. It is a compile-time
+    error to modify members of such blocks. These blocks are initialized
+    by a separate API as specified in Ray Tracing chapter of the Vulkan
+    specification.
+
+Modifications to Chapter 5 of the OpenGL Shading Language Specification
+(Operators and Expressions)
+
+    Modify section 5.4.1 (Conversion and Scalar Constructors)
+
+    Add to the end of the section:
+
+      Acceleration structure types can be constructed only from a single uint64_t
+      value or from a uvec2 value. Other types cannot be constructed from
+      acceleration structure types.
+
+      example:
+
+        layout(shaderRecordEXT) buffer sbt
+        {
+            uint64_t as_va;
+            uvec2    as_va2;
+        };
+
+        void main()
+        {
+            ...
+            if (some_condition) {
+                traceRayEXT(accelerationStructureEXT(as_va), ... );
+            } else {
+                traceRayEXT(accelerationStructureEXT(as_va2), ... );
+            }
+            ...
+        }
+
+Modifications to Chapter 6 of the OpenGL Shading Language Specification
+(Statements and Structure)
+
+    Modify section 6.4 (Jumps)
+
+    Add to the jump_statement rule:
+
+        ignoreIntersectionEXT ; // in the any-hit shading language only
+        terminateRayEXT ;       // in the any-hit shading language only
+
+    Add to the end of the section:
+
+    The `ignoreIntersectionEXT` keyword is only allowed within any-hit shaders.
+    This keyword terminates the calling any-hit shader and continues the ray
+    query without modifying gl_RayTmaxEXT and gl_HitKindEXT.
+
+    The `terminateRayEXT` keyword is only allowed within any-hit shaders.
+    This keyword terminates the calling any-hit shader, stops the ray
+    traversal, and invokes the closest-hit shader.
 
 Additions to Chapter 7 of the OpenGL Shading Language Specification
 (Built-in Variables)
@@ -587,9 +670,9 @@ Additions to Chapter 7 of the OpenGL Shading Language Specification
         in    vec3   gl_ObjectRayDirectionEXT;
 
         // Ray parameters
-        in    float  gl_RayTminEXT;
-        in    float  gl_RayTmaxEXT;
-        in    uint   gl_IncomingRayFlagsEXT;
+        in          float  gl_RayTminEXT;
+        in volatile float  gl_RayTmaxEXT;
+        in          uint   gl_IncomingRayFlagsEXT;
 
         // Transform matrices
         in    mat4x3 gl_ObjectToWorldEXT;
@@ -644,10 +727,11 @@ Additions to Chapter 7 of the OpenGL Shading Language Specification
     Add the following description for gl_InstanceCustomIndexEXT:
 
     gl_InstanceCustomIndex is available in the intersection, any-hit and
-    closest-hit shaders to specify the application defined value of the instance
-    that intersects the current ray. Only lower 24 bits are valid, upper 8 bits
-    will be ignored. See the Ray Tracing chapter of the Vulkan specification for
-    more details.
+    closest-hit shaders to specify the application defined value of the
+    instance that intersects the current ray. The value provided in this
+    built-in is obtained from the lower 24 bits of the variable, the upper
+    8 bits are zero. See the Ray Tracing chapter of the Vulkan specification
+    for more details.
 
     Add the following description for gl_GeometryIndexEXT:
 
@@ -774,6 +858,19 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     The results of subgroup operations (such as ballot) and invocation-level
     clock operations may not be consistent across an invocation repack function
     and care must be exercised when using these with shader calls.
+    [[if GL_KHR_shader_subgroup is supported::]]
+    The gl_SubgroupSize, gl_SubgroupInvocationID, gl_SubgroupEqMask,
+    gl_SubgroupGeMask, gl_SubgroupGtMask, gl_SubgroupLeMask, and
+    gl_SubgroupLtMask variables must be treated as volatile across shader
+    calls.
+    [[if GL_ARB_shader_ballot is supported::]]
+    The gl_SubGroupSizeARB, gl_SubGroupInvocationARB, gl_SubGroupEqMaskARB,
+    gl_SubGroupGeMaskARB, gl_SubGroupGtMaskARB, gl_SubGroupLeMaskARB, and
+    gl_SubGroupLtMaskARB variables must be treated as volatile across shader
+    calls.
+    [[if GL_NV_shader_sm_builtins is supported::]]
+    The gl_WarpIDNV and gl_SMIDNV variables must be treated as volatile across
+    shader calls.
     [[end]]
 
     Syntax:
@@ -803,15 +900,25 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     and the valid parametric range on which intersections can occur is
     specified by <Tmin> and <Tmax>.
 
-    <rayFlags> is any combination of built-in constants as defined in
-    Section 7.3.2 "Built-In Constants".
+    The components of <origin> and <direction> must all be finite values.
+    <tMin> and <tMax> must be non-negative, and <tMin> must be less than or equal to <tMax>.  
+    The parameters <origin>, <direction>, <tMin>, or <tMax> may not contain Nans.
 
-    <cullMask> is an 8 bit mask which specifies the instances to be intersected
-    i.e visible to the traced ray. This mask will be combined with the mask field
-    specified in VkGeometryInstanceKHR as defined in the Ray Tracing chapter of Vulkan
-    Specification using a bitwise AND operation. The instance is visible only if
-    the result of the operation is non-zero. The upper 24 bits of this value are
-    ignored. If the value is zero, no instances are visible.
+    <rayFlags> is a bit-wise combination of the built-in constants as defined
+    in Section 7.3.2 "Built-In Constants". Behavior is undefined if more than
+    one of the gl_RayFlagsOpaqueEXT, gl_RayFlagsNoOpaqueEXT,
+    gl_RayFlagsCullOpaqueEXT, or gl_RayFlagsCullNoOpaqueEXT are set, or if
+    both gl_RayFlagsCullBackFacingTrianglesEXT and
+    gl_RayFlagsCullFrontFacingTrianglesEXT are set.
+
+    <cullMask> is a mask which specifies the instances to be intersected
+    i.e visible to the traced ray. Only the 8 least-significant bits are used;
+    other bits are ignored. This mask will be combined with the mask field
+    specified in VkAccelerationStructureInstanceKHR as defined in the Ray
+    Traversal chapter of Vulkan Specification using a bitwise AND operation.
+    The instance is visible only if the result of the operation is non-zero.
+    The upper 24 bits of this value are ignored. If the value is zero, no
+    instances are visible.
 
     Associated with the ray is <payload> which is a compile-time constant to select
     a shader defined structure containing data that will be passed to other
@@ -826,11 +933,13 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
     The <sbtRecordOffset> and <sbtRecordStride> parameters influence the
     computation of record indices of the <shader binding table> that locate
-    the intersection, any-hit, and closest-hit shaders during a trace query. See
+    the intersection, any-hit, and closest-hit shaders during a trace query. Only
+    the 4 least-significant bits are used; other bits are ignored. See
     the Ray Tracing chapter of the Vulkan specification for more information.
 
     The <missIndex> parameter influences computation of indices into the
-    <shader binding table> to locate a miss shader during a trace query. See
+    <shader binding table> to locate a miss shader during a trace query. Only
+    the 16 least-significant bits are used; other bits are ignored. See
     the Ray Tracing chapter of the vulkan specification for more information.
 
     Syntax:
@@ -844,25 +953,10 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     the current ray interval, the any-hit shader corresponding to the current
     intersection shader is invoked. If the intersection is not ignored in the
     any-hit shader, <hitT> is committed as the new gl_RayTmaxEXT value of the
-    current ray and <hitKind> is committed as the new value for gl_HitKindEXT.
-
-    Syntax:
-
-        void ignoreIntersectionEXT();
-
-    This function is only available in an any-hit shader.
-
-    Terminates the calling any-hit shader and continues the ray query without
-    modifying gl_RayTmaxEXT and gl_HitKindEXT.
-
-    Syntax:
-
-        void terminateRayEXT();
-
-    This function is only available in an any-hit shader.
-
-    Terminates the calling any-hit shader, stops the ray traversal, and invokes
-    the closest-hit shader.
+    current ray, <hitKind> is committed as the new value for gl_HitKindEXT, and
+    true is returned. If either of those checks fails, then false is returned.
+    If the value of <hitT> falls outside the current ray interval, the hit is
+    rejected and false is returned.
 
     Syntax:
 
@@ -883,7 +977,18 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     qualified variables having the same value for the location layout qualifier.
 
 
-    Example :
+Additions to Chapter 9 of the OpenGL Shading Language Specification
+(Shading Language Grammar)
+
+    Add the tokens IGNORE_INTERSECTION and TERMINATE_RAY.
+
+    Under the rule for jump_statement, add:
+
+        | IGNORE_INTERSECTION SEMICOLON // any-hit shader only
+        | TERMINATE_RAY SEMICOLON       // any-hit shader only
+
+
+Example :
 
 
     Ray Generation Shader :
@@ -1015,6 +1120,12 @@ Interactions with GL_NV_shader_subgroup_partitioned
     the ray generation, intersection, any-hit, closest-hit, miss, and callable
     shading languages.
 
+Interactions with GL_NV_shaders_sm_builtins
+
+    If GL_NV_shader_sm_builtins is supported, the builtin variables added by
+    this extension are available in the ray generation, intersection, any-hit,
+    closest-hit, miss, and callable shading languages.
+
 Interactions with GL_ARB_shader_ballot
 
     If GL_ARB_shader_ballow is supported, the builtin variables and functions
@@ -1044,6 +1155,12 @@ Interactions with GL_EXT_nonuniform_qualifier
     If GL_EXT_nonuniform_qualifier is supported, arrays of
     accelerationStructureEXT can be indexed with non-unform integral
     expressions when they are decorated with the nonuniformEXT qualifier.
+
+Interactions with GL_EXT_scalar_block_layout
+
+    If GL_EXT_scalar_block_layout is supported, buffer blocks with
+    a layout of shaderRecordEXT can also be laid out using the scalar
+    block layout.
 
 Interactions with GL_EXT_ray_flags_primitive_culling
 
@@ -1139,3 +1256,22 @@ Revision History
                                    and callableDataEXT/callableDataInEXT, grammatical fixes
     13    2020-06-05    dgkoch     further grammatical and typo fixes, fix descriptions of
                                    gl_LaunchIDEXT and gl_LaunchSizeEXT, fix example.
+    14    2020-06-02    dgkoch     Add interactions with GL_NV_shader_sm_builtins.
+                                   Add volatile recommendations for subgroup and sm builtins.
+    15    2020-06-09    dgkoch     Add the ability to construct accelerationStructureEXT type from
+                                   uint64_t or uvec2.
+    16    2020-07-10    tobias     Clarify valid bits for some parameters (GLSL !63)
+    17    2020-07-22    dgkoch     Mark gl_RayTmaxEXT volatile in intersection shaders
+                                   (vulkan #2268)
+    18    2020-07-24    jbarczack  Add numeric limits on ray parameters (vulkan issue 2235)
+    19    2020-08-21    dgkoch     Clarify that shaderRecordEXT can be used with most other layout
+                                   qualifiers to control block layout, and add interactions with
+                                   GL_EXT_scalar_block_layout (Vulkan issue 2230)
+    20    2020-09-24    dgkoch     Document ray flag exclusive combinations (vulkan #2286)
+                                   Clarity valid bits for gl_InstanceCustomIndex (GLSL #19)
+                                   Clarify reportIntersectionEXT behaviour when hitT is out of
+                                   range (vulkan #2359)
+    21    2020-10-21    dgkoch     ignoreIntersectionEXT and terminateRayEXT are jump statements
+                                   instead of builtin functions (vulkan #2374)
+    22    2020-11-10    dgkoch     correct reference to Vulkan structure containing the mask
+                                   (vulkan #2414)

@@ -15,15 +15,16 @@ Contributors
     Ashwin Lele, NVIDIA
     Daniel Koch, NVIDIA
     Tobias Hector, AMD
+    Joshua Barczak, Intel
 
 Status
 
-    Draft
+    Complete
 
 Version
 
-    Last Modified Date: 2020-04-01
-    Revision: 6
+    Last Modified Date: 2020-11-10
+    Revision: 12
 
 Dependencies
 
@@ -59,7 +60,7 @@ Overview
     expected way for an implementation to map GLSL constructs to SPIR-V
     constructs:
 
-      rayQueryEXT type -> OpTypeRayQueryProvisionalKHR instruction
+      rayQueryEXT type -> OpTypeRayQueryKHR instruction
       accelerationStructureEXT type -> OpTypeAccelerationStructureKHR instruction
 
       gl_RayFlagsNoneEXT -> NoneKHR ray flag
@@ -82,7 +83,7 @@ Overview
       gl_RayQueryCandidateIntersectionTriangleEXT -> RayQueryCandidateIntersectionTriangleKHR flag
       gl_RayQueryCandidateIntersectionAABBEXT -> RayQueryCandidateIntersectionAABBKHR flag
 
-      rayQueryEXT variable -> OpVariable instruction with type OpTypeRayQueryProvisionalKHR
+      rayQueryEXT variable -> OpVariable instruction with type OpTypeRayQueryKHR
 
       rayQueryInitializeEXT -> OpRayQueryInitializeKHR instruction
       rayQueryProceedEXT -> OpRayQueryProceedKHR instruction
@@ -150,6 +151,18 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
                                     query traversal information.
 
 
+    Change the following sentence in the first paragraph of 4.1.7 (Opaque
+    Types) from
+
+        They can only be declared as function parameters or in uniform-
+        qualified variables (see “Uniform  Variables”).
+
+    to
+
+        With the exception of rayQueryEXT (see "Ray Query Types"), they can
+        only be declared as function parameters or in uniform-qualified
+        variables (see “Uniform  Variables”).
+
     Add two new sub-sections under Section 4.1.7 (Opaque Types)
 
     4.1.7.x Acceleration Structure Types
@@ -169,13 +182,15 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
     This type is used in the rayQueryInitializeEXT() builtin described in Section 8.19
     Members of structures cannot be declared with this type.
 
-    4.1.7.x Ray Query Types
+    4.1.7.y Ray Query Types
 
     rayQueryEXT is an opaque type representing a ray query object used to
     traverse acceleration structure and return traversal information.
     It is declared and behaves like above described opaque types. When aggregated
     into arrays within a shader, rayQueryEXT can only be indexed with
     a dynamically uniform integral expression, otherwise results are undefined.
+    Unlike other opaque types, rayQueryEXT variables are declared with no storage
+    qualifiers, either in the global scope or within function scope.
 
     [[If GL_EXT_nonuniform_qualifier is supported
     When aggregated into arrays within a shader, rayQueryEXT can
@@ -246,15 +261,25 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     and the valid parametric range on which intersections can occur is
     specified by <tMin> and <tMax>.
 
-    <rayFlags> is any combination of built-in constants as defined in
-    Section 7.3.x "Fixed Constants"
+    The components of <origin> and <direction> must all be finite values.
+    <tMin> and <tMax> must be non-negative, and <tMin> must be less than or equal to <tMax>.
+    The parameters <origin>, <direction>, <tMin>, or <tMax> may not contain Nans.
 
-    <cullMask> is an 8 bit mask which specifies the instances to be intersected
-    i.e visible to the traced ray. This mask will be combined with the mask field
-    specified in VkGeometryInstanceKHR as defined in the Ray Traversal chapter of
-    Vulkan Specification using a bitwise AND operation. The instance is visible 
-    only if the result of the operation is non-zero. The upper 24 bits of this 
-    value are ignored. If the value is zero, no instances are visible.
+    <rayFlags> is a bit-wise combination of the built-in constants as defined
+    in  Section 7.3.x "Fixed Constants". Behavior is undefined if more than
+    one of the gl_RayFlagsOpaqueEXT, gl_RayFlagsNoOpaqueEXT,
+    gl_RayFlagsCullOpaqueEXT, or gl_RayFlagsCullNoOpaqueEXT are set, or if both
+    gl_RayFlagsCullBackFacingTrianglesEXT and
+    gl_RayFlagsCullFrontFacingTrianglesEXT are set.
+
+    <cullMask> is a mask which specifies the instances to be intersected
+    i.e visible to the traced ray. Only the 8 least-significant bits are used;
+    other bits are ignored. This mask will be combined with the mask field
+    specified in VkAccelerationStructureInstanceKHR as defined in the Ray
+    Traversal chapter of Vulkan Specification using a bitwise AND operation.
+    The instance is visible only if the result of the operation is non-zero.
+    The upper 24 bits of this value are ignored. If the value is zero, no
+    instances are visible.
 
 
     Syntax:
@@ -478,3 +503,10 @@ Revision History
      4    2020-02-25    tobias     Added missing (and fairly important!) rayQueryGetIntersectionTEXT
      5    2020-03-06    alele      Rename RayWorld to WorldRay for some builtins (#20), fix typo (!50)
      6    2020-04-01    alele      Remove primitive culling ray flags (vulkan issue 2073)
+     7    2020-07-03    dgkoch     Fix SPIR-V mapping for rayQueryEXT
+     8    2020-07-10    tobias     Clarify valid bits for some parameters (GLSL!63)
+     9    2020-07-24    jbarczack  Add numeric limits on ray parameters (vulkan issue 2235)
+    10    2020-09-11    tobias     Clarify ray query storage class (GLSL!70), fix typo (github!135)
+    11    2020-09-16    dgkoch     Document ray flag exclusive combinations (vulkan #2286)
+    12    2020-11-10    dgkoch     correct reference to Vulkan structure containing the mask
+                                   (vulkan #2414)
