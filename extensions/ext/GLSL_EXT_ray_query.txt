@@ -23,8 +23,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-11-10
-    Revision: 12
+    Last Modified Date: 2020-11-24
+    Revision: 13
 
 Dependencies
 
@@ -440,7 +440,7 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
         
         vec3 rayQueryGetIntersectionObjectRayDirectionEXT(rayQueryEXT q, bool committed);
 
-    Returns object-space origin of ray for current intersection
+    Returns object-space direction of ray for current intersection.
 
     If committed is 'true'  returns value for committed intersection
     If committed is 'false' returns value for candidate intersection
@@ -450,7 +450,7 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
         vec3 rayQueryGetIntersectionObjectRayOriginEXT(rayQueryEXT q, bool committed);
 
-    Returns object-space direction of ray for current intersection.
+    Returns object-space origin of ray for current intersection
 
     If committed is 'true'  returns value for committed intersection
     If committed is 'false' returns value for candidate intersection
@@ -510,3 +510,4 @@ Revision History
     11    2020-09-16    dgkoch     Document ray flag exclusive combinations (vulkan #2286)
     12    2020-11-10    dgkoch     correct reference to Vulkan structure containing the mask
                                    (vulkan #2414)
+    13    2020-11-24    dgkoch     swap descriptions of rayQueryGetIntersectionObjectRay{Origin,Direction}EXT
