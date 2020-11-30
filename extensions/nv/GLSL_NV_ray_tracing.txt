@@ -26,8 +26,8 @@ Status
 
 Version
 
-    Last Modified Date: 2019-10-15
-    Revision: 7
+    Last Modified Date: 2020-11-30
+    Revision: 8
 
 Dependencies
 
@@ -885,10 +885,23 @@ Issues
        - there is no "baseInstance" relevant for these shaders, and so ID makes
          it more obvious that this is zero-based.
 
+    7) Does the miss shading stage really have gl_ObjectRayOriginNV and
+       gl_ObjectRayDirectionNV built-ins given that the here was no object
+       intersected?
+
+       RESOLVED: It was noticed that these were inadvertently included by this
+       extension when EXT_ray_tracing was being developed and removed there
+       since they cannot possibly be well-defined values in the miss
+       shading language. However, we decided to leave them in NV_ray_tracing
+       for compatibility. Note that SPIR-V validation may still warn about
+       use of these in a miss shader, since their use is almost certainly a
+       mistake.
+
 Revision History
 
     Rev.  Date          Author     Changes
     ----  -----------   ------     -------------------------------------------
+     8    30-Nov-2020   dgkoch     Add issue 7 about gl_ObjectRay params in miss shader
      7    15-Oct-2019   dgkoch     Fix github issues #93, #95
      6    25-Mar-2019   ewerness   Callables shouldn't have incoming ray flags
      5    04-Mar-2019   alele      Clarify readonly semantics for buffer block
