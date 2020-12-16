@@ -23,8 +23,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-12-04
-    Revision: 13
+    Last Modified Date: 2020-12-16
+    Revision: 14
 
 Dependencies
 
@@ -380,7 +380,14 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     Syntax:
         uint rayQueryGetIntersectionInstanceShaderBindingTableRecordOffsetEXT(rayQueryEXT q, bool committed);
 
-    Return offset
+    Returns the application-specified
+    VkAccelerationStructureInstanceKHR::instanceShaderBindingTableRecordOffset
+    value from the bottom-level acceleration structure instance within the
+    top-level acceleration structure. For ray queries this member has no
+    functional effect, but is provided for completeness as the application
+    could use this to store arbitray instance data. When used
+    with ray tracing pipelines, this value is used in calculating
+    the hit shader binding table index.
 
     If <committed> is 'true'  returns value for committed intersection.
     If <committed> is 'false' returns value for candidate intersection.
@@ -400,7 +407,8 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
         int rayQueryGetIntersectionPrimitiveIndexEXT(rayQueryEXT q, bool committed);
 
-    Returns primitive
+    Returns the index of the primitive (triangle or bounding box) within the
+    geometry of the bottom-level acceleration structure being processed.
 
     If <committed> is 'true'  returns value for committed intersection.
     If <committed> is 'false' returns value for candidate intersection.
@@ -512,3 +520,6 @@ Revision History
     13    2020-12-04    dgkoch     swap descriptions of rayQueryGetIntersectionObjectRay{Origin,
                                    Direction}EXT (#143)
                                    various typographical improvements (vulkan issue 2432)
+    14    2020-12-16    dgkoch     Add description for rayQueryGetIntersectionPrimitiveIndexEXT and
+                                   rayQueryGetIntersectionInstanceShaderBindingTableRecordOffsetEXT
+                                   (vulkan issue 2432)
