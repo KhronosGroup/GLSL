@@ -26,8 +26,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-11-30
-    Revision: 8
+    Last Modified Date: 2020-12-16
+    Revision: 9
 
 Dependencies
 
@@ -39,6 +39,20 @@ Dependencies
 
     This extension interacts with revision 43 of the GL_KHR_vulkan_glsl
     extension, dated October 25, 2017.
+
+    This extension interacts with GL_KHR_shader_subgroup.
+
+    This extension interacts with GL_NV_shader_subgroup_partitioned.
+
+    This extension interacts with GL_ARB_shader_ballot.
+
+    This extension interacts with GL_ARB_shader_group_vote.
+
+    This extension interacts with GL_ARB_shader_clock.
+
+    This extension interacts with GL_EXT_shader_realtime_clock.
+
+    This extension interacts with GL_NV_shader_sm_builtins.
 
 Overview
 
@@ -843,6 +857,64 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     }
 
 
+Interactions with GL_KHR_shader_subgroup
+
+    If GL_KHR_shader_subgroup is supported, the following built-in variables
+    are available in the ray generation, intersection, any-hit, closest-hit,
+    miss, and callable shading languages:
+
+        mediump in uint  gl_SubgroupSize;
+        mediump in uint  gl_SubgroupInvocationID;
+        highp   in uvec4 gl_SubgroupEqMask;
+        highp   in uvec4 gl_SubgroupGeMask;
+        highp   in uvec4 gl_SubgroupGtMask;
+        highp   in uvec4 gl_SubgroupLeMask;
+        highp   in uvec4 gl_SubgroupLtMask;
+
+    and have the same sematics.
+
+    Additionally, all the "Shader Invocation Group Functions" that are
+    not listed as compute-only are available in the ray generation,
+    intersection, any-hit, closest-hit, miss, and callable shading languages.
+
+Interactions with GL_NV_shader_subgroup_partitioned
+
+    If GL_NV_shader_subgroup_partitioned is supported, subgroupPartitionNV()
+    and all the subgroupPartitioned*NV() builtin functions are available in
+    the ray generation, intersection, any-hit, closest-hit, miss, and callable
+    shading languages.
+
+Interactions with GL_NV_shaders_sm_builtins
+
+    If GL_NV_shader_sm_builtins is supported, the builtin variables added by
+    this extension are available in the ray generation, intersection, any-hit,
+    closest-hit, miss, and callable shading languages.
+
+Interactions with GL_ARB_shader_ballot
+
+    If GL_ARB_shader_ballow is supported, the builtin variables and functions
+    added by this extension are available in the ray generation, intersection,
+    any-hit, closest-hit, miss, and callable shading languages.
+
+Interactions with GL_ARB_shader_group_vote
+
+    If GL_ARB_shader_group_vote is supported, the builtin functions added by
+    this extension are available in the ray generation, intersection, any-hit,
+    closest-hit, miss, and callable shading languages.
+
+Interactions with GL_ARB_shader_clock
+
+    If GL_ARB_shader_clock is supported, the new timing functions added by
+    this extension are available in the ray generation, intersection, any-hit,
+    closest-hit, miss, and callable shading languages.
+
+Interactions with GL_EXT_shader_realtime_clock
+
+    If GL_EXT_shader_realtime_clock is supported, the new timing functions
+    added by this extension are available in the ray generation, intersection,
+    any-hit, closest-hit, miss, and callable shading languages.
+
+
 Issues
 
     1) Do we need to specify the GL_NV_ray_tracing as enabled for these new
@@ -885,8 +957,15 @@ Issues
        - there is no "baseInstance" relevant for these shaders, and so ID makes
          it more obvious that this is zero-based.
 
-    7) Does the miss shading stage really have gl_ObjectRayOriginNV and
-       gl_ObjectRayDirectionNV built-ins given that the here was no object
+    7) Are subgroup operations supported in ray tracing stages?
+
+       RESOLVED: Yes. All the non-compute-only builtin variables and functions
+       are available in all of the ray tracing shader stages. That is,
+       everything except: gl_NumSubgroups, gl_SubgroupID, and
+       subgroupMemoryBarrierShared().
+
+    8) Does the miss shading stage really have gl_ObjectRayOriginNV and
+       gl_ObjectRayDirectionNV built-ins given that there was no object
        intersected?
 
        RESOLVED: It was noticed that these were inadvertently included by this
@@ -901,7 +980,8 @@ Revision History
 
     Rev.  Date          Author     Changes
     ----  -----------   ------     -------------------------------------------
-     8    30-Nov-2020   dgkoch     Add issue 7 about gl_ObjectRay params in miss shader
+     9    16-Dec-2020   dgkoch     Add interactions with subgroup and clock extensions
+     8    30-Nov-2020   dgkoch     Add issue 8 about gl_ObjectRay params in miss shader
      7    15-Oct-2019   dgkoch     Fix github issues #93, #95
      6    25-Mar-2019   ewerness   Callables shouldn't have incoming ray flags
      5    04-Mar-2019   alele      Clarify readonly semantics for buffer block
