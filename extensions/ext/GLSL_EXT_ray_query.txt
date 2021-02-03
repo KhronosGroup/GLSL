@@ -23,8 +23,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-12-16
-    Revision: 14
+    Last Modified Date: 2021-02-03
+    Revision: 15
 
 Dependencies
 
@@ -72,8 +72,10 @@ Overview
       gl_RayFlagsCullOpaqueEXT -> CullOpaqueKHR ray flag
       gl_RayFlagsCullNoOpaqueEXT -> CullNoOpaqueKHR ray flag
 
-      gl_RayQueryCommittedIntersectionEXT -> RayQueryCommittedIntersectionKHR enum
-      gl_RayQueryCandidateIntersectionEXT -> RayQueryCandidateIntersectionKHR enum
+      The boolean <committed> argument of any rayQueryGetIntersection* function
+      translates in SPIR-V to an <Intersection> argument of
+      RayQueryCommittedIntersectionKHR if 'true' and
+      RayQueryCandidateIntersectionKHR if 'false'.
 
       gl_RayQueryCommittedIntersectionNoneEXT -> RayQueryCommittedIntersectionNoneKHR enum
       gl_RayQueryCommittedIntersectionTriangleEXT ->RayQueryCommittedIntersectionTriangleKHR enum
@@ -523,3 +525,4 @@ Revision History
     14    2020-12-16    dgkoch     Add description for rayQueryGetIntersectionPrimitiveIndexEXT and
                                    rayQueryGetIntersectionInstanceShaderBindingTableRecordOffsetEXT
                                    (vulkan issue 2432)
+    15    2021-02-03    dgkoch     Clarify the SPIR-V mapping for the 'committed' arg (vulkan issue 2516)
