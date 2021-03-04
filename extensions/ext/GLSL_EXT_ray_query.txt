@@ -16,6 +16,7 @@ Contributors
     Daniel Koch, NVIDIA
     Tobias Hector, AMD
     Joshua Barczak, Intel
+    Tyler Nowicki, Huawei
 
 Status
 
@@ -23,8 +24,8 @@ Status
 
 Version
 
-    Last Modified Date: 2021-02-03
-    Revision: 15
+    Last Modified Date: 2021-03-04
+    Revision: 16
 
 Dependencies
 
@@ -431,8 +432,7 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
         bool rayQueryGetIntersectionFrontFaceEXT(rayQueryEXT q, bool committed);
 
-    Returns whether current intersection is front face or back facing
-    triangle.
+    Returns whether current intersection is front face triangle.
 
     If <committed> is 'true'  returns value for committed intersection.
     If <committed> is 'false' returns value for candidate intersection.
@@ -442,8 +442,7 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
         bool rayQueryGetIntersectionCandidateAABBOpaqueEXT(rayQueryEXT q);
 
-    Returns whether current candidate intersection is an opaque AABB or
-    not.
+    Returns whether current candidate intersection is an opaque AABB.
 
     Syntax:
 
@@ -526,3 +525,4 @@ Revision History
                                    rayQueryGetIntersectionInstanceShaderBindingTableRecordOffsetEXT
                                    (vulkan issue 2432)
     15    2021-02-03    dgkoch     Clarify the SPIR-V mapping for the 'committed' arg (vulkan issue 2516)
+    16    2021-03-04    tnowicki   Clarify GetIntersectionFrontFace and GetIntersectionAABBOpaque
