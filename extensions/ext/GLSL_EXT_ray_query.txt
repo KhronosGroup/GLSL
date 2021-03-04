@@ -432,7 +432,7 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
         bool rayQueryGetIntersectionFrontFaceEXT(rayQueryEXT q, bool committed);
 
-    Returns whether current intersection is front face triangle.
+    Returns whether current intersection is a front facing triangle.
 
     If <committed> is 'true'  returns value for committed intersection.
     If <committed> is 'false' returns value for candidate intersection.
