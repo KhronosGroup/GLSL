@@ -442,8 +442,8 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
         bool rayQueryGetIntersectionCandidateAABBOpaqueEXT(rayQueryEXT q);
 
-    Returns whether current candidate intersection is opaque geometry
-    or not.
+    Returns whether current candidate intersection is opaque AABB or
+    not.
 
     Syntax:
 
