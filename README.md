@@ -72,3 +72,4 @@ which normatively accepts SPIR-V but does not normatively consume a high-level s
 - [GL_EXT_shader_image_int64](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_shader_image_int64.txt)
 - [GL_NV_primitive_shading_rate](https://github.com/KhronosGroup/GLSL/blob/master/extensions/nv/GLSL_NV_primitive_shading_rate.txt)
 - [GL_EXT_shared_memory_block](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_shared_memory_block.txt)
+- [GL_HUAWEI_subpass_shading](https://github.com/KhronosGroup/GLSL/blob/master/extensions/huawei/GLSL_HUAWEI_subpass_shading.txt)
