@@ -56,6 +56,22 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
 
       #define GL_HUAWEI_subpass_shading  
 
+Additions to Chapter 2 of the OpenGL Shading Language Specification, Version 4.60
+
+    Add Section 2.7. Subpass Shading Processor
+    
+    The subpass shading processor is a programmable unit that operates independently from the other 
+    shader processors. Compilation units written in the OpenGL Shading Language to run on this processor are
+    called subpass shading shaders. When a set of subpass shading shaders are successfully compiled and linked, 
+    they result in a subpass shading shader executable that runs on the subpass shading processor
+
+    A subpass shading shader is almost identical to a compute shader except the following
+    differences.
+        
+        * A subpass shading shader must be dispatched in a dedicate subpass
+        * A subpass shading shader is allowed to read fragment from input attachment
+        * The work dimension is defined by the size of render area and the number of layers of the framebuffer
+        
 Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
 
     Modify Section 4.1.7, (Opaque Types)
@@ -79,6 +95,22 @@ Changes to Chapter 12 of The OpenGL Shading Language Specification, Version 4.60
     Change the "Subpass inputs are read through a new set of types, available only to fragment shaders:" to 
 
     Subpass inputs are read through a new set of types, available only to fragment or subpass shading shaders:
+
+Additions to Chapter 2 of the OpenGL ES ESSL versions 3.20
+
+    Add Section 2.7. Subpass Shading Processor
+    
+    The subpass shading processor is a programmable unit that operates independently from the other 
+    shader processors. Compilation units written in the OpenGL Shading Language to run on this processor are
+    called subpass shading shaders. When a set of subpass shading shaders are successfully compiled and linked, 
+    they result in a subpass shading shader executable that runs on the subpass shading processor
+
+    A subpass shading shader is almost identical to a compute shader except the following
+    differences.
+        
+        * A subpass shading shader must be dispatched in a dedicate subpass
+        * A subpass shading shader is allowed to read fragment from input attachment
+        * The work dimension is defined by the size of render area and the number of layers of the framebuffer
 
 Changes to Chapter 4 of The OpenGL ES ESSL versions 3.20
 
