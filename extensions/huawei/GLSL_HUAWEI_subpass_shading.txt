@@ -60,10 +60,10 @@ Additions to Chapter 2 of the OpenGL Shading Language Specification, Version 4.6
 
     Add Section 2.7. Subpass Shading Processor
     
-    The subpass shading processor is a programmable unit that operates independently from the other 
-    shader processors. Compilation units written in the OpenGL Shading Language to run on this processor are
-    called subpass shading shaders. When a set of subpass shading shaders are successfully compiled and linked, 
-    they result in a subpass shading shader executable that runs on the subpass shading processor
+    The subpass shading processor is a programmable unit that operates the subpass inputs. It runs independently 
+    from the other shader processors. Compilation units written in the OpenGL Shading Language to run on this
+    processor are called subpass shading shaders. When a set of subpass shading shaders are successfully compiled 
+    and linked, they result in a subpass shading shader executable that runs on the subpass shading processor.
 
     A subpass shading shader is almost identical to a compute shader except the following
     differences.
@@ -100,10 +100,10 @@ Additions to Chapter 2 of the OpenGL ES ESSL versions 3.20
 
     Add Section 2.7. Subpass Shading Processor
     
-    The subpass shading processor is a programmable unit that operates independently from the other 
-    shader processors. Compilation units written in the OpenGL Shading Language to run on this processor are
-    called subpass shading shaders. When a set of subpass shading shaders are successfully compiled and linked, 
-    they result in a subpass shading shader executable that runs on the subpass shading processor
+    The subpass shading processor is a programmable unit that operates the subpass inputs. It runs independently 
+    from the other shader processors. Compilation units written in the OpenGL Shading Language to run on this
+    processor are called subpass shading shaders. When a set of subpass shading shaders are successfully compiled 
+    and linked, they result in a subpass shading shader executable that runs on the subpass shading processor.
 
     A subpass shading shader is almost identical to a compute shader except the following
     differences.
