@@ -73,3 +73,4 @@ which normatively accepts SPIR-V but does not normatively consume a high-level s
 - [GL_NV_primitive_shading_rate](https://github.com/KhronosGroup/GLSL/blob/master/extensions/nv/GLSL_NV_primitive_shading_rate.txt)
 - [GL_EXT_shared_memory_block](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_shared_memory_block.txt)
 - [GL_EXT_subgroup_uniform_control_flow](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_subgroup_uniform_control_flow.txt)
+- [GL_NV_ray_tracing_motion_blur](https://github.com/KhronosGroup/GLSL/blob/master/extensions/nv/GLSL_NV_ray_tracing_motion_blur.txt)
