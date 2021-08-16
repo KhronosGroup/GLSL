@@ -534,7 +534,7 @@ Additions to Chapter 6 of the OpenGL Shading Language Specification
             An error will be generated if the front-end compiler cannot generate
             a literal 32-bit value.
             Unlike `spirv_by_reference`, `spirv_literal` can only be used on
-            functions defined with `spirv_instruction`, and are invalid on
+            functions defined with `spirv_instruction`, and is invalid on
             user-defined functions.
 
     Add a new section 6.1.3, SPIR-V Instructions
