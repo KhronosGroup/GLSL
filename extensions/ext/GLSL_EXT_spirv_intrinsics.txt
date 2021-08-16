@@ -226,7 +226,7 @@ Additions to Chapter 3 of the OpenGL Shading Language Specification
         SPIR-V intrinsics used by a shader may be defined by extensions, or
         guarded by capabilities.
         Each intrinsic can take a list of extensions and capabilities which
-        must be enabled in the generated spir-v in order to use that
+        must be enabled in the generated SPIR-V in order to use that
         intrinsic.
     
         spirv-requirements-list:
