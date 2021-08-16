@@ -458,7 +458,6 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
         spirv_type-parameter:
 
             constant-expression
-            literal
 
         spirv_instruction-qualifier-list:
 
