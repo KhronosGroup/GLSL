@@ -552,7 +552,7 @@ Additions to Chapter 6 of the OpenGL Shading Language Specification
         declaration that has a return type and parameters matching those of the
         desired instruction.
         If any parameters of the instruction should be passed by pointer
-        rather than by object, those parameters should additionally be
+        rather than by object, those parameters must additionally be
         decorated with `spirv_by_reference`.
         If any parameters of the instruction are literals, those parameters
         should additionally be decorated with `spirv_literal`.
