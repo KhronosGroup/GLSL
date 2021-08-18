@@ -247,14 +247,10 @@ Additions to Chapter 3 of the OpenGL Shading Language Specification
             literal-string
             literal-string , spirv-extension-list
 
-        The `extensions` qualifier declares a list of SPIR-V extensions
-        that are required to use this instruction.
         An *OpExtension* instruction will be inserted into the generated
         SPIR-V code for each declared extension with the string parameter
         as its `Name` operand, if it is not already present.
 
-        The `capabilities` qualifier declares a list of SPIR-V capabilities
-        that are required to use this instruction.
         An *OpCapability* instruction will be inserted into the generated
         SPIR-V code for each declared capability with the integer parameter
         as its `Capability` operand, if it is not already present.
@@ -525,12 +521,13 @@ Additions to Chapter 6 of the OpenGL Shading Language Specification
             for the underlying object.
             
             When generating SPIR-V, the `spirv_literal` qualifier indicates
-            to the compiler that the variable should be compiled to a literal
-            value rather than a variable or constant with an id. Values passed
-            to such a parameter must be integer, boolean, or floating-point
-            constant expressions in the 32-bit range which can be evaluated by
-            the compiler front-end, and must not involve specialization
-            constants.
+            to the compiler that the value passed to the parameter should be
+            compiled to a literal value rather than a variable or constant with
+            an id.
+            Values passed to such a parameter must be integer, boolean, or
+            floating-point constant expressions in the 32-bit range which can
+            be evaluated by the compiler front-end, and must not involve
+            specialization constants.
             An error will be generated if the front-end compiler cannot generate
             a literal 32-bit value.
             Unlike `spirv_by_reference`, `spirv_literal` can only be used on
