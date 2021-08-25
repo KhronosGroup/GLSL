@@ -116,7 +116,7 @@ Syntax:
 
     The <currentTime> parameter is an additional parameter provided to
     traversal call when compared with 'traceRayEXT'. It can be queried in
-    downstream stages to implement time-dependant behavior (like geometry transformations) 
+    downstream stages to implement time-dependent behavior (like geometry transformations) 
     and is used to intersect with motion geometry at the corresponding time.
 
 
