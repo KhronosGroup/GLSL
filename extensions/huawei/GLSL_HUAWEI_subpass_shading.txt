@@ -68,7 +68,7 @@ Additions to Chapter 2 of the OpenGL Shading Language Specification, Version 4.6
     A subpass shading shader is almost identical to a compute shader except the following
     differences.
         
-        * A subpass shading shader must be dispatched in a dedicate subpass
+        * A subpass shading shader must be dispatched in a dedicated subpass
         * A subpass shading shader is allowed to read fragment from input attachment
         * The work dimension is defined by the size of render area and the number of layers of the framebuffer
         
