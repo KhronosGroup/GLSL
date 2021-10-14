@@ -80,7 +80,7 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
 
 Changes to Chapter 8 of The OpenGL Shading Language Specification, Version 4.60 
 
-    Modify Section 8.18, (Subpass-Input Functions), 
+    Modify Section 8.18, (Subpass-Input Functions)
 
     Change the "Subpass-input functions are only available when targeting a Vulkan fragment stage." to 
 
