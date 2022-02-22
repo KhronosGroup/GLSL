@@ -1,0 +1,42 @@
+= OpenGL-GLSL Repository
+
+This Gitlab repo will initially be used for tracking internal OpenGL and
+OpenGL ES Shading Language issues.
+
+Eventually, when the respective spec editors are ready, we may move the
+official Shading Language specs from Subversion into this repo as well.
+
+== Proof-of-concept (only) Asciidoctor Specs
+
+This repo also contains a proof-of-concept conversion of recent GLSL
+(4.60.5) and ESSL (3.20.4) specifications into asciidoc format and the
+asciidoctor toolchain. This is *not* in any way official, until and unless
+the respective editors decide to adopt this format and toolchain.
+
+== Building The Spec (Draft)
+
+First, clone the Khronos GitLab repository containing the GLSL / ESSL
+specification to your local Linux, Windows, or Mac PC. The repository is
+located at https://gitlab.khronos.org/opengl/GLSL .
+
+Next, install all the necessary build tools (see <<depends,Software
+Dependencies>> below).
+
+Finally, go to the root directory of your local repository clone, and
+
+    $ make html
+
+builds HTML5 specification outputs for GLSL and ESSL.
+
+    $ make pdf
+
+builds PDF specification outputs for GLSL and ESSL.
+
+The resulting documents are placed in the `out` folder.
+
+== Software Dependencies (Draft)
+
+Your environment needs to be setup in the same way as for building Vulkan
+specifications.
+This is described here:
+https://gitlab.khronos.org/vulkan/vulkan/blob/devel/BUILD.adoc#depends

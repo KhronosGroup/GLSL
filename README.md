@@ -10,9 +10,7 @@ but technically for those that do not live in the Khronos registries for OpenGL 
 
 - This is a partial mirror of the GitHub https://github.com/KhronosGroup/GLSL.
 - The README.md are notably different, and this one won't maintain an index of extensions (unlike the GitHub README).
-- Once something moves to GitHub, the GitHub version will be considered the true source of the extension,
-  and it may be safer to even delete it here, but that is yet to be tried out.
-- This is not currently the internal GLSL tracker, which is currently elsewhere, under OpenGL.
+- Once something moves to GitHub, the GitHub version will be considered the true source of the extension.
 
 ## This Project Contains
 
