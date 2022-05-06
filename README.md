@@ -75,4 +75,4 @@ which normatively accepts SPIR-V but does not normatively consume a high-level s
 - [GL_HUAWEI_subpass_shading](https://github.com/KhronosGroup/GLSL/blob/master/extensions/huawei/GLSL_HUAWEI_subpass_shading.txt)
 - [GL_EXT_subgroup_uniform_control_flow](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_subgroup_uniform_control_flow.txt)
 - [GL_NV_ray_tracing_motion_blur](https://github.com/KhronosGroup/GLSL/blob/master/extensions/nv/GLSL_NV_ray_tracing_motion_blur.txt)
-- [GL_EXT_ray_cull_mask.txt](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_ray_cull_mask.txt.txt)
+- [GL_EXT_ray_cull_mask](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_ray_cull_mask.txt)
