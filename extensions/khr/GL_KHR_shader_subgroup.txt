@@ -449,9 +449,9 @@ Additions to Chapter 3 of the OpenGL Shading Language Specification
         - In a compute shader, invocations may be inactive within a subgroup
           if the local workgroup size is not a multiple of the subgroup size.
 
-        In fragment shaders, for subgroup operations other than subgroupQuad
-        operations, helper invocations may be treated as inactive even if they
-        would be considered otherwise active.
+        Helper invocations participate in subgroup operations but, for operations
+        other than subgroupQuad operations, they may be treated as inactive even
+        if they would be considered otherwise active.
 
         For each active invocation within a subgroup that reaches the same
         dynamic instance of a subgroup built-in function, all active invocations
