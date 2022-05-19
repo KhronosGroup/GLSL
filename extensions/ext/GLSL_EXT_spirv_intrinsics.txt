@@ -262,6 +262,10 @@ Additions to Chapter 3 of the OpenGL Shading Language Specification
         generated SPIR-V.
         These qualifiers must be declared at global scope.
 
+        Any extensions or capabilities needed by the execution mode must be declared
+        using the optional spirv-requirements-list as described in section 3.9
+        (SPIR-V Requirements Declarations).
+        
         spirv_execution_mode-qualifier:
         
             `spirv_execution_mode` ( integer-constant-expression )
@@ -336,6 +340,10 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
 
         This functionality is only available when generating SPIR-V.
 
+        Any extensions or capabilities needed by the storage class must be declared
+        using the optional spirv-requirements-list as described in section 3.9
+        (SPIR-V Requirements Declarations).
+        
         The `spirv_storage_class` qualifier can only be used on variable
         declarations at global scope.
 
@@ -359,6 +367,10 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
 
         This functionality is only available when generating SPIR-V.
 
+        Any extensions or capabilities needed by the decoration must be declared
+        using the optional spirv-requirements-list as described in section 3.9
+        (SPIR-V Requirements Declarations).
+        
         The `spirv_decorate`, `spirv_decorate_id`, and
         `spirv_decorate_string` qualifiers can be used on variable
         declarations, function parameters, function return types,
@@ -411,8 +423,9 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
         instruction into the generated SPIR-V code, taking the first
         integer parameter as its `Decoration` operand, and further
         parameters as `Extra Operands`.
-        Parameters to this qualifier must be constant expressions as defined
-        in section 4.3.3, Constant Expressions.
+        Parameters to this qualifier must be a constant expression that
+        doesn't involve a specialization constant, as defined in section
+        4.3.3, Constant Expressions.
 
         The `spirv_decorate_string` qualifier inserts an *OpDecorateString*
         or *OpMemberDecorateString* instruction into the generated SPIR-V
@@ -435,6 +448,10 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
         be added by use of the `spirv_type` specifier.
 
         This functionality is only available when generating SPIR-V.
+        
+        Any extensions or capabilities needed by the type must be declared
+        using the optional spirv-requirements-list as described in section 3.9
+        (SPIR-V Requirements Declarations).
 
         The `spirv_type()` specifier can be used in place of a type name
         for variable declarations.
@@ -489,7 +506,8 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
             inserted into the resulting SPIR-V, declaring the type.
           * For variables declared with a SPIR-V type that is defined by
             instructions in the core instruction set, an instruction with
-            the declared `id` will be inserted into the resulting SPIR-V.
+            the declared `id` as its opcode will be inserted into the
+            resulting SPIR-V.
 
         Any extensions or capabilities needed by the type must be declared
         using SPIR-V Requirements Declarations (see section 3.9).
@@ -545,6 +563,10 @@ Additions to Chapter 6 of the OpenGL Shading Language Specification
 
         This functionality is only available when generating SPIR-V.
 
+        Any extensions or capabilities needed by the instruction must be declared
+        using the optional spirv-requirements-list as described in section 3.9
+        (SPIR-V Requirements Declarations).
+        
         The `spirv_instruction` qualifier must always be used with a function
         declaration that has a return type and parameters matching those of the
         desired instruction.
