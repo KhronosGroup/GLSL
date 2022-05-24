@@ -1,0 +1,293 @@
+Name
+
+    EXT_fragment_shader_barycentric
+
+Name Strings
+
+    GL_EXT_fragment_shader_barycentric
+
+Contact
+
+    Pat Brown, NVIDIA (pbrown 'at' nvidia.com)
+    Stu Smith, AMD
+
+Contributors
+
+    Ashwin Lele, NVIDIA
+    Jeff Bolz, NVIDIA
+    Graeme Leese, Broadcom
+
+Status
+
+    Complete
+
+Version
+
+    Last Modified:      June 23, 2021
+    Revision:           1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.50
+    (#version 450) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification, version 4.60, dated July 23, 2017.
+
+Overview
+
+    This extension provides two new OpenGL Shading Language (GLSL) fragment
+    shader built-in inputs (gl_BaryCoordEXT and gl_BaryCoordNoPerspEXT) that are
+    three-component vectors specifying the relative weights for each vertex in
+    the original primitive.  Fragments located in the corners of a triangle
+    primitive will have weights of (1,0,0), (0,1,0), and (0,0,1), while a
+    fragment in the exact middle of a triangle will have weights of (1/3, 1/3,
+    1/3).  Fragments located at the endpoints of a line primitive will have
+    weights of (1,0,0) and (0,1,0).  The weights in the vector gl_BaryCoordEXT
+    are perspective-corrected and reflect the location of the fragment as
+    projected onto the original primitive.  The weights in the vector
+    gl_BaryCoordNoPerspEXT are not perspective-corrected and reflect the
+    location of the fragment relative to the on-screen projection of the
+    original primitive.  For both vectors, the values of the three components
+    should add to approximately 1.0.
+
+    This extension also allows fragment shaders to read the raw per-vertex
+    values of shader outputs from the last shader stage executed before
+    rasterization.  This mechanism uses the same syntax used to read
+    per-vertex inputs in for tessellation and geometry shaders.  The qualifier
+    "pervertexEXT" can be applied to fragment shader input blocks and
+    variables to specify that those inputs do not read interpolated
+    per-fragment values, but instead read raw per-vertex values from the
+    vertices of the original primitive.  Like tessellation and geometry shader
+    inputs, such variables or blocks must be declared as arrays and indexed
+    with a vertex number (0, 1, or 2).  For example, if a shader declares the
+    following input block:
+
+      pervertexEXT in Inputs {
+        float f;
+        float g;
+      } inputs[];
+
+    the expression "inputs[0].f" reads the value of <f> for the first vertex
+    of the original primitive, while "inputs[2].g" reads the value of <g> for
+    the third vertex.
+
+    While barycentric weights can be used to interpolate values by reading the
+    outputs of previous shaders (using "pervertexEXT" attributes), it can
+    also be used to interpolate values based in input values fetched directly
+    from memory, with no shader outputs involved.  For example, in code like
+    the following:
+
+      pervertexEXT in int vertexIDs[];
+      buffer VertexData {
+        struct VertexAttributes {
+          vec3 normal;
+        } attrs[];
+      };
+
+    shaders can fetch the values of <normal> for the three vertices of a
+    triangle primitive using:
+
+      vec3 normal0 = attrs[vertexIDs[0]];
+      vec3 normal1 = attrs[vertexIDs[1]];
+      vec3 normal2 = attrs[vertexIDs[2]];
+
+    without reading or emitting any normal vectors in a vertex shader.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+      pervertexEXT auxiliary storage qualifier -> PerVertexKHR Decoration
+
+      gl_BaryCoordEXT -> BaryCoordKHR decorated OpVariable
+      gl_BaryCoordNoPerspEXT -> BaryCoordNoPerspKHR decorated OpVariable
+
+    Input variables decorated with "PerVertexKHR" are accessed with an extra
+    array dimension identifying a vertex number.
+
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_fragment_shader_barycentric : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+      #define GL_EXT_fragment_shader_barycentric         1
+
+
+    Modify Section 3.6, Keywords (p. 15)
+
+    (add to list of keywords, on the line with "centroid", "flat", "smooth",
+     and "noperspective")
+
+      pervertexEXT
+
+
+    Modify Section 4.3, Storage Qualifiers (p. 41)
+
+    (add to table of auxiliary storage qualifiers, p. 42)
+
+    Auxiliary Storage
+       Qualifier          Meaning
+    ------------------    ------------------------------------------
+     pervertexEXT         no interpolation; fragment shader reads
+                          previous-stage outputs with a vertex number
+
+
+    Modify Section 4.3.4, Input Variables (p. 45)
+
+    (modify third paragraph, p. 46, to document that fragment shader inputs
+     declared with "pervertexEXT" are treated similarly to tessellation and
+     geometry shader inputs and document that "pervertexEXT" has no effect in
+     non-fragment shaders)
+
+    Tessellation control input variables, tessellation evaluation input
+    variables, geometry shader input variables, and fragment shader input
+    variables qualified with "pervertexEXT" get the per-vertex values written
+    out by output variables of the same names in the previous active shader
+    stage. Since all of these inputs have separate values for each vertex
+    in the input primitive, each such input variable (or input block, see
+    interface blocks below) needs to be declared as an array. For tessellation
+    or geometry stage inputs, centroid, and interpolation qualifiers
+    are allowed, but have no effect. For example,
+
+      in float foo[]; // geometry shader input for vertex "out float foo"
+
+    (modify fourth paragraph, p. 46, to document how the array size for
+     "arrayed" inputs is obtained for tessellation shaders and per-vertex
+     fragment shader inputs)
+
+    ...   For geometry shaders, ... section 4.4.1 "Input Layout Qualifiers".
+    For tessellation control and evaluation shaders, the array size will be
+    set by (or if provided, must be consistent with) the maximum patch size
+    gl_MaxPatchVertices.  For fragment shader inputs qualified with
+    "pervertexEXT", the array size will be set to (or if provided, must be
+    no more than) three.
+
+    (modify fifth paragraph, p. 46, to treat "pervertexEXT" inputs as
+     "arrayed" interfaces)
+
+    Some inputs and outputs are arrayed ...  Geometry shader inputs,
+    tessellation control shader inputs and outputs, tessellation evaluation
+    inputs, and fragment shader inputs qualified with "pervertexEXT" all have
+    an additional level of arrayness relative to other shader inputs and
+    outputs.  Component limits...
+
+    (modify second paragraph, p. 47, adding alternate language about the
+     handling of fragment shader inputs using "pervertexEXT")
+
+    Fragment shader inputs not declared with "pervertexEXT" get
+    per-fragment values, typically interpolated from a previous stage's
+    outputs. ... as well as the interpolation qualifiers flat, noperspective,
+    and smooth.  Fragment shader inputs declared with "pervertexEXT" are
+    not interpolated.  Such inputs are arrayed and may be used to directly
+    access the previous stage's outputs for one of the vertices of the
+    primitives producing the fragment, using a vertex number of 0, 1, or 2 as
+    an index.  ...
+
+    (modify third paragraph, p. 47, allowing integer and double-precision
+     fragment shader inputs if qualified with "pervertexEXT")
+
+    Fragment shader inputs that are, or contain, signed or unsigned integers,
+    integer vectors, or any double-precision floating-point type must be
+    qualified with the qualifier "flat" or "pervertexEXT".
+
+    (modify the fourth paragraph, p. 48, adding an example)
+
+    Fragment inputs are declared as in the following examples:
+
+      ...
+      pervertexEXT in vec4 perVertexAttr[];
+
+
+    Modify Section 4.3.9, Interface Blocks, p. 51
+
+    (update the fake grammar, p. 52, to clarify that you can use the
+     interpolation qualifier "pervertexEXT" on input blocks)
+
+      interface-qualifier:
+        ...
+        pervertexEXT in
+        ...
+
+
+    Modify Section 4.5, Interpolation Qualifiers, p. 83
+
+    (add to the table in first paragraph of the section)
+
+      Qualifier         Meaning
+      ----------------  --------------------------------------------
+      pervertexEXT       no interpolation, values accessed per vertex
+
+    (add before the next-to-last paragraph, p. 83)
+
+    A variable or interface block qualified with "pervertexEXT" must be
+    declared as an array, where each array element corresponds to one of the
+    vertices of the primitive that produced the fragment.  This array will
+    have a size of three if declared as unsized, and reads of per-vertex
+    values for missing vertices, such as the third vertex of a line primitive,
+    will return values from the valid vertex with the highest
+    index. The order of the vertices of the input primitive is
+    defined in the OpenGL or Vulkan API Specifications.  No interpolated
+    per-fragment values are available for inputs qualified with
+    "pervertexEXT".  For variables qualified with "pervertexEXT", it is a
+    compile-time error to also qualify the variable with either "centroid" or
+    "sample".
+
+
+    Modify Section 4.5.1, Redeclaring Built-In Interpolation Variables in the
+    Compatibility Profile, p. 84
+
+    (modify the first paragraph of the section to prohibit the use of
+     "pervertexEXT" on built-ins)
+
+     The following predeclared variables can be redeclared with an
+     interpolation qualifier other than "pervertexEXT" when using the
+     compatibility profile:
+     ...
+
+
+    Modify Section 7.1, Built-In Language Variables, p. 122
+
+    (modify the list of fragment built-ins, p. 124)
+
+    In the fragment, language, built-in variables are intrinsically declared
+    as:
+
+      ...
+      in vec3 gl_BaryCoordEXT;
+      in vec3 gl_BaryCoordNoPerspEXT;
+
+    (add description of the new built-ins to the list of descriptions, before
+     gl_PerVertex, p. 131)
+
+    The built-in fragment shader input variables gl_BaryCoordEXT and
+    gl_BaryCoordNoPerspEXT are three-component vectors providing barycentric
+    coordinates for the fragment.  The values for these built-ins are derived
+    as described in the OpenGL or Vulkan API Specifications.
+
+
+Issues
+    (1) What are the differences to NV_fragment_shader_barycentric?
+    
+    Reads of missing per-vertex values return values from the
+    valid vertex with the highest index.
+
+
+
+Revision History
+
+    Revision 1
+    - Internal revisions.
