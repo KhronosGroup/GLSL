@@ -272,6 +272,8 @@ endif::GLSL[]
 ifdef::ESSL[]
 === Changes from {slabbrev} 3.2 revision 6
 
+ * Private OpenGL issue #156: Clarify that per-vertex arrays of arrays of
+   blocks are allowed in the geometry stage.
  * Private GLSL issue #57: Clarify that *imageLoad* precision is determined
    only by the precision of the image argument.
  * Public GLSL issue #164: Clarify the precision expected from *mod*.
@@ -4789,9 +4791,9 @@ buffer variable declarations outside blocks, with these exceptions:
   * Opaque types are not allowed
   * Structure definitions cannot be nested inside a block
 ifdef::ESSL[]
-  * Arrays of arrays of blocks are not allowed, except for the case in the
-    tessellation pipe where the declaration is a per-vertex-array of arrays
-    of blocks.
+  * Arrays of arrays of blocks are not allowed, except for the cases in the
+    tessellation and geometry stages where the declaration is a
+    per-vertex-array of arrays of blocks.
 endif::ESSL[]
 
 ifdef::GLSL[]
