@@ -31,8 +31,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-11-10
-    Revision: 22
+    Last Modified Date: 2022-05-25
+    Revision: 23
 
 Dependencies
 
@@ -405,7 +405,8 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
     They can be read from and written to in any-hit, closest-hit, and miss shaders
     There can be only a single variable at global scope with this qualifier in
     stages where this qualifier is permitted. If multiple variables are present
-    results of accessing these variables are undefined.
+    results of accessing these variables are undefined. They cannot have any other
+    storage qualifiers.
     It is a compile-time error to declare unsized arrays of this type.
     The type of this variable must match the type of the rayPayloadEXT variable 
     as passed with its location layout qualifier to traceRayEXT(), otherwise the
@@ -1275,3 +1276,5 @@ Revision History
                                    instead of builtin functions (vulkan #2374)
     22    2020-11-10    dgkoch     correct reference to Vulkan structure containing the mask
                                    (vulkan #2414)
+    23    2022-05-25    tnowicki   rayPayloadInEXT can have no additional storage qualifiers
+                                   (vulkan #3076)
