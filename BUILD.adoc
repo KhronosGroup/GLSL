@@ -1,0 +1,308 @@
+= OpenGL^(R)^ Shading Language Specification Build Instructions and Notes =
+:toc2:
+:toclevels: 1
+
+
+[[intro]]
+== Introduction
+
+This README describes important stuff for getting the proof-of-concept
+(*not* official) asciidoctor OpenGL and OpenGL ES Shading Language
+Specifications building properly.
+
+
+[[repo]]
+== Cloning the Repository
+
+Clone the repo following instructions at https://gitlab.khronos.org/opengl/GLSL .
+For example, if you are using ssh:
+
+    git clone git@gitlab.khronos.org:opengl/GLSL.git
+
+
+[[building]]
+== Building The Spec ==
+
+Once you have all the right tools installed (see <<depends,Software
+Dependencies>> below):
+
+    $ cd path-to-repo/GLSL
+    $ make all
+
+or equivalently:
+
+    $ make html pdf
+
+will generate these targets in the directory specified by Makefile variable
+`$(OUTDIR)` (by default, `./out`).
+
+  * `html` - HTML5 in `$(OUTDIR)/essl.html` and `$(OUTDIR)/glsl.html`
+  * `pdf` - PDF in `$(OUTDIR)/essl.pdf` and `$(OUTDIR)/glsl.pdf`
+
+The individual targets for ESSL and GLSL, HTML and PDF specifications
+are also supported.
+
+
+[[styles]]
+== Our stylesheets ==
+
+NOTE: Section mostly TBD.
+
+We use the default Asciidoctor stylesheet.
+
+Markup follows the Vulkan API Style Guide.
+
+
+[[equations]]
+== Imbedding Equations
+
+Many equations can be written using the _eq_ asciidoc role, which covers
+many common equations, or just straight asciidoc markup.
+
+For more complex equations, such as multi-case statements, matrices, and
+complex fractions, equations should be written using the latexmath: inline
+and block macros. The contents of the latexmath: blocks should be LaTeX math
+notation. No delimiters are required.
+
+LaTeX math is passed through unmodified to the HTML output, which is
+subsequently rendered with the KaTeX engine when the html is loaded. A local
+copy of the KaTeX release is kept in `katex/` and copied to the HTML output
+directory during spec generation. Math is processed into SVGs via
+asciidoctor-mathematical for PDF output.
+
+The following caveats apply:
+
+  * The special characters `<` , `>` , and `&` can currently be used only in
+    +++[latexmath]+++ block macros, not in +++latexmath:[]+++ inline macros.
+    Instead use `\lt` for `<` and `\gt` for `>`. `&` is an alignment construct
+    for multiline equations, and should only appear in block macros anyway.
+  * AMSmath environments (e.g. pass:[\begin{equation*}], pass:[{align*}],
+    etc.) cannot be used in KaTeX at present, and have been replaced with
+    constructs supported by KaTeX such as pass:[{aligned}].
+  * Arbitrary LaTeX constructs cannot be used. KaTeX and
+    asciidoctor-mathematical are only equation renderers, not full LaTeX
+    engines. So imbedding LaTeX like \Large or pass:[\hbox{\tt\small VK\_FOO}]
+    may not work in any of the backends, and should be avoided.
+
+
+[[depends]]
+== Software Dependencies ==
+
+This section describes the software components used by the spec toolchain.
+
+Before building the spec, you must install the following libraries:
+
+  * GNU make (make version: 4.0.8-1; older versions probably OK)
+  * Python 3 (python, version: 3.4.2)
+  * Ruby (ruby, version: 2.3.3)
+  * Git command-line client (git, version: 2.1.4)
+        Build can progress without a git client, but branch/commit information
+        will be omitted from the build.
+    Any version supporting the follow operations should work:
+  ** `git symbolic-ref --short HEAD`
+  ** `git log -1 --format="%H"`
+
+The following Ruby Gems are also required to be installed:
+
+  * Asciidoctor (asciidoctor, version: 1.5.5)
+  * Coderay (coderay, version 1.1.1)
+  * Asciidoctor PDF (asciidoctor-pdf, version: 1.5.0.alpha14)
+  * Asciidoctor Mathematical (asciidoctor-mathematical, version 0.2.2)
+  * https://github.com/asciidoctor/asciidoctor-mathematical#dependencies[Dependencies for asciidoctor-mathematical]
+  ** There are a lot of these!
+  * KaTeX distribution (version 0.7.0 from https://github.com/Khan/KaTeX ,
+    cached under doc/specs/vulkan/katex/)
+
+Only the first two of those gems is needed if you don't intend to build PDF
+versions of the spec and supporting documents.
+
+
+[[depends-ubuntu]]
+=== Ubuntu / Ubuntu Bash on Windows 10
+
+Most dependencies can be installed via apt-get:
+
+        sudo apt-get -qq -y install build-essential python3 git cmake bison flex libffi-dev libxml2-dev libgdk-pixbuf2.0-dev libcairo2-dev libpango1.0-dev ttf-lyx gtk-doc-tools
+
+The default ruby packages on Ubuntu are fairly out of date.
+Ubuntu only provides "ruby" and "ruby2.0" - the latter is multiple revisions
+behind the current stable branch, and would require wrangling to get the
+makefile working with it.
+
+Luckily, there are better options; either https://rvm.io[rvm] or
+https://github.com/rbenv/rbenv[rbenv] is recommended to install a more
+recent version.
+
+Here are instructions for using rvm to setup version 2.3.x:
+
+        gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+        \curl -sSL https://get.rvm.io | bash -s stable --ruby
+        source ~/.rvm/scripts/rvm
+        rvm install ruby-2.3
+        rvm use ruby-2.3
+
+NOTE: Windows 10 Bash will need to be launched with the "-l" option
+appended, so that it runs a login shell; otherwise RVM won't function
+correctly on future launches.
+
+NOTE: Most of the tools on Bash for Windows are quite happy with Windows
+line endings (CR LF), but bash scripts expect Unix line endings (LF).
+This means that if you try to run scripts like ./makeAllExts, you'll need to
+have them checked out with those line endings.
+
+[[depends-osx]]
+=== OSX
+
+OSX should work in the same way as for ubuntu by using the Homebrew package
+manager, with the exception that you can simply install the ruby package via
+`brew` rather than using a ruby-specific version manager.
+
+You'll likely also need to install additional fonts for the PDF build via
+mathematical, which you can do with:
+
+        cd ~/Library/Fonts
+        curl -LO http://mirrors.ctan.org/fonts/cm/ps-type1/bakoma/ttf/cmex10.ttf \
+                 -LO http://mirrors.ctan.org/fonts/cm/ps-type1/bakoma/ttf/cmmi10.ttf \
+                 -LO http://mirrors.ctan.org/fonts/cm/ps-type1/bakoma/ttf/cmr10.ttf \
+                 -LO http://mirrors.ctan.org/fonts/cm/ps-type1/bakoma/ttf/cmsy10.ttf \
+                 -LO http://mirrors.ctan.org/fonts/cm/ps-type1/bakoma/ttf/esint10.ttf \
+                 -LO http://mirrors.ctan.org/fonts/cm/ps-type1/bakoma/ttf/eufm10.ttf \
+                 -LO http://mirrors.ctan.org/fonts/cm/ps-type1/bakoma/ttf/msam10.ttf \
+                 -LO http://mirrors.ctan.org/fonts/cm/ps-type1/bakoma/ttf/msbm10.ttf
+
+
+[[depends-windows]]
+=== Windows
+
+Most of the dependencies on unix packages are light enough that it's
+possible to build the spec natively in Windows, but it means
+bypassing the makefile and calling functions directly.
+This might be solved in future. For now, there are three options for
+Windows users:
+
+        * <<depends-ubuntu, Ubuntu Bash on Windows 10>>
+        * <<MinGW>> (PDF builds not tested)
+        * <<Cygwin>>
+
+
+==== MinGW
+
+MinGW can be obtained here: http://www.mingw.org/
+
+Once the installer has run its initial setup, following the
+http://www.mingw.org/wiki/Getting_Started[instructions on the website], you
+should install the "mingw-developer-tools", "mingw-base" and "msys-base"
+packages.
+The "msys-base" package allows you to use a bash terminal from windows with
+whatever is normally in your path on Windows, as well as the unix tools
+installed by MinGW.
+
+In the native Windows environment, you should also install the following
+native packages:
+
+  * Python 3.x (https://www.python.org/downloads/)
+  * Ruby 2.x (https://rubyinstaller.org/)
+  * Git command-line client (https://git-scm.com/download)
+
+Once this is setup, and the necessary ruby gems are installed, launch the
+msys bash shell, and navigate to the spec Makefile.
+From there, you'll need to set `PYTHON=` to the location of your python
+executable for version 3.x before your make command - but otherwise
+everything other than pdf builds should just work.
+
+NOTE: Building the PDF spec via this path has not yet been tested but *may* be
+possible - liblasem is the main issue and it looks like there is now a mingw32
+build of it available.
+
+
+==== Cygwin
+
+When installing Cygwin, you should install the following packages via setup:
+
+    autoconf
+    bison
+    cmake
+    curl    // Only used to download fonts, can be done in another way
+    flex
+    gcc-core
+    gcc-g++
+    git
+    libcairo-devel
+    libcairo2
+    libffi-devel
+    libgdk_pixbuf2.0-devel
+    libiconv
+    liblasem0.4-devel
+    libpango1.0-devel
+    libpango1.0_0
+    libxml2
+    libxml2-devel
+    make
+    python3
+    ruby
+    ruby-devel
+
+NOTE: Native versions of some of these packages are usable, but care should be
+taken for incompatibilities with various parts of cygwin - e.g. paths.
+Ruby in particular is unable to resolve Windows paths correctly via the native
+version.
+Python and Git for Windows can be used, though for Python you'll need to set the
+path to it via the PYTHON environment variable, before calling make.
+
+When it comes to installing the mathematical ruby gem, there are two things
+that will require tweaking to get it working.
+Firstly, instead of:
+
+        MATHEMATICAL_SKIP_STRDUP=1 gem install asciidoctor-mathematical
+
+You should use
+
+        MATHEMATICAL_USE_SYSTEM_LASEM=1 gem install asciidoctor-mathematical
+
+The latter causes it to use the lasem package already installed, rather than
+trying to build a fresh one.
+
+The mathematical gem also looks for "liblasem" rather than "liblasem0.4" as
+installed by the lasem0.4-devel package, so it is necessary to add a symlink
+to your /lib directory using:
+
+    ln -s /lib/liblasem-0.4.dll.a /lib/liblasem.dll.a
+
+<<Ruby Gems>> are not installed to a location that is in your path normally.
+Gems are installed to `~/bin/` - you should add this to your path before
+calling make:
+
+    export PATH=~/bin:$PATH
+
+Finally, you'll need to manually install fonts for lasem via the following
+commands:
+
+    mkdir /usr/share/fonts/truetype
+    cd /usr/share/fonts/truetype
+    curl -LO http://mirrors.ctan.org/fonts/cm/ps-type1/bakoma/ttf/cmex10.ttf \
+         -LO http://mirrors.ctan.org/fonts/cm/ps-type1/bakoma/ttf/cmmi10.ttf \
+         -LO http://mirrors.ctan.org/fonts/cm/ps-type1/bakoma/ttf/cmr10.ttf \
+         -LO http://mirrors.ctan.org/fonts/cm/ps-type1/bakoma/ttf/cmsy10.ttf \
+         -LO http://mirrors.ctan.org/fonts/cm/ps-type1/bakoma/ttf/esint10.ttf \
+         -LO http://mirrors.ctan.org/fonts/cm/ps-type1/bakoma/ttf/eufm10.ttf \
+         -LO http://mirrors.ctan.org/fonts/cm/ps-type1/bakoma/ttf/msam10.ttf \
+         -LO http://mirrors.ctan.org/fonts/cm/ps-type1/bakoma/ttf/msbm10.ttf
+
+
+=== Ruby Gems
+
+The following ruby gems can be installed directly via the `gem install`
+command, once the platform is set up:
+
+        gem install rake asciidoctor coderay
+        MATHEMATICAL_SKIP_STRDUP=1 gem install asciidoctor-mathematical
+        gem install --pre asciidoctor-pdf
+
+Note: Only the first of these is required for non-PDF builds.
+
+
+[[history]]
+== Revision History
+
+  * 2017-03-05 - Updated for move to OpenGL/GLSL repository.
+  * 2017-01-30 - Lifted and modified from Vulkan README

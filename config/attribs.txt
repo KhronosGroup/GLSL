@@ -1,0 +1,37 @@
+// Various special / math symbols, matching LaTeX names.
+
+:sym1: ✓
+:sym2: †
+:times: ×
+:cdot: ·
+:plus: +
+:geq: ≥
+:leq: ≤
+:neq: ≠
+:leftarrow: ←
+:uparrow: ↑
+:rightarrow: →
+:downarrow: ↓
+:elem: ∈
+:lnot: ¬
+:land: ∧
+:lor: ∨
+:oplus: ⊕
+:alpha: α
+:beta: β
+:gamma: γ
+:DeltaUpper: Δ
+:delta: δ
+:epsilon: ε
+:lambda: λ
+:pi: π
+:rho: ρ
+:tau: τ
+:lceil: ⌈
+:rceil: ⌉
+:lfloor: ⌊
+:rfloor: ⌋
+:vert: |
+:partial: ∂
+:onehalf: ½
+:onequarter: ¼ 
