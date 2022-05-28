@@ -24,8 +24,8 @@ Status
 
 Version
 
-    Last Modified Date: 2021-03-04
-    Revision: 16
+    Last Modified Date: 2022-05-27
+    Revision: 17
 
 Dependencies
 
@@ -268,11 +268,17 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     The parameters <origin>, <direction>, <tMin>, or <tMax> may not contain Nans.
 
     <rayFlags> is a bit-wise combination of the built-in constants as defined
-    in  Section 7.3.x "Fixed Constants". Behavior is undefined if more than
-    one of the gl_RayFlagsOpaqueEXT, gl_RayFlagsNoOpaqueEXT,
-    gl_RayFlagsCullOpaqueEXT, or gl_RayFlagsCullNoOpaqueEXT are set, or if both
-    gl_RayFlagsCullBackFacingTrianglesEXT and
-    gl_RayFlagsCullFrontFacingTrianglesEXT are set.
+    in  Section 7.3.x "Fixed Constants". Behavior is undefined if:
+
+      * more than one of the gl_RayFlagsOpaqueEXT, gl_RayFlagsNoOpaqueEXT,
+        gl_RayFlagsCullOpaqueEXT, or gl_RayFlagsCullNoOpaqueEXT are set,
+      * both gl_RayFlagsCullBackFacingTrianglesEXT and
+        gl_RayFlagsCullFrontFacingTrianglesEXT are set,
+    [[if GL_EXT_ray_flags_primitive_culling is supported]]
+      * both gl_RayFlagsSkipTrianglesEXT and gl_RayFlagsSkipAABBEXT are set,
+      * more than one of gl_RayFlagsSkipTrianglesEXT, gl_RayFlagsCullBackFacingTrianglesEXT,
+        or gl_RayFlagsCullFrontFacingTrianglesEXT are set.
+    [[end if GL_EXT_ray_flags_primitive_culling]]
 
     <cullMask> is a mask which specifies the instances to be intersected
     i.e. visible to the traced ray. Only the 8 least-significant bits are used;
@@ -526,3 +532,4 @@ Revision History
                                    (vulkan issue 2432)
     15    2021-02-03    dgkoch     Clarify the SPIR-V mapping for the 'committed' arg (vulkan issue 2516)
     16    2021-03-04    tnowicki   Clarify GetIntersectionFrontFace and GetIntersectionAABBOpaque
+    17    2022-05-27    dgkoch     Disallow more combinations of ray flags (vk-gl-cts#3647)
