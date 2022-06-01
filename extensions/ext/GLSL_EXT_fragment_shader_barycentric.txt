@@ -23,8 +23,8 @@ Status
 
 Version
 
-    Last Modified:      June 23, 2021
-    Revision:           1
+    Last Modified:      June 1, 2022
+    Revision:           2
 
 Dependencies
 
@@ -285,9 +285,20 @@ Issues
     Reads of missing per-vertex values return values from the
     valid vertex with the highest index.
 
+    (2) What are the interactions with MSAA?
 
+    As with NV_fragment_shader_barycentric, this extension does not provide
+    extra "Centroid" and "Sample" variants of the gl_BaryCoord* built-in
+    inputs.  Equivalent values can be obtained using built-in interpolation
+    functions like:
+
+      vec3 bcCentroid = interpolateAtCentroid(gl_BaryCoordEXT);
+      vec3 bcNoPerspSample = interpolateAtSample(gl_BaryCoordNoPerspEXT, sampleID);
 
 Revision History
+
+    Revision 2, 2022/06/01 (ssmith)
+    - Add MSAA interaction note.
 
     Revision 1
     - Internal revisions.
