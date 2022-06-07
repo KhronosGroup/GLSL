@@ -16,14 +16,10 @@
 
 ifdef::GLSL[]
 :apiname: OpenGL
-:apispec: {apiname} Specification
 :apiversion: 4.6
-:slname: {apiname} Shading Language
 :slabbrev: GLSL
 :version: 460
 :minor: 4.60
-:revision: 8
-:revnumber: {minor}.{revision}
 :authors: Graeme Leese, Broadcom (Editor) ; John Kessenich (Author) ; Dave Baldwin and Randi Rost (Version 1.1 Authors)
 :compiletimeerror: a compile-time error
 :highp:
@@ -33,20 +29,21 @@ endif::GLSL[]
 
 ifdef::ESSL[]
 :apiname: OpenGL ES
-:apispec: {apiname} Specification
 :apiversion: 3.2
-:slname: {apiname} Shading Language
 :slabbrev: GLSL ES
 :version: 320
 :minor: 3.20
-:revision: 7
-:revnumber: {minor}.{revision}
 :authors: Graeme Leese, Broadcom (Editor) ; Robert J. Simpson, Qualcomm ; John Kessenich ; Dave Baldwin and Randi Rost (Version 1.1 Authors)
 :compiletimeerror: an error
 :highp: highp
 :mediump: mediump
 :lowp: lowp
 endif::ESSL[]
+
+:apispec: {apiname} Specification
+:slname: {apiname} Shading Language
+:revision: 8
+:revnumber: {minor}.{revision}
 
 = The {apiname}^(R)^ Shading Language, Version {revnumber}
 {authors}
@@ -146,7 +143,7 @@ endif::ESSL[]
 
 
 ifdef::GLSL[]
-=== Changes from Revision 7 of GLSL 4.6
+=== Changes from {slabbrev} {apiversion} revision 7
 
  * Private GLSL issue #57: Clarify that *imageLoad* precision is determined (where
    applicable) only by the precision of the image argument.
@@ -170,7 +167,7 @@ ifdef::GLSL[]
  * Private Bugzilla #15755: Clarify storage size of precision qualified
    <<interface-blocks,interface block>> members in application visible memory.
 
-=== Changes from Revision 6 of GLSL 4.6
+=== Changes from {slabbrev} {apiversion} revision 6
 
   * Incorporated the GL_KHR_vulkan_glsl specification.
   * Add note in the introduction about presence in drivers of SPIR-V features,
@@ -179,7 +176,7 @@ ifdef::GLSL[]
     rules.
     See <<uniform-variable-layout-qualifiers, Uniform Variable Layout Qualifiers>>.
 
-=== Changes from Revision 5 of GLSL 4.6
+=== Changes from {slabbrev} {apiversion} revision 5
 
   * Private GLSL issue #34: Clarify/consolidate implicit conversion rules from int -> uint
     to be the same as explicit construction.
@@ -204,7 +201,7 @@ ifdef::GLSL[]
   * For *precise* computations, the controlling expressions for
     control flow and ternary operators (*?:*) are not included.
 
-=== Changes from Revision 4 of GLSL 4.6
+=== Changes from {slabbrev} {apiversion} revision 4
 
   * Private bug 13012: Clarified that builtin uniform variables might only
     be available in the fragment stage.
@@ -245,7 +242,7 @@ ifdef::GLSL[]
   * Added image formats to the layout-qualifier table in the
     <<layout-qualifiers, Layout Qualifiers>> section.
 
-=== Changes from Revision 3 of GLSL 4.6
+=== Changes from {slabbrev} {apiversion} revision 3
 
   * Private GLSL issue 13: Fix misspelling of *allInvocationsEqual*().
     (The one in the table was incorrectly listed as *anyInvocationsEqual*(),
@@ -270,7 +267,11 @@ ifdef::GLSL[]
     array: the capturing buffer increments for each block array element.
 endif::GLSL[]
 ifdef::ESSL[]
-=== Changes from {slabbrev} 3.2 revision 6
+=== Changes from {slabbrev} {apiversion} revision 7
+
+There are no changes between revision 7 and revision 8.
+
+=== Changes from {slabbrev} {apiversion} revision 6
 
  * Private OpenGL issue #156: Clarify that per-vertex arrays of arrays of
    blocks are allowed in the geometry stage.
@@ -295,7 +296,7 @@ ifdef::ESSL[]
  * Private Bugzilla #15755: Clarify storage size of precision qualified
    <<interface-blocks,interface block>> members in application visible memory.
 
-=== Changes from {slabbrev} 3.2 revision 5
+=== Changes from {slabbrev} {apiversion} revision 5
 
   * Incorporated the GL_KHR_vulkan_glsl specification.
   * Clarify it is same location that triggers default-uniform block matching
@@ -303,7 +304,7 @@ ifdef::ESSL[]
     See <<uniform-variable-layout-qualifiers, Uniform Variable Layout Qualifiers>>.
 
 [[changes-from-glsl-es-3.2-revision-4]]
-=== Changes from GLSL ES 3.2 revision 4
+=== Changes from {slabbrev} {apiversion} revision 4
 
   * Clarified that this specification completely defines the {slname}.
     Normatively reference C++ only for the preprocessor.
@@ -323,7 +324,7 @@ ifdef::ESSL[]
     control flow and ternary operators (*?:*) are not included.
 
 [[changes-from-glsl-es-3.2-revision-3]]
-=== Changes from GLSL ES 3.2 revision 3
+=== Changes from {slabbrev} {apiversion} revision 3
 
   * Matching of default uniforms when shaders are linked.
   * _gl_DepthRange_ is only guaranteed to be available in the fragment
@@ -359,7 +360,7 @@ ifdef::ESSL[]
 
 
 [[changes-from-glsl-es-3.2-revision-2]]
-=== Changes from GLSL ES 3.2 revision 2
+=== Changes from {slabbrev} {apiversion} revision 2
 
   * Updated value for _gl_MaxTessControlTotalOutputComponents_
   * Clarified the allowed character set for pre-processing
@@ -372,7 +373,7 @@ ifdef::ESSL[]
   * Sequence and ternary operators with array types
 
 [[changes-from-glsl-es-3.2-revision-1]]
-=== Changes from GLSL ES 3.2 revision 1
+=== Changes from {slabbrev} {apiversion} revision 1
 
   * Signed zeros must be supported
   * Layout qualifier table
