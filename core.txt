@@ -157,6 +157,7 @@ ifdef::GLSL[]
  * Private GLSL issue #30: Clarify that struct members' precision is always fixed
    as part of the struct type declaration.
  * Private GLSL issue #49: Clarify support for unary *+*.
+ * Private GLSL issue #43: Clarify precisions of constructors.
  * Private GLSL issue #53: Clarify which qualifiers are allowed on
    <<interface-blocks,Interface Blocks>>.
  * Private GLSL issue #31: Removed incorrect example of 'invariant' applied to
@@ -282,6 +283,7 @@ ifdef::ESSL[]
  * Private GLSL issue #30: Clarify that struct members' precision is always fixed
    as part of the struct type declaration.
  * Private GLSL issue #49: Clarify support for unary *+*.
+ * Private GLSL issue #43: Clarify precisions of constructors.
  * Private GLSL issue #53: Clarify which qualifiers are allowed on
    <<interface-blocks,Interface Blocks>>.
  * Private GLSL issue #55: Clarify which expressions are valid interpolants for
@@ -7672,6 +7674,12 @@ same shader stage must be declared with the same precision qualification.
 For the purposes of determining if an output from one shader stage matches
 an input of the next stage, the precision qualifier need not match.
 
+This specification only governs the minimum required precision for storage and
+operations on values.
+Implementations are free to calculate and/or store any results at higher
+precisions.
+If necessary, this variance can be controlled using the invariance qualifier.
+
 [[range-and-precision]]
 === Range and Precision
 
@@ -7826,12 +7834,6 @@ the range of a *lowp* integer value.
 The range of a *highp* integer value must be the same as or greater than the
 range of a *mediump* integer value.
 
-Within the above specification, an implementation is allowed to vary the
-representation of numeric values, both within a shader and between different
-shaders.
-If necessary, this variance can be controlled using the invariance
-qualifier.
-
 The actual ranges and precisions provided by an implementation can be
 queried through the API.
 See the <<references, normative references>> for details on how to do
@@ -7909,21 +7911,16 @@ highp mat4 m;
 
 Literal constants do not have precision qualifiers.
 Neither do Boolean variables.
-Neither do constructors.
 
 For this paragraph, "`operation`" includes operators, built-in functions,
 and constructors, and "`operand`" includes function arguments and
 constructor arguments.
-The precision used to internally evaluate an operation, and the precision
-qualification subsequently associated with any resulting intermediate
-values, must be at least as high as the highest precision qualification of
-the operands consumed by the operation.
-
-In cases where operands do not have a precision qualifier, the precision
-qualification will come from the other operands.
-If no operands have a precision qualifier, then the precision qualifications
-of the operands of the next consuming operation in the expression will be
-used.
+The precision qualification associated with any operation is the highest
+precision qualification of the operands consumed by the operation, if any
+operand has an associated precision.
+In cases where no operand has a precision qualifier, the precision
+qualifications of the operands of the next consuming operation in the
+expression will be used.
 This rule can be applied recursively until a precision qualified operand is
 found.
 If necessary, it will also include the precision qualification of l-values
