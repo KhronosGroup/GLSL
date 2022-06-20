@@ -21,8 +21,8 @@ Status
 
 Version
 
-    Last Modified Date: 2020-05-21
-    Revision: 2
+    Last Modified Date: 2022-05-27
+    Revision: 3
 
 Dependencies
 
@@ -71,7 +71,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     where <behavior> is as specified in section 3.3.
     New preprocessor #defines are added:
 
-      #define GL_EXT_ray_flags_primtive_culling          1
+      #define GL_EXT_ray_flags_primitive_culling         1
 
 
 Additions to Chapter 4 of the OpenGL Shading Language Specification
@@ -126,12 +126,23 @@ Additions to Chapter 7 of the OpenGL Shading Language Specification
     const uint gl_RayFlagsSkipTrianglesEXT = 256U;
     const uint gl_RayFlagsSkipAABBEXT = 512U;
 
+    The behaviour of traceRayEXT is undefined if the <rayFlags> parameter has
+
+      * both gl_RayFlagsSkipTrianglesEXT and gl_RayFlagsSkipAABBEXT set,
+      * more than one of gl_RayFlagsSkipTrianglesEXT, gl_RayFlagsCullBackFacingTrianglesEXT,
+        or gl_RayFlagsCullFrontFacingTrianglesEXT set.
 
 Interactions with GL_EXT_ray_tracing/GL_EXT_ray_query
 
     Ray flags added by this extension can be used as flags for 'rayflags'
     argument for  traceRayEXT()/rayQueryInitializeEXT() call or for comparing 
     values to gl_IncomingRayFlagsEXT or the result of rayQueryGetRayFlagsEXT.
+
+    The behaviour of rayQueryInitializeEXT is undefined if the <rayFlags> parameter has
+
+      * both gl_RayFlagsSkipTrianglesEXT and gl_RayFlagsSkipAABBEXT set,
+      * more than one of gl_RayFlagsSkipTrianglesEXT, gl_RayFlagsCullBackFacingTrianglesEXT,
+        or gl_RayFlagsCullFrontFacingTrianglesEXT set.
 
 Issues
 
@@ -141,5 +152,6 @@ Revision History
 
     Rev.  Date          Author     Changes
     ----  -----------   ------     -------------------------------------------
+     3    2022-05-27    dgkoch     Disallow more combinations of ray flags (vk-gl-cts#3647)
      2    2020-05-21    alele      Add 'primitive_culling' layout qualifier
      1    2020-04-01    alele      Initial draft
