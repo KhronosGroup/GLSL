@@ -289,11 +289,14 @@ Issues
 
     As with NV_fragment_shader_barycentric, this extension does not provide
     extra "Centroid" and "Sample" variants of the gl_BaryCoord* built-in
-    inputs.  Equivalent values can be obtained using built-in interpolation
+    inputs.  Equivalent values can be obtained either by decorating the
+    gl_BaryCoordEXT or gl_BaryCoordNoPerspEXT inputs with the centroid 
+    or sample interpolation qualifiers, or by using built-in interpolation
     functions like:
 
-      vec3 bcCentroid = interpolateAtCentroid(gl_BaryCoordEXT);
-      vec3 bcNoPerspSample = interpolateAtSample(gl_BaryCoordNoPerspEXT, sampleID);
+      vec3 bcCentroid      = interpolateAtCentroid(gl_BaryCoordEXT);
+      vec3 bcNoPerspSample = interpolateAtSample(gl_BaryCoordNoPerspEXT, sample);
+      vec3 bcOffset        = interpolateAtOffset(gl_BaryCoordEXT, offset);
 
 Revision History
 
