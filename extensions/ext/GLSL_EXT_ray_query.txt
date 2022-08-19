@@ -114,6 +114,9 @@ Overview
       rayQueryGetIntersectionObjectToWorldEXT -> OpRayQueryGetIntersectionObjectToWorldKHR instruction
       rayQueryGetIntersectionWorldToObjectEXT -> OpRayQueryGetIntersectionWorldToObjectKHR instruction
 
+    Note: When mapping to SPIR-V, ray query objects are always passed by pointer, and it is invalid to access the underlying object.
+    This differs from other arguments, notably including the acceleration structure handle used to initialize a ray query, which are passed by value. 
+
 Modifications to the OpenGL Shading Language Specification, Version 4.60
 
     Including the following line in a shader can be used to control the
