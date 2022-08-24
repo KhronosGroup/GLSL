@@ -940,9 +940,9 @@ _version-declaration_ : ::
 
 Tokens:
 
-  :: POUND *#* +
-     VERSION *version* +
-     ES *es*
+{empty}:: POUND *#* +
+          VERSION *version* +
+          ES *es*
 endif::ESSL[]
 
 
@@ -956,35 +956,35 @@ Except as noted below, it behaves as the C++ standard preprocessor (see
 
 The complete list of preprocessor directives is as follows.
 
-  :: # +
-     #define +
-     #undef +
+{empty}:: # +
+          #define +
+          #undef +
 
-  :: #if +
-     #ifdef +
-     #ifndef +
-     #else +
-     #elif +
-     #endif +
+{empty}:: #if +
+          #ifdef +
+          #ifndef +
+          #else +
+          #elif +
+          #endif +
 
-  :: #error +
-     #pragma +
+{empty}:: #error +
+          #pragma +
 
-  :: #extension +
+{empty}:: #extension +
 ifdef::GLSL[]
-     #version +
+          #version +
 endif::GLSL[]
 
-  :: #line
+{empty}:: #line
 
 The following
 ifdef::GLSL[operators are]
 ifdef::ESSL[operator is]
 also available:
 
-  :: defined +
+{empty}:: defined +
 ifdef::GLSL[]
-     ##
+          ##
 endif::GLSL[]
 
 ifdef::ESSL[]
@@ -1012,11 +1012,11 @@ preprocessors for macro definitions both with and without macro parameters.
 
 The following predefined macros are available:
 
-  :: +__LINE__+ +
-     +__FILE__+ +
-     +__VERSION__+ +
+{empty}:: +__LINE__+ +
+          +__FILE__+ +
+          +__VERSION__+ +
 ifdef::ESSL[]
-     +GL_ES+
+          +GL_ES+
 endif::ESSL[]
 
 ifdef::editing-notes[]
@@ -1507,134 +1507,134 @@ The following are the keywords in the language and (after
 preprocessing) can only be used as described in this specification,
 or {compiletimeerror} results:
 
-  :: *const* *uniform* *buffer* *shared*
+{empty}:: *const* *uniform* *buffer* *shared*
 ifdef::GLSL[*attribute* *varying*]
-  :: *coherent* *volatile* *restrict* *readonly* *writeonly*
-  :: *atomic_uint*
-  :: *layout*
-  :: *centroid* *flat* *smooth*
+{empty}:: *coherent* *volatile* *restrict* *readonly* *writeonly*
+{empty}:: *atomic_uint*
+{empty}:: *layout*
+{empty}:: *centroid* *flat* *smooth*
 ifdef::GLSL[*noperspective*]
-  :: *patch* *sample*
-  :: *invariant* *precise*
-  :: *break* *continue* *do* *for* *while* *switch* *case* *default*
-  :: *if* *else*
+{empty}:: *patch* *sample*
+{empty}:: *invariant* *precise*
+{empty}:: *break* *continue* *do* *for* *while* *switch* *case* *default*
+{empty}:: *if* *else*
 ifdef::GLSL[]
-  :: *subroutine*
+{empty}:: *subroutine*
 endif::GLSL[]
-  :: *in* *out* *inout*
-  :: *int* *void* *bool* *true* *false* *float*
+{empty}:: *in* *out* *inout*
+{empty}:: *int* *void* *bool* *true* *false* *float*
 ifdef::GLSL[*double*]
-  :: *discard* *return*
-  :: *vec2* *vec3* *vec4* *ivec2* *ivec3* *ivec4* *bvec2* *bvec3* *bvec4*
-  :: *uint* *uvec2* *uvec3* *uvec4*
+{empty}:: *discard* *return*
+{empty}:: *vec2* *vec3* *vec4* *ivec2* *ivec3* *ivec4* *bvec2* *bvec3* *bvec4*
+{empty}:: *uint* *uvec2* *uvec3* *uvec4*
 ifdef::GLSL[]
-  :: *dvec2* *dvec3* *dvec4*
+{empty}:: *dvec2* *dvec3* *dvec4*
 endif::GLSL[]
-  :: *mat2* *mat3* *mat4*
-  :: *mat2x2* *mat2x3* *mat2x4*
-  :: *mat3x2* *mat3x3* *mat3x4*
-  :: *mat4x2* *mat4x3* *mat4x4*
+{empty}:: *mat2* *mat3* *mat4*
+{empty}:: *mat2x2* *mat2x3* *mat2x4*
+{empty}:: *mat3x2* *mat3x3* *mat3x4*
+{empty}:: *mat4x2* *mat4x3* *mat4x4*
 ifdef::GLSL[]
-  :: *dmat2* *dmat3* *dmat4*
-  :: *dmat2x2* *dmat2x3* *dmat2x4*
-  :: *dmat3x2* *dmat3x3* *dmat3x4*
-  :: *dmat4x2* *dmat4x3* *dmat4x4*
+{empty}:: *dmat2* *dmat3* *dmat4*
+{empty}:: *dmat2x2* *dmat2x3* *dmat2x4*
+{empty}:: *dmat3x2* *dmat3x3* *dmat3x4*
+{empty}:: *dmat4x2* *dmat4x3* *dmat4x4*
 endif::GLSL[]
-  :: *lowp* *mediump* *highp* *precision*
+{empty}:: *lowp* *mediump* *highp* *precision*
 ifdef::GLSL[]
-  :: *sampler1D* *sampler1DShadow* *sampler1DArray* *sampler1DArrayShadow*
-  :: *isampler1D* *isampler1DArray* *usampler1D* *usampler1DArray*
+{empty}:: *sampler1D* *sampler1DShadow* *sampler1DArray* *sampler1DArrayShadow*
+{empty}:: *isampler1D* *isampler1DArray* *usampler1D* *usampler1DArray*
 endif::GLSL[]
-  :: *sampler2D* *sampler2DShadow* *sampler2DArray* *sampler2DArrayShadow*
-  :: *isampler2D* *isampler2DArray* *usampler2D* *usampler2DArray*
+{empty}:: *sampler2D* *sampler2DShadow* *sampler2DArray* *sampler2DArrayShadow*
+{empty}:: *isampler2D* *isampler2DArray* *usampler2D* *usampler2DArray*
 ifdef::GLSL[]
-  :: *sampler2DRect* *sampler2DRectShadow* *isampler2DRect* *usampler2DRect*
+{empty}:: *sampler2DRect* *sampler2DRectShadow* *isampler2DRect* *usampler2DRect*
 endif::GLSL[]
-  :: *sampler2DMS* *isampler2DMS* *usampler2DMS*
-  :: *sampler2DMSArray* *isampler2DMSArray* *usampler2DMSArray*
-  :: *sampler3D* *isampler3D* *usampler3D*
-  :: *samplerCube* *samplerCubeShadow* *isamplerCube* *usamplerCube*
-  :: *samplerCubeArray* *samplerCubeArrayShadow*
-  :: *isamplerCubeArray* *usamplerCubeArray*
-  :: *samplerBuffer* *isamplerBuffer* *usamplerBuffer*
+{empty}:: *sampler2DMS* *isampler2DMS* *usampler2DMS*
+{empty}:: *sampler2DMSArray* *isampler2DMSArray* *usampler2DMSArray*
+{empty}:: *sampler3D* *isampler3D* *usampler3D*
+{empty}:: *samplerCube* *samplerCubeShadow* *isamplerCube* *usamplerCube*
+{empty}:: *samplerCubeArray* *samplerCubeArrayShadow*
+{empty}:: *isamplerCubeArray* *usamplerCubeArray*
+{empty}:: *samplerBuffer* *isamplerBuffer* *usamplerBuffer*
 ifdef::GLSL[]
-  :: *image1D* *iimage1D* *uimage1D*
-  :: *image1DArray* *iimage1DArray* *uimage1DArray*
+{empty}:: *image1D* *iimage1D* *uimage1D*
+{empty}:: *image1DArray* *iimage1DArray* *uimage1DArray*
 endif::GLSL[]
-  :: *image2D* *iimage2D* *uimage2D*
-  :: *image2DArray* *iimage2DArray* *uimage2DArray*
+{empty}:: *image2D* *iimage2D* *uimage2D*
+{empty}:: *image2DArray* *iimage2DArray* *uimage2DArray*
 ifdef::GLSL[]
-  :: *image2DRect* *iimage2DRect* *uimage2DRect*
-  :: *image2DMS* *iimage2DMS* *uimage2DMS*
-  :: *image2DMSArray* *iimage2DMSArray* *uimage2DMSArray*
+{empty}:: *image2DRect* *iimage2DRect* *uimage2DRect*
+{empty}:: *image2DMS* *iimage2DMS* *uimage2DMS*
+{empty}:: *image2DMSArray* *iimage2DMSArray* *uimage2DMSArray*
 endif::GLSL[]
-  :: *image3D* *iimage3D* *uimage3D*
-  :: *imageCube* *iimageCube* *uimageCube*
-  :: *imageCubeArray* *iimageCubeArray* *uimageCubeArray*
-  :: *imageBuffer* *iimageBuffer* *uimageBuffer*
-  :: *struct*
+{empty}:: *image3D* *iimage3D* *uimage3D*
+{empty}:: *imageCube* *iimageCube* *uimageCube*
+{empty}:: *imageCubeArray* *iimageCubeArray* *uimageCubeArray*
+{empty}:: *imageBuffer* *iimageBuffer* *uimageBuffer*
+{empty}:: *struct*
 
 In addition, when targeting Vulkan, the following keywords also exist:
 
 ifdef::GLSL[]
-  :: *texture1D* *texture1DArray*
-  :: *itexture1D* *itexture1DArray* *utexture1D* *utexture1DArray*
+{empty}:: *texture1D* *texture1DArray*
+{empty}:: *itexture1D* *itexture1DArray* *utexture1D* *utexture1DArray*
 endif::GLSL[]
-  :: *texture2D* *texture2DArray*
-  :: *itexture2D* *itexture2DArray* *utexture2D* *utexture2DArray*
+{empty}:: *texture2D* *texture2DArray*
+{empty}:: *itexture2D* *itexture2DArray* *utexture2D* *utexture2DArray*
 ifdef::GLSL[]
-  :: *texture2DRect* *itexture2DRect* *utexture2DRect*
+{empty}:: *texture2DRect* *itexture2DRect* *utexture2DRect*
 endif::GLSL[]
-  :: *texture2DMS* *itexture2DMS* *utexture2DMS*
-  :: *texture2DMSArray* *itexture2DMSArray* *utexture2DMSArray*
-  :: *texture3D* *itexture3D* *utexture3D*
-  :: *textureCube* *itextureCube* *utextureCube*
-  :: *textureCubeArray* *itextureCubeArray* *utextureCubeArray*
-  :: *textureBuffer* *itextureBuffer* *utextureBuffer*
-  :: *sampler* *samplerShadow*
-  :: *subpassInput* *isubpassInput* *usubpassInput*
-  :: *subpassInputMS* *isubpassInputMS* *usubpassInputMS*
+{empty}:: *texture2DMS* *itexture2DMS* *utexture2DMS*
+{empty}:: *texture2DMSArray* *itexture2DMSArray* *utexture2DMSArray*
+{empty}:: *texture3D* *itexture3D* *utexture3D*
+{empty}:: *textureCube* *itextureCube* *utextureCube*
+{empty}:: *textureCubeArray* *itextureCubeArray* *utextureCubeArray*
+{empty}:: *textureBuffer* *itextureBuffer* *utextureBuffer*
+{empty}:: *sampler* *samplerShadow*
+{empty}:: *subpassInput* *isubpassInput* *usubpassInput*
+{empty}:: *subpassInputMS* *isubpassInputMS* *usubpassInputMS*
 
 The following are the keywords reserved for future use.
 Using them will result in {compiletimeerror}:
 
 ifdef::ESSL[]
-  :: *attribute* *varying*
-  :: *noperspective*
-  :: *subroutine*
+{empty}:: *attribute* *varying*
+{empty}:: *noperspective*
+{empty}:: *subroutine*
 endif::ESSL[]
-  :: *common* *partition* *active*
-  :: *asm*
-  :: *class* *union* *enum* *typedef* *template* *this*
-  :: *resource*
-  :: *goto*
-  :: *inline* *noinline* *public* *static* *extern* *external* *interface*
-  :: *long* *short* *half* *fixed* *unsigned* *superp*
+{empty}:: *common* *partition* *active*
+{empty}:: *asm*
+{empty}:: *class* *union* *enum* *typedef* *template* *this*
+{empty}:: *resource*
+{empty}:: *goto*
+{empty}:: *inline* *noinline* *public* *static* *extern* *external* *interface*
+{empty}:: *long* *short* *half* *fixed* *unsigned* *superp*
 ifdef::ESSL[*double*]
-  :: *input* *output*
-  :: *hvec2* *hvec3* *hvec4* *fvec2* *fvec3* *fvec4*
+{empty}:: *input* *output*
+{empty}:: *hvec2* *hvec3* *hvec4* *fvec2* *fvec3* *fvec4*
 ifdef::ESSL[]
-  :: *dvec2* *dvec3* *dvec4*
-  :: *dmat2* *dmat3* *dmat4*
-  :: *dmat2x2* *dmat2x3* *dmat2x4*
-  :: *dmat3x2* *dmat3x3* *dmat3x4*
-  :: *dmat4x2* *dmat4x3* *dmat4x4*
+{empty}:: *dvec2* *dvec3* *dvec4*
+{empty}:: *dmat2* *dmat3* *dmat4*
+{empty}:: *dmat2x2* *dmat2x3* *dmat2x4*
+{empty}:: *dmat3x2* *dmat3x3* *dmat3x4*
+{empty}:: *dmat4x2* *dmat4x3* *dmat4x4*
 endif::ESSL[]
-  :: *filter*
-  :: *sizeof* *cast*
-  :: *namespace* *using*
+{empty}:: *filter*
+{empty}:: *sizeof* *cast*
+{empty}:: *namespace* *using*
 ifdef::ESSL[]
-  :: *sampler1D* *sampler1DShadow* *sampler1DArray* *sampler1DArrayShadow*
-  :: *isampler1D* *isampler1DArray* *usampler1D* *usampler1DArray*
-  :: *sampler2DRect* *sampler2DRectShadow* *isampler2DRect* *usampler2DRect*
+{empty}:: *sampler1D* *sampler1DShadow* *sampler1DArray* *sampler1DArrayShadow*
+{empty}:: *isampler1D* *isampler1DArray* *usampler1D* *usampler1DArray*
+{empty}:: *sampler2DRect* *sampler2DRectShadow* *isampler2DRect* *usampler2DRect*
 endif::ESSL[]
-  :: *sampler3DRect*
+{empty}:: *sampler3DRect*
 ifdef::ESSL[]
-  :: *image1D* *iimage1D* *uimage1D*
-  :: *image1DArray* *iimage1DArray* *uimage1DArray*
-  :: *image2DRect* *iimage2DRect* *uimage2DRect*
-  :: *image2DMS* *iimage2DMS* *uimage2DMS*
-  :: *image2DMSArray* *iimage2DMSArray* *uimage2DMSArray*
+{empty}:: *image1D* *iimage1D* *uimage1D*
+{empty}:: *image1DArray* *iimage1DArray* *uimage1DArray*
+{empty}:: *image2DRect* *iimage2DRect* *uimage2DRect*
+{empty}:: *image2DMS* *iimage2DMS* *uimage2DMS*
+{empty}:: *image2DMSArray* *iimage2DMSArray* *uimage2DMSArray*
 endif::ESSL[]
 
 In addition, all identifiers containing two consecutive underscores (+__+)
@@ -2197,9 +2197,9 @@ Definitions::
 An _integral type_ is any signed or unsigned, scalar or vector integer type.
 It excludes arrays and structures.
 
-:: A _scalar integral type_ is a scalar signed or unsigned integer type:
+{empty}:: A _scalar integral type_ is a scalar signed or unsigned integer type:
 
-:: A _vector integral type_ is a vector of signed or unsigned integers:
+{empty}:: A _vector integral type_ is a vector of signed or unsigned integers:
 
 Signed and unsigned integer variables are fully supported.
 In this document, the term _integer_ is meant to generally include both
@@ -2983,7 +2983,7 @@ inner-most (right-most in declaration) dimensions iterate faster than the
 outer dimensions.
 That is, for the above, the order in memory would be:
 
-  :: Low address : a[0][0] : a[0][1] : a[1][0] : a[1][1] : a[2][0] : a[2][1]
+{empty}:: Low address : a[0][0] : a[0][1] : a[1][0] : a[1][1] : a[2][0] : a[2][1]
      : High address
 
 // There is a gigantic block of GLSL/ESSL differences starting here
@@ -9414,7 +9414,7 @@ lightIntensity.length() // return the size of the array
 Assignments of values to variable names are done with the assignment
 operator (*=*):
 
-  :: _lvalue-expression_ = _rvalue-expression_
+{empty}:: _lvalue-expression_ = _rvalue-expression_
 
 The _lvalue-expression_ evaluates to an l-value.
 The assignment operator stores the value of _rvalue-expression_ into the
@@ -9462,11 +9462,11 @@ The other assignment operators are
 
 where the general expression
 
-  :: _lvalue_ _op_= _expression_
+{empty}:: _lvalue_ _op_= _expression_
 
 is equivalent to
 
-  :: _lvalue_ = _lvalue_ _op_ _expression_
+{empty}:: _lvalue_ = _lvalue_ _op_ _expression_
 
 where _lvalue_ is the value returned by _lvalue-expression_, _op_ is as
 described below, and the _lvalue-expression_ and _expression_ must satisfy
@@ -12941,7 +12941,7 @@ ifdef::GLSL[]
       produced by {apiname}'s fixed functionality transform.
       It is intended to be used to compute _gl_Position_, e.g.
 --
-  :: _gl_Position_ = *ftransform*()
+{empty}:: _gl_Position_ = *ftransform*()
 
 This function should be used, for example, when an application is rendering
 the same geometry in separate passes, and one pass uses the fixed
@@ -14263,18 +14263,18 @@ separate functions, each for a different type of image variable.
 The _IMAGE_PARAMS_ placeholder is replaced by one of the following parameter
 lists:
 
-  :: gimage2D _image_, ivec2 _P_
-  :: gimage3D _image_, ivec3 _P_
-  :: gimageCube _image_, ivec3 _P_
-  :: gimageBuffer _image_, int _P_
-  :: gimage2DArray _image_, ivec3 _P_
-  :: gimageCubeArray _image_, ivec3 _P_
+{empty}:: gimage2D _image_, ivec2 _P_
+{empty}:: gimage3D _image_, ivec3 _P_
+{empty}:: gimageCube _image_, ivec3 _P_
+{empty}:: gimageBuffer _image_, int _P_
+{empty}:: gimage2DArray _image_, ivec3 _P_
+{empty}:: gimageCubeArray _image_, ivec3 _P_
 ifdef::GLSL[]
-  :: gimage1D _image_, int _P_
-  :: gimage1DArray _image_, ivec2 _P_
-  :: gimage2DRect _image_, ivec2 _P_
-  :: gimage2DMS _image_, ivec2 _P_, int _sample_
-  :: gimage2DMSArray _image_, ivec3 _P_, int _sample_
+{empty}:: gimage1D _image_, int _P_
+{empty}:: gimage1DArray _image_, ivec2 _P_
+{empty}:: gimage2DRect _image_, ivec2 _P_
+{empty}:: gimage2DMS _image_, ivec2 _P_, int _sample_
+{empty}:: gimage2DMSArray _image_, ivec3 _P_, int _sample_
 endif::GLSL[]
 
 where each of the lines represents one of three different image variable
