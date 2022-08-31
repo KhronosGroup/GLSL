@@ -48,7 +48,7 @@ VERBOSE =
 SPECDATE = $(shell echo `date -u "+%a, %d %b %Y %T %z"`)
 
 # Generate Asciidoc attributes for spec remark
-GITHEAD  = ../../../.git/logs/HEAD
+GITHEAD  = .git/logs/HEAD
 ifeq ($(wildcard $(GITHEAD)),)
 # If GITHEAD does not exist, don't include branch info.
 SPECREMARK = Git branch information not available
