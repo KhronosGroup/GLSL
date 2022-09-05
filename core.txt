@@ -5148,13 +5148,13 @@ endif::ESSL[]
 | *input_attachment_index* = |                | subpass types only    |       |               | *uniform* (Vulkan only)
 ifdef::GLSL[]
 | *location* =            |                   | X                     |       |               | *uniform* / *buffer* and subroutine variables
-| *location* =            |                   | X                     | X     | X          .2+| all *in* / *out*, except for compute
+| *location* =            |                   | X                     | X     | X^1^       .2+| all *in* / *out*, except for compute
 | *component* =           |                   | X                     |       | X
 | *index* =               |                   | X                     |       |               | fragment *out* and subroutine functions
 endif::GLSL[]
 ifdef::ESSL[]
 | *location* =            |                   | X                     |       |               | *uniform* / *buffer*
-| *location* =            |                   | X^1^                  | X     | X             | all *in* / *out*, except for compute
+| *location* =            |                   | X                     | X     | X^1^          | all *in* / *out*, except for compute
 endif::ESSL[]
 | *triangles* +
   *quads* +
@@ -5284,12 +5284,10 @@ ifdef::ESSL[]
 endif::ESSL[]
 |====
 
-ifdef::ESSL[]
 1::
     Location qualifiers are not allowed for members of an arrayed block,
     except for per-vertex-arrays (see "`<<interface-blocks, Interface
     Blocks>>`").
-endif::ESSL[]
 
 
 [[input-layout-qualifiers]]
@@ -5421,23 +5419,13 @@ order.
 If a block has no block-level *location* layout qualifier, it is required
 that either all or none of its members have a *location* layout qualifier,
 or a compile-time error results.
-ifdef::GLSL[]
 For some blocks declared as arrays, the *location* can only be applied at
 the block level: When a block is declared as an array where additional
 locations are needed for each member for each block array element, it is a
 compile-time error to specify locations on the block members.
-That is, when locations would be under specified by applying them on block
-members, they are not allowed on block members.
 For _arrayed_ interfaces (those generally having an extra level of arrayness
 due to interface expansion), the outer array is stripped before applying
 this rule.
-endif::GLSL[]
-ifdef::ESSL[]
-
-If an input is declared as an array of blocks, excluding per-vertex-arrays
-as required for tessellation, it is an error to declare a member of the
-block with a *location* qualifier.
-endif::ESSL[]
 
 When generating SPIR-V, all *in* and *out* qualified user-declared (non
 built-in) variables and blocks (or all their members) must have a
