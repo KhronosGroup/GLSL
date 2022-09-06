@@ -16295,11 +16295,11 @@ ifdef::ESSL[]
 endif::ESSL[]
   . IEEE 754-2008.
     _IEEE Standard for Floating-Point Arithmetic_
-  . "`SPIR-V Specification, Version 1.3, Revision 7`" ,
+  . "`SPIR-V Specification, Version 1.6, Revision 2`" ,
     https://www.khronos.org/registry/spir-v/.
-  . "`Vulkan^R^ 1.1.105 - A Specification`",
+  . "`Vulkan^R^ 1.3.226 - A Specification`",
     https://www.khronos.org/registry/vulkan/,
-    March 19, 2019.
+    September 1, 2022.
 
 
 = Non-Normative SPIR-V Mappings
