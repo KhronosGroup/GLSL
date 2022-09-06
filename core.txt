@@ -16306,7 +16306,7 @@ endif::ESSL[]
 
 This appendix includes:
 
-- a comparision of feature differences with SPIR-V versus without, for both Vulkan and OpenGL
+- a comparison of feature differences with SPIR-V versus without, for both Vulkan and OpenGL
 - a discussion of how GLSL features logically map to SPIR-V features.
 
 == Feature Comparisons
