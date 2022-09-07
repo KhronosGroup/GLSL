@@ -16097,19 +16097,19 @@ ifdef::editing-notes[]
 endif::editing-notes[]
 
 ifdef::GLSL[]
-Pat Brown, NVIDIA +
 Jeff Bolz, NVIDIA +
-Frank Chen +
 Pierre Boudier, AMD +
+Pat Brown, NVIDIA +
+Frank Chen +
 Piers Daniell, NVIDIA +
 Chris Dodd, NVIDIA +
-Nick Haemel, NVIDIA +
 Jason Green, Transgaming +
+Nick Haemel, NVIDIA +
 Brent Insko, Intel +
-Jon Leech +
-Bill Licea-Kane, Qualcomm +
 Daniel Koch, NVIDIA +
+Jon Leech +
 Graeme Leese, Broadcom +
+Bill Licea-Kane, Qualcomm +
 Barthold Lichtenbelt, NVIDIA +
 Bruce Merry, ARM +
 Robert Ohannessian +
@@ -16121,9 +16121,9 @@ Christophe Riccio, AMD +
 Kevin Rogovin +
 Ian Romanick, Intel +
 Greg Roth, NVIDIA +
+Jeremy Sandmel, Apple +
 Graham Sellers, AMD +
 Dave Shreiner, ARM +
-Jeremy Sandmel, Apple +
 Robert Simpson, Qualcomm +
 Eric Werness, NVIDIA +
 Mark Young, AMD
