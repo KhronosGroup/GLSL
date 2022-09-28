@@ -12796,10 +12796,10 @@ case.
 [options="header"]
 |====
 | Syntax | Description
-| highp uint *packUnorm2x16*({mediump} vec2 _v_) +
-  highp uint *packSnorm2x16*({mediump} vec2 _v_) +
-  {highp} uint *packUnorm4x8*({mediump} vec4 _v_) +
-  {highp} uint *packSnorm4x8*({mediump} vec4 _v_)
+| highp uint *packUnorm2x16*(vec2 _v_) +
+  highp uint *packSnorm2x16*(vec2 _v_) +
+  {highp} uint *packUnorm4x8*(vec4 _v_) +
+  {highp} uint *packSnorm4x8*(vec4 _v_)
     | First, converts each component of the normalized floating-point value
       _v_ into 16-bit (*2x16*) or 8-bit (*4x8*) integer values.
       Then, the results are packed into the returned 32-bit unsigned
