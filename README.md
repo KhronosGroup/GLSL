@@ -78,3 +78,4 @@ which normatively accepts SPIR-V but does not normatively consume a high-level s
 - [GL_EXT_ray_cull_mask](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_ray_cull_mask.txt)
 - [GL_EXT_fragment_shader_barycentric](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_fragment_shader_barycentric.txt)
 - [GLSL_EXT_mesh_shader](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_mesh_shader.txt)
+- [GL_EXT_opacity_micromap.txt](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_opacity_micromap.txt)
