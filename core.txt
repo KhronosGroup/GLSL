@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2017 The Khronos Group Inc.
+// Copyright 2008-2022 The Khronos Group Inc.
 // Copyright notice at https://www.khronos.org/registry/speccopyright.html
 
 // {GLSL} or {ESSL} must be set in the invoking command line to generate
@@ -61,7 +61,7 @@ include::config/attribs.txt[]
 
 <<<<
 
-include::copyright-spec.txt[]
+include::copyright-spec.adoc[]
 
 <<<<
 
@@ -5604,7 +5604,7 @@ Further, when location aliasing, the aliases sharing the location must have
 the same underlying numerical type and bit width  (floating-point or integer,
 32-bit versus 64-bit, etc.) and the same
 auxiliary storage and interpolation qualification.
-The one exception where component aliasing is permitted is 
+The one exception where component aliasing is permitted is
 when targeting {apiname} for two input
 variables (not block members) to a vertex shader, which are allowed to have
 component aliasing.
