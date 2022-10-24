@@ -89,8 +89,10 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     - Composites: each member is recursively defined to be null according to their
       constituent types
 
-   Null initialization can be achieved by using an empty brace expression. Null
-   initializers may only be used to initialize sized-types.
+   It is a compile-time error to null initialize any other type, or to null initialize an
+   unsized array type.
+   
+   Null initialization can be achieved by using an empty brace expression.
 
    For example,
 
