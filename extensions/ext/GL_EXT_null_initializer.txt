@@ -46,7 +46,7 @@ Depenendencies
 
 Overview
 
-  This extension adds a null initializer to GLSL and allow shared variables in
+  This extension adds a null initializer to GLSL and allows shared variables in
   compute shaders to be null initiailzed. Null initializers are specified using
   a new syntax of empty braces.
 
