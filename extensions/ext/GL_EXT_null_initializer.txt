@@ -109,7 +109,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
 
   With:
 
-    Variables declared as shared may only have null initializers (see section 4.3.8.1).
+    Variables declared as shared may only have null initializers (see section 4.1.11.1).
     Uninitialized shared variables' contents are undefined at the beginning of shader
     execution. Any data written to shared variables will be visible to other work items
     (executing the same shader) within the same workgroup.
