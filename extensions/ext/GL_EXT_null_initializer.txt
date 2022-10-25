@@ -77,7 +77,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
 
   New preprocessor #defines are added to the OpenGL Shading Language:
 
-    #define GL_EXT_null_initialize_shared_memory    1
+    #define GL_EXT_null_initializer    1
 
   Add a new section 4.1.11.1 Null Initializers:
 
