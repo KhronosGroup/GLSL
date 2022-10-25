@@ -24,12 +24,8 @@ Status
 
 Version
 
-  Last Modified Date:      June 11, 2020
-  Revision:                3
-
-Number
-
-  TBD
+  Last Modified Date:      October 25, 2022
+  Revision:                4
 
 Depenendencies
 
@@ -150,3 +146,6 @@ Revision History
     - Rename extension from GL_EXT_null_initialize_shared_memory
     - Allow null initializers generally
     - Restrict null initializers to sized types
+
+  Revision 4 (Alan Baker)
+    - Editorial changes
