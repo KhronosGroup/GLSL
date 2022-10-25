@@ -71,7 +71,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
   Including the following line in a shader can be used to control the language
   features described in this extension:
 
-    #extension GL_EXT_null_initialize_shared_memory : <behavior>
+    #extension GL_EXT_null_initializer : <behavior>
 
   where <behavior> is as specified in section 3.3.
 
