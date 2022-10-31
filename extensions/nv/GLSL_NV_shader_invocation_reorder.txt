@@ -1,0 +1,848 @@
+Name
+
+    NV_shader_invocation_reorder
+
+Name Strings
+
+    GL_NV_shader_invocation_reorder
+
+Contact
+
+    Ashwin Lele (alele 'at' nvidia.com), NVIDIA
+
+Contributors
+
+    Eric Werness (ewerness 'at' nvidia.com), NVIDIA
+    Daniel Koch (dgkoch 'at' nvidia.com), NVIDIA
+
+Status
+
+    Complete
+
+Version
+
+    Last Modified Date: 2022-09-01
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.60
+    (#version 460) and higher.
+
+    This extension is written against revision 5 of the OpenGL Shading Language
+    version 4.60, dated September 4, 2017.
+
+    This extension interacts with revision 43 of the GL_KHR_vulkan_glsl
+    extension, dated October 25, 2017.
+
+    This extension requires GLSL_EXT_ray_tracing.
+
+    This extension interacts with GLSL_NV_ray_tracing_motion_blur.
+
+    This extension requires GLSL_EXT_buffer_reference_uvec2.
+
+Overview
+
+    Ray tracing workloads are known to suffer from divergent shader execution
+    and data divergence. The current ray tracing pipeline API allows implementations
+    to dynamically schedule work triggered on execution of 'traceRayEXT'
+    or 'executeCallableEXT' but this does not allow applications any control
+    over it. Furthermore not all real world use cases require tight coupling
+    of ray tracing traversal and shading.
+
+    This extension document modifies GLSL for ray tracing stages to add support 
+    for 'hitObjectNV' which is an opaque type which encapsulates the state of
+    traversal and allows queries to read this state. Additionally new functions 
+    using this hitobject, enable user explicit control over ray tracing traversal and shading. 
+    Furthermore new builtins are added to explicitly communicate reordering
+    information to implementations to allow them to reorder threads to minimize 
+    shader and data divergence and improving coherent execution.
+
+    This extension document adds support for the following extensions to be used
+    within GLSL:
+
+    - GL_NV_shader_invocation_reorder - enables reordering operations
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+      hitObjectNV type -> OpTypeHitObjectNV instruction
+
+      hitObjectNV variable -> OpVariable instruction with type OpTypeHitObjectNV
+
+      hitObjectTraceRayNV -> OpHitObjectTraceRayNV instruction
+      hitObjectTraceRayMotionNV -> OpHitObjectTraceRayMotionNV instruction
+
+      hitObjectRecordHitNV -> OpHitObjectRecordHitNV instruction
+      hitObjectRecordHitMotionNV -> OpHitObjectRecordHitMotionNV instruction
+
+      hitObjectRecordHitWithIndexNV -> OpHitObjectRecordHitWithIndexNV instruction
+      hitObjectRecordHitWithIndexMotionNV -> OpHitObjectRecordHitWithIndexMotionNV instruction
+
+      hitObjectRecordMissNV -> OpHitObjectRecordMissNV instruction
+      hitObjectRecordMissMotionNV -> OpHitObjectRecordMissMotionNV instruction
+
+      hitObjectRecordNopNV -> OpHitObjectRecordNopNV instruction
+
+      hitObjectExecuteShaderNV -> OpHitObjectExecuteShaderNV instruction 
+
+      hitObjectIsHitNV -> OpHitObjectIsHitNV instruction
+      hitObjectIsMissNV -> OpHitObjectIsMissNV instruction
+      hitObjectIsNopNV -> OpHitObjectIsNopNV instruction
+
+      hitObjectGetRayTMinNV -> OpHitObjectGetRayTMinNV instruction
+      hitObjectGetRayTMaxNV -> OpHitObjectGetRayTMaxNV instruction
+      hitObjectGetWorldRayOriginNV -> OpHitObjectGetWorldRayOriginNV instruction
+      hitObjectGetWorldRayDirectionNV -> OpHitObjectGetWorldDirectionNV instruction
+      hitObjectGetObjectRayOriginNV -> OpHitObjectGetObjectRayOriginNV instruction
+      hitObjectGetObjectRayDirectionNV -> OpHitObjectGetObjectDirectionNV instruction
+      hitObjectGetObjectToWorldNV -> OpHitObjectGetObjectToWorldNV instruction
+      hitObjectGetWorldToObjectNV -> OpHitObjectGetWorldToObjectNV instruction
+
+      hitObjectGetInstanceIdNV -> OpHitObjectGetInstanceIdNV instruction
+      hitObjectGetInstanceCustomIndexNV -> OpHitObjectGetInstanceCustomIndexNV instruction
+      hitObjectGetGeometryIndexNV -> OpHitObjectGetGeometryIndexNV instruction 
+      hitObjectGetPrimitiveIndexNV -> OpHitObjectGetPrimitiveIndexNV instruction
+      hitObjectGetHitKindNV -> OpHitObjectGetHitKindNV instruction
+
+      hitObjectGetShaderBindingTableRecordIndexNV ->
+            OpHitObjectGetShaderBindingTableRecordIndexNV instruction
+
+      hitObjectGetShaderRecordBufferHandleNV ->
+            OpHitObjectGetShaderRecordBufferHandleNV instruction
+
+
+      reorderThreadNV ->
+            OpReorderThreadWithHintNV/OpReorderThreadWithHitObjectNV instruction
+     
+         
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_NV_shader_invocation_reorder  : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+    New preprocessor #defines are added:
+
+      #define GL_NV_shader_invocation_reorder                          1
+
+Changes to Chapter 3 of The OpenGL Shading Language Specification, Version 4.60
+
+    Modify Section 3.6, (Keywords)
+
+    (add the following to the list of reserved keywords)
+
+    hitObjectNV
+
+Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
+
+    Add following to Section 4.1 (Basic Types)
+
+    Hit Object Opaque Types
+
+    Types                           Meaning
+    -----                           -------
+
+    hitObjectNV                     A handle representing the state
+                                    captured during traversal through 
+                                    acceleration structure or populated
+                                    via builtins.
+                                    This is available only in ray-generation,
+                                    closest-hit and miss shading stages.
+                                    
+                                    
+
+    Change the following sentence in the first paragraph of 4.1.7 (Opaque
+    Types) from
+
+        They can only be declared as function parameters or in uniform-
+        qualified variables (see Uniform  Variables).
+
+    to
+
+        With the exception of hitObjectNV (see "Hit Object Type"), they can
+        only be declared as function parameters or in uniform-qualified
+        variables (see Uniform  Variables).
+
+    Add two new sub-sections under Section 4.1.7 (Opaque Types)
+
+    4.1.7.y Hit Object Type
+
+    hitObjectNV is an opaque type representing the state captured during
+    traversal of acceleration structures or manually populated via builtins.
+    It is declared and behaves like above described opaque types. When aggregated
+    into arrays within a shader, hitObjectNV can only be indexed with
+    a dynamically uniform integral expression, otherwise results are undefined.
+    Unlike other opaque types, hitObjectNV variables are declared with no storage
+    qualifiers, either in the global scope or within function scope.
+
+    [[If GL_EXT_nonuniform_qualifier]] is supported
+    When aggregated into arrays within a shader, hitObjectNV can
+    be indexed with a non-uniform integral expressions, when decorated with the
+    nonuniformEXT qualifier.
+    [[end]]
+
+    This type is used in various hit object builtins described in Section 8.19
+    Members of a structure cannot be declared with this type.
+
+    
+    Modify Section 4.3 (Storage Qualifiers)
+
+
+    Storage Qualifier              Meaning
+    -----------------              -------
+
+
+    hitObjectAttributeNV           Ray-generation, closest-hit or miss shader only.
+                                   Storage associated with attibutes for
+                                   geometry intersected by a ray when used for
+                                   a hit object.
+
+
+    4.3.X hitObjectAttributeNV Variables
+
+    These are allowed only in ray-generation, closest-hit, and miss shaders.
+    It is a compile-time error to use them in any other stage. They can be
+    both read from and written to. They cannot have any other storage qualifiers. 
+    It is a compile-time error to declare unsized arrays of this type.
+
+
+    Modify table in Section 4.4 (Layout Qualifiers)
+
+
+    Layout Qualifier            Qualifier  Individual   Block    Block      Allowed
+                                  Only      Variable             Member    Interface
+    -----------------           ---------  ----------   ------   ------    ---------
+
+    hitobjectshaderrecordnv                               X                  buffer                    
+
+
+
+    Add a new subsection to Section 4.4
+
+    4.4.10 Hit Object Shader Record Buffer
+
+    This allows a buffer reference to be used in context of reading from
+    data section of a shader record as it is encoded in a hit object.
+
+    This layout qualifier can only be used on an buffer interface block
+    which is a buffer reference i.e annotated with 
+    layout qualifier 'buffer_reference'
+
+    It is a compile-time error to use this qualifier with any other 
+    interface-qualifier or member of an interface block.
+
+
+Additions to Chapter 8 of the OpenGL Shading Language Specification
+(Built-in Functions)
+
+    Add Section 8.19, Hit Object Functions
+     (Modify section 8.19 from Ray Tracing functions from EXT_ray_tracing
+     to add following)
+
+    The hitObjectTraceRayNV(), hitObjectTraceRayMotionNV(), 
+    hitObjectExecuteShaderNV() are considered shader call functions. 
+    reorderThreadNV() and reorderThreadWithHintNV() are considered as 
+    invocation repack functions.
+
+
+    Syntax:
+
+        void hitObjectTraceRayNV(hitObjectNV hitobject, 
+                   accelerationStructureEXT topLevel,
+                   uint rayFlags,
+                   uint cullMask,
+                   uint sbtRecordOffset,
+                   uint sbtRecordStride,
+                   uint missIndex,
+                   vec3 origin,
+                   float Tmin,
+                   vec3 direction,
+                   float Tmax,
+                   int payload);
+
+
+    This function is only available in the ray generation, closest-hit, and
+    miss shaders.
+
+    Initiates a ray query against a top-level <accelerationStructureEXT>
+    structure, triggering the execution of various intersection and any-hit
+    shaders as ray-geometry intersections are being evaluated, and returns the
+    resulting hit or miss information in the hit object. This does not
+    execute any closest-hit or miss shaders. No thread reordering
+    or user-observable driver side scheduling occurs.
+
+    Refer to 'traceRayEXT' for various parameter definitions.
+
+
+    Syntax:
+
+        void hitObjectTraceRayMotionNV(hitObjectNV hitobject, 
+                   accelerationStructureEXT topLevel,
+                   uint rayFlags,
+                   uint cullMask,
+                   uint sbtRecordOffset,
+                   uint sbtRecordStride,
+                   uint missIndex,
+                   vec3 origin,
+                   float Tmin,
+                   vec3 direction,
+                   float Tmax,
+                   float currentTime,
+                   int payload);
+
+
+    This function is only available in the ray generation, closest-hit, and
+    miss shaders.
+
+    Initiates a ray query against a top-level <accelerationStructureEXT>
+    structure, triggering the execution of various intersection and any-hit
+    shaders as ray-geometry intersections are being evaluated, and returns the
+    resulting hit or miss information in the hit object. This does not
+    execute any closest-hit or miss shaders. No thread reordering
+    or user-observable driver side scheduling occurs.
+
+    'hitObjectTraceRayMotionNV' operates the same as 'hitObjectTraceRayNV', 
+    with the exception of <currentTime> parameter.
+
+    This function is allowed only when GLSL_NV_ray_tracing_motion_blur 
+    extension is present.
+
+    Refer to 'traceRayMotionNV' for various parameter definitions.
+
+
+    Syntax:
+
+        void hitObjectRecordHitNV(hitObjectNV hitobject,
+                    accelerationStructureEXT topLevel,
+                    int instanceid,
+                    int primitiveid,
+                    int geometryindex,
+                    uint hitKind,
+                    uint sbtRecordOffset,
+                    uint sbtRecordStride,
+                    vec3 origin,
+                    float Tmin,
+                    vec3 direction,
+                    float Tmax,
+                    int attributeLocation)
+
+    Populates 'hitobject' representing a hit without tracing a ray.
+    It is legal to construct a hit which is not the closest hit along the ray
+    or a hit which is not located along the ray.
+
+    <instanceid> refers to the index of the instance within <topLevel>
+    acceleration structure for which this hit object is created.
+    Result are undefined for negative or out of bounds index.
+ 
+    <primitiveid> refers to the index of the primitive (triangle or bounding
+    box) within <topLevel> acceleration structure for which this hit object is created.
+    Results are undefined for negative or out of bounds index.
+
+    <geometryindex> refers to the index of the geometry within <topLevel>
+    acceleration structure for which this hit object is created.
+    Results are undefined for negative or out of bounds index.
+
+    <hitKind> is used to describe the kind of intersection for which this hit 
+    object is created. Refer to 'Fixed Constants' for details
+
+    <sbtRecordOffset> and <sbtRecordStride> parameters influence the
+    computation of record indices of the <shader binding table> that locate
+    the closest-hit shaders for which this hit object is created.
+
+    Refer to shader binding table, hit shader indexing of the Vulkan specification 
+    for more information.
+    
+    <attributeLocation> is a compile-time constant to select
+    a shader defined structure containing attributes which is used to populate
+    this hit object. 
+    It is possible for a shader to contain multiple invocations 'hitObjectRecordHitNV'
+    with different attribute types. Different attribute types are chosen based on the 
+    different values of the compile-time constant <attributeLocation> which correspond 
+    to the hitObjectAttributeNV qualified variables having the same value for the
+    location layout qualifier. 
+    
+
+Syntax:
+
+        void hitObjectRecordHitMotionNV(hitObjectNV hitobject,
+                    accelerationStructureEXT topLevel,
+                    int instanceid,
+                    int primitiveid,
+                    int geometryindex,
+                    uint hitKind,
+                    uint sbtRecordOffset,
+                    uint sbtRecordStride,
+                    vec3 origin,
+                    float Tmin,
+                    vec3 direction,
+                    float Tmax,
+                    float currentTime,
+                    int attributeLocation)
+
+    Populates 'hitobject' representing a hit without tracing a ray.
+    It is legal to construct a hit which is not the closest hit along the ray
+    or a hit which is not located along the ray.
+
+    Refer to 'hitObjectRecordHitNV' for various parameter definitions
+
+    Refer to 'traceRayMotionNV' for defintion of <currentTime>
+
+    This function is allowed only when GLSL_NV_ray_tracing_motion_blur 
+    extension is present.
+
+
+    Syntax:
+
+        void hitObjectRecordHitWithIndexNV(hitObjectNV hitobject,
+                    accelerationStructureEXT topLevel,
+                    int instanceid,
+                    int primitiveid,
+                    int geometryindex,
+                    uint hitKind,
+                    uint sbtRecordIndex,
+                    vec3 origin,
+                    float Tmin,
+                    vec3 direction,
+                    float Tmax,
+                    int attributeLocation)
+
+    Populates 'hitobject' representing a hit without tracing a ray.
+    It is legal to construct a hit which is not the closest hit along the ray
+    or a hit which is not located along the ray.
+
+    <instanceid> refers to the index of the instance within <topLevel>
+    acceleration structure for which this hit object is created. 
+    Results are undefined for negative or out of bounds index.
+ 
+    <primitiveid> refers to the index of the primitive (triangle or bounding
+    box) within <topLevel> acceleration structure for which this hit object is created.
+    Results are undefined for negative or out of bounds index.
+
+    <geometryindex> refers to the index of the geometry within <topLevel>
+    acceleration structure for which this hit object is created. 
+    Results are undefined for negative or out of bounds index.
+
+    <hitKind> is used to describe the kind of intersection for which this hit 
+    object is created. Refer to 'Fixed Constants' in EXT_ray_tracing for details
+
+    <sbtRecordIndex> refers to the record index of the closest-hit shader of
+    the <shader binding table> for which this hit object is created
+    Only the 4 least-significant bits are used; other bits are ignored.
+
+    Refer to shader binding table, hit shader indexing of the Vulkan specification 
+    for more information.
+
+    <attributeLocation> is a compile-time constant to select
+    a shader defined structure containing attributes which is used to populate
+    this hit object. 
+    It is possible for a shader to contain multiple invocations 'hitObjectRecordHitNV'
+    with different attribute types. Different attribute types are chosen based on the 
+    different values of the compile-time constant <attributeLocation> which correspond 
+    to the hitObjectAttributeNV qualified variables having the same value for the
+    location layout qualifier. 
+
+Syntax:
+
+        void hitObjectRecordHitWithIndexMotionNV(hitObjectNV hitobject,
+                    accelerationStructureEXT topLevel,
+                    int instanceid,
+                    int primitiveid,
+                    int geometryindex,
+                    uint hitKind,
+                    uint sbtRecordIndex,
+                    vec3 origin,
+                    float Tmin,
+                    vec3 direction,
+                    float Tmax,
+                    float currentTime,
+                    int attributeLocation)
+
+    Populates 'hitobject' representing a hit without tracing a ray.
+    It is legal to construct a hit which is not the closest hit along the ray
+    or a hit which is not located along the ray.
+
+    Refer to 'hitObjectRecordHitWithIndexNV' for various parameter definitions
+
+    Refer to 'traceRayMotionNV' for defintion of <currentTime>
+
+    This function is allowed only when GLSL_NV_ray_tracing_motion_blur 
+    extension is present.
+
+    Syntax:
+
+        void hitObjectRecordMissNV(hitObjectNV hitObject, 
+                   uint sbtRecordIndex, 
+                   vec3 origin,
+                   float Tmin,
+                   vec3 direction,
+                   float TMax)
+
+    Populates 'hitobject' representing a miss without tracing a ray
+    It is legal to construct a miss in a hit object for a ray that 
+    could have hit some geometry if traced.
+
+    <sbtRecordIndex> refers to the record index of the miss shader of
+    the <shader binding table> for which this hit object is created.
+
+    Refer to shader binding table, hit shader indexing of the Vulkan 
+    specification for more information.
+
+Syntax:
+
+        void hitObjectRecordMissMotionNV(hitObjectNV hitObject, 
+                   uint sbtRecordIndex, 
+                   vec3 origin,
+                   float Tmin,
+                   vec3 direction,
+                   float TMax,
+                   float currentTime)
+
+    Populates 'hitobject' representing a miss without tracing a ray
+    It is legal to construct a miss in a hit object for a ray that 
+    could have hit some geometry if traced.
+
+    Refer to 'hitObjectRecordMissNV' for various parameter definitions.
+
+    Refer to 'traceRayMotionNV' for defintion of <currentTime>
+
+    This function is allowed only when GLSL_NV_ray_tracing_motion_blur 
+    extension is present.
+    
+    Syntax:
+
+        void hitObjectRecordEmptyNV(hitObjectNV hitObject)
+
+    Encodes the hitobject to represent an empty hit object which represents
+    neither a hit nor a miss.
+
+    
+    Syntax:
+
+        void hitObjectExecuteShaderNV(hitObjectNV hitObject,
+                    int payload)
+
+
+    Execute the closest-hit or miss shader encoded in the 'hitobject'
+    This call does not trigger reordering of threads.
+
+
+    Syntax:
+
+        bool hitObjectIsEmptyNV(hitObjectNV hitObject)
+    
+    Returns 'true' if <hitObject> encodes a nop, 'false' otherwise.
+
+
+    Syntax:
+
+        bool hitObjectIsMissNV(hitObjectNV hitObject)
+
+    Returns 'true' if <hitobject> encodes a miss, 'false' otherwise.
+
+
+    Syntax:
+
+        bool hitObjectIsHitNV(hitObjectNV hitObject)
+
+    Returns 'true' if <hitobject> encodes a hit, 'false' otherwise.
+
+
+    Syntax:
+
+        float hitObjectGetRayTMinNV(hitObjectNV hitObject)
+
+    Returns the parametric <tMin> value encoded in the hit object.
+    Refer to the semantics of gl_RayTMinEXT as defined in EXT_ray_tracing.
+
+
+    Syntax:
+
+        float hitObjectGetRayTMaxNV(hitObjectNV hitObject)
+
+    Returns the parametric <tMax> value encoded in the hit object.
+    Refer to the semantics of gl_RayTMaxEXT as defined in EXT_ray_tracing.
+
+    Syntax:
+
+        vec3 hitObjectGetObjectRayOriginNV(hitObjectNV hitObject)
+
+    Returns the object-space origin of ray encoded in the hit object.
+
+
+    Syntax:
+
+        vec3 hitObjectGetObjectRayDirectionNV(hitObjectNV hitObject)
+
+    Returns the object-space direction of ray encoded in the hit object.
+
+    Syntax:
+
+        vec3 hitObjectGetWorldRayOriginNV(hitObjectNV hitObject)
+
+    Returns the world-space origin of ray encoded in the hit object.
+
+
+    Syntax:
+
+        vec3 hitObjectGetWorldRayDirectionNV(hitObjectNV hitObject)
+
+    Returns the world-space direction of ray encoded in the hit object.
+
+
+    Syntax:
+
+        mat4x3 hitObjectGetObjectToWorldNV(hitObjectNV hitObject)
+
+    Returns the object to world transformation matrix as encoded in the hit object.
+
+    Syntax:
+
+        mat4x3 hitObjectGetWorldToObjectNV(hitObjectNV hitObject)
+
+    Returns the world to object transformation matrix as encoded in the hit object.
+
+    Syntax:
+
+        int hitObjectGetInstanceCustomIndexNV(hitObjectNV hitObject);
+
+    Returns the custom index of the instance encoded in the hit object.
+
+
+    Syntax:
+
+        int hitObjectGetInstanceIdNV(hitObjectNV hitObject);
+
+    Returns the index of the instance encoded in the hit object.
+
+
+    Syntax:
+
+        int hitObjectGetGeometryIndexNV(hitObjectNV hitObject);
+
+    Returns implementation defined index of geometry encoded in the hit
+    object.
+
+
+    Syntax:
+
+        int hitObjectGetPrimitiveIndexNV(hitObjectNV hitObject);
+
+    Returns the index of the primitive (triangle or bounding box) within the
+    geometry as encoded in the hit object.
+
+
+    Syntax:
+
+        uint hitObjectGetHitKindNV(hitObjectNV hitObject);
+
+    Returns values as defined in EXT_ray_tracing specification for
+    gl_HitKindEXT.
+
+
+    Syntax:
+
+        void hitObjectGetAttributesNV(hitObjectNV hitObject, int attributeLocation);
+
+    
+    Extracts the attributes encoded in the hit object and writes to 
+    'hitObjectAttributeNV' storage class decorated variable selected using
+    'attributeLocation' as specified below.
+
+    <attributeLocation> is a compile-time constant to select
+    a shader defined structure used to populate with attributes associated
+    with this hit object. 
+    It is possible for a shader to contain multiple invocations
+    'hitObjectGetAttributesNV'
+    with different attribute types. Different attribute types are chosen based on the 
+    different values of the compile-time constant <attributeLocation> which correspond 
+    to the hitObjectAttributeNV qualified variables having the same value for the
+    location layout qualifier. 
+
+    
+    Syntax:
+
+        uvec2 hitObjectGetShaderRecordBufferHandleNV(hitObjectNV hitObject);
+
+    
+    Returns a uvec2 handle representing the address for data for a record in
+    the shader binding table as encoded in the hit object.
+    
+    This can be used with a buffer reference with additional layout qualifier 
+    'hitobjectshaderrecordnv' as defined in EXT_buffer_reference_uvec2.
+
+
+    Syntax:
+
+        uint hitObjectGetShaderBindingTableRecordIndexNV(hitObjectNV hitObject);
+
+    Returns the index for the record in shader binding table as encoded in hit
+    object. For a hit, returns index within hit group for a miss the index within
+    miss table.
+
+
+    Syntax:
+    
+        float hitObjectGetCurrentTimeNV(hitObjectNV hitObject);
+
+    Returns the current time as encoded in the hit object.
+    Only applicable if hit object was constructed for hitObjectTraceRayMotionNV
+
+
+    Add Section 8.20, Reorder Functions
+
+
+    Reorder functions allow implementations to reorder threads based
+    on input given to these builtins to so that subsequent code can
+    execute with improved coherence.
+
+    For reorder functions providing a hint, the implementation will reorder 
+    based on the unsigned numerical value of the number of bits provided. 
+    The sorting may be coarse, be bucketing rather than sorting, or only use 
+    the high bits of the hint provided. If both the hint and the hit object 
+    are provided the implementation should reorder based on the hint after 
+    the shader being executed. The value of bits of a hint should be <= 32
+    Values greater than 32 will lead to undefined behavior.
+
+    These functions are available only in ray-generation shader stage.
+
+    Syntax:
+
+        void reorderThreadNV(uint hint, uint bits);
+
+
+    Reorder threads based on user provided <hint>. Similar hint values
+    indicate similarity of subsequent work done after this call. Behavior
+    is implementation defined.
+
+    <hint> determines desired ordering of threads relative to others.
+
+    <bits> indicates number of least significant bits an implementation
+    should take into account from <hint> in determining ordering. 
+    
+    Value of <bits> should be <= 32. Values greater than 32 will 
+    lead to undefined behavior.
+   
+
+    Syntax:
+
+        void reorderThreadNV(hitObjectNV hitObject)
+
+    Reorder threads based on provided <hitObject>. The exact properties
+    from hit object which are used to reorder the threads is implementation
+    defined.
+
+
+    Syntax:
+
+        void reorderThreadNV(hitObjectNV hitObject, uint hint, uint bits)
+
+    Reorder threads based on provided <hitObject> supplemented by additional
+    information based on user provided <hint>. The exact properties from 
+    hit object and user specified hint which are used to reorder theads is
+    implementation defined.
+
+    <hint> determines desired ordering of threads relative to others.
+
+    <bits> indicates number of least significant bits an implementation
+    should take into account from <hint> in determining ordering.
+
+    Value of <bits> should be <= 32. Values greater than 32 will 
+    lead to undefined behavior.
+   
+
+Interactions with GLSL_EXT_ray_tracing
+
+    This extension requires acceleration structures, shader stages,
+    storage qualifiers and the various ray flags added by GLSL_EXT_ray_tracing.
+
+Interactions with GL_EXT_nonuniform_qualifier
+
+    If GL_EXT_nonuniform_qualifier is supported, arrays of
+    hitObjectNV can be indexed with non-unform integral
+    expressions when they are decorated with the nonuniformEXT qualifier.
+
+Interactions with GL_EXT_scalar_block_layout
+
+    If GL_EXT_scalar_block_layout is supported, buffer references with
+    a layout of hitobjectshaderrecordnv can also be laid out using the scalar
+    block layout.
+
+Example
+
+    #version 460
+    #extension GL_EXT_ray_tracing : enable
+    #extension GL_EXT_buffer_reference_uvec2 : enable
+    #extension GL_NV_shader_invocation_reorder : enable
+    layout(binding = 0) uniform accelerationStructureEXT as;
+    layout(binding = 1, rgba32f) uniform image2D img;
+    layout(binding = 2) uniform RayParams { vec3 origin;};
+    layout(location = 0) rayPayloadEXT vec4 Color;
+    layout(buffer_reference, hitobjectshaderrecordnv) buffer SRB 
+    {
+        uint materialId;
+    };
+    layout(location = 0) hitObjectAttributeNV vec3 sphereAABB;
+    void main()
+    {
+        //Trace rays executing custom intersection/any-hit
+        vec4 outputColor = vec4(0);
+        hitObjectNV hObj;
+        //Initialize to an empty hit object
+        hitObjectRecordEmpty(hObj);
+
+        hitObjectTraceRayNV(hObj,
+                   as,
+                   0,
+                   0,
+                   0,
+                   4,
+                   0,
+                   origin + vec3(gl_LaunchIDEXT.xyz),
+                   0.0f,
+                   origin + vec3(gl_LaunchIDEXT.xyz) + vec3(0,0,1.0f),
+                   1.0f,
+                   0);
+
+        uint materialIdHint = 0;
+        
+        if (hitObjectIsHitNV(hObj)) {
+            uvec2 handle = hitObjectGetShaderRecordBufferHandleNV(hObj);
+            materialIdHint = SRB(handle).materialId;
+        }
+
+        //Reorder threads based on hit object and additional hint on material type
+        //Use 3 LSB bits only
+        reorderThreadNV(hObj, materialIdHint, 3);
+
+        //Execute closest-hit shaders only
+        if (hitObjectIsHitNV(hObj)) {
+            //Get Attributes of intersection
+            hitObjectGetAttributesNV(hObj, 0);
+            hitObjectExecuteShaderNV(hObj, 0);
+            outputColor = vec4(Color.x + distance(sphereAABB, vec3(0)));
+        } 
+        
+        imageStore(img, ivec2(gl_LaunchIDEXT.xy), outputColor);
+
+    }
+
+Issues
+
+      1) What is the point of empty hit object?
+      A) Can use them to participate in reordering when state of hitobject of
+         thread represents neither a hit nor a miss.
+
+
+Revision History
+
+    Rev.  Date          Author     Changes
+    ----  -----------   ------     -------------------------------------------
+     1    2022-09-01    alele      Initial revisions
