@@ -12,8 +12,8 @@ Contact
 
 Contributors
 
-    Eric Werness (ewerness 'at' nvidia.com), NVIDIA
-    Daniel Koch (dgkoch 'at' nvidia.com), NVIDIA
+    Eric Werness, NVIDIA
+    Daniel Koch, NVIDIA
 
 Status
 
@@ -40,6 +40,8 @@ Dependencies
     This extension interacts with GLSL_NV_ray_tracing_motion_blur.
 
     This extension requires GLSL_EXT_buffer_reference_uvec2.
+
+    This extension interacts with GL_EXT_nonuniform_qualifier.
 
 Overview
 
@@ -232,7 +234,7 @@ Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
     This allows a buffer reference to be used in context of reading from
     data section of a shader record as it is encoded in a hit object.
 
-    This layout qualifier can only be used on an buffer interface block
+    This layout qualifier can only be used on a buffer interface block
     which is a buffer reference i.e annotated with 
     layout qualifier 'buffer_reference'
 
@@ -370,7 +372,7 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     location layout qualifier. 
     
 
-Syntax:
+    Syntax:
 
         void hitObjectRecordHitMotionNV(hitObjectNV hitobject,
                     accelerationStructureEXT topLevel,
@@ -449,7 +451,7 @@ Syntax:
     to the hitObjectAttributeNV qualified variables having the same value for the
     location layout qualifier. 
 
-Syntax:
+    Syntax:
 
         void hitObjectRecordHitWithIndexMotionNV(hitObjectNV hitobject,
                     accelerationStructureEXT topLevel,
@@ -495,7 +497,7 @@ Syntax:
     Refer to shader binding table, hit shader indexing of the Vulkan 
     specification for more information.
 
-Syntax:
+    Syntax:
 
         void hitObjectRecordMissMotionNV(hitObjectNV hitObject, 
                    uint sbtRecordIndex, 
@@ -705,11 +707,10 @@ Syntax:
 
     For reorder functions providing a hint, the implementation will reorder 
     based on the unsigned numerical value of the number of bits provided. 
-    The sorting may be coarse, be bucketing rather than sorting, or only use 
+    The sorting may be coarse, be bucketed rather than sorted, or only use
     the high bits of the hint provided. If both the hint and the hit object 
     are provided the implementation should reorder based on the hint after 
-    the shader being executed. The value of bits of a hint should be <= 32
-    Values greater than 32 will lead to undefined behavior.
+    the shader being executed.
 
     These functions are available only in ray-generation shader stage.
 
@@ -796,7 +797,7 @@ Example
         vec4 outputColor = vec4(0);
         hitObjectNV hObj;
         //Initialize to an empty hit object
-        hitObjectRecordEmpty(hObj);
+        hitObjectRecordEmptyNV(hObj);
 
         hitObjectTraceRayNV(hObj,
                    as,
