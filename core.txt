@@ -10713,11 +10713,11 @@ pipe stages.
 ifdef::GLSL[]
 The variable _gl_ClipDistance_ is intended for writing clip distances, and
 provides the forward compatible mechanism for controlling user clipping.
-The element _gl_ClipDistance[i]_ specifies a clip distance for each plane
+The element _gl_ClipDistance[i]_ specifies a clip distance for each half-space
 _i_.
-A distance of 0 means the vertex is on the plane, a positive distance means
-the vertex is inside the clip plane, and a negative distance means the point
-is outside the clip plane.
+A distance of 0 means the vertex is on the boundary of the half-space, a positive distance means
+the vertex is inside the clip volume, and a negative distance means the point
+is outside the clip volume.
 The clip distances will be linearly interpolated across the primitive and
 the portion of the primitive with interpolated distances less than 0 will be
 clipped.
@@ -10725,25 +10725,25 @@ clipped.
 The _gl_ClipDistance_ array is predeclared as unsized and must be explicitly
 sized by the shader either redeclaring it with a size or implicitly sized by
 indexing it only with constant integral expressions.
-This needs to size the array to include all the clip planes that are enabled
-via the API; if the size does not include all enabled planes,
+This needs to size the array to include all the clip half-spaces that are enabled
+via the API; if the size does not include all enabled half-spaces,
 results are undefined.
 The size can be at most _gl_MaxClipDistances_.
 The number of varying components (see _gl_MaxVaryingComponents)_ consumed by
 _gl_ClipDistance_ will match the size of the array, no matter how many
-planes are enabled.
+half-spaces are enabled.
 The shader must also set all values in _gl_ClipDistance_ that have been
 enabled via the API, or results are undefined.
-Values written into _gl_ClipDistance_ for planes that are not enabled have
+Values written into _gl_ClipDistance_ for half-spaces that are not enabled have
 no effect.
 
 The variable _gl_CullDistance_ provides a mechanism for controlling user
 culling.
-The element _gl_CullDistance[i]_ specifies a cull distance for plane _i_.
-A distance of 0 means the vertex is on the plane, a positive distance means
+The element _gl_CullDistance[i]_ specifies a cull distance for half-space _i_.
+A distance of 0 means the vertex is on the boundary of the half-space, a positive distance means
 the vertex is inside the cull volume, and a negative distance means the
 point is outside the cull volume.
-Primitives whose vertices all have a negative cull distance for plane _i_
+Primitives whose vertices all have a negative cull distance for half-spaces _i_
 will be discarded.
 
 The _gl_CullDistance_ array is predeclared as unsized and must be sized by
@@ -11541,13 +11541,13 @@ out gl_PerVertex { // part of the gl_PerVertex block described in 7.1
 ----
 
 The output variable _gl_ClipVertex_ provides a place for vertex and geometry
-shaders to write the coordinate to be used with the user clipping planes.
+shaders to write the coordinate to be used with the user clipping half-spaces.
 Writing to _gl_ClipDistance_ is the preferred method for user clipping.
 It is a compile-time or link-time error for the set of shaders forming a
 program to statically read or write both _gl_ClipVertex_ and either
 _gl_ClipDistance_ or _gl_CullDistance_.
 If neither _gl_ClipVertex_ nor _gl_ClipDistance_ is written, their values
-are undefined and any clipping against user clip planes is also undefined.
+are undefined and any clipping against user clip half-spaces is also undefined.
 
 Similarly to what was previously described for the core profile, the
 _gl_PerVertex_ block can be redeclared in a shader to explicitly include
@@ -11564,10 +11564,8 @@ out gl_PerVertex {
 }; // no other aspects of the fixed interface will be used
 ----
 
-The user must ensure the clip vertex and user clipping planes are defined in
+The user must ensure the clip vertex and user clipping half-spaces are defined in
 the same coordinate space.
-User clip planes work properly only under linear transform.
-It is undefined what happens under non-linear transform.
 
 The output variables _gl_FrontColor_, _glFrontSecondaryColor_,
 _gl_BackColor_, and _glBackSecondaryColor_ assign primary and secondary
