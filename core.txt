@@ -5891,7 +5891,7 @@ layout(origin_upper_left, pixel_center_integer) in vec4 gl_FragCoord;
 If _gl_FragCoord_ is redeclared in any fragment shader in a program, it must
 be redeclared in all the fragment shaders in that program that have a static
 use _gl_FragCoord_.
-All redeclarations of _gl_FragCoord in all fragment shaders in a single
+All redeclarations of _gl_FragCoord_ in all fragment shaders in a single
 program must have the same set of qualifiers.
 Within any shader, the first redeclarations of _glFragCoord_ must appear
 before any use of _gl_FragCoord_.
