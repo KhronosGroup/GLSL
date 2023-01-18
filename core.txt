@@ -5893,7 +5893,7 @@ be redeclared in all the fragment shaders in that program that have a static
 use _gl_FragCoord_.
 All redeclarations of _gl_FragCoord_ in all fragment shaders in a single
 program must have the same set of qualifiers.
-Within any shader, the first redeclarations of _glFragCoord_ must appear
+Within any shader, the first redeclarations of _gl_FragCoord_ must appear
 before any use of _gl_FragCoord_.
 The built-in _gl_FragCoord_ is only predeclared in fragment shaders, so
 redeclaring it in any other shader language results in a compile-time error.
