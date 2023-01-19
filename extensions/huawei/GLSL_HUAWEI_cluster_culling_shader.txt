@@ -1,0 +1,276 @@
+Name	
+	HUAWEI_cluster_culling_shader	
+
+Name Strings
+	
+	GL_HUAWEI_cluster_culling_shader	
+
+Contact	
+
+	YuChang Wang , HUAWEI	
+
+
+Contributors	
+	
+ 	YuChang Wang, HUAWEI	
+
+Status	
+
+	Draft	
+
+
+Version
+
+	Last Modified Date: 2022-11-14
+	Revision: 1	
+
+Dependencies	
+
+	This extension can be applied to OpenGL GLSL versions 4.60.7	
+	(#version 460) and higher.
+	
+	This extension can be applied to OpenGL ES ESSL versions 3.20 
+	(#version 320) and higher.
+	
+	This extension is written against revision 7 of the OpenGL Shading Language version 4.60, 
+	dated July 10, 2019, and can be applied to OpenGL ES ESS version 3.20, dated July 10, 2019.
+	
+	This extension interacts with revision 43 of the GL_KHR_vulkan_glsl extension, dated October 25, 2017.
+	
+
+Overview
+
+	This extension allowing application to use a new programmable shader type -- Cluster Culling Shader -- 
+	to execute geometry culling on GPU. This mechanism does not require pipeline barrier between compute shader 
+	and other rendering pipeline.
+
+	This new shader types have execution environments similar to that of compute shaders, where a collection of 
+	shader invocations form a workgroup and cooperate to perfrom coarse level culling and emit one or more 
+	drawing command to the subsequent rendering pipeline to draw visible clusters.
+
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60.7
+	
+	Including the following line in a shader can be used to control the language features described in this extension:
+			#extension GL_HUAWEI_cluster_culling_shader		 : <behavior>
+	where <behavior> is as specified in section 3.3.	
+	A new preprocessor #define is added to the OpenGL Shading Language:	
+			#define GL_HUAWEI_cluster_culling_shader
+
+
+	Modify the introduction to Chapter 2, Overview of OpenGL Shading (p.6)
+    
+	(modify first paragraph)  ... Currently, these processors are the vertex,
+    	tessellation control, tessellation evaluation, geometry, fragment,
+    	compute, and cluster culling processors.
+
+    	(modify second paragraph)  ... The specific languages will be referred to
+    	by the name of the processor they target: vertex, tessellation control,
+    	tessellation evaluation, geometry, fragment, compute, or cluster culling.
+
+	Insert new sections at the end of Chapter 2 (p.8)
+
+	Section 2.7, Cluster Culling Processor
+
+	Cluster Culling Shader(CCS) is similar to the existing compute shader; its main purpose is to provide an
+ 	execution environment in order to perform coarse-level geometry culling and level-of-detail selection more 
+	efficiently on GPU.
+
+	The traditional 2-pass GPU culling solution using compute shader needs a pipeline barrier between compute 
+	pipeline and graphics pipeline, sometimes, in order to optimize performance, an additional compaction 
+	process may also be required. this extension improve the above mention shortcomings which can allow compute 
+	shader directly emit visible clusters to following graphics pipeline.
+
+	A set of new built-in output variables are used to express visible cluster, in addition, a new built-in 
+	function is used to emit these variables from CCS to subsequent rendering pipeline, then IA can use these 
+	variables to fetches vertices of visible cluster and drive vertex shader to shading these vertices. 
+	As stated above, both IA and vertex shader are perserved, vertex shader still used for vertices position 
+	shading, instead of directly outputting a set of transformed vertices from compute shader, this makes CCS 
+	more suitable for mobile GPUs.
+
+
+	Modify Section 4.3.4, Input Variables (p. 50)
+	(add below sentence after the last paragraph, p53)
+
+	All built-in input variables of Cluster Culling Shader are the same as Compute Shader, no other new ones are added.
+
+	
+	Modify Section 4.3.6, Output Variables(p.54)
+	(modify last paragraph to add cluster culling shaders, p.54)
+	
+	It is a compile-time error to declare a vertex, tessellation evaluation,
+	tessellation control, geometry or cluster culling shader output that contains any of the following:  ...
+
+
+	Modify Section 4.3.8, Shared Variables(p.57)
+	(modify first paragraph of the section, p57)
+	The shared qualifier is used to declare variables that have storage shared between all work items in a compute, 	
+	cluster culling shader local work group. Variables declared as shared may only be used in compute, cluster culling 
+	shaders.  ...
+
+	
+	Modify Section 4.4, Layout Qualifiers, p. 62
+    	(modify the layout qualifier table, pp. 63-66)
+
+	Layout Qualifier   | Qualifier | Individual | Block | Block  | Allowed interfaces
+                           | only      | variabl    |       | Member |
+      	-------------------+-----------+------------+-------+--------+--------------------
+      local_size_x =       |           |            |       |        | compute in
+      local_size_y =       |     X     |            |       |        | cluster culling in
+      local_size_z =       |           |            |       |        | 
+      ---------------------+-----------+------------+-------+--------+--------------------
+
+
+
+	Modify Section in 4.4.1, Cluster Culling Shader Inputs, p.66
+	(add below sentence after the last paragraph, p76)
+	(note:  the content of this section is nearly identical to the content of section 4.4.1, Compute Shader Inputs)
+	There are no layout location qualifiers for cluster culling shader inputs. Layout qualifier identifiers for cluster 
+	culling shader inputs are the work group size qualifiers:
+
+  	layout-qualifier-id :
+    	local_size_x = integer-constant-expression
+   	local_size_y = integer-constant-expression
+    	local_size_z = integer-constant-expression
+
+	These cluster culling shader input layout qualifers behave identically to the
+	equivalent compute shader qualifiers and specify a fixed local group size
+	used for each cluster culling shader work group. If no size is specified in any of
+	the three dimensions, a default size of one will be used.
+
+	Modify Section 7.1, Built-In Language Variables (p.138)
+	(add 7.1.7 Cluster Culling Shader Special Variable , p.148)
+	(modify 7.1.7. Compatibility Profile Built-In Language Variables to 7.1.8. Compatibility Profile Built-In Language Variables, p.148)
+	
+	In the cluster culling language, built-in variables are intrinsically declared as:
+
+	const uvec3 gl_WorkGroupSize;
+	in uvec3 gl_WorkGroupID;
+      	in uvec3 gl_LocalInvocationID;
+      	in uvec3 gl_GlobalInvocationID;
+      	in uint  gl_LocalInvocationIndex;
+
+	// type 1 (non-indexed mode)
+	out gl_PerClusterHUAWEI
+	{
+    	  uint gl_VertexCountHUAWEI;
+    	  uint gl_InstanceCountHUAWEI;
+    	  uint gl_FirstVertexHUAWEI;
+    	  uint gl_FirstInstanceHUAWEI;
+	  uint gl_ClusterIdHUAWEI;
+    	}
+	// type 2 (indexed mode)
+	out gl_PerClusterHUAWEI
+	{
+    	  uint gl_IndexCountHUAWEI;
+    	  uint gl_InstanceCountHUAWEI;
+    	  uint gl_FirstIndexHUAWEI ;
+    	  int  gl_VertexOffsetHUAWEI;
+    	  uint gl_FirstInstanceHUAWEI;
+    	  uint gl_ClusterIdHUAWEI;
+	}
+
+
+	Cluster culling shader input variables
+	gl_WorkGroupSize, gl_WorkGroupID, gl_LocalInvocationID, gl_GlobalInvocationID, gl_LocalInvocationIndex are used
+	in the same fashion as the corresponding input variables in the computer shader.
+
+
+	Cluster culling shader output variables   
+	cluster culling shader have the following built-in output variables.
+
+	gl_IndexCountHUAWEI is the number of vertices to draw in indexed mode.
+	gl_VertexCountHUAWEI is the number of vertices to draw.
+	gl_InstanceCountHUAWEI is the number of instances to draw.
+	gl_FirstIndexHUAWEI is the base index within the index buffer.
+	gl_FirstVertexHUAWEI is the index of the first vertex to draw.
+	gl_VertexOffsetHUAWEI is the value added to the vertex index before indexing into the vertex buffer.
+	gl_FirstInstanceHUAWEI is the instance ID of the first instance to draw.
+	gl_ClusterIdHUAWEI is the index of cluster being rendered by this drawing command.
+
+
+	(modify the discussion of the built-in variables shared with compute shaders, which starts on p. 147)
+	The built-in constant gl_WorkGroupSize is a compute, clust culling shader
+    	constant containing the local work-group size of the shader. The size ...
+
+    	The built-in variable gl_WorkGroupID is a compute, cluster culling shader
+    	input variable containing the three-dimensional index of the global work
+    	group that the current invocation is executing in. ...
+
+   	 The built-in variable gl_LocalInvocationID is a compute, cluster culling
+    	shader input variable containing the three-dimensional index of the local
+    	work group within the global work group that the current invocation is
+    	executing in. ...
+
+    	The built-in variable gl_GlobalInvocationID is a compute, cluster culling
+    	shader input variable containing the global index of the current work
+    	item. This value uniquely identifies this invocation from all other
+    	invocations across all local and global work groups initiated by the
+    	current DispatchCompute or DispatchMeshTasksNV call or by a previously
+    	executed task shader. ...
+
+    	The built-in variable gl_LocalInvocationIndex is a compute, cluster culling
+    	hader input variable that contains the one-dimensional representation of
+    	the gl_LocalInvocationID.
+
+
+	Modify Section 8.16, Shader Invocation Control Functions, p. 201
+    	(modify first paragraph of the section, p. 201)
+    	The shader invocation control function is available only in tessellation
+    	control, compute, and cluster culling shaders.  It is used
+    	to control the relative execution order of multiple shader invocations
+    	used to process a patch (in the case of tessellation control shaders) or a
+    	local work group (in the case of compute, cluster culling shaders), which
+    	are otherwise executed with an undefined relative order.
+	
+    	(modify the last paragraph, p. 201)
+    	For compute, cluster culling shaders, the barrier() function may be placed
+    	within flow control, but that flow control must be uniform flow control.
+
+	Modify Section 8.17, Shader Memory Control Functions, p. 201
+
+    	(modify table of functions, p. 202)
+
+      	void memoryBarrierShared()
+
+        Control the ordering of memory transactions to shared variables issued
+        within a single shader invocation.
+
+        Only available in compute, cluster culling shaders.
+
+      	
+	void groupMemoryBarrier()
+
+        Control the ordering of all memory transactions issued within a single
+        shader invocation, as viewed by other invocations in the same work
+        group.
+
+        Only available in compute, cluster culling shaders.
+
+    	
+	(modify last paragraph, p. 202)
+
+    	... all of the above variable types. The functions memoryBarrierShared()
+    	and groupMemoryBarrier() are available only in compute, cluster culling
+    	shaders; the other functions are available in all shader types.
+
+    	
+	(modify last paragraph, p. 203)
+
+    	... When using the function groupMemoryBarrier(), this ordering guarantee
+    	applies only to other shader invocations in the same compute, cluster culling shader work group; all other memory barrier
+	functions provide the guarantee to all other shader invocations. ...
+
+
+
+
+
+Issues
+
+    TBD
+
+Revision History
+
+     Rev.              Date                                 Changes
+    ------      -----------------        ----------------------------------------
+     1             2022-11-14               Initial draft
