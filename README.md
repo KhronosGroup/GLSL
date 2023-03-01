@@ -80,3 +80,4 @@ which normatively accepts SPIR-V but does not normatively consume a high-level s
 - [GL_EXT_mesh_shader](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_mesh_shader.txt)
 - [GL_EXT_opacity_micromap](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_opacity_micromap.txt)
 - [GL_NV_shader_invocation_reorder](https://github.com/KhronosGroup/GLSL/blob/master/extensions/nv/GLSL_NV_shader_invocation_reorder.txt)
+- [GL_ARM_shader_core_builtins](https://github.com/KhronosGroup/GLSL/blob/master/extensions/arm/GLSL_ARM_shader_core_builtins.txt)
