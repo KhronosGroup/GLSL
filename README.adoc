@@ -96,3 +96,4 @@ that do not live in the Khronos registries for OpenGL or OpenGL ES.
 - link:{repo}/ext/GL_EXT_texture_offset_non_const.txt[GL_EXT_texture_offset_non_const]
 - link:{repo}/nv/GLSL_NV_cooperative_matrix2.txt[GL_NV_cooperative_matrix2]
 - link:{repo}/ext/GLSL_EXT_shader_quad_control.txt[GL_EXT_shader_quad_control]
+- link:{repo}/ext/GLSL_EXT_integer_dot_product.txt[GL_EXT_integer_dot_product]

@@ -1,0 +1,288 @@
+Name
+
+    EXT_integer_dot_product
+
+Name Strings
+
+    GL_EXT_integer_dot_product
+
+Contact
+
+    Jeff Bolz, NVIDIA (jbolz 'at' nvidia.com)
+
+Contributors
+
+    Jeff Bolz, NVIDIA (jbolz 'at' nvidia.com)
+    Kevin Petit, Arm Ltd. (kevin.petit 'at' arm.com)
+    Tobias Hector, AMD
+    Graeme Leese, Broadcom Corporation
+    Georg Lehmann
+
+Status
+
+    Complete.
+
+Version
+
+    Last Modified:      June 7, 2023
+    Revision:           1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.50
+    (#version 450) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.00
+    (#version 300) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification, version 4.60, dated July 23, 2017.
+
+    This extension interacts with
+    GL_EXT_shader_explicit_arithmetic_types_int8,
+    GL_EXT_shader_explicit_arithmetic_types_int16 and
+    GL_EXT_shader_explicit_arithmetic_types_int64.
+
+Overview
+
+    This extension adds mixed-precision integer dot product instructions.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs, the SPIR-V capabilities they require, and the Vulkan
+    feature bits those capabilities require.
+
+    All functions introduced in this extension require support for
+    the shaderIntegerDotProduct Vulkan feature and DotProductKHR SPIR-V
+    capability.
+
+    The dotPacked4x8EXT and dotPacked4x8AccSatEXT functions require support for
+    the DotProductInput4x8BitPackedKHR SPIR-V capability.
+
+    All functions with i8vec4 or u8vec4 input vectors require support for the
+    DotProductInput4x8BitKHR SPIR-V capability.
+
+    All functions with input vectors of other types require support for the
+    DotProductInputAllKHR SPIR-V capability.
+
+    Function described in this extension map to SPIR-V instructions as follows:
+
+      dot(Packed4x8)EXT(unsigned, unsigned)                 -> Opcode: OpUDotKHR
+      dot(Packed4x8)EXT(signed, unsigned)                   -> Opcode: OpSUDotKHR
+      dot(Packed4x8)EXT(unsigned, signed)                   -> Opcode: OpSUDotKHR
+      dot(Packed4x8)EXT(signed, signed)                     -> Opcode: OpSDotKHR
+      dot(Packed4x8)AccSatEXT(unsigned, unsigned, unsigned) -> Opcode: OpUDotAccSatKHR
+      dot(Packed4x8)AccSatEXT(signed, unsigned, signed)     -> Opcode: OpSUDotAccSatKHR
+      dot(Packed4x8)AccSatEXT(unsigned, signed, signed)     -> Opcode: OpSUDotAccSatKHR
+      dot(Packed4x8)AccSatEXT(signed, signed, signed)       -> Opcode: OpSDotAccSatKHR
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following lines in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_integer_dot_product : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+      #define GL_EXT_integer_dot_product            1
+
+    Modify Section 8.5, Geometric Functions
+
+    Add new rows to the table of built-in functions:
+
+      uint dotEXT(uvec2 a, uvec2 b)
+      int dotEXT(ivec2 a, ivec2 b)
+      int dotEXT(ivec2 a, uvec2 b)
+      int dotEXT(uvec2 a, ivec2 b)
+
+      uint dotEXT(uvec3 a, uvec3 b)
+      int dotEXT(ivec3 a, ivec3 b)
+      int dotEXT(ivec3 a, uvec3 b)
+      int dotEXT(uvec3 a, ivec3 b)
+
+      uint dotEXT(uvec4 a, uvec4 b)
+      int dotEXT(ivec4 a, ivec4 b)
+      int dotEXT(ivec4 a, uvec4 b)
+      int dotEXT(uvec4 a, ivec4 b)
+
+      uint dotPacked4x8EXT(uint a, uint b)
+      int dotPacked4x8EXT(int a, uint b)
+      int dotPacked4x8EXT(uint a, int b)
+      int dotPacked4x8EXT(int a, int b)
+
+      If GL_EXT_shader_explicit_arithmetic_types_int8 is enabled:
+
+      uint dotEXT(u8vec2 a, u8vec2 b)
+      int dotEXT(i8vec2 a, u8vec2 b)
+      int dotEXT(u8vec2 a, i8vec2 b)
+      int dotEXT(i8vec2 a, i8vec2 b)
+
+      uint dotEXT(u8vec3 a, u8vec3 b)
+      int dotEXT(i8vec3 a, u8vec3 b)
+      int dotEXT(u8vec3 a, i8vec3 b)
+      int dotEXT(i8vec3 a, i8vec3 b)
+
+      uint dotEXT(u8vec4 a, u8vec4 b)
+      int dotEXT(i8vec4 a, u8vec4 b)
+      int dotEXT(u8vec4 a, i8vec4 b)
+      int dotEXT(i8vec4 a, i8vec4 b)
+
+      If GL_EXT_shader_explicit_arithmetic_types_int16 is enabled:
+
+      uint dotEXT(u16vec2 a, u16vec2 b)
+      int dotEXT(i16vec2 a, u16vec2 b)
+      int dotEXT(u16vec2 a, i16vec2 b)
+      int dotEXT(i16vec2 a, i16vec2 b)
+
+      uint dotEXT(u16vec3 a, u16vec3 b)
+      int dotEXT(i16vec3 a, u16vec3 b)
+      int dotEXT(u16vec3 a, i16vec3 b)
+      int dotEXT(i16vec3 a, i16vec3 b)
+
+      uint dotEXT(u16vec4 a, u16vec4 b)
+      int dotEXT(i16vec4 a, u16vec4 b)
+      int dotEXT(u16vec4 a, i16vec4 b)
+      int dotEXT(i16vec4 a, i16vec4 b)
+
+      If GL_EXT_shader_explicit_arithmetic_types_int64 is enabled:
+
+      uint64_t dotEXT(u64vec2 a, u64vec2 b)
+      int64_t dotEXT(i64vec2 a, u64vec2 b)
+      int64_t dotEXT(u64vec2 a, i64vec2 b)
+      int64_t dotEXT(i64vec2 a, i64vec2 b)
+
+      uint64_t dotEXT(u64vec3 a, u64vec3 b)
+      int64_t dotEXT(i64vec3 a, u64vec3 b)
+      int64_t dotEXT(u64vec3 a, i64vec3 b)
+      int64_t dotEXT(i64vec3 a, i64vec3 b)
+
+      uint64_t dotEXT(u64vec4 a, u64vec4 b)
+      int64_t dotEXT(i64vec4 a, u64vec4 b)
+      int64_t dotEXT(u64vec4 a, i64vec4 b)
+      int64_t dotEXT(i64vec4 a, i64vec4 b)
+
+      The dotEXT() and dotPacked4x8EXT() functions return the dot product of the
+      two input vectors <a> and <b>.
+
+      The resulting value will equal the low-order N bits of the correct result
+      R, where N is the result width and R is the dot-product of the input
+      vectors computed with enough precision to avoid overflow and underflow.
+
+      Where vectors are packed into 32-bit integers, vector components follow
+      byte significance order with the lowest-numbered component stored in the
+      least significant byte.
+
+      uint dotAccSatEXT(uvec2 a, uvec2 b, uint c)
+      int dotAccSatEXT(ivec2 a, uvec2 b, int c)
+      int dotAccSatEXT(uvec2 a, ivec2 b, int c)
+      int dotAccSatEXT(ivec2 a, ivec2 b, int c)
+
+      uint dotAccSatEXT(uvec3 a, uvec3 b, uint c)
+      int dotAccSatEXT(ivec3 a, uvec3 b, int c)
+      int dotAccSatEXT(uvec3 a, ivec3 b, int c)
+      int dotAccSatEXT(ivec3 a, ivec3 b, int c)
+
+      uint dotAccSatEXT(uvec4 a, uvec4 b, uint c)
+      int dotAccSatEXT(ivec4 a, uvec4 b, int c)
+      int dotAccSatEXT(uvec4 a, ivec4 b, int c)
+      int dotAccSatEXT(ivec4 a, ivec4 b, int c)
+
+      uint dotPacked4x8AccSatEXT(uint a, uint b, uint c)
+      int dotPacked4x8AccSatEXT(int a, uint b, int c)
+      int dotPacked4x8AccSatEXT(uint a, int b, int c)
+      int dotPacked4x8AccSatEXT(int a, int b, int c)
+
+      If GL_EXT_shader_explicit_arithmetic_types_int8 is enabled:
+
+      uint dotAccSatEXT(u8vec2 a, u8vec2 b, uint c)
+      int dotAccSatEXT(i8vec2 a, u8vec2 b, int c)
+      int dotAccSatEXT(u8vec2 a, i8vec2 b, int c)
+      int dotAccSatEXT(i8vec2 a, i8vec2 b, int c)
+
+      uint dotAccSatEXT(u8vec3 a, u8vec3 b, uint c)
+      int dotAccSatEXT(i8vec3 a, u8vec3 b, int c)
+      int dotAccSatEXT(u8vec3 a, i8vec3 b, int c)
+      int dotAccSatEXT(i8vec3 a, i8vec3 b, int c)
+
+      uint dotAccSatEXT(u8vec4 a, u8vec4 b, uint c)
+      int dotAccSatEXT(i8vec4 a, u8vec4 b, int c)
+      int dotAccSatEXT(u8vec4 a, i8vec4 b, int c)
+      int dotAccSatEXT(i8vec4 a, i8vec4 b, int c)
+
+      If GL_EXT_shader_explicit_arithmetic_types_int16 is enabled:
+
+      uint dotAccSatEXT(u16vec2 a, u16vec2 b, uint c)
+      int dotAccSatEXT(i16vec2 a, u16vec2 b, int c)
+      int dotAccSatEXT(u16vec2 a, i16vec2 b, int c)
+      int dotAccSatEXT(i16vec2 a, i16vec2 b, int c)
+
+      uint dotAccSatEXT(u16vec3 a, u16vec3 b, uint c)
+      int dotAccSatEXT(i16vec3 a, u16vec3 b, int c)
+      int dotAccSatEXT(u16vec3 a, i16vec3 b, int c)
+      int dotAccSatEXT(i16vec3 a, i16vec3 b, int c)
+
+      uint dotAccSatEXT(u16vec4 a, u16vec4 b, uint c)
+      int dotAccSatEXT(i16vec4 a, u16vec4 b, int c)
+      int dotAccSatEXT(u16vec4 a, i16vec4 b, int c)
+      int dotAccSatEXT(i16vec4 a, i16vec4 b, int c)
+
+      If GL_EXT_shader_explicit_arithmetic_types_int64 is enabled:
+
+      uint64_t dotAccSatEXT(u64vec2 a, u64vec2 b, uint64_t c)
+      int64_t dotAccSatEXT(i64vec2 a, u64vec2 b, int64_t c)
+      int64_t dotAccSatEXT(u64vec2 a, i64vec2 b, int64_t c)
+      int64_t dotAccSatEXT(i64vec2 a, i64vec2 b, int64_t c)
+
+      uint64_t dotAccSatEXT(u64vec3 a, u64vec3 b, uint64_t c)
+      int64_t dotAccSatEXT(i64vec3 a, u64vec3 b, int64_t c)
+      int64_t dotAccSatEXT(u64vec3 a, i64vec3 b, int64_t c)
+      int64_t dotAccSatEXT(i64vec3 a, i64vec3 b, int64_t c)
+
+      uint64_t dotAccSatEXT(u64vec4 a, u64vec4 b, uint64_t c)
+      int64_t dotAccSatEXT(i64vec4 a, u64vec4 b, int64_t c)
+      int64_t dotAccSatEXT(u64vec4 a, i64vec4 b, int64_t c)
+      int64_t dotAccSatEXT(i64vec4 a, i64vec4 b, int64_t c)
+
+      The function dotAccSatEXT() computes the dot product of the two input
+      vectors <a> and <b> and then returns the result of the saturating addtion
+      with the accumulator <c>.
+
+      All components of the input vectors are extended to the bit width of
+      the result's type if the bit width of the result's type is larger than
+      that of the components of the input vectors, using sign-extension for
+      signed inputs and zero-extension for unsigned inputs. The extended input
+      vectors are then multiplied component-wise and all components of the
+      vector resulting from the component-wise multiplication are added
+      together. Finally, the resulting sum is added to the input accumulator.
+      This final addition is saturating.
+
+      If any of the multiplications or additions, with the exception of the
+      final accumulation, overflow or underflow, the result of the instruction
+      is undefined.
+
+      Where vectors are packed into 32-bit integers, vector components follow
+      byte significance order with the lowest-numbered component stored in the
+      least significant byte.
+Issues
+
+    (1) What overloads should this extension support?
+
+    RESOLVED: The VK_KHR_shader_integer_dot_product extension requires that all
+    data types accepted by the Vulkan implementation be usable with dot product
+    instructions. This extension provides overloads for all possible input
+    vector types. The return values are 32-bit integers, except for dot
+    products operating on vectors of 64-bit integers, as this is expected to be
+    the common case and it is easy for compilers to fold any subsequent
+    truncations or zero/sign-extensions into the dot product instruction as an
+    optimization.
+
+Revision History
+
+    Revision 1
+    - Internal revisions.
