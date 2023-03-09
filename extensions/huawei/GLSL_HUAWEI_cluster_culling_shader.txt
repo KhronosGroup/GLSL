@@ -16,7 +16,7 @@ Contributors
 
 Status	
 
-	Draft	
+	Complete	
 
 
 Version
@@ -267,7 +267,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60.7
 
 Issues
 
-    TBD
+    None.
 
 Revision History
 
