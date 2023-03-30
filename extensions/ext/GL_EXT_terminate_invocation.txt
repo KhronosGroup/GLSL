@@ -42,7 +42,7 @@ Depenendencies
 Overview
 
   This extension adds a new type of jump to the language, terminateInvocation. Similarly
-  to discard, terminateInvocation also discards fragment from being processed.
+  to discard, terminateInvocation discards the fragment being processed.
   TerminateInvocation allows a programmer to disambiguate the underlying
   behavior they wish to express for discard. It is recommended that programmers
   use demote (see GL_EXT_demote_to_helper_invocation) or terminateInvocation
