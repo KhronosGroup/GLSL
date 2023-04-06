@@ -40,7 +40,7 @@ Overview
     This extension extends the GLSL support added for ray tracing in 
     GLSL_EXT_ray_tracing extension to expose a new overloaded variant of built-in 
     function call for recursive ray traversal 'traceRayMotionNV' and a new built-in 
-    variable 'gl_CurrentTimeNV' which can be used to calculate shading 
+    variable 'gl_CurrentRayTimeNV' which can be used to calculate shading 
     based on ray geometry intersection at a particular point in time.
 
     Mapping to SPIR-V
