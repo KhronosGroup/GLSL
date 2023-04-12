@@ -22,7 +22,7 @@ Status
 
 Version
 
-    Last Modified Date: June 30, 2022
+    Last Modified Date: April 12, 2023
     Revision: 1
 
 Dependencies
@@ -85,11 +85,15 @@ Overview
     textureBlockMatchSADQCOM -> OpImageBlockMatchSSDQCOM
     textureBlockMatchSSDQCOM -> OpImageBlockMatchSADQCOM
 
-    The <weight> texture of the function textureWeightedQCOM must be
-    decorated with WeightTextureQCOM.
-
-    The <target> and <reference> textures of functions textureBlockMatchSADQCOM and
-    textureBlockMatchSSDQCOM must be decorated with BlockMatchTextureQCOM.
+    The <weight> texture operand of textureWeightedQCOM should be
+    decorated with WeightTextureQCOM.  The decoration can
+    help SPIR-V reflection tools provide this information back to
+    application which in turn is helpful for the application to properly
+    create the weight texture object in the client API.
+    
+    For similar reasons, the <target> and <reference> texture operands of
+    textureBlockMatchSADQCOM and textureBlockMatchSSDQCOM should be decorated
+    with BlockMatchTextureQCOM.
     
     The corresponding 3 SPIR-V capabilities are:
     
@@ -145,6 +149,12 @@ Modifications to the OpenGL GL Shading Language Specification, Version 1.40, dat
     |                                    | Square Differences (SSD).                  |
     +------------------------------------+--------------------------------------------+
 
+    * The textureBlockMatch* functions return a per-component metric that reflects
+    the correlation of the target and reference blocks.  If the blocks match exactly
+    the value 0 is returned.  The detailed description of the SAD and SSD metrics
+    is documented in the "Block Matching" section of the "Image Operations" chapter
+    of the Vulkan specification.
+
     * target and reference specify the two input textures. If
     the same block from one texture is going to be used repeatedly across multiple
     instructions, that texture should be specified as the referenceTexture.
@@ -157,68 +167,8 @@ Modifications to the OpenGL GL Shading Language Specification, Version 1.40, dat
 
 Modifications to the OpenGL ES Shading Language Specification, Version 3.10, dated 29 January 2016
 
-    Including the following line in a shader can be used to control the
-    language features described in this extension:
+* The changes for OpenGL ES are identical to those above for OpenGL GL.
 
-        #extension GL_QCOM_image_processing   : <behavior>
-
-    where <behavior> is as specified in Section 3.3.
-
-    New preprocessor #defines are added to the OpenGL Shading Language:
-
-        #define GL_QCOM_image_processing     1
-
-    Add to the table at the end of Subsection 8.9.1 the following image processing functions. Note
-	that these built-ins rely on separate samplers and textures as defined in GL_KHR_vulkan_glsl.
-
-    +------------------------------------+--------------------------------------------+
-    | Syntax                             | Description                                |
-    +------------------------------------+--------------------------------------------+
-    |   vec4 textureWeightedQCOM(        | weighted sample operation multiplies       |
-    |       sampler2D tex,               | a 2D kernel of filter weights with a corr- |
-    |       vec2      P,                 | esponding region of sampled texels and     |
-    |       sampler2DArray weight)       | sums the results to produce the output     |
-    |                                    | value.                                     |
-    +------------------------------------+--------------------------------------------+
-    |   vec4 textureBoxFilterQCOM(       | Linear operation taking average of pixels  |
-    |       sampler2D tex,               | within the spatial region described by     |
-    |       vec2      P,                 | boxSize.  The box is centered at coordinate|
-    |       vec2      boxSize)           | P and has width and height of boxSize.x    |
-    |                                    | and boxSize.y.                             |
-    +------------------------------------+--------------------------------------------+
-    |   vec4 textureBlockMatchSADQCOM(   | Block matching operation measures the      |
-    |       sampler2D target             | correlation (or similarity) of the target  |
-    |       uvec2     targetCoord,       | block and reference block.  targetCoord    |
-    |       sampler2D reference,         | and refCoord specify the bottom-left corner|
-    |       uvec2     refCoord,          | of the block in target and reference       |
-    |       uvec2     blockSize)         | images. The error metric is the Sum of     |
-    |                                    | Absolute Differences (SAD).                |
-    +------------------------------------+--------------------------------------------+
-    |   vec4 textureBlockMatchSSDQCOM(   | Block matching operation measures the      |
-    |       sampler2D target             | correlation (or similarity) of the target  |
-    |       uvec2     targetCoord,       | block and reference block.  TargetCoord    |
-    |       sampler2D reference,         | and refCoord specify the bottom-left corner|
-    |       uvec2     refCoord,          | of the block in target and reference       |
-    |       uvec2     blockSize)         | images. The error metric is the Sum of     |
-    |                                    | Square Differences (SSD).                  |
-    +------------------------------------+--------------------------------------------+
-
-    * <target> and <reference> specify the two input textures. If
-    the same block from one texture is going to be used repeatedly across multiple
-    instructions, that texture should be specified as the referenceTexture.
-
-    * For textureBlockMatchSADQCOM and textureBlockMatchSSDQCOM, <blockSize> specifies
-	  the size (in texels) of the blocks to be compared.
-
-
-Restrictions:
-
-    The <weight> texture used in the function textureWeightedQCOM cannot be used 
-    with any other texture functions.
-
-    The <target> and <reference> textures used in textureBlockMatchSADQCOM or
-    textureBlockMatchSSDQCOM cannot be used with any other texture functions.
-    
 
 Issues
     None.
@@ -227,5 +177,5 @@ Revision History
 
     Rev.  Date           Author    Changes
     ----  -----------    --------  --------------------------------------------
-    1     30-Jun-2022    jleger    Initial version
+    1     12-Apr-2023    jleger    Initial version
  
