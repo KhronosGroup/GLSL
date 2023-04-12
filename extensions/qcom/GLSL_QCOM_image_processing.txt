@@ -170,12 +170,12 @@ Modifications to the OpenGL ES Shading Language Specification, Version 3.10, dat
 * The changes for OpenGL ES are identical to those above for OpenGL GL.
 
 Restrictions:
-    It is a compile-time error if the <weight> texture used in the function 
-    textureWeightedQCOM is also used with any other texture built-in function.
+    It is a compile-time error if the sampler variable used as the <weight> parameter
+    in function textureWeightedQCOM is used in any other context in the shader.
     
-    It is a compile-time error if the <target> and <reference> textures used in
-    textureBlockMatchSADQCOM or textureBlockMatchSSDQCOM are used in any other texture
-    built-in function.
+    It is a compile-time error if the sampler variable used as the <target> or <reference>
+    parameter in functions textureBlockMatchSADQCOM or textureBlockMatchSSDQCOM is used in
+    any other context in the shader.
 
 Issues
     None.
