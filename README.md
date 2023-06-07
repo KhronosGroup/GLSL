@@ -84,3 +84,5 @@ which normatively accepts SPIR-V but does not normatively consume a high-level s
 - [GL_HUAWEI_cluster_culling_shader](https://github.com/KhronosGroup/GLSL/blob/master/extensions/huawei/GLSL_HUAWEI_cluster_culling_shader.txt)
 - [GL_QCOM_image_processing](https://github.com/KhronosGroup/GLSL/blob/master/extensions/qcom/GLSL_QCOM_image_processing.txt)
 - [GL_EXT_ray_tracing_position_fetch](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_ray_tracing_position_fetch.txt)
+- [GL_EXT_null_initializer](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_null_initializer.txt)
+
