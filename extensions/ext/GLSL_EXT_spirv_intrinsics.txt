@@ -458,6 +458,7 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
         spirv_type-parameter:
 
             constant-expression
+            spirv_id constant-expression
 
         spirv_instruction-qualifier-list:
 
@@ -480,6 +481,10 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
 
         Parameters to this qualifier must be either literal values, or constant
         expressions as defined in section 4.3.3, Constant Expressions.
+        If `spirv_id` is present in front of a parameter, the compiler will
+        always generate constant instruction <id>s for the parameter; if not,
+        it will attempt to resolve it to a literal value, and raise an error
+        if it cannot.
 
         When generating SPIR-V, the compiler will generate type
         instructions for these types in the following manner:
@@ -1033,3 +1038,5 @@ Revision History
                                Updated contributor list.
      8    2023-06-16  thector  Clarified grammar and rules for decorate and
                                execution mode intrinsics.
+     9    2023-06-16  thector  Added `spirv_id` qualifier to type parameter
+                               lists to differentiate literals from <id>s.
