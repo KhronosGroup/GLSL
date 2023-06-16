@@ -269,31 +269,30 @@ Additions to Chapter 3 of the OpenGL Shading Language Specification
         spirv_execution_mode-qualifier:
         
             `spirv_execution_mode` ( integer-constant-expression )
-            `spirv_execution_mode` ( integer-constant-expression, spirv_execution_mode-parameter-list )
+            `spirv_execution_mode` ( integer-constant-expression, spirv_literal-parameter-list )
             `spirv_execution_mode` ( spirv-requirements-list, integer-constant-expression )
-            `spirv_execution_mode` ( spirv-requirements-list, integer-constant-expression, spirv_execution_mode-parameter-list )
+            `spirv_execution_mode` ( spirv-requirements-list, integer-constant-expression, spirv_literal-parameter-list )
             
             `spirv_execution_mode_id` ( integer-constant-expression )
-            `spirv_execution_mode_id` ( integer-constant-expression, spirv_execution_mode_id-parameter-list )
+            `spirv_execution_mode_id` ( integer-constant-expression, spirv_expression-parameter-list )
             `spirv_execution_mode_id` ( spirv-requirements-list, integer-constant-expression )
-            `spirv_execution_mode_id` ( spirv-requirements-list, integer-constant-expression, spirv_execution_mode_id-parameter-list )
+            `spirv_execution_mode_id` ( spirv-requirements-list, integer-constant-expression, spirv_expression-parameter-list )
 
-        spirv_execution_mode-parameter-list:
+        spirv_literal-parameter-list:
 
-            spirv_execution_mode-parameter
-            spirv_execution_mode-parameter , spirv_execution_mode-parameter-list
+            spirv_literal-parameter
+            spirv_literal-parameter , spirv_literal-parameter-list
 
-        spirv_execution_mode-parameter:
+        spirv_literal-parameter:
 
             floating-constant
             integer-constant
             bool-constant
-            literal-string
 
-        spirv_execution_mode_id-parameter-list:
+        spirv_expression-parameter-list:
 
             constant-expression
-            constant-expression , spirv_execution_mode_id-parameter-list
+            constant-expression , spirv_expression-parameter-list
 
         The `spirv_execution_mode` qualifier declares a SPIR-V execution mode
         used by this shader.
@@ -301,13 +300,18 @@ Additions to Chapter 3 of the OpenGL Shading Language Specification
         SPIR-V code taking the first integer parameter as its `Mode` operand,
         and subsequent operands used as its `Extra Operands`, in the same
         order they are declared.
+        Parameters included in the parameter list of this qualifier must be
+        literal values, otherwise a compiler error is generated.
 
-        The `spirv_execution_mode_id` qualifier is similar to
-        `spirv_execution_mode`, but allows the use of constant expressions
-        rather than only literals, and generates an *OpExecutionModeId*
-        instruction instead.
-        Parameters to this qualifier must be constant expressions as defined
-        in section 4.3.3, Constant Expressions. 
+        The `spirv_execution_mode_id` qualifier declares a SPIR-V execution
+        mode used by this shader with non-literal parameters.
+        An *OpExecutionModeId* instruction will be inserted into the generated
+        SPIR-V code taking the first integer parameter as its `Mode` operand,
+        and subsequent operands used as its `Extra Operands`, in the same
+        order they are declared.
+        Parameters included in the parameter list of this qualifier must be
+        constant expressions as defined in section 4.3.3, Constant
+        Expressions, otherwise a compiler error is generated.
 
         Any extensions or capabilities needed by the execution mode
         must be declared using SPIR-V Requirements Declarations
@@ -380,33 +384,17 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
 
         spirv_decorate-qualifier:
 
-            `spirv_decorate` ( integer-constant, spirv_decorate-parameter-list )
-            `spirv_decorate` ( spirv-requirements-list , integer-constant, spirv_decorate-parameter-list )
-            `spirv_decorate_id` ( integer-constant, spirv_decorate_id-parameter-list  )
-            `spirv_decorate_id` ( spirv-requirements-list , integer-constant, spirv_decorate_id-parameter-list  )
-            `spirv_decorate_string` ( integer-constant, spirv_decorate_string-parameter-list )
-            `spirv_decorate_string` ( spirv-requirements-list , integer-constant, spirv_decorate_string-parameter-list )
+            `spirv_decorate` ( integer-constant, spirv_literal-parameter-list )
+            `spirv_decorate` ( spirv-requirements-list , integer-constant, spirv_literal-parameter-list )
+            `spirv_decorate_id` ( integer-constant, spirv_expression-parameter-list  )
+            `spirv_decorate_id` ( spirv-requirements-list , integer-constant, spirv_expression-parameter-list  )
+            `spirv_decorate_string` ( integer-constant, spirv_string-parameter-list )
+            `spirv_decorate_string` ( spirv-requirements-list , integer-constant, spirv_string-parameter-list )
 
-        spirv_decorate-parameter-list:
-
-            spirv_decorate-parameter
-            spirv_decorate-parameter , spirv_decorate-parameter-list
-
-        spirv_decorate-parameter:
-
-            floating-constant
-            integer-constant
-            bool-constant
-
-        spirv_decorate_id-parameter-list:
-
-            constant-expression
-            constant-expression , spirv_decorate_id-parameter-list
-
-        spirv_decorate_string-parameter-list:
+        spirv_string-parameter-list:
 
             literal-string
-            literal-string , spirv_decorate_string-parameter-list
+            literal-string , spirv_string-parameter-list
 
         The `spirv_decorate` qualifier inserts an *OpDecorate* or
         *OpMemberDecorate* instruction into the generated SPIR-V code,
@@ -414,18 +402,15 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
         and further parameters as `Extra Operands`.
         If the `spirv_decorate` qualifier is applied to a struct member,
         *OpMemberDecorate* is inserted, otherwise *OpDecorate* is.
-        Integer and floating point values used must be expressible in a
-        32-bit range.
-        An error will be generated if the front-end compiler detects a
-        value outside of the 32-bit range.
-
+        Parameters included in the parameter list of this qualifier must be
+        literal values, otherwise a compiler error is generated.
+        
         The `spirv_decorate_id` qualifier inserts an *OpDecorateId*
         instruction into the generated SPIR-V code, taking the first
         integer parameter as its `Decoration` operand, and further
         parameters as `Extra Operands`.
-        Parameters to this qualifier must be a constant expression that
-        doesn't involve a specialization constant, as defined in section
-        4.3.3, Constant Expressions.
+        There are no restrictions on parameters that can be included in the
+        parameter list of this qualifier.
 
         The `spirv_decorate_string` qualifier inserts an *OpDecorateString*
         or *OpMemberDecorateString* instruction into the generated SPIR-V
@@ -435,6 +420,8 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
         If the `spirv_decorate_string` qualifier is applied to a struct
         member, *OpMemberDecorateString* is inserted, otherwise
         *OpDecorateString* is.
+        Parameters included in the parameter list of this qualifier must be
+        literal strings, otherwise a compiler error is generated.
 
         Any extensions or capabilities needed by the decoration must be
         declared using SPIR-V Requirements Declarations (see section 3.9).
@@ -644,20 +631,20 @@ Additions to Chapter 9 of the OpenGL Shading Language Specification
         spirv_execution_mode-qualifier:
 
             SPIRV_EXECUTION_MODE LEFT_PAREN INTCONSTANT RIGHT_PAREN
-            SPIRV_EXECUTION_MODE LEFT_PAREN INTCONSTANT COMMA spirv_execution_mode-parameter-list RIGHT_PAREN
+            SPIRV_EXECUTION_MODE LEFT_PAREN INTCONSTANT COMMA spirv_literal-parameter-list RIGHT_PAREN
             SPIRV_EXECUTION_MODE LEFT_PAREN spirv-requirements-list COMMA INTCONSTANT  RIGHT_PAREN
-            SPIRV_EXECUTION_MODE LEFT_PAREN spirv-requirements-list COMMA INTCONSTANT COMMA spirv_execution_mode-parameter-list RIGHT_PAREN
+            SPIRV_EXECUTION_MODE LEFT_PAREN spirv-requirements-list COMMA INTCONSTANT COMMA spirv_literal-parameter-list RIGHT_PAREN
             SPIRV_EXECUTION_MODE_ID LEFT_PAREN INTCONSTANT RIGHT_PAREN
-            SPIRV_EXECUTION_MODE_ID LEFT_PAREN INTCONSTANT COMMA spirv_execution_mode_id-parameter-list RIGHT_PAREN
+            SPIRV_EXECUTION_MODE_ID LEFT_PAREN INTCONSTANT COMMA spirv_expression-parameter-list RIGHT_PAREN
             SPIRV_EXECUTION_MODE_ID LEFT_PAREN INTCONSTANT COMMA spirv-requirements-list RIGHT_PAREN
-            SPIRV_EXECUTION_MODE_ID LEFT_PAREN INTCONSTANT COMMA spirv-requirements-list COMMA spirv_execution_mode_id-parameter-list RIGHT_PAREN
+            SPIRV_EXECUTION_MODE_ID LEFT_PAREN INTCONSTANT COMMA spirv-requirements-list COMMA spirv_expression-parameter-list RIGHT_PAREN
 
-        spirv_execution_mode-parameter-list:
+        spirv_literal-parameter-list:
 
-            spirv_execution_mode-parameter
-            spirv_execution_mode-parameter COMMA spirv_execution_mode-parameter-list
+            spirv_literal-parameter
+            spirv_literal-parameter COMMA spirv_literal-parameter-list
 
-        spirv_execution_mode-parameter:
+        spirv_literal-parameter:
 
             FLOATCONSTANT
             INTCONSTANT
@@ -665,10 +652,10 @@ Additions to Chapter 9 of the OpenGL Shading Language Specification
             BOOLCONSTANT
             STRING_LITERAL
 
-        spirv_execution_mode_id-parameter-list:
+        spirv_expression-parameter-list:
 
             constant-expression
-            constant-expression COMMA spirv_execution_mode_id-parameter-list
+            constant-expression COMMA spirv_expression-parameter-list
 
         spirv_decorate-qualifier:
 
@@ -1006,11 +993,19 @@ Issues
     The main issue spotted so far is any keywords that are applied to a variable
     (e.g. `shadercallcoherent`) in GLSL but are applied to particular
     operations in SPIR-V (e.g. `ShaderCallKHR` scope).
-
     This extension isn't designed as a replacement for language features
     however, so this type of restriction seems fine. The functionality in
-    the example can be achieved directly by adding a new "scope" constant.
+    this example can be achieved directly by adding a new "scope" constant.
 
+    Additionally, type declarations that require other type declarations are
+    not possible to express directly, as GLSL has no type declarations (e.g.
+    `typedef`) and thus can't express an identifier to types.
+    `spirv_type` is a type declaration of sorts, but it has no associated
+    identifier, so can't be referenced by other instances of `spirv_type`.
+    This means any new types with chained types (e.g. pointers) cannot be
+    expressed.
+    If this functionality is desired, it can be added by a future extension.
+    
 Revision History
 
     Rev.    Date      Author   Changes
@@ -1036,3 +1031,5 @@ Revision History
                                Removed broken spirv_literal example.
      7    2021-03-02  thector  Added spirv_literal example.
                                Updated contributor list.
+     8    2023-06-16  thector  Clarified grammar and rules for decorate and
+                               execution mode intrinsics.
