@@ -2,21 +2,21 @@ Name
 GL_KHR_cooperative_matrix
 
 Contact
-Neil Hickey, Arm (neil.hickey 'at' arm.com)
+Jeff Bolz, NVIDIA (jbolz 'at' nvidia.com)
 
 Contributors
-Jeff Bolz, NVIDIA (jbolz 'at' nvidia.com)
 Kevin Petit, Arm (kevin.petit 'at' arm.com)
+Neil Hickey, Arm (neil.hickey 'at' arm.com)
 
 Notice
-Copyright (c) 2022 The Khronos Group Inc. Copyright terms at http://www.khronos.org/registry/speccopyright.html
+Copyright (c) 2022-2023 The Khronos Group Inc. Copyright terms at http://www.khronos.org/registry/speccopyright.html
 
 Status
-Not yet released
+Complete.
 
 Version
-Last Modified: Feb 10, 2023
-Revision: 3
+Last Modified: July 21, 2023
+Revision: 1
 
 
 
@@ -66,7 +66,8 @@ coopmat constructor from scalar value -> OpConstantComposite
 coopmat constructor from coopmat -> Op*Convert, OpConvert*To*
 coopmat.length() -> OpCooperativeMatrixLength
 coopmat[i] -> OpCompositeExtract/OpCompositeInsert/OpAccessChain
-+, -, *, / -> OpFAdd, OpFNegate/OpFSub, OpMatrixTimesScalar, OpFDiv
++, -, *, / -> OpFAdd, OpFNegate/OpFSub, OpFMul/OpMatrixTimesScalar, OpFDiv
+              (similarly for integer types)
 coopmatLoad -> OpCooperativeMatrixLoadKHR
 coopmatStore -> OpCooperativeMatrixStoreKHR
 coopmatMulAdd -> OpCooperativeMatrixMulAddKHR
@@ -75,7 +76,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
 
 Including the following line in a shader can be used to control the
 language features described in this extension:
-#extension VK_KHR_cooperative_matrix : <behavior>
+#extension GL_KHR_cooperative_matrix : <behavior>
 where <behavior> is as specified in section 3.3.
 New preprocessor #defines are added to the OpenGL Shading Language:
 
@@ -177,7 +178,7 @@ Add a new Section 8.X, Cooperative Matrix Functions
 The following functions are used to load and store cooperative matrix
 values from and to memory. In memory, the matrices are stored as arrays
 of their element type and size. In the following functions, the generic type
-"coopmat" can accept an coopmat type with any type parameters. The
+"coopmat" can accept a coopmat type with any type parameters. The
 "buf" arrays must be in either buffer storage or shared storage, and the
 array that is passed in can be sized or unsized.
 
@@ -332,10 +333,22 @@ type_parameter_specifier_element
 type_parameter_specifier_list COMMA type_parameter_specifier_element
 
 
-Interactions with GL_EXT_shader_explicit_arithmetic_types_float16
+Interactions with GL_EXT_shader_explicit_arithmetic_types
 
 If GL_EXT_shader_explicit_arithmetic_types_float16 is not supported,
 remove the coopMatLoad/coopMatStore overloads that use float16_t.
+
+If GL_EXT_shader_explicit_arithmetic_types_float64 is not supported,
+remove the coopMatLoad/coopMatStore overloads that use float64_t.
+
+If GL_EXT_shader_explicit_arithmetic_types_int8 is not supported,
+remove the coopMatLoad/coopMatStore overloads that use int8_t or uint8_t.
+
+If GL_EXT_shader_explicit_arithmetic_types_int16 is not supported,
+remove the coopMatLoad/coopMatStore overloads that use int16_t or uint16_t.
+
+If GL_EXT_shader_explicit_arithmetic_types_int64 is not supported,
+remove the coopMatLoad/coopMatStore overloads that use int64_t or uint64_t.
 
 Issues
 
@@ -388,9 +401,3 @@ Revision History
 Revision 1
 
 - Internal revisions.
-
-Revision 2
-Change coopmatrix type to be specified as a template argument, cuts down on the number of new typenames added
-
-Revision 3
-Update to match the current SPIR-V extension.
