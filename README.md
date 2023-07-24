@@ -86,3 +86,4 @@ which normatively accepts SPIR-V but does not normatively consume a high-level s
 - [GL_EXT_ray_tracing_position_fetch](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_ray_tracing_position_fetch.txt)
 - [GL_EXT_null_initializer](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_null_initializer.txt)
 - [GL_EXT_terminate_invocation](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_terminate_invocation.txt)
+- [GL_EXT_integer_dot_product](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GLSL_EXT_integer_dot_product.txt)
