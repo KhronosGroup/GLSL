@@ -2084,7 +2084,7 @@ endif::GLSL[]
   *uimage2D*
     | a handle for accessing an unsigned integer 2D texture
 | *usampler2DArray* +
-  *utexture1DArray* +
+  *utexture2DArray* +
   *uimage2DArray*
     | a handle for accessing an unsigned integer 2D array texture
 ifdef::GLSL[]
