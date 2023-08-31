@@ -6077,6 +6077,11 @@ layout(location = 3) out vec4 color;
 will establish that the fragment shader output _color_ is assigned to
 ifdef::GLSL[]
 fragment color 3 as the first (index zero) input to the blend equation.
+endif::GLSL[]
+ifdef::ESSL[]
+fragment color 3.
+endif::ESSL[]
+ifdef::GLSL[]
 And,
 
 [source,c++]
@@ -6087,9 +6092,6 @@ layout(location = 3, index = 1) out vec4 factor;
 will establish that the fragment shader output _factor_ is assigned to
 fragment color 3 as the second (index one) input to the blend equation.
 endif::GLSL[]
-ifdef::ESSL[]
-fragment color 3.
-endif::ESSL[]
 
 For fragment shader outputs, the location
 ifdef::GLSL[and index specify]
