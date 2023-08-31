@@ -42,7 +42,7 @@ endif::ESSL[]
 
 :apispec: {apiname} Specification
 :slname: {apiname} Shading Language
-:revision: 8
+:revision: 9
 :revnumber: {minor}.{revision}
 
 = The {apiname}^(R)^ Shading Language, Version {revnumber}
@@ -141,6 +141,8 @@ endif::ESSL[]
 [[changes]]
 == Changes
 
+
+=== Changes from {slabbrev} {apiversion} revision 8
 
 ifdef::GLSL[]
 === Changes from {slabbrev} {apiversion} revision 7
