@@ -10714,8 +10714,8 @@ The clip distances will be linearly interpolated across the primitive and
 the portion of the primitive with interpolated distances less than 0 will be
 clipped.
 
-The _gl_ClipDistance_ array is predeclared as unsized and must be explicitly
-sized by the shader either redeclaring it with a size or implicitly sized by
+The _gl_ClipDistance_ array is predeclared as unsized and must be either explicitly
+sized by the shader redeclaring it with a size or implicitly sized by
 indexing it only with constant integral expressions.
 This needs to size the array to include all the clip half-spaces that are enabled
 via the API; if the size does not include all enabled half-spaces,
@@ -10738,9 +10738,9 @@ point is outside the cull volume.
 Primitives whose vertices all have a negative cull distance for half-spaces _i_
 will be discarded.
 
-The _gl_CullDistance_ array is predeclared as unsized and must be sized by
-the shader either redeclaring it with a size or indexing it only with
-constant integral expressions.
+The _gl_CullDistance_ array is predeclared as unsized and must be either explicitly
+sized by the shader redeclaring it with a size or implicitly sized by
+indexing it only with constant integral expressions.
 The size determines the number and set of enabled cull distances and can be
 at most _gl_MaxCullDistances_.
 The number of varying components (see _gl_MaxVaryingComponents_) consumed by
