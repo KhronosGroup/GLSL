@@ -6692,14 +6692,14 @@ endif::GLSL[]
 ifdef::ESSL[]
 [source,c++]
 ----
-// redeclaration that changes nothing is allowed +
+// redeclaration that changes nothing is allowed
 out float gl_FragDepth;
 ----
 endif::ESSL[]
 ifdef::GLSL[]
 [source,c++]
 ----
-// redeclaration that changes nothing is allowed +
+// redeclaration that changes nothing is allowed
 out float gl_FragDepth;
 
 // assume it may be modified in any way
