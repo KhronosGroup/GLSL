@@ -87,3 +87,4 @@ which normatively accepts SPIR-V but does not normatively consume a high-level s
 - [GL_EXT_null_initializer](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_null_initializer.txt)
 - [GL_EXT_terminate_invocation](https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_terminate_invocation.txt)
 - [GL_KHR_cooperative_matrix](https://github.com/KhronosGroup/GLSL/blob/master/extensions/khr/GLSL_KHR_cooperative_matrix.txt)
+- [GL_NV_displacement_micromap](https://github.com/KhronosGroup/GLSL/blob/master/extensions/nv/GLSL_NV_displacement_micromap.txt)

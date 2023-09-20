@@ -1,0 +1,229 @@
+Name
+
+    NV_displacement_micromap
+
+Name Strings
+
+    GL_NV_displacement_micromap
+
+Contact
+
+    Eric Werness (ewerness 'at' nvidia.com), NVIDIA
+    Ashwin Lele (alele 'at' nvidia.com), NVIDIA
+    Pyarelal Knowles (pknowles 'at' nvidia.com), NVIDIA
+
+Contributors
+
+    Christoph Kubisch (ckubisch 'at' nvidia.com), NVIDIA
+    Oliver Klehm (oklehm 'at' nvidia.com), NVIDIA
+
+Status
+
+    Provisional
+
+Version
+
+    Last Modified Date: 2023-08-1
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.60
+    (#version 460) and higher.
+
+    This extension is written against revision 5 of the OpenGL Shading Language
+    version 4.60, dated September 4, 2017.
+
+    This extension interacts with revision 43 of the GL_KHR_vulkan_glsl
+    extension, dated October 25, 2017.
+
+    This extension interacts with GLSL_EXT_ray_tracing.
+
+    This extension interacts with GLSL_NV_mesh_shader.
+
+    This extension interacts with GLSL_EXT_mesh_shader.
+
+Overview
+
+    This extension document modifies GLSL to add support for displacement
+    micromaps
+
+    This extension document adds support for the following extensions to be used
+    within GLSL:
+
+    - GL_NV_displacement_micromap - enables displacement micro map.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+      gl_HitMicroTriangleVertexPositionsNV ->
+        HitMicroTriangleVertexPositionsNV decorated OpVariable
+      gl_HitMicroTriangleVertexBarycentricsNV ->
+        HitMicroTriangleVertexBarycentricsNV decorated OpVariable
+
+      gl_HitKindFrontFacingMicroTriangleNV ->
+        HitKindFrontFacingMicroTriangleNV decorated OpVariable
+      gl_HitKindBackFacingMicroTriangleNV ->
+        HitKindBackFacingMicroTriangleNV decorated OpVariable
+
+      fetchMicroTriangleVertexPositionNV
+           -> OpFetchMicroTriangleVertexPositionNV instruction
+      fetchMicroTriangleVertexBarycentricNV
+           -> OpFetchMicroTriangleVertexBarycentricNV instruction
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_NV_displacement_micromap       : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+    New preprocessor #defines are added:
+
+      #define GL_NV_displacement_micromap          1
+
+Changes to Chapter 3 of The OpenGL Shading Language Specification, Version 4.60
+
+    Modify Section 3.6, (Keywords)
+
+    (add the following to the list of reserved keywords)
+
+    accelerationStructureEXT
+
+Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
+
+    Add following to Section 4.1 (Basic Types)
+
+    This extension allows usage of accelerationStructureEXT opaque type as
+    defined in the GL_EXT_ray_tracing specification.
+
+Additions to Chapter 7 of the OpenGL Shading Language Specification
+(Built-in Variables)
+
+    Modify Section 7.1, Built-in Languages Variables
+
+    In the any-hit and closest-hit shading languages, built-in variables are declared
+    as follows
+
+        // Vertex positions of the currently hit micro triangle
+        in vec3  gl_HitMicroTriangleVertexPositionsNV[3];
+
+        // Barycentric coordinates of the hit microtriangle's vertices
+        // relative to the base triangle's vertices.
+        in vec2  gl_HitMicroTriangleVertexBarycentricsNV[3];
+
+    Modify Section 7.3, Built-in Constants
+
+        in uint gl_HitKindFrontFacingMicroTriangleNV;
+        in uint gl_HitKindBackFacingMicroTriangleNV;
+
+    gl_HitKindEXT can be compared to these to determine if the geometry hit is a
+    microtriangle and if it is front or back facing. Note that the value is
+    implementation defined and may be a constant provided at link time.
+
+Additions to Chapter 8 of the OpenGL Shading Language Specification
+(Built-in Functions)
+
+    Modify Section 8.X, Ray Tracing Functions
+
+    Syntax:
+
+        vec3 fetchMicroTriangleVertexPositionNV(accelerationStructureEXT as,
+                                                int instanceId,
+                                                int geometryIndex,
+                                                int primitiveIndex,
+                                                ivec2 barycentrics);
+
+    Returns the vertex position of a micro triangle in object space provided integer (u,v) barycentric
+    coordinates in 'barycentrics' for a micro vertex for a given primitive, geometry and instance
+    index in the provided acceleration structure 'as'.
+
+    This function is available only in ray-generation, mesh and compute shader
+    stages.
+
+    Syntax:
+        vec2 fetchMicroTriangleVertexBarycentricNV(accelerationStructureEXT as,
+                                                  int instanceId,
+                                                  int geometryIndex,
+                                                  int primitiveIndex,
+                                                  ivec2 barycentrics);
+
+    Returns the barycentrics of a micro triangle vertex relative to the base
+    triangle vertices when provided integer (u,v) barycentric coordinates in
+    'barycentrics' for a given primitive, geometry and instance
+    index in the provided acceleration structure 'as'.
+
+    This function is available only in ray-generation, mesh and compute shader
+    stages.
+
+Interactions with GLSL_EXT_ray_tracing
+
+    Acceleration structure are added by both this extension and GLSL_EXT_ray_tracing
+    and they are intended to have identical definitions, and can be enabled by either
+    extension, for use with the instructions added by that extension.
+
+    gl_HitKindEXT may return new values, matching gl_HitKindFrontFacingMicroTriangleNV
+    and gl_HitKindBackFacingMicroTriangleNV.
+
+Interactions with GLSL_NV_mesh_shader
+
+    If GLSL_NV_mesh_shader is supported, fetchMicroTriangleVertexPositionNV and
+    fetchMicroTriangleVertexBarycentricNV are available in mesh shaders.
+
+Interactions with GLSL_EXT_mesh_shader
+
+    If GLSL_EXT_mesh_shader is supported, fetchMicroTriangleVertexPositionNV and
+    fetchMicroTriangleVertexBarycentricNV are available in mesh shaders.
+
+Examples
+
+    To interpolate microvertex attributes, the barycentric coordinates need to
+    be relative to the microtriangle's vertices. This can be computed with the
+    following function, where 'barycentrics' are the coordinates of the
+    microvertices and `p` is the coordinate to be transformed, all relative to
+    the base triangle.
+
+    vec2 baseToMicro(vec2 barycentrics[3], vec2 p)
+    {
+        vec2  ap   = p - barycentrics[0];
+        vec2  ab   = barycentrics[1] - barycentrics[0];
+        vec2  ac   = barycentrics[2] - barycentrics[0];
+        float rdet = 1.f / ( ab.x * ac.y - ab.y * ac.x );
+        return vec2(ap.x * ac.y - ap.y * ac.x,
+                    ap.y * ab.x - ap.x * ab.y) * rdet;
+    }
+    ...
+    hitAttributeEXT vec2 baseBaryCoord;
+    ...
+    vec2 microBaryCoord = baseToMicro(gl_HitMicroTriangleVertexBarycentricsNV, baseBaryCoord)
+
+    // Example interpolation, effectively matching
+    // gl_WorldToObjectEXT * vec4(gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT, 1.0)
+    vec3 hitPosition = mat3(gl_HitMicroTriangleVertexPositionsNV[0],
+                            gl_HitMicroTriangleVertexPositionsNV[1],
+                            gl_HitMicroTriangleVertexPositionsNV[2]) * microBaryCoord;
+
+Issues
+
+    1. Is a new hit kind needed?
+
+    RESOLVED: New hit kinds are added for traceRayEXT() hits. Extending hit
+    kinds fits the existing API, e.g. reportIntersectionEXT(). Note that their
+    value is provided by the implementation at link time to allow changes. It is
+    required to compare gl_HitKindEXT directly and avoid extracting bits.
+
+    2. How will applications be able to interpolate microvertex attributes when
+    the hit location from hitAttributeEXT is relative to the base triangle?
+
+    RESOLVED: The microvertex relative barycentric coordinate can be computed by the user. See Examples.
+
+Revision History
+
+    Rev.  Date         Author     Changes
+    ----  -----------  -------    -------------------------------------------
+     1    2023-08-1    pknowles   Internal revisions.
