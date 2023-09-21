@@ -318,43 +318,43 @@ Overview
         /*Operation*/ExclusiveScan,
         /*Value*/value)
 
-      subgroupClusteredAdd(value) -> OpGroupNonUniformIAdd | OpGroupNonUniformFAdd(
+      subgroupClusteredAdd(value, clusterSize) -> OpGroupNonUniformIAdd | OpGroupNonUniformFAdd(
         /*Execution*/Subgroup,
         /*Operation*/ClusteredReduce,
         /*Value*/value,
         /*ClusterSize*/clusterSize)
 
-      subgroupClusteredMul(value) -> OpGroupNonUniformIMul | OpGroupNonUniformFMul(
+      subgroupClusteredMul(value, clusterSize) -> OpGroupNonUniformIMul | OpGroupNonUniformFMul(
         /*Execution*/Subgroup,
         /*Operation*/ClusteredReduce,
         /*Value*/value,
         /*ClusterSize*/clusterSize)
 
-      subgroupClusteredMin(value) ->  OpGroupNonUniformSMin | OpGroupNonUniformUMin | OpGroupNonUniformFMin(
+      subgroupClusteredMin(value, clusterSize) ->  OpGroupNonUniformSMin | OpGroupNonUniformUMin | OpGroupNonUniformFMin(
         /*Execution*/Subgroup,
         /*Operation*/ClusteredReduce,
         /*Value*/value,
         /*ClusterSize*/clusterSize)
 
-      subgroupClusteredMax(value) ->  OpGroupNonUniformSMax | OpGroupNonUniformUMax | OpGroupNonUniformFMax(
+      subgroupClusteredMax(value, clusterSize) ->  OpGroupNonUniformSMax | OpGroupNonUniformUMax | OpGroupNonUniformFMax(
         /*Execution*/Subgroup,
         /*Operation*/ClusteredReduce,
         /*Value*/value,
         /*ClusterSize*/clusterSize)
 
-      subgroupClusteredAnd(value) -> OpGroupNonUniformBitwiseAnd | OpGroupNonUniformLogicalAnd(
+      subgroupClusteredAnd(value, clusterSize) -> OpGroupNonUniformBitwiseAnd | OpGroupNonUniformLogicalAnd(
         /*Execution*/Subgroup,
         /*Operation*/ClusteredReduce,
         /*Value*/value,
         /*ClusterSize*/clusterSize)
 
-      subgroupClusteredOr(value) -> OpGroupNonUniformBitwiseOr | OpGroupNonUniformLogicalOr(
+      subgroupClusteredOr(value, clusterSize) -> OpGroupNonUniformBitwiseOr | OpGroupNonUniformLogicalOr(
         /*Execution*/Subgroup,
         /*Operation*/ClusteredReduce,
         /*Value*/value,
         /*ClusterSize*/clusterSize)
 
-      subgroupClusteredXor(value) -> OpGroupNonUniformBitwiseXor | OpGroupNonUniformLogicalXor(
+      subgroupClusteredXor(value, clusterSize) -> OpGroupNonUniformBitwiseXor | OpGroupNonUniformLogicalXor(
         /*Execution*/Subgroup,
         /*Operation*/ClusteredReduce,
         /*Value*/value,
