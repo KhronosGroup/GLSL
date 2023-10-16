@@ -12399,7 +12399,7 @@ The description is per component.
       Returns an angle whose tangent is [eq]#y / x#.
       The signs of _x_ and _y_ are used to determine what quadrant the angle
       is in.
-      The range of values returned by this function is [eq]#[-{pi}, {pi}#.
+      The range of values returned by this function is [eq]#[-{pi}, {pi}]#.
       Results are undefined if _x_ and _y_ are both 0.
 | genFType *atan*(genFType _y_over_x_)
     | Arc tangent.
