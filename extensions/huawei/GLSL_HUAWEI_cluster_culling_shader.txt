@@ -21,8 +21,8 @@ Status
 
 Version
 
-	Last Modified Date: 2022-11-14
-	Revision: 1	
+	Last Modified Date: 2023-11-28
+	Revision: 2
 
 Dependencies	
 
@@ -86,7 +86,9 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60.7
 	variables to fetches vertices of visible cluster and drive vertex shader to shading these vertices. 
 	As stated above, both IA and vertex shader are perserved, vertex shader still used for vertices position 
 	shading, instead of directly outputting a set of transformed vertices from compute shader, this makes CCS 
-	more suitable for mobile GPUs.
+	more suitable for mobile GPUs. furthermore, CCS can also determine what shading rate a cluster uses for
+	rendering, e.g. use the distance between the cluster and the view point to determine the shading rate of
+	the cluster. This capability enables the cluster culling shader to reduce the rendering loading more effectively.
 
 
 	Modify Section 4.3.4, Input Variables (p. 50)
@@ -158,6 +160,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60.7
     	  uint gl_FirstVertexHUAWEI;
     	  uint gl_FirstInstanceHUAWEI;
 	  uint gl_ClusterIDHUAWEI;
+	  uint gl_ClusterShadingRateHUAWEI;
     	}
 	// type 2 (indexed mode)
 	out gl_PerClusterHUAWEI
@@ -167,7 +170,8 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60.7
     	  uint gl_FirstIndexHUAWEI ;
     	  int  gl_VertexOffsetHUAWEI;
     	  uint gl_FirstInstanceHUAWEI;
-    	  uint gl_ClusterIDHUAWEI;
+	  uint gl_ClusterIDHUAWEI;
+	  uint gl_ClusterShadingRateHUAWEI;
 	}
 
 
@@ -187,10 +191,11 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60.7
 	gl_VertexOffsetHUAWEI is the value added to the vertex index before indexing into the vertex buffer.
 	gl_FirstInstanceHUAWEI is the instance ID of the first instance to draw.
 	gl_ClusterIDHUAWEI is the index of cluster being rendered by this drawing command.
+	gl_ClusterShadingRateHUAWEI is the shading rate of cluster being rendered by this drawing command.
 
 
 	(modify the discussion of the built-in variables shared with compute shaders, which starts on p. 147)
-	The built-in constant gl_WorkGroupSize is a compute, clust culling shader
+	The built-in constant gl_WorkGroupSize is a compute, cluster culling shader
     	constant containing the local work-group size of the shader. The size ...
 
     	The built-in variable gl_WorkGroupID is a compute, cluster culling shader
@@ -263,8 +268,6 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60.7
 
 
 
-
-
 Issues
 
     None.
@@ -273,4 +276,5 @@ Revision History
 
      Rev.              Date                                 Changes
     ------      -----------------        ----------------------------------------
-     1             2022-11-14               Initial draft
+     1             2022-11-14                Initial draft
+     2             2023-11-28                Add per-cluster shading rate
