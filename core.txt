@@ -13703,11 +13703,11 @@ ifdef::GLSL[]
   float *textureGrad*(sampler2DRectShadow _sampler_, vec3 _P_, vec2 _dPdx_, vec2 _dPdy_) +
   float *textureGrad*(sampler1DShadow _sampler_, vec3 _P_, float _dPdx_, float _dPdy_) +
   gvec4 *textureGrad*(gsampler1DArray _sampler_, vec2 _P_, float _dPdx_, float _dPdy_) +
-  gvec4 *textureGrad*(gsampler2DArray _sampler_, vec3 _P_, vec2 _dPdx_, vec2 _dPdy_) +
   float *textureGrad*(sampler1DArrayShadow _sampler_, vec3 _P_, float _dPdx_, float _dPdy_) +
 endif::GLSL[]
   float *textureGrad*(sampler2DShadow _sampler_, vec3 _P_, vec2 _dPdx_, vec2 _dPdy_) +
   float *textureGrad*(samplerCubeShadow _sampler_, vec4 _P_, vec3 _dPdx_, vec3 _dPdy_) +
+  gvec4 *textureGrad*(gsampler2DArray _sampler_, vec3 _P_, vec2 _dPdx_, vec2 _dPdy_) +
   float *textureGrad*(sampler2DArrayShadow _sampler_, vec4 _P_, vec2 _dPdx_, vec2 _dPdy_) +
   gvec4 *textureGrad*(gsamplerCubeArray _sampler_, vec4 _P_, vec3 _dPdx_, vec3 _dPdy_) +
    a| Do a texture lookup as in *texture* but with <<explicit-gradients,
