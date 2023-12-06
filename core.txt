@@ -144,6 +144,9 @@ endif::ESSL[]
 
 === Changes from {slabbrev} {apiversion} revision 8
 
+ * Private GLSL issue #59: Fix incorrect domain of *atanh* function.
+
+
 ifdef::GLSL[]
 === Changes from {slabbrev} {apiversion} revision 7
 
@@ -12416,7 +12419,7 @@ The description is per component.
       Results are undefined if [eq]#x < 1#.
 | genFType *atanh*(genFType _x_)
     | Arc hyperbolic tangent; returns the inverse of *tanh*.
-      Results are undefined if [eq]#x {geq} 1#.
+      Results are undefined if [eq]#{vert}x{vert} {geq} 1#.
 |====
 
 
