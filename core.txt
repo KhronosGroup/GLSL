@@ -11376,6 +11376,10 @@ _gl_ClipDistance_ contains linearly interpolated values for the vertex-
 pipeline values written by a shader to the _gl_ClipDistance_ output
 variable. Only elements in this array that have clipping enabled will
 have defined values.
+
+_gl_CullDistance_ contains linearly interpolated values for the vertex-
+pipeline values written by a shader to the _gl_CullDistance_ output
+variable.
 endif::GLSL[]
 
 The input variable _gl_PrimitiveID_ is filled with the value written to the
