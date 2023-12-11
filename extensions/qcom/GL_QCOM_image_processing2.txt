@@ -1,0 +1,210 @@
+Name
+
+    QCOM_image_processing2
+
+Name Strings
+
+    QCOM_image_processing2
+
+Contact
+
+    Wooyoung Kim, Qualcomm Technologies Inc.  (wooykim 'at' qti.qualcomm.com)
+
+Contributors
+
+    Wooyoung Kim, Qualcomm Technologies Inc.
+    Jeff Leger,   Qualcomm Technologies Inc.
+    Ruihao Zhang, Qualcomm Technologies Inc.
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date: 13-Nov-2023
+    Revision: 1
+
+Number
+
+    TBD.
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    Requires GL_KHR_vulkan_glsl.
+
+
+Overview
+
+    This extension is a follow-on to an earlier extension GL_QCOM_image_processing which has
+    added four new shader instructions to perform some of the frequently sought image
+    processing tasks. This extension adds another four new image processing operations.
+
+    Block Matching Window SSD: The operation repeatedly performs block match operations
+      across a 2D window specified on the sampler used to create the target image to
+      compute an error at each (X,Y) within the 2D window that describes whether the texel
+      in the target image matches the corresponding texel in the reference image and
+      return either the minimum or maximum error using sum of squares (SSD) of the differences. 
+  
+    Block Matching Window SAD: This operation follows the same pattern as "Block Matching
+      Window SSD", computing the sum of the absolute differences (SAD)
+
+    Block Matching Gather SSD: The operation computes errors at 4 texels at the given offsets
+      that describe whether the texels in the target image match the corresponding texels in 
+      the reference image. It returns the SSD error metrics at the 4 texel offsets in the X, Y, 
+      Z, and W components. 
+
+    Block Matching Gather SAD: This operation follows the same pattern as "Block Matching
+     Gather SSD", computing the sum of the absolute differences at 4 offsets.
+
+    Each of the above 4 image processing operations are limited to single-component formats.
+
+
+Modifications to the OpenGL GL Shading Language Specification, Version 1.40, dated 22 November 2009
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_QCOM_image_processing2  : <behavior>
+
+    where <behavior> is as specified in Section 3.3.
+
+    A new preprocessor #define is added to the OpenGL Shading Language:
+
+        #define GL_QCOM_image_processing2    1
+
+    Add to the table at the end of Subsection 8.9.2 "Texel Lookup Functions"
+    the following image processing functions. Note that these built-ins rely on separate
+    samplers and textures as defined in GL_KHR_vulkan_glsl.
+
+    +---------------------------------------+--------------------------------------------+
+    | Syntax                                | Description                                |
+    +---------------------------------------+--------------------------------------------+
+    | vec4 textureBlockMatchWindowSSDQCOM(  | Windowed block matching operation that     |
+    |       sampler2D target                | measures the correlation (or similarity)   |
+    |       uvec2     targetCoord,          | of the target block and reference block.   |
+    |       sampler2D reference,            | targetCoord and refCoord specify the top-  |
+    |       uvec2     refCoord,             | left corner of the block in target and     |
+    |       uvec2     blockSize)            | reference images. The error metric is the  |
+    |                                       | sum of the squares of the values (SSD).    |
+    +---------------------------------------+--------------------------------------------+
+    | vec4 textureBlockMatchWindowSADQCOM(  | Windowed block matching operation that     |
+    |       sampler2D target                | measures the correlation (or similarity)   |
+    |       uvec2     targetCoord,          | of the target block and reference block.   |
+    |       sampler2D reference,            | targetCoord and refCoord specify the top-  |
+    |       uvec2     refCoord,             | left corner of the block in target and     |
+    |       uvec2     blockSize)            | reference images. The error metric is the  |
+    |                                       | sum of the absolute values (SAD).          |
+    +---------------------------------------+--------------------------------------------+
+    | vec4 textureBlockMatchGatherSSDQCOM(  | Gathered block matching operation that     |
+    |       sampler2D target                | measures the correlation (or similarity)   |
+    |       uvec2     targetCoord,          | of the target block and reference block.   |
+    |       sampler2D reference,            | targetCoord and refCoord specify the top-  |
+    |       uvec2     refCoord,             | left corner of the block in target and     |
+    |       uvec2     blockSize)            | reference images. The error metric is the  |
+    |                                       | sum of the squares of the values (SSD).    |
+    +---------------------------------------+--------------------------------------------+
+    | vec4 textureBlockMatchGatherSADQCOM(  | Gathered block matching operation that     |
+    |       sampler2D target                | measures the correlation (or similarity)   |
+    |       uvec2     targetCoord,          | of the target block and reference block.   |
+    |       sampler2D reference,            | targetCoord and refCoord specify the top-  |
+    |       uvec2     refCoord,             | left corner of the block in target and     |
+    |       uvec2     blockSize)            | reference images. The error metric is the  |
+    |                                       | sum of the absolute values (SAD).          |
+    +---------------------------------------+--------------------------------------------+
+
+
+    * target and reference specify the two input textures. If
+      the block from one texture is going to be used repeatedly across multiple
+      instructions, that texture should be specified as the referenceTexture.
+
+    * targetCoord and referenceCoord specify the texture coordinates (in texels)
+      of the top left corner of the block.
+
+    * blockSize specifies the size (in texels) of the blocks to be compared.
+
+
+Modifications to the OpenGL ES Shading Language Specification, Version 3.10, dated 29 January 2016
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_QCOM_image_processing2   : <behavior>
+
+    where <behavior> is as specified in Section 3.3.
+
+    A new preprocessor #define is added to the OpenGL Shading Language:
+
+        #define GL_QCOM_image_processing2    1
+
+    Add to the table at the end of Subsection 8.9.1 the following image processing functions. Note
+	  that these built-ins rely on separate samplers and textures as defined in GL_KHR_vulkan_glsl.
+
+    +---------------------------------------+--------------------------------------------+
+    | Syntax                                | Description                                |
+    +---------------------------------------+--------------------------------------------+
+    | vec4 textureBlockMatchWindowSSDQCOM(  | Windowed block matching operation that     |
+    |       sampler2D target                | measures the correlation (or similarity)   |
+    |       uvec2     targetCoord,          | of the target block and reference block.   |
+    |       sampler2D reference,            | targetCoord and refCoord specify the top-  |
+    |       uvec2     refCoord,             | left corner of the block in target and     |
+    |       uvec2     blockSize)            | reference images. The error metric is the  |
+    |                                       | sum of the squares of the values (SSD).    |
+    +---------------------------------------+--------------------------------------------+
+    | vec4 textureBlockMatchWindowSADQCOM(  | Windowed block matching operation that     |
+    |       sampler2D target                | measures the correlation (or similarity)   |
+    |       uvec2     targetCoord,          | of the target block and reference block.   |
+    |       sampler2D reference,            | targetCoord and refCoord specify the top-  |
+    |       uvec2     refCoord,             | left corner of the block in target and     |
+    |       uvec2     blockSize)            | reference images. The error metric is the  |
+    |                                       | sum of the absolute values (SAD).          |
+    +---------------------------------------+--------------------------------------------+
+    | vec4 textureBlockMatchGatherSSDQCOM(  | Gathered block matching operation that     |
+    |       sampler2D target                | measures the correlation (or similarity)   |
+    |       uvec2     targetCoord,          | of the target block and reference block.   |
+    |       sampler2D reference,            | targetCoord and refCoord specify the top-  |
+    |       uvec2     refCoord,             | left corner of the block in target and     |
+    |       uvec2     blockSize)            | reference images. The error metric is the  |
+    |                                       | sum of the squares of the values (SSD).    |
+    +---------------------------------------+--------------------------------------------+
+    | vec4 textureBlockMatchGatherSADQCOM(  | Gathered block matching operation that     |
+    |       sampler2D target                | measures the correlation (or similarity)   |
+    |       uvec2     targetCoord,          | of the target block and reference block.   |
+    |       sampler2D reference,            | targetCoord and refCoord specify the top-  |
+    |       uvec2     refCoord,             | left corner of the block in target and     |
+    |       uvec2     blockSize)            | reference images. The error metric is the  |
+    |                                       | sum of the absolute values (SAD).          |
+    +---------------------------------------+--------------------------------------------+
+
+    * target and reference specify the two input textures. If
+      the block from one texture is going to be used repeatedly across multiple
+      instructions, that texture should be specified as the referenceTexture.
+
+    * targetCoord and referenceCoord specify the texture coordinates (in texels)
+      of the top left corner of the block.
+
+    * blockSize specifies the size (in texels) of the blocks to be compared.
+
+
+Restrictions:
+    
+    The <target> and <reference> textures used in textureBlockMatchWindowSADQCOM,
+    textureBlockMatchWindowSSDQCOM, textureBlockMatchGatherSSDQCOM, and/or
+    textureBlockMatchGatherSSDQCOM cannot be used with any other texture functions.
+    
+
+Issues
+
+
+Revision History
+
+    Rev.  Date           Author    Changes
+    ----  -----------    --------  --------------------------------------------
+    1     13-Nov-2023    wooykim   Initial draft
+ 
