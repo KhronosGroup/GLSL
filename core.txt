@@ -9580,8 +9580,8 @@ endif::ESSL[]
     Results are undefined if one or both operands are negative.
     The operator modulus (*%*) is not defined for any other data types
     (non-integer types).
-  * The arithmetic unary operators plus (*+*), negate (*-*), post- and pre-increment and
-    decrement (*--* and *++*) operate on integer or floating-point values
+  * The arithmetic unary operators plus (*{plus}*), negate (*-*), post- and pre-increment and
+    decrement (*--* and *{plus}{plus}*) operate on integer or floating-point values
     (including vectors and matrices).
     All unary operators work component-wise on their operands.
     These result with the same type they operated on.
