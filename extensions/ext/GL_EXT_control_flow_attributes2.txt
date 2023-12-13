@@ -105,8 +105,8 @@ Add the following control-flow attributes to the table in Section 6.5 Control-Fl
 Add the following before "The *unroll*, *dont_unroll*, *flatten*, and *dont_flatten* attributes are"
 
     /I/ in *min_iterations(I)*/*max_iterations(I)*, /M/ in *iteration_multiple(M)*,
-    and /C/ in *peel_count(C)*/*partial_count(C)* must be a 32-bit positive signed
-    or unsigned non-specialization compile-time constant integral expression, or a
+    and /C/ in *peel_count(C)*/*partial_count(C)* must be a 32-bit signed
+    or unsigned non-specialization compile-time constant integral expression greater than 0, or a
     compile-time error results.
 
 Revision History
