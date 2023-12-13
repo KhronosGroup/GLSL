@@ -21,11 +21,11 @@ Notice
 
 Status
 
-    Draft.
+    Final
 
 Version
 
-    Last Modified Date: 30-Nov-2023
+    Last Modified Date: 13-Dec-2023
     Revision: 1
 
 Number
@@ -98,8 +98,8 @@ Add the following control-flow attributes to the table in Section 6.5 Control-Fl
       *min_iterations(I)*     |    Loop     | the loop executes at least a given number of iterations
       *max_iterations(I)*     |    Loop     | the loop executes at most a given number of iterations
       *iteration_multiple(M)* |    Loop     | the loop executes a multiple of a given number of iterations
-      *peel_count(C)*         |    Loop     | the loop be peeled by a given number of loop iterations
-      *partial_count(C)*      |    Loop     | the loop be partially unrolled by a given number of loop iterations
+      *peel_count(C)*         |    Loop     | the loop should be peeled by a given number of loop iterations
+      *partial_count(C)*      |    Loop     | the loop should be partially unrolled by a given number of loop iterations
 
 
 Add the following before "The *unroll*, *dont_unroll*, *flatten*, and *dont_flatten* attributes are"
@@ -109,15 +109,8 @@ Add the following before "The *unroll*, *dont_unroll*, *flatten*, and *dont_flat
     or unsigned non-specialization compile-time constant integral expression, or a
     compile-time error results.
 
-    In addition, /M/ in *iteration_multiple(M)* must be greater than 0.
-
-
-Issues
-
-    1. 
-
 Revision History
 
     Rev.    Date         Author          Changes
     ----  -----------    ------------    ----------------------------------------------
-    1     30-Nov-2023    Wooyoung Kim    initial draft
+    1     13-Dec-2023    Wooyoung Kim    final version
