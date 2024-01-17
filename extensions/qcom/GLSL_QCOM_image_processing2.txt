@@ -4,7 +4,7 @@ Name
 
 Name Strings
 
-    QCOM_image_processing2
+    GL_QCOM_image_processing2
 
 Contact
 
@@ -22,7 +22,7 @@ Status
 
 Version
 
-    Last Modified Date: 13-Nov-2023
+    Last Modified Date: 16-Jan-2024
     Revision: 1
 
 Number
@@ -39,7 +39,7 @@ Dependencies
 
     Requires GL_KHR_vulkan_glsl.
 
-    Requires GLSL_
+    Requires GL_QCOM_image_processing.
 
 
 Overview
@@ -208,5 +208,5 @@ Revision History
 
     Rev.  Date           Author    Changes
     ----  -----------    --------  --------------------------------------------
-    1     13-Nov-2023    wooykim   Initial draft
+    1     16-Jan-2024    wooykim   Initial version
  
