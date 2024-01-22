@@ -85,41 +85,41 @@ Modifications to the OpenGL GL Shading Language Specification, Version 1.40, dat
     the following image processing functions. Note that these built-ins rely on separate
     samplers and textures as defined in GL_KHR_vulkan_glsl.
 
-    +---------------------------------------+--------------------------------------------+
-    | Syntax                                | Description                                |
-    +---------------------------------------+--------------------------------------------+
-    | vec4 textureBlockMatchWindowSSDQCOM(  | Windowed block matching operation that     |
-    |       sampler2D target                | measures the correlation (or similarity)   |
-    |       uvec2     targetCoord,          | of the target block and reference block.   |
-    |       sampler2D reference,            | targetCoord and refCoord specify the top-  |
-    |       uvec2     refCoord,             | left corner of the block in target and     |
-    |       uvec2     blockSize)            | reference images. The error metric is the  |
-    |                                       | sum of the squares of the values (SSD).    |
-    +---------------------------------------+--------------------------------------------+
-    | vec4 textureBlockMatchWindowSADQCOM(  | Windowed block matching operation that     |
-    |       sampler2D target                | measures the correlation (or similarity)   |
-    |       uvec2     targetCoord,          | of the target block and reference block.   |
-    |       sampler2D reference,            | targetCoord and refCoord specify the top-  |
-    |       uvec2     refCoord,             | left corner of the block in target and     |
-    |       uvec2     blockSize)            | reference images. The error metric is the  |
-    |                                       | sum of the absolute values (SAD).          |
-    +---------------------------------------+--------------------------------------------+
-    | vec4 textureBlockMatchGatherSSDQCOM(  | Gathered block matching operation that     |
-    |       sampler2D target                | measures the correlation (or similarity)   |
-    |       uvec2     targetCoord,          | of the target block and reference block.   |
-    |       sampler2D reference,            | targetCoord and refCoord specify the top-  |
-    |       uvec2     refCoord,             | left corner of the block in target and     |
-    |       uvec2     blockSize)            | reference images. The error metric is the  |
-    |                                       | sum of the squares of the values (SSD).    |
-    +---------------------------------------+--------------------------------------------+
-    | vec4 textureBlockMatchGatherSADQCOM(  | Gathered block matching operation that     |
-    |       sampler2D target                | measures the correlation (or similarity)   |
-    |       uvec2     targetCoord,          | of the target block and reference block.   |
-    |       sampler2D reference,            | targetCoord and refCoord specify the top-  |
-    |       uvec2     refCoord,             | left corner of the block in target and     |
-    |       uvec2     blockSize)            | reference images. The error metric is the  |
-    |                                       | sum of the absolute values (SAD).          |
-    +---------------------------------------+--------------------------------------------+
+    +--------------------------------------+---------------------------------------------+
+    | Syntax                               | Description                                 |
+    +--------------------------------------+---------------------------------------------+
+    | vec4 textureBlockMatchWindowSSDQCOM( | Windowed block matching operation that      |
+    |       sampler2D target               | measures the correlation (or similarity)    |
+    |       uvec2     targetCoord,         | of the target block and reference block.    |
+    |       sampler2D reference,           | targetCoord and refCoord specify the bottom-|
+    |       uvec2     refCoord,            | left corner of the block in target and      |
+    |       uvec2     blockSize)           | reference images. The error metric is the   |
+    |                                      | sum of the squares of the values (SSD).     |
+    +--------------------------------------+---------------------------------------------+
+    | vec4 textureBlockMatchWindowSADQCOM( | Windowed block matching operation that      |
+    |       sampler2D target               | measures the correlation (or similarity)    |
+    |       uvec2     targetCoord,         | of the target block and reference block.    |
+    |       sampler2D reference,           | targetCoord and refCoord specify the bottom-|
+    |       uvec2     refCoord,            | left corner of the block in target and      |
+    |       uvec2     blockSize)           | reference images. The error metric is the   |
+    |                                      | sum of the absolute values (SAD).           |
+    +--------------------------------------+---------------------------------------------+
+    | vec4 textureBlockMatchGatherSSDQCOM( | Gathered block matching operation that      |
+    |       sampler2D target               | measures the correlation (or similarity)    |
+    |       uvec2     targetCoord,         | of the target block and reference block.    |
+    |       sampler2D reference,           | targetCoord and refCoord specify the bottom-|
+    |       uvec2     refCoord,            | left corner of the block in target and      |
+    |       uvec2     blockSize)           | reference images. The error metric is the   |
+    |                                      | sum of the squares of the values (SSD).     |
+    +--------------------------------------+---------------------------------------------+
+    | vec4 textureBlockMatchGatherSADQCOM( | Gathered block matching operation that      |
+    |       sampler2D target               | measures the correlation (or similarity)    |
+    |       uvec2     targetCoord,         | of the target block and reference block.    |
+    |       sampler2D reference,           | targetCoord and refCoord specify the bottom-|
+    |       uvec2     refCoord,            | left corner of the block in target and      |
+    |       uvec2     blockSize)           | reference images. The error metric is the   |
+    |                                      | sum of the absolute values (SAD).           |
+    +--------------------------------------+---------------------------------------------+
 
 
     * target and reference specify the two input textures. If
@@ -148,41 +148,41 @@ Modifications to the OpenGL ES Shading Language Specification, Version 3.10, dat
     Add to the table at the end of Subsection 8.9.1 the following image processing functions. Note
 	  that these built-ins rely on separate samplers and textures as defined in GL_KHR_vulkan_glsl.
 
-    +---------------------------------------+--------------------------------------------+
-    | Syntax                                | Description                                |
-    +---------------------------------------+--------------------------------------------+
-    | vec4 textureBlockMatchWindowSSDQCOM(  | Windowed block matching operation that     |
-    |       sampler2D target                | measures the correlation (or similarity)   |
-    |       uvec2     targetCoord,          | of the target block and reference block.   |
-    |       sampler2D reference,            | targetCoord and refCoord specify the top-  |
-    |       uvec2     refCoord,             | left corner of the block in target and     |
-    |       uvec2     blockSize)            | reference images. The error metric is the  |
-    |                                       | sum of the squares of the values (SSD).    |
-    +---------------------------------------+--------------------------------------------+
-    | vec4 textureBlockMatchWindowSADQCOM(  | Windowed block matching operation that     |
-    |       sampler2D target                | measures the correlation (or similarity)   |
-    |       uvec2     targetCoord,          | of the target block and reference block.   |
-    |       sampler2D reference,            | targetCoord and refCoord specify the top-  |
-    |       uvec2     refCoord,             | left corner of the block in target and     |
-    |       uvec2     blockSize)            | reference images. The error metric is the  |
-    |                                       | sum of the absolute values (SAD).          |
-    +---------------------------------------+--------------------------------------------+
-    | vec4 textureBlockMatchGatherSSDQCOM(  | Gathered block matching operation that     |
-    |       sampler2D target                | measures the correlation (or similarity)   |
-    |       uvec2     targetCoord,          | of the target block and reference block.   |
-    |       sampler2D reference,            | targetCoord and refCoord specify the top-  |
-    |       uvec2     refCoord,             | left corner of the block in target and     |
-    |       uvec2     blockSize)            | reference images. The error metric is the  |
-    |                                       | sum of the squares of the values (SSD).    |
-    +---------------------------------------+--------------------------------------------+
-    | vec4 textureBlockMatchGatherSADQCOM(  | Gathered block matching operation that     |
-    |       sampler2D target                | measures the correlation (or similarity)   |
-    |       uvec2     targetCoord,          | of the target block and reference block.   |
-    |       sampler2D reference,            | targetCoord and refCoord specify the top-  |
-    |       uvec2     refCoord,             | left corner of the block in target and     |
-    |       uvec2     blockSize)            | reference images. The error metric is the  |
-    |                                       | sum of the absolute values (SAD).          |
-    +---------------------------------------+--------------------------------------------+
+    +--------------------------------------+---------------------------------------------+
+    | Syntax                               | Description                                 |
+    +--------------------------------------+---------------------------------------------+
+    | vec4 textureBlockMatchWindowSSDQCOM( | Windowed block matching operation that      |
+    |       sampler2D target               | measures the correlation (or similarity)    |
+    |       uvec2     targetCoord,         | of the target block and reference block.    |
+    |       sampler2D reference,           | targetCoord and refCoord specify the bottom-|
+    |       uvec2     refCoord,            | left corner of the block in target and      |
+    |       uvec2     blockSize)           | reference images. The error metric is the   |
+    |                                      | sum of the squares of the values (SSD).     |
+    +--------------------------------------+---------------------------------------------+
+    | vec4 textureBlockMatchWindowSADQCOM( | Windowed block matching operation that      |
+    |       sampler2D target               | measures the correlation (or similarity)    |
+    |       uvec2     targetCoord,         | of the target block and reference block.    |
+    |       sampler2D reference,           | targetCoord and refCoord specify the bottom-|
+    |       uvec2     refCoord,            | left corner of the block in target and      |
+    |       uvec2     blockSize)           | reference images. The error metric is the   |
+    |                                      | sum of the absolute values (SAD).           |
+    +--------------------------------------+---------------------------------------------+
+    | vec4 textureBlockMatchGatherSSDQCOM( | Gathered block matching operation that      |
+    |       sampler2D target               | measures the correlation (or similarity)    |
+    |       uvec2     targetCoord,         | of the target block and reference block.    |
+    |       sampler2D reference,           | targetCoord and refCoord specify the bottom-|
+    |       uvec2     refCoord,            | left corner of the block in target and      |
+    |       uvec2     blockSize)           | reference images. The error metric is the   |
+    |                                      | sum of the squares of the values (SSD).     |
+    +--------------------------------------+---------------------------------------------+
+    | vec4 textureBlockMatchGatherSADQCOM( | Gathered block matching operation that      |
+    |       sampler2D target               | measures the correlation (or similarity)    |
+    |       uvec2     targetCoord,         | of the target block and reference block.    |
+    |       sampler2D reference,           | targetCoord and refCoord specify the bottom-|
+    |       uvec2     refCoord,            | left corner of the block in target and      |
+    |       uvec2     blockSize)           | reference images. The error metric is the   |
+    |                                      | sum of the absolute values (SAD).           |
+    +--------------------------------------+---------------------------------------------+
 
     * target and reference specify the two input textures. If
       the block from one texture is going to be used repeatedly across multiple
