@@ -127,7 +127,7 @@ Modifications to the OpenGL GL Shading Language Specification, Version 1.40, dat
       instructions, that texture should be specified as the referenceTexture.
 
     * targetCoord and referenceCoord specify the texture coordinates (in texels)
-      of the top left corner of the block.
+      of the bottom left corner of the block.
 
     * blockSize specifies the size (in texels) of the blocks to be compared.
 
