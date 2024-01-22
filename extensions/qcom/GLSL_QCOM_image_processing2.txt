@@ -22,7 +22,7 @@ Status
 
 Version
 
-    Last Modified Date: 16-Jan-2024
+    Last Modified Date: 22-Jan-2024
     Revision: 1
 
 Number
@@ -189,7 +189,7 @@ Modifications to the OpenGL ES Shading Language Specification, Version 3.10, dat
       instructions, that texture should be specified as the referenceTexture.
 
     * targetCoord and referenceCoord specify the texture coordinates (in texels)
-      of the top left corner of the block.
+      of the bottom left corner of the block.
 
     * blockSize specifies the size (in texels) of the blocks to be compared.
 
@@ -208,5 +208,5 @@ Revision History
 
     Rev.  Date           Author    Changes
     ----  -----------    --------  --------------------------------------------
-    1     16-Jan-2024    wooykim   Initial version
+    1     22-Jan-2024    wooykim   Initial version
  
