@@ -45,8 +45,8 @@ Dependencies
 Overview
 
   This extension adds the ability to annotate entry points via an attribute to
-  indicate that subgroups should reconverge in the same way as invocation
-  groups.
+  indicate that invocations should reconverge in the same manner indicated in
+  the source shader.
 
   This is done through the attribute syntax "[[ ... ]]" syntax. For example,
     
