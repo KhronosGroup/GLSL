@@ -1,0 +1,161 @@
+Name
+
+    EXT_expect_assume
+
+Name Strings
+
+    GL_EXT_expect_assume
+
+Contact
+
+    Sven van Haastregt, Arm (sven.vanhaastregt 'at' arm.com)
+
+Contributors
+
+    Jan-Harald Fredriksen, Arm
+    Kevin Petit, Arm
+    Sven van Haastregt, Arm
+
+Notice
+
+    Copyright (c) 2024 The Khronos Group Inc. Copyright terms at
+        http://www.khronos.org/registry/speccopyright.html
+
+Status
+
+    Complete
+
+Version
+
+    Last Modified Date: 02-Feb-2024
+    Revision: 1
+
+Number
+
+    TBD.
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    This extension interacts with the
+    GL_EXT_shader_explicit_arithmetic_types_int8,
+    GL_EXT_shader_explicit_arithmetic_types_int16, and
+    GL_EXT_shader_explicit_arithmetic_types_int64 extensions.
+
+    This extension is written against version 4.60.8 of the OpenGL
+    Shading Language Specification, dated August 14, 2023
+
+Overview
+
+    This extension adds assumeEXT and expectEXT built-in functions
+    that provide additional information to a compiler, similar to the
+    llvm.assume and llvm.expect intrinsics. Shader compilers may use
+    this information to generate more efficient code.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-specification), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+        assumeEXT -> OpAssumeTrueKHR
+        expectEXT -> OpExpectKHR
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_EXT_expect_assume : <behavior>
+
+    where <behavior> is as specified in Section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+        #define GL_EXT_expect_assume 1
+
+    Add a new Section 8.X, Optimization Hint Functions
+
+    The built-in functions defined in this section are not required for
+    functional correctness.
+
+    The following built-in function allows the compiler to assume that
+    `condition` is true whenever control flow reaches the call. Behavior
+    is undefined if `condition` is false instead.
+
+        void assumeEXT(bool condition);
+
+    The following built-in functions return `value` and provide information
+    to the compiler that the most probable value of `value` is
+    `expected_value`.
+
+        bool expectEXT(bool value, bool expected_value);
+        bvec2 expectEXT(bvec2 value, bvec2 expected_value);
+        bvec3 expectEXT(bvec3 value, bvec3 expected_value);
+        bvec4 expectEXT(bvec4 value, bvec4 expected_value);
+
+        int expectEXT(int value, int expected_value);
+        ivec2 expectEXT(ivec2 value, ivec2 expected_value);
+        ivec3 expectEXT(ivec3 value, ivec3 expected_value);
+        ivec4 expectEXT(ivec4 value, ivec4 expected_value);
+
+        uint expectEXT(uint value, uint expected_value);
+        uvec2 expectEXT(uvec2 value, uvec2 expected_value);
+        uvec3 expectEXT(uvec3 value, uvec3 expected_value);
+        uvec4 expectEXT(uvec4 value, uvec4 expected_value);
+
+        If GL_EXT_shader_explicit_arithmetic_types_int8 is enabled:
+
+        int8_t expectEXT(int8_t value, int8_t expected_value);
+        i8vec2 expectEXT(i8vec2 value, i8vec2 expected_value);
+        i8vec3 expectEXT(i8vec3 value, i8vec3 expected_value);
+        i8vec4 expectEXT(i8vec4 value, i8vec4 expected_value);
+
+        uint8_t expectEXT(uint8_t value, uint8_t expected_value);
+        u8vec2 expectEXT(u8vec2 value, u8vec2 expected_value);
+        u8vec3 expectEXT(u8vec3 value, u8vec3 expected_value);
+        u8vec4 expectEXT(u8vec4 value, u8vec4 expected_value);
+
+        If GL_EXT_shader_explicit_arithmetic_types_int16 is enabled:
+
+        int16_t expectEXT(int16_t value, int16_t expected_value);
+        i16vec2 expectEXT(i16vec2 value, i16vec2 expected_value);
+        i16vec3 expectEXT(i16vec3 value, i16vec3 expected_value);
+        i16vec4 expectEXT(i16vec4 value, i16vec4 expected_value);
+
+        uint16_t expectEXT(uint16_t value, uint16_t expected_value);
+        u16vec2 expectEXT(u16vec2 value, u16vec2 expected_value);
+        u16vec3 expectEXT(u16vec3 value, u16vec3 expected_value);
+        u16vec4 expectEXT(u16vec4 value, u16vec4 expected_value);
+
+        If GL_EXT_shader_explicit_arithmetic_types_int64 is enabled:
+
+        int64_t expectEXT(int64_t value, int64_t expected_value);
+        i64vec2 expectEXT(i64vec2 value, i64vec2 expected_value);
+        i64vec3 expectEXT(i64vec3 value, i64vec3 expected_value);
+        i64vec4 expectEXT(i64vec4 value, i64vec4 expected_value);
+
+        uint64_t expectEXT(uint64_t value, uint64_t expected_value);
+        u64vec2 expectEXT(u64vec2 value, u64vec2 expected_value);
+        u64vec3 expectEXT(u64vec3 value, u64vec3 expected_value);
+        u64vec4 expectEXT(u64vec4 value, u64vec4 expected_value);
+
+Issues
+
+1. Should the assume built-in function be named "assumeEXT" or "assumeTrueEXT"?
+
+   RESOLVED:  The built-in is named "assumeEXT". Other languages (such as
+   OpenCL C) use the shorter name. Aligning the name to higher level
+   languages is more desirable than aligning to SPIR-V.
+
+Revision History
+
+    Rev.  Date          Author               Changes
+    ----  -----------   ------------------   ---------------------------------
+     1    02-Feb-2024   Sven van Haastregt   Initial revision.
