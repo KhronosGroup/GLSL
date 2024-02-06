@@ -1,0 +1,169 @@
+Name
+
+    KHR_shader_subgroup_rotate
+
+Name Strings
+
+    GL_KHR_shader_subgroup_rotate
+
+Contact
+
+    Kevin Petit (kevin.petit 'at' arm.com), Arm Ltd.
+
+Contributors
+
+    Kevin Petit, Arm Ltd.
+    Jeff Bolz, NVidia
+    Stuart Brady, Arm Ltd.
+    Sven van Haastregt, Arm Ltd.
+
+Notice
+
+    Copyright (c) 2021-2024 The Khronos Group Inc. Copyright terms at
+        http://www.khronos.org/registry/speccopyright.html
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date: 2024/02/06
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification version 4.60, dated July 23, 2017.
+
+    This extension interacts with revision 1 of the
+    GL_EXT_shader_subgroup_extended_types_int8,
+    GL_EXT_shader_subgroup_extended_types_int16,
+    GL_EXT_shader_subgroup_extended_types_int64 and
+    GL_EXT_shader_subgroup_extended_types_float16 extensions, dated
+    January 8, 2019.
+
+Overview
+
+    This extension adds built-in functions to rotate values within a subgroup.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs, the SPIR-V capabilities they require, and the Vulkan
+    feature bits those capabilities require:
+
+      subgroupRotate(value, delta) ->
+        Opcode: OpGroupNonUniformRotateKHR(
+                    /*Execution*/Subgroup,
+                    /*Value*/value,
+                    /*Delta*/delta)
+        Capabilities: GroupNonUniformRotateKHR
+        Vulkan features: shaderSubgroupRotate
+
+      subgroupClusteredRotate(value, delta, clusterSize) ->
+        Opcode: OpGroupNonUniformRotateKHR(
+                    /*Execution*/Subgroup,
+                    /*Value*/value,
+                    /*Delta*/delta,
+                    /*ClusterSize*/clusterSize)
+        Capabilities: GroupNonUniformRotateKHR
+        Vulkan features: shaderSubgroupRotateClustered
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_KHR_shader_subgroup_rotate : <behavior>
+
+    where <behavior> is as specified in section 3.3. If
+    GL_KHR_shader_subgroup_rotate is enabled, the GL_KHR_shader_subgroup_basic
+    extension is also implicitly enabled.
+
+    New preprocessor #defines are added:
+
+      #define GL_KHR_shader_subgroup_rotate        1
+
+
+Additions to Chapter 8 of the OpenGL Shading Language Specification
+(Built-in Functions)
+
+    Add to Section 8.18, Shader Invocation Group Functions
+
+    Syntax:
+
+        genType  subgroupRotate(genType value,  uint delta);
+        genIType subgroupRotate(genIType value, uint delta);
+        genUType subgroupRotate(genUType value, uint delta);
+        genBType subgroupRotate(genBType value, uint delta);
+        genDType subgroupRotate(genDType value, uint delta);
+
+        genType  subgroupClusteredRotate(genType value,  uint delta, uint clusterSize);
+        genIType subgroupClusteredRotate(genIType value, uint delta, uint clusterSize);
+        genUType subgroupClusteredRotate(genUType value, uint delta, uint clusterSize);
+        genBType subgroupClusteredRotate(genBType value, uint delta, uint clusterSize);
+        genDType subgroupClusteredRotate(genDType value, uint delta, uint clusterSize);
+
+        If GL_EXT_shader_subgroup_extended_types_int8 is enabled:
+
+        genI8Type subgroupRotate(genI8Type value, uint delta);
+        genU8Type subgroupRotate(genU8Type value, uint delta);
+
+        genI8Type subgroupClusteredRotate(genI8Type value, uint delta, uint clusterSize);
+        genU8Type subgroupClusteredRotate(genU8Type value, uint delta, uint clusterSize);
+
+        If GL_EXT_shader_subgroup_extended_types_int16 is enabled:
+
+        genI16Type subgroupRotate(genI16Type value, uint delta);
+        genU16Type subgroupRotate(genU16Type value, uint delta);
+
+        genI16Type subgroupClusteredRotate(genI16Type value, uint delta, uint clusterSize);
+        genU16Type subgroupClusteredRotate(genU16Type value, uint delta, uint clusterSize);
+
+        If GL_EXT_shader_subgroup_extended_types_int64 is enabled:
+
+        genI64Type subgroupRotate(genI64Type value, uint delta);
+        genU64Type subgroupRotate(genU64Type value, uint delta);
+
+        genI64Type subgroupClusteredRotate(genI64Type value, uint delta, uint clusterSize);
+        genU64Type subgroupClusteredRotate(genU64Type value, uint delta, uint clusterSize);
+
+        If GL_EXT_shader_subgroup_extended_types_float16 is enabled:
+
+        genF16Type subgroupRotate(genF16Type value, uint delta);
+
+        genF16Type subgroupClusteredRotate(genF16Type value, uint delta, uint clusterSize);
+
+    Only usable if the extension GL_KHR_shader_subgroup_rotate is enabled.
+
+    The function subgroupRotate() returns the <value> whose
+    <gl_SubgroupInvocationID> is equal to the remainder of the division
+    of this invocation's <gl_SubgroupInvocationID> plus <delta> by
+    <gl_SubgroupSize>.
+
+    If the selected invocation is inactive, an undefined value is returned.
+
+    <delta> must be dynamically uniform within the calling subgroub.
+
+    When the addition of <gl_SubgroupInvocationID> and <delta> results in
+    overflow, its result will be the low-order 32 bits of the correct result R,
+    where R is computed with enough precision to avoid overflow.
+
+Issues
+
+None.
+
+Revision History
+
+    Rev.  Date          Author      Changes
+    ----  -----------   --------    -------------------------------------------
+     1    2024/02/06    Kevin Petit Initial revision.
