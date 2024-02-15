@@ -2771,53 +2771,89 @@ endif::ESSL[]
 
 Variables of the same type can be aggregated into arrays by declaring a name
 followed by brackets (*[ ]*) enclosing an optional size.
+When present, the array size must be a constant integral expression (see
+"`<<constant-expressions,Constant Expressions>>`") greater than zero.
+The type of the size parameter can be a signed or unsigned integer and the
+choice of type does not affect the type of the resulting array.
+Arrays only have a single dimension (a single number within "`[ ]`"),
+however, arrays of arrays can be declared.
+Any type can be formed into an array.
+
+There are 3 types of array objects:
+
+  Explicitly Sized:: The number of elements in the array is explicitly given.
+  Runtime Sized:: The number of elements is not given and the array is the
+                  outermost dimension of the last declared member of a shader
+                  storage block (see section "`<<interface-blocks,Interface
+                  Blocks>>`"). The array size is inferred at run-time from the
+                  size of the data store backing the shader storage block.
+  Unsized:: The number of array elements is not given and the array
+            is not runtime sized.
+
+Unsized arrays may become explicitly sized following either an explicitly-sized
+initializer or a redeclaration with an explicit size (Explicitly-sized and
+runtime-sized arrays may not be redeclared).
+It is a compile-time error to redeclare an array with a different underlying
+member type.
+
 ifdef::GLSL[]
-When an array size is specified in a declaration, it must be an integral
-constant expression (see "`<<constant-expressions,Constant Expressions>>`")
-greater than zero.
-Except for the last declared member of a shader storage block (see section
-"`<<interface-blocks,Interface Blocks>>`"), the size of an array must be
-declared (_explicitly sized_) before it is indexed with anything other than
-a constant integral expression.
-The size of any array must be declared before passing it as an argument to a
-function.
-Violation of any of these rules result in compile-time errors.
-It is legal to declare an array without a size (_unsized_) and then later
-redeclare the same name as an array of the same type and specify a size, or
-index it only with constant integral expressions (_implicitly sized_).
-However, unless noted otherwise, blocks cannot be redeclared; an unsized
+Note, however, unless noted otherwise, blocks cannot be redeclared; so an unsized
 array member in a user-declared block cannot be sized by a block redeclaration.
-It is a compile-time error to declare an array with a size, and then later
-(in the same shader) index the same array with a constant integral
-expression greater than or equal to the declared size.
-It is a compile-time error to redeclare an unsized array with a size equal
-to or smaller than any index used earlier in the shader to index the array.
-It is also a compile-time error to index an array with a negative constant
-expression.
-Arrays declared as formal parameters in a function declaration must specify
-a size.
+endif::GLSL[]
+
+It is {compiletimeerror} if, following any initializer, an array contains any type that
+is or includes an unsized array.
+
+ifdef::ESSL[]
+Unsized arrays are used for certain builtin variables but it is an error if a
+user-declared array remains unsized following its initializer.
+endif::ESSL[]
+
+It is {compiletimeerror} if:
+
+ * an unsized array is indexed with anything other than a constant integral expression.
+ * an unsized array is declared as a formal parameter to a function.
+ * an unsized array is declared as the return type of a function.
+ * a runtime-sized or unsized array is passed as a function argument.
+ * any array is indexed using a negative constant expression.
+ * an explicitly sized array is indexed with a constant expression greater than
+   or equal to the declared size.
+ * an unsized array is redeclared with a size less than or equal to any
+   constant index used earlier in the shader to index the array.
+
 Undefined behavior results from indexing an array with a non-constant
 expression that's greater than or equal to the array's size or less than 0.
-Arrays only have a single dimension (a single entry within "[ ]"), however,
-arrays of arrays can be declared.
-All types (basic types, structures, arrays) can be formed into an array.
 
+[NOTE]
+.Note
+====
+Some features outside the scope of GLSL, for example OpenGL or Vulkan's "Robust
+Buffer Access" features, may further constrain what behaviors are valid here.
+Typically these features will prevent out-of-bounds indexing causing program
+termination and may determine which values must be returned.
+====
+
+[NOTE]
+.Note
+====
 All arrays are inherently homogeneous; made of elements all having the same
 type and size, with one exception.
-The exception is a shader storage block having an unsized array as its last
-member (_run-time sized_); an array can be formed from such a shader storage
-block, even if the storage blocks have differing lengths for their last
-member.
+An array of shader storage blocks whose last member is a runtime-sized array
+allows the individual blocks to have different sizes and hence a different
+number of elements in the trailing array.
+====
 
-Some examples are:
+
+Some examples of array declarations are:
 
 [source,c++]
 ----
 float frequencies[3];
-uniform vec4 lightPosition[4];
-light lights[];
+uniform vec4 lightPosition[4u];
+light lights[];            // Unsized. Valid in GLSL, illegal in ESSL.
 const int numLights = 2;
 light lights[numLights];
+vec4 a[3][2];
 
 // a shader storage block, introduced in section 4.3.7 "Buffer Variables"
 buffer b {
@@ -2827,186 +2863,69 @@ buffer b {
                // but not necessarily all v, if sized dynamically
 ----
 
-An array type can be formed by specifying non-array type followed by an
-array specifier.
-All dimensions of such an array specifier must include a size.
+An array type can be formed by specifying a non-array type
+(<<type_specifier_nonarray>>) followed by an <<array_specifier>>.
+Note that in this context the construct _type [size]_ does not always result in
+an array of length _size_ of type _type_.
+For example,
 
 [source,c++]
 ----
 float[5]    // an array of size [5] of float
-float[2][3] // an array of size [2][3] of float, not size [3] of float[2]
-----
-
-endif::GLSL[]
-ifdef::ESSL[]
-When present, the array size must be a constant integral expression (see
-"`<<constant-expressions,Constant Expressions>>`") greater than zero.
-The type of the size parameter can be a signed or unsigned integer and the
-choice of type does not affect the type of the resulting array.
-Arrays only have a single dimension (a single number within "`[ ]`"),
-however, arrays of arrays can be declared.
-Any type can be formed into an array.
-
-Arrays are sized either at compile-time or at run-time.
-To size an array at compile-time, either the size must be specified within
-the brackets as above or must be inferred from the type of the initializer.
-
-If an array is declared as the last member of a shader storage block and the
-size is not specified at compile-time, it is sized at run-time.
-In all other cases, arrays are sized only at compile-time.
-An array declaration sized at compile-time which leaves the size of the
-array unspecified is an error.
-
-For compile-time sized arrays, it is illegal to index an array with a
-constant integral expression greater than or equal to the declared size or
-with a negative constant expression.
-Arrays declared as formal parameters in a function declaration must also
-specify a size.
-Undefined behavior results from indexing an array with a non-constant
-expression that's greater than or equal to the array's size or less than 0.
-If robust buffer access is enabled (see section 10.3.5 "`Robust Buffer
-Access`" of the <<references,{apispec}>>), such indexing must not result in
-abnormal program termination.
-The results are still undefined, but implementations are encouraged to
-produce zero values for such accesses.
-
-Some examples are:
-
-[source,c++]
-----
-float frequencies[3];
-uniform vec4 lightPosition[4u];
-const int numLights = 2;
-light lights[numLights];
-vec4 a[3][2];
-a.length() // this is 3
-a[x].length() // this is 2
-// a shader storage block, introduced in section 4.3.7 "Buffer Variables"
-buffer b {
-    float u[]; // an error
-    vec4 v[];  // okay, v will be sized at run-time
-} name[3];     // when the block is arrayed, all u will be the same size,
-               // but not necessarily all v, if sized dynamically
-----
-
-When the *length*() method will return a compile-time constant, the
-expression in brackets (x above) will be evaluated and subject to the rules
-required for array indices, but the array will not be dereferenced.
-Thus, behavior is well defined even if the run-time value of the expression
-is out of bounds.
-
-An array type can be formed by specifying a non-array type
-(<<type_specifier_nonarray>>) followed by an <<array_specifier>>.
-
-[source,c++]
-----
-float[5]
-----
-
-Note that the construct _type [size]_ does not always result in an array of
-length _size_ of type _type_:
-
-[source,c++]
-----
 float[2][3] // an array of size [2] of array of size [3] of float,
             // not size [3] of float[2]
 ----
-endif::ESSL[]
 
-This type can be used anywhere any other type can be used, including as the
-return value from a function
+Such an array type can be used anywhere any other type can be used, including
+as the return value from a function, as a constructor of an array and in
+declarations.
 
 [source,c++]
 ----
+// As a function return type
 float[5] foo() { }
-----
-
-as a constructor of an array:
-
-[source,c++]
-----
+// As an array constructor
 float[5](3.4, 4.2, 5.0, 5.2, 1.1)
-----
-
-as an unnamed parameter:
-
-[source,c++]
-----
+// In declaring an unnamed parameter
 void foo(float[5])
-----
-
-and as an alternate way of declaring a variable or function parameter:
-
-[source,c++]
-----
+// In normal declarations
 float[5] a;
+
+// The following 3 declarations are equivalent:
+vec4 a[3][2]; // size-3 array of size-2 array of vec4
+vec4[2] a[3];
+vec4[3][2] a;
 ----
 
-ifdef::ESSL[]
-An array type can also be formed without specifying a size if the definition
-includes an initializer:
-
-[source,c++]
-----
-float x[] = float[2] (1.0, 2.0); // declares an array of size 2
-float y[] = float[] (1.0, 2.0, 3.0); // declares an array of size 3
-float a[5];
-float b[] = a;
-----
-
-Note that the initializer itself does not need to be a constant expression
-but the length of the initializer will be a constant expression.
-endif::ESSL[]
-
-Arrays can have initializers formed from array constructors:
-
+If such an array type is unsized and used as a constructor then the size of the
+array is inferred from the constructor arguments. For example,
 [source,c++]
 ----
 float a[5] = float[5](3.4, 4.2, 5.0, 5.2, 1.1);
-float a[5] = float[](3.4, 4.2, 5.0, 5.2, 1.1);  // same thing
+float a[5] = float[](3.4, 4.2, 5.0, 5.2, 1.1);  // Constructor also of type float[5]
 ----
 
-An array of arrays can be declared as:
-
+It is {compiletimeerror} to assign either to or from a runtime-sized or unsized
+array (rather than specific elements).
+Note, this is a rare case that initializers and assignments appear to have
+different semantics.
+An initializer for an unsized array is valid and will size the array, but the
+equivalent assigment is not valid.
+For example,
 [source,c++]
 ----
-vec4 a[3][2]; // size-3 array of size-2 array of vec4
+float a[5];
+float b[];
+// An initializer sizes an array ...
+float c[] = a;  // c is explicitly size 5
+// ... but the equivalent assignment is not valid
+float d[];
+d = a;          // Error. Assignment to an unsized array
+// It is never valid to assign from an unsized array
+float e[] = b;  // Error. b is unsized so cannot be assigned
 ----
-
-which declares a one-dimensional array of size 3 of one-dimensional arrays
-of size 2 of *vec4*.
-The following declarations do the same thing:
-
-[source,c++]
-----
-vec4[2] a[3]; // size-3 array of size-2 array of vec4
-vec4[3][2] a; // size-3 array of size-2 array of vec4
-----
-
-When in transparent memory (like in a uniform block), the layout is that the
-inner-most (right-most in declaration) dimensions iterate faster than the
-outer dimensions.
-That is, for the above, the order in memory would be:
-
-{empty}:: Low address : a[0][0] : a[0][1] : a[1][0] : a[1][1] : a[2][0] : a[2][1]
-     : High address
-
-// There is a gigantic block of GLSL/ESSL differences starting here
-// and going down through the Storage Qualifiers section. Apparently
-// there was a complete rewrite by one spec, probably ESSL, as virtually
-// no language is shared
 
 ifdef::GLSL[]
-The type of _a_ needed for both constructors and nameless parameters is
-"`vec4[3][2]`":
-
-[source,c++]
-----
-vec4 b[2] = vec4[2](vec4(0.0), vec4(0.1));
-vec4[3][2] a = vec4[3][2](b, b, b);        // constructor
-void foo(vec4[3][2]); // prototype with unnamed parameter
-----
-
 Alternatively, the initializer-list syntax can be used to initialize an
 array of arrays:
 
@@ -3017,21 +2936,6 @@ vec4 a[3][2] = { vec4[2](vec4(0.0), vec4(1.0)),
                  vec4[2](vec4(0.0), vec4(1.0)) };
 ----
 
-Unsized arrays can be explicitly sized by an initializer at declaration
-time:
-
-[source,c++]
-----
-float a[5];
-...
-float b[] = a;  // b is explicitly size 5
-float b[5] = a; // means the same thing
-float b[] = float[](1,2,3,4,5); // also explicitly sizes to 5
-----
-
-However, it is a compile-time error to assign to an unsized array.
-Note, this is a rare case that initializers and assignments appear to have
-different semantics.
 For arrays of arrays, any unsized dimension is explicitly sized by the
 initializer:
 
@@ -3041,93 +2945,93 @@ vec4 a[][] = { vec4[2](vec4(0.0), vec4(1.0)), // okay, size to a[3][2]
                vec4[2](vec4(0.0), vec4(1.0)),
                vec4[2](vec4(0.0), vec4(1.0)) };
 ----
+endif::GLSL[]
 
-Arrays know the number of elements they contain.
-This can be obtained by using the *length*() method:
+When in transparent memory (like in a uniform block), the layout is that the
+inner-most (right-most in declaration) dimensions iterate faster than the
+outer dimensions.
+That is, for the above, the order in memory would be:
+
+{empty}:: Low address : a[0][0] : a[0][1] : a[1][0] : a[1][1] : a[2][0] : a[2][1]
+     : High address
+
+ifdef::ESSL[]
+Any restrictions on the usage of a type also apply to arrays of that type.
+This applies recursively.
+endif::ESSL[]
+
+
+==== The *length*() Method
+
+The number of elements in an array can be obtained by using the *length*()
+method:
 
 [source,c++]
 ----
 float a[5];
 a.length(); // returns 5
+
+vec4 a[3][2];
+a.length()    // returns 3
+a[x].length() // returns 2
 ----
 
-This returns a type *int*.
-If an array has been explicitly sized, the value returned by the *length*()
-method is a constant expression.
-If an array has not been explicitly sized and is the last declared member of
-a shader storage block, the value returned will not be a constant expression
-and will be determined at runtime based on the size of the buffer object
-providing storage for the block.
-Such arrays are runtime sized.
-For runtime-sized arrays, the value returned by the *length*() method will be
-undefined if the array is contained in an array of shader storage blocks
-that is indexed with a non-constant expression less than zero or greater
-than or equal to the number of blocks in the array.
+The return value has type *int*.
 
-The *length*() method cannot be called on an array that is not runtime sized
-and also has not yet been explicitly sized;
-this results in a compile-time error.
+It is {compiletimeerror} to use the *length*() method on an unsized array.
+The return value is a constant expression if and only if the array is
+explicitly-sized.
 
 When the *length*() method returns a compile-time constant, the expression the
-*length*() method is applied to cannot contain any side effects, such as writes
+*length*() method is applied to will be parsed and is subject to the normal
+language rules but any arrays will not be dereferenced.
+This means that the value returned is well-defined even if the indices are out
+of bounds at runtime.
+Note, however, that because indices which are constant expressions are still
+checked, an error will still be generated for constant indexing out-of-bounds.
+
+When the *length*() method returns a compile-time constant and the expression the
+*length*() method is applied to contains any side effects (such as writes
 to l-values within the expression, or function calls that themselves have side
-effects: only the compile-time constant length itself need be computed.
-Behavior and results, including any compile-time error reporting,
-are undefined if the expression contains other effects.
+effects), behavior is undefined.
+A compile- or link-time error may be given by the implementation but this is
+not required.
 
 [source,c++]
 ----
 float a, b;
-const int s = float[2](a=3.0, ++b).length(); // illegal side effects
+float[2](a=3.0, ++b).length(); // Behavior undefined. Illegal side effects
+
+float c[5][3];
+c[7].length(); // Error. Static indexing out of bounds.
+c[i].length(); // Valid, returns 3 even if i < 0 or i >= 5 at runtime.
+
+struct S {
+    float a[3];
+} s[5];
+s[i+3].a.length(); // Valid. Returns 3 for all inputs i.
+s[i++].a.length(); // Behavior undefined. Illegal side-effects.
+
+buffer B {
+    float x[3];
+    float y[];
+} b[5];
+b[i++].x.length(); // Behaviour undefined. Illegal side-effects.
+b[i++].y.length(); // Valid. i is incremented and b dereferenced. The runtime size
+                   // of y is returned if 0 <= x < 5, behavior undefined if not.
 ----
 
-The *length*() method works equally well for arrays of arrays:
-
-[source,c++]
-----
-vec4 a[3][2];
-a.length()    // this is 3
-a[x].length() // this is 2
-----
-
-When the *length*() method returns a compile-time constant, the expression
-in brackets (_x_ above) will be parsed and subjected to the rules required for
-array indices, but the array will not be dereferenced.
-Thus, behavior is well defined even if the run-time value of the expression
-is out of bounds, as long as the expression contains no side effects.
-
-When the *length*() method returns a run-time value
-(not a compile-time constant), the array will be
-dereferenced.
-E.g., if _x_ is not a compile-time constant and is out of range, an undefined
-value results.
-More generally, all involved expressions are fully evaluated and executed.
-
-[source,c++]
-----
-// for a compile time-sized array b containing a member array a:
-b[x+3].a.length(); // b is never dereferenced, x+3 is evaluated and checked
-b[++x].a.length(); // not allowed; results are undefined
-
-// for an array s of a shader storage object (run-time sized) containing a member array a:
-s[++x].a.length(); // s is dereferenced; ++x needs to be a valid index
-----
-
-For implicitly-sized or run-time-sized arrays, only the outer-most dimension
-can be lacking a size.
-A type that includes an unknown array size cannot be formed into an array
-until it gets an explicit size, except for shader storage blocks where the
-only unsized array member is the last member of the block.
-
-In a shader storage block, the last member may be declared without an
-explicit size.
-In this case, the effective array size is inferred at run-time from the size
-of the data store backing the interface block.
-Such run-time-sized arrays may be indexed with general integer expressions.
-However, it is a compile-time error to pass them as an argument to a
-function or index them with a negative constant expression.
+The precision is determined using the same rules as for other cases where
+there is no intrinsic precision.
+See "`<<precision-qualifiers,Precision Qualifiers>>`".
 
 
+// There is a gigantic block of GLSL/ESSL differences starting here
+// and going down through the Storage Qualifiers section. Apparently
+// there was a complete rewrite by one spec, probably ESSL, as virtually
+// no language is shared
+
+ifdef::GLSL[]
 [[implicit-conversions]]
 === Implicit Conversions
 
@@ -3492,58 +3396,8 @@ Otherwise, a link-time error will result.
 (A shared global having only one initializer does not require that
 initializer to be a constant expression.)
 endif::GLSL[]
+
 ifdef::ESSL[]
-The last member of a shader storage block (see "`<<buffer-variables,Buffer
-Variables>>`"), may be declared without specifying a size.
-For such arrays, the effective array size is inferred at run-time from the
-size of the data store backing the shader storage block.
-Such runtime-sized arrays may be indexed with general integer expressions,
-but may not be passed as an argument to a function or indexed with a
-negative constant expression.
-
-[source,c++]
-----
-struct S { float f; };
-buffer ShaderStorageBlock1
-{
-    vec4 a[]; // illegal
-    vec4 b[]; // legal, runtime-sized arrays are last member
-};
-buffer ShaderStorageBlock2
-{
-    vec4 a[4]; // legal, size declared
-    S b[]; // legal, runtime-sized arrays are allowed,
-    // including arrays of structures
-};
-----
-
-However, it is a compile-time error to assign to a runtime-sized array.
-Assignments to individual elements of the array is allowed.
-
-Arrays have a fixed number of elements.
-This can be obtained by using the *length*() method:
-
-[source,c++]
-----
-float a[5];
-a.length(); // returns 5
-----
-
-The return value is a signed integral expression.
-For compile-time sized arrays, the value returned by the length method is a
-constant expression.
-For run-time sized arrays , the value returned will not be constant
-expression and will be determined at run time based on the size of the
-buffer object providing storage for the block.
-
-The precision is determined using the same rules as for other cases where
-there is no intrinsic precision.
-See "`<<precision-qualifiers,Precision Qualifiers>>`".
-
-Any restrictions on the usage of a type also apply to arrays of that type.
-This applies recursively.
-
-
 [[scoping]]
 == Scoping
 
