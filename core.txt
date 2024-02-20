@@ -145,7 +145,10 @@ endif::ESSL[]
 === Changes from {slabbrev} {apiversion} revision 8
 
  * Private GLSL issue #59: Fix incorrect domain of *atanh* function.
-
+ * Private GLSL issue #68: Clarifying changes to the "`<<arrays,Arrays>>`" section.
+   The section is reorganised for ease of editing and certain rules are clarified.
+   The rules for unsized arrays are included for ES even though they cannot be
+   declared because they apply to certain pre-declared uses.
 
 ifdef::GLSL[]
 === Changes from {slabbrev} {apiversion} revision 7
