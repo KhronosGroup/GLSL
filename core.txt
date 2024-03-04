@@ -2520,12 +2520,10 @@ Except for array indexing, structure member selection, and parentheses,
 opaque variables are not allowed to be operands in expressions; such use
 results in a compile-time error.
 
-ifdef::ESSL[]
 When aggregated into arrays within a shader, opaque types can only be
 indexed with a dynamically uniform integral expression (see "`Dynamically
 Uniform Expressions`") unless otherwise noted; otherwise, results are
 undefined.
-endif::ESSL[]
 
 Opaque variables cannot be treated as l-values; hence cannot be used as
 *out* or *inout* function parameters, nor can they be assigned into.
@@ -2555,11 +2553,6 @@ are used to specify which texture to access and how it is to be filtered.
 
 Texture-combined sampler types are opaque types,
 declared and behaving as described above for opaque types.
-ifdef::GLSL[]
-When aggregated into arrays within a shader, they can only be indexed
-with a dynamically uniform integral expression, otherwise results are
-undefined.
-endif::GLSL[]
 
 [[images]]
 ==== Images
@@ -2567,11 +2560,10 @@ endif::GLSL[]
 Image types are opaque types, declared and behaving as described above for
 opaque types.
 They can be further qualified with memory qualifiers.
+ifdef::ESSL[]
 When aggregated into arrays within a shader, images can only be indexed with
-ifdef::GLSL[]
-a dynamically uniform integral expression, otherwise results are undefined.
-endif::GLSL[]
-ifdef::ESSL[a constant integral expression.]
+a constant integral expression.
+endif::ESSL[]
 
 Image variables are handles to
 ifdef::GLSL[one-,]
@@ -2615,10 +2607,6 @@ built-in atomic counter functions as described in
 They are bound to buffers as described in
 "`<<atomic-counter-layout-qualifiers,Atomic Counter Layout Qualifiers>>`".
 
-Atomic counters aggregated into arrays within a shader can only be indexed
-with dynamically uniform integral expressions, otherwise results are
-undefined.
-
 Members of structures cannot be declared as atomic counter types.
 
 ifdef::ESSL[]
@@ -2634,9 +2622,6 @@ Atomic counter types are not available when targeting Vulkan.
 Texture (e.g., *texture2D*), *sampler*, and *samplerShadow* types are opaque
 types, declared and behaving as described above for opaque types.
 These types are only available when targeting Vulkan.
-When aggregated into arrays within a shader, these types can only be indexed
-with a dynamically uniform expression, or texture lookup will result in
-undefined values.
 Texture variables are handles to one-, two-, and three-dimensional textures,
 cube maps, etc., as enumerated in the basic types tables.
 There are distinct texture types for each texture target, and for each of
@@ -2654,8 +2639,6 @@ Subpass-input types are only available when targeting Vulkan.
 
 Subpass-input types (e.g., *subpassInput*) are opaque types, declared
 and behaving as described above for opaque types.
-When aggregated into arrays within a shader, they can only be indexed with a
-dynamically uniform integral expression, otherwise results are undefined.
 
 Subpass-input types are handles to two-dimensional single sampled or
 multi-sampled images, with distinct types for each of float, integer,
