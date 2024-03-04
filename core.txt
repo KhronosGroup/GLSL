@@ -144,6 +144,7 @@ endif::ESSL[]
 
 === Changes from {slabbrev} {apiversion} revision 8
 
+ * Public GLSL issue #198: Clarify that logical operators operate only on scalars.
  * Private GLSL issue #59: Fix incorrect domain of *atanh* function.
  * Private GLSL issue #66: Add a note clarifying that uninitialized *out* parameters
    will be copied, causing function arguments to become undefined.
@@ -9618,16 +9619,16 @@ endif::ESSL[]
     To get a vector of component-wise equality results for vectors, use the
     built-in functions *equal* and *notEqual*.
   * The logical binary operators and (*&&*), or (*||*), and exclusive or
-    (*^^*) operate only on two Boolean expressions and result in a Boolean
-    expression.
+    (*^^*) operate only on two scalar Boolean expressions. The result is a
+    scalar Boolean.
     And (*&&*) will only evaluate the right hand operand if the left hand
     operand evaluated to *true*.
     Or (*||*) will only evaluate the right hand operand if the left hand
     operand evaluated to *false*.
     Exclusive or (*^^*) will always evaluate both operands.
   * The logical unary operator not (*!*).
-    It operates only on a Boolean expression and results in a Boolean
-    expression.
+    It operates only on a scalar Boolean expression. The result is a scalar
+    Boolean.
     To operate on a vector, use the built-in function *not*.
   * The sequence (*,*) operator that operates on expressions by returning
     the type and value of the right-most expression in a comma separated
