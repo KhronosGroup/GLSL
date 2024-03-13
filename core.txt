@@ -144,11 +144,15 @@ endif::ESSL[]
 
 === Changes from {slabbrev} {apiversion} revision 8
 
+ * Public GLSL issue #198: Clarify that logical operators operate only on scalars.
  * Private GLSL issue #59: Fix incorrect domain of *atanh* function.
+ * Private GLSL issue #66: Add a note clarifying that uninitialized *out* parameters
+   will be copied, causing function arguments to become undefined.
  * Private GLSL issue #68: Clarifying changes to the "`<<arrays,Arrays>>`" section.
    The section is reorganised for ease of editing and certain rules are clarified.
    The rules for unsized arrays are included for ES even though they cannot be
    declared because they apply to certain pre-declared uses.
+
 
 ifdef::GLSL[]
 === Changes from {slabbrev} {apiversion} revision 7
@@ -2523,12 +2527,10 @@ Except for array indexing, structure member selection, and parentheses,
 opaque variables are not allowed to be operands in expressions; such use
 results in a compile-time error.
 
-ifdef::ESSL[]
 When aggregated into arrays within a shader, opaque types can only be
 indexed with a dynamically uniform integral expression (see "`Dynamically
 Uniform Expressions`") unless otherwise noted; otherwise, results are
 undefined.
-endif::ESSL[]
 
 Opaque variables cannot be treated as l-values; hence cannot be used as
 *out* or *inout* function parameters, nor can they be assigned into.
@@ -2558,11 +2560,6 @@ are used to specify which texture to access and how it is to be filtered.
 
 Texture-combined sampler types are opaque types,
 declared and behaving as described above for opaque types.
-ifdef::GLSL[]
-When aggregated into arrays within a shader, they can only be indexed
-with a dynamically uniform integral expression, otherwise results are
-undefined.
-endif::GLSL[]
 
 [[images]]
 ==== Images
@@ -2570,11 +2567,10 @@ endif::GLSL[]
 Image types are opaque types, declared and behaving as described above for
 opaque types.
 They can be further qualified with memory qualifiers.
+ifdef::ESSL[]
 When aggregated into arrays within a shader, images can only be indexed with
-ifdef::GLSL[]
-a dynamically uniform integral expression, otherwise results are undefined.
-endif::GLSL[]
-ifdef::ESSL[a constant integral expression.]
+a constant integral expression.
+endif::ESSL[]
 
 Image variables are handles to
 ifdef::GLSL[one-,]
@@ -2618,10 +2614,6 @@ built-in atomic counter functions as described in
 They are bound to buffers as described in
 "`<<atomic-counter-layout-qualifiers,Atomic Counter Layout Qualifiers>>`".
 
-Atomic counters aggregated into arrays within a shader can only be indexed
-with dynamically uniform integral expressions, otherwise results are
-undefined.
-
 Members of structures cannot be declared as atomic counter types.
 
 ifdef::ESSL[]
@@ -2637,9 +2629,6 @@ Atomic counter types are not available when targeting Vulkan.
 Texture (e.g., *texture2D*), *sampler*, and *samplerShadow* types are opaque
 types, declared and behaving as described above for opaque types.
 These types are only available when targeting Vulkan.
-When aggregated into arrays within a shader, these types can only be indexed
-with a dynamically uniform expression, or texture lookup will result in
-undefined values.
 Texture variables are handles to one-, two-, and three-dimensional textures,
 cube maps, etc., as enumerated in the basic types tables.
 There are distinct texture types for each texture target, and for each of
@@ -2657,8 +2646,6 @@ Subpass-input types are only available when targeting Vulkan.
 
 Subpass-input types (e.g., *subpassInput*) are opaque types, declared
 and behaving as described above for opaque types.
-When aggregated into arrays within a shader, they can only be indexed with a
-dynamically uniform integral expression, otherwise results are undefined.
 
 Subpass-input types are handles to two-dimensional single sampled or
 multi-sampled images, with distinct types for each of float, integer,
@@ -9490,16 +9477,16 @@ endif::ESSL[]
     To get a vector of component-wise equality results for vectors, use the
     built-in functions *equal* and *notEqual*.
   * The logical binary operators and (*&&*), or (*||*), and exclusive or
-    (*^^*) operate only on two Boolean expressions and result in a Boolean
-    expression.
+    (*^^*) operate only on two scalar Boolean expressions. The result is a
+    scalar Boolean.
     And (*&&*) will only evaluate the right hand operand if the left hand
     operand evaluated to *true*.
     Or (*||*) will only evaluate the right hand operand if the left hand
     operand evaluated to *false*.
     Exclusive or (*^^*) will always evaluate both operands.
   * The logical unary operator not (*!*).
-    It operates only on a Boolean expression and results in a Boolean
-    expression.
+    It operates only on a scalar Boolean expression. The result is a scalar
+    Boolean.
     To operate on a vector, use the built-in function *not*.
   * The sequence (*,*) operator that operates on expressions by returning
     the type and value of the right-most expression in a comma separated
@@ -10113,6 +10100,15 @@ out a value when the function returns.
 Evaluation of an *inout* parameter results in both a value and an l-value;
 the value is copied to the formal parameter at call time and the l-value is
 used to copy out a value when the function returns.
+
+[NOTE]
+.Note
+====
+Because *out* parameters are not copied into a function, they begin the function
+uninitialized. At the end of the function, the values are copied out to the
+caller unconditionally which, if the value has not been set in the function,
+will result in the passed argument becoming uninitialized in the caller.
+====
 
 The order in which output parameters are copied back to the caller is
 undefined.
