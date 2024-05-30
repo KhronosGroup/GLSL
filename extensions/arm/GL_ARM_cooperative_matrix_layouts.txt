@@ -1,0 +1,52 @@
+Name
+    GL_ARM_cooperative_matrix_layouts
+
+Name Strings
+    GL_ARM_cooperative_matrix_layouts
+
+Contact
+    Kevin Petit (kevin.petit 'at' arm.com), Arm
+
+Contributors
+    Kevin Petit, Arm
+    Pedro Olsen Ferreira, Arm
+
+Status
+    Complete
+
+Version
+    Last Modified Date: 2024-05-29
+    Revision: 1
+
+Number
+    N/A
+
+Dependencies
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+    This extension can be applied to OpenGL ES ESSL versions 3.0
+    (#version 300) and higher.
+    This extension is written against revision 7 of the OpenGL Shading Language
+    version 4.50, dated May 9, 2017.
+    This extension interacts with revision 2 of the GL_KHR_cooperative_matrix.
+    extension, dated 03 May 2023.
+
+Overview
+    This extension adds support for cooperative matrix memory layouts used on Arm GPUs.
+    The new layouts are described in GLSL using the constants
+
+        gl_CooperativeMatrixLayoutRowBlockedInterleavedARM = 4202
+        gl_CooperativeMatrixLayoutColumnBlockedInterleavedARM = 4203
+
+    These constants match their equivalent on the accompanying SPIR-V extension.
+    The layout requires the user provided buffers for the cooperative matrix data
+    contain the matrix data laid out as described in the equivalent SPIR-V extension
+    SPV_ARM_cooperative_matrix_layouts.
+
+Issues
+    None.
+
+Revision History
+    Rev.    Date      Author                Changes
+    ----  ----------  --------------------  -----------------------------------------
+     1    2024-05-29  Pedro Olsen Ferreira  Internal revisions.
