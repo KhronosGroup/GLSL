@@ -1,3 +1,6 @@
+// Copyright 2008-2024 The Khronos Group Inc.
+// SPDX-License-Identifier: CC-BY-4.0
+
 [[shading-language-grammar]]
 = Shading Language Grammar
 

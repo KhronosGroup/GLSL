@@ -1,3 +1,6 @@
+// Copyright 2008-2024 The Khronos Group Inc.
+// SPDX-License-Identifier: CC-BY-4.0
+
 ifdef::ESSL[]
 [[counting-of-inputs-and-outputs]]
 = Counting of Inputs and Outputs
