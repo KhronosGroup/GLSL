@@ -57,7 +57,7 @@ endif::ESSL[]
 :fullimagewidth: width="800"
 :source-highlighter: coderay
 // Various special / math symbols. This is easier to edit with than Unicode.
-include::config/attribs.txt[]
+include::config/attribs.adoc[]
 
 <<<<
 

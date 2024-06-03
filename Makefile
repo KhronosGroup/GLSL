@@ -107,19 +107,19 @@ $(OUTDIR)/katex/README.md: katex/README.md | $(OUTDIR)
 # causing specs to *always* be regenerated.
 html: $(OUTDIR)/essl.html $(OUTDIR)/glsl.html
 
-$(OUTDIR)/essl.html: core.txt | $(OUTDIR) katexinst
+$(OUTDIR)/essl.html: core.adoc | $(OUTDIR) katexinst
 	$(QUIET)$(ASCIIDOC) -b html5 $(ADOCOPTS) -a ESSL $(ADOCHTMLOPTS) -o $@ $<
 
-$(OUTDIR)/glsl.html: core.txt | $(OUTDIR) katexinst
+$(OUTDIR)/glsl.html: core.adoc | $(OUTDIR) katexinst
 	$(QUIET)$(ASCIIDOC) -b html5 $(ADOCOPTS) -a GLSL $(ADOCHTMLOPTS) -o $@ $<
 
 pdf: $(OUTDIR)/glsl.pdf $(OUTDIR)/essl.pdf
 
-$(OUTDIR)/essl.pdf: core.txt | $(OUTDIR)
+$(OUTDIR)/essl.pdf: core.adoc | $(OUTDIR)
 	$(QUIET)$(MKDIR) $(PDFMATHDIR)
 	$(QUIET)$(ASCIIDOC) -b pdf $(ADOCOPTS) -a ESSL $(ADOCPDFOPTS) -o $@ $<
 
-$(OUTDIR)/glsl.pdf: core.txt | $(OUTDIR)
+$(OUTDIR)/glsl.pdf: core.adoc | $(OUTDIR)
 	$(QUIET)$(MKDIR) $(PDFMATHDIR)
 	$(QUIET)$(ASCIIDOC) -b pdf $(ADOCOPTS) -a GLSL $(ADOCPDFOPTS) -o $@ $<
 
@@ -132,7 +132,7 @@ REFLOWOPTS = -overwrite
 
 reflow:
 	$(QUIET) echo "Warning: please verify the spec outputs build without changes!"
-	$(PYTHON) $(REFLOW) $(REFLOWOPTS) core.txt
+	$(PYTHON) $(REFLOW) $(REFLOWOPTS) core.adoc
 
 # Clean generated and output files
 
