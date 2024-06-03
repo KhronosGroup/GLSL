@@ -1,0 +1,25 @@
+// Copyright 2008-2024 The Khronos Group Inc.
+// SPDX-License-Identifier: CC-BY-4.0
+
+= GLSL
+
+This repository contains source for the GLSL Specification, and is a staging
+area for Khronos-private GLSL extensions, before they go public in
+https://github.com/KhronosGroup/GLSL.
+
+It is notably for Vulkan related GLSL extensions, but technically for those
+that do not live in the Khronos registries for OpenGL or OpenGL ES.
+
+== Differences from GitHub
+
+  * This is a partial mirror of https://github.com/KhronosGroup/GLSL, and
+    additionally contains GLSL spec source that is not yet published.
+  * The README is notably different, and this one won't maintain an index of
+    extensions (unlike the GitHub README).
+  * Once something moves to GitHub, the GitHub version will be considered
+    the true source of the extension.
+
+== This Project Contains
+
+  * new shading language extension proposals and discussions
+  * issue tracking for these unreleased extensions

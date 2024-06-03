@@ -1,10 +1,23 @@
-// Various special / math symbols, matching LaTeX names.
+// Copyright 2015-2024 The Khronos Group Inc.
+// SPDX-License-Identifier: CC-BY-4.0
 
+// Various special / math symbols, matching LaTeX names.
+// The pass:[+ ] notation avoids asciidoctor EOL treatment of the attribute.
+
+// Special symbols - not used in [eq] spans
 :sym1: ✓
 :sym2: †
+:sym3: ‡
+:sym4: §
+:reg: ®
+:trade: ™
+:harr: ↔
+
+// Math operators and logic symbols
 :times: ×
-:cdot: ·
-:plus: +
+:cdot: ⋅
+:plus: pass:[+ ]
+:minus: pass:[- ]
 :geq: ≥
 :leq: ≤
 :neq: ≠
@@ -17,16 +30,6 @@
 :land: ∧
 :lor: ∨
 :oplus: ⊕
-:alpha: α
-:beta: β
-:gamma: γ
-:DeltaUpper: Δ
-:delta: δ
-:epsilon: ε
-:lambda: λ
-:pi: π
-:rho: ρ
-:tau: τ
 :lceil: ⌈
 :rceil: ⌉
 :lfloor: ⌊
@@ -34,4 +37,34 @@
 :vert: |
 :partial: ∂
 :onehalf: ½
-:onequarter: ¼ 
+:onequarter: ¼
+:ldots: …
+:forall: ∀
+:sqrt: √
+:inf: ∞
+:plusmn: ±
+
+// Greek letters
+:alpha: α
+:beta: β
+:gamma: γ
+:DeltaUpper: Δ
+:delta: δ
+:epsilon: ε
+:eta: η
+:theta: θ
+:lambda: λ
+:pi: π
+:rho: ρ
+:sigma: σ
+:tau: τ
+:phi: ϕ
+
+// Word break opportunity tag for HTML
+ifdef::backend-html5[]
+:wbro: pass:[<wbr>]
+endif::backend-html5[]
+ifndef::backend-html5[]
+:wbro:
+endif::backend-html5[]
+

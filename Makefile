@@ -1,16 +1,5 @@
-# Copyright (c) 2014-2017 The Khronos Group Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Copyright 2014-2024 The Khronos Group Inc.
+# SPDX-License-Identifier: Apache-2.0
 
 # OpenGL Shading Language Specification makefile
 
@@ -101,12 +90,7 @@ ADOCOPTS     = -d book $(ATTRIBOPTS) $(NOTEOPTS) $(VERBOSE) $(ADOCEXTS)
 ADOCHTMLEXTS = -r $(CURDIR)/config/katex_replace.rb
 ADOCHTMLOPTS = $(ADOCHTMLEXTS) -a katexpath=../katex
 
-# The monkey patch for asciidoctor-pdf fixes issue #259
-# (https://github.com/asciidoctor/asciidoctor-pdf/issues/259).
-# @tobias has submitted a pull request to fix it. Once it goes into a
-# gem release, we'll remove this.
-ADOCPDFEXTS  = -r $(ADOCPDF) -r asciidoctor-mathematical \
-	       -r $(CURDIR)/config/asciidoctor-pdf-monkeypatch.rb --trace
+ADOCPDFEXTS  = -r $(ADOCPDF) -r asciidoctor-mathematical
 ADOCPDFOPTS  = $(ADOCPDFEXTS) -a mathematical-format=svg \
 	       -a imagesoutdir=$(PDFMATHDIR)
 
@@ -143,13 +127,13 @@ $(OUTDIR)/glsl.pdf: $(SPECSRC) $(SPECFILES) | $(OUTDIR)
 $(OUTDIR):
 	$(QUIET)$(MKDIR) $(OUTDIR)
 
-# Reflow text in spec sources
-REFLOW = reflow.py
-REFLOWOPTS = -overwrite
-
-reflow:
-	$(QUIET) echo "Warning: please verify the spec outputs build without changes!"
-	$(PYTHON) $(REFLOW) $(REFLOWOPTS) $(SPECSRC) $(SPECFILES)
+# Reflow text in spec sources - not currently used
+# REFLOW = reflow.py
+# REFLOWOPTS = -overwrite
+#
+# reflow:
+#	  $(QUIET) echo "Warning: please verify the spec outputs build without changes!"
+#	  $(PYTHON) $(REFLOW) $(REFLOWOPTS) $(SPECSRC) $(SPECFILES)
 
 # Clean generated and output files
 
