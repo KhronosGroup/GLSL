@@ -1,0 +1,519 @@
+[[introduction]]
+= Introduction
+
+This document specifies only version {minor} of the {slname} ({slabbrev}).
+It requires +__VERSION__+ to substitute {version}, and requires
+*#version* to accept only
+ifdef::GLSL[`{version}`.]
+ifdef::ESSL[`{version} es`.]
+If *#version* is declared with a smaller number, the language accepted is a
+previous version of the shading language, which will be supported depending
+on the version and type of context in the API.
+See the <<references, normative references>> for details on what language
+versions are supported.
+
+ifdef::GLSL[]
+Previous versions of the {slname}, as well as the OpenGL ES Shading Language,
+are not strict subsets of the version specified here, particularly with
+respect to precision, name-hiding rules, and treatment of interface
+variables.
+See the specification corresponding to a particular language version for
+details specific to that version of the language.
+endif::GLSL[]
+
+Throughout, when generating SPIR-V for consumption by the Vulkan API
+(see <<references, normative references>>), this will be said to be
+_targeting Vulkan_.
+
+While this specification and the {apispec} are normative for {slname}, for
+SPIR-V generation it is still the SPIR-V specification and the SPIR-V client
+API specification that are normative for the generated SPIR-V.
+See the <<references, normative references>> for further detail.
+
+For SPIR-V generation, the SPIR-V client API specifies the commands used to
+manipulate SPIR-V shaders.
+
+Independent offline tool chains will compile {slabbrev} down to the SPIR-V
+intermediate language.
+SPIR-V generation is not enabled with a *#extension*, *#version*, or a
+profile.
+Instead, use of {slabbrev} for SPIR-V is determined by offline tool-chain use.
+See the documentation of such tools to see how to request generation of
+SPIR-V for its client API.
+
+{slabbrev} -> SPIR-V compilers must be directed as to what SPIR-V *Capabilities*
+are legal at run-time and give errors for {slabbrev} feature use outside those
+capabilities.
+This is also true for implementation-dependent limits that can be error
+checked by the front-end against built-in constants present in the {slabbrev}
+source: the front-end can be informed of such limits, and report errors when
+they are exceeded.
+
+ifdef::GLSL[]
+SPIR-V features that are not controlled by a SPIR-V capability, but do have an
+equivalent GLSL counterpart (stages, built-in functions, types, limits, etc.)
+are only expected to work on OpenGL drivers that support the GLSL counterpart.
+endif::GLSL[]
+
+All references in this specification to the <<references,{apispec}>> are to
+ifdef::GLSL[]
+the Core profile of version {apiversion}, unless a different profile is
+specified.
+endif::GLSL[]
+ifdef::ESSL[]
+version {apiversion}.
+endif::ESSL[]
+
+
+[[changes]]
+== Changes
+
+
+=== Changes from {slabbrev} {apiversion} revision 8
+
+ * Public GLSL issue #198: Clarify that logical operators operate only on scalars.
+ * Private GLSL issue #59: Fix incorrect domain of *atanh* function.
+ * Private GLSL issue #66: Add a note clarifying that uninitialized *out* parameters
+   will be copied, causing function arguments to become undefined.
+ * Private GLSL issue #68: Clarifying changes to the "`<<arrays,Arrays>>`" section.
+   The section is reorganised for ease of editing and certain rules are clarified.
+   The rules for unsized arrays are included for ES even though they cannot be
+   declared because they apply to certain pre-declared uses.
+
+
+ifdef::GLSL[]
+=== Changes from {slabbrev} {apiversion} revision 7
+
+ * Private GLSL issue #57: Clarify that *imageLoad* precision is determined (where
+   applicable) only by the precision of the image argument.
+ * Public GLSL issue #164: Clarify the precision expected from *mod*.
+ * Public GLSL issue #8: Clarify when compute-shader variables may be accessed.
+ * Public GLSL issue #13: Clarify bit-width requirements for location aliasing.
+ * Public GLSL issue #161: Fix incorrect layout qualifier example.
+ * Private GLSL issue #30: Clarify that struct members' precision is always fixed
+   as part of the struct type declaration.
+ * Private GLSL issue #49: Clarify support for unary *+*.
+ * Private GLSL issue #43: Clarify precisions of constructors.
+ * Private GLSL issue #53: Clarify which qualifiers are allowed on
+   <<interface-blocks,Interface Blocks>>.
+ * Private GLSL issue #31: Removed incorrect example of 'invariant' applied to
+   'in' variable.
+ * Fix public GLSL issue #83: It is only opaque-type variables that are
+   required to keep their memory qualifiers (e.g., *readonly*) when
+   passed to a user-defined function.
+ * Clarify error conditions when declaring atomic counters.
+ * Subnormal values might be flushed to 0.0 by *intBitsToFloat*().
+ * Clarified that 'precise' cannot qualify structure definitions.
+ * Private Bugzilla #15755: Clarify storage size of precision qualified
+   <<interface-blocks,interface block>> members in application visible memory.
+
+=== Changes from {slabbrev} {apiversion} revision 6
+
+  * Incorporated the GL_KHR_vulkan_glsl specification.
+  * Add note in the introduction about presence in drivers of SPIR-V features,
+    as they relate to GLSL features.
+  * Clarify it is same location that triggers default-uniform block matching
+    rules.
+    See <<uniform-variable-layout-qualifiers, Uniform Variable Layout Qualifiers>>.
+
+=== Changes from {slabbrev} {apiversion} revision 5
+
+  * Private GLSL issue #34: Clarify/consolidate implicit conversion rules from int -> uint
+    to be the same as explicit construction.
+
+  * Private GLSL issue #24: Clarify that *barrier*() by itself is enough to synchronize
+    both control flow and memory accesses to *shared* variables and tessellation
+    control output variables. For other memory accesses an additional memory
+    barrier is still required.
+
+  * Normatively reference IEEE-754 for definitions of floating-point formats.
+
+  * Private GLSL issue 36: *refract* function on *double* types requires eta
+    argument to have type *double*.
+
+  * Clarify restrictions on input variables in tessellation and geometry stages.
+
+  * Private GLSL issue 15: Clarify the ordering of bindings for arrays of arrays.
+
+  * Private GLSL issue 14: Uniform variables need only match at link time if they
+    are statically used.
+
+  * For *precise* computations, the controlling expressions for
+    control flow and ternary operators (*?:*) are not included.
+
+=== Changes from {slabbrev} {apiversion} revision 4
+
+  * Private bug 13012: Clarified that builtin uniform variables might only
+    be available in the fragment stage.
+
+  * Private bug 13837: Ternary and sequence operators may operate on *void* types.
+
+  * Clarified that errors arising from preprocessing must be returned at compile time.
+
+  * Clarified that access to any part of a variable constitutes a static use.
+
+  * Private GLSL issue 19: A statement is required following any label at the end of a *switch*.
+
+  * Private GLSL issue 26: *noise* is not valid when compiling for SPIR-V.
+
+  * Private GLSL issue 20: *length*() expressions returning a constant value may not
+    contain side effects.
+
+  * Public OpenGL-API issue 7: Variables can be declared as both *readonly*
+    and *writeonly*.
+
+  * Private GLSL issue 16: Use of constant expressions within *#line* directives is undefined.
+
+  * Corrected return type of *imageAtomicExchange* on *float* images.
+
+  * Private GLSL issue 32: Remove *length*() method contradiction:
+    Non runtime-sized arrays only support *length*() on explicitly
+    sized arrays.
+
+  * Private GLSL issue 21: Clarified the l-value restriction on *interpolateAt*.
+
+  * Private OpenGL-API issue 53: Clarified bit-width requirements for location aliasing.
+
+  * Public GLSL issue 15: *gl_in* can be redeclared using unsized-array syntax.
+
+  * Clarification of the formats needed for DEPTH_COMPONENT and
+    STENCIL_COMPONENT for depth/stencil textures.
+
+  * Added image formats to the layout-qualifier table in the
+    <<layout-qualifiers, Layout Qualifiers>> section.
+
+=== Changes from {slabbrev} {apiversion} revision 3
+
+  * Private GLSL issue 13: Fix misspelling of *allInvocationsEqual*().
+    (The one in the table was incorrectly listed as *anyInvocationsEqual*(),
+    other spellings were correct.)
+
+
+=== Summary of Changes from Revision 7 of GLSL Version 4.50
+
+  * Incorporated the GL_ARB_shader_atomic_counter_ops extension.
+  * Incorporated the GL_ARB_shader_draw_parameters extension.
+  * Incorporated the GL_ARB_shader_group_vote extension.
+  * Incorporated the GL_ARB_gl_spirv extension.
+  * Private Bug 16070: Allow extra semi-colons at global scope.
+  * Private GLSL Issue 5: Be explicit that "`fail to link`" is really
+    "`compile-time or link-time error`", for some forms of error.
+  * Private GLSL Issue 7: Change _gl_MaxComputeUniformComponents_ to 1024.
+  * Private OpenGL API Issue 35: Require location on transparent individual
+    uniform variables for SPIR-V.
+  * Private GLSL Issue 8: Be more clear an *interpolateAt*() interpolant can
+    be a structure member.
+  * Private GLSL Issue 9: Specify how *xfb_buffer* interacts with a block
+    array: the capturing buffer increments for each block array element.
+endif::GLSL[]
+ifdef::ESSL[]
+=== Changes from {slabbrev} {apiversion} revision 7
+
+There are no changes between revision 7 and revision 8.
+
+=== Changes from {slabbrev} {apiversion} revision 6
+
+ * Private OpenGL issue #156: Clarify that per-vertex arrays of arrays of
+   blocks are allowed in the geometry stage.
+ * Private GLSL issue #57: Clarify that *imageLoad* precision is determined
+   only by the precision of the image argument.
+ * Public GLSL issue #164: Clarify the precision expected from *mod*.
+ * Public GLSL issue #8: Clarify when compute-shader variables may be accessed.
+ * Public GLSL Issue #159: Remove incorrect vertex input example.
+ * Private GLSL issue #30: Clarify that struct members' precision is always fixed
+   as part of the struct type declaration.
+ * Private GLSL issue #49: Clarify support for unary *+*.
+ * Private GLSL issue #43: Clarify precisions of constructors.
+ * Private GLSL issue #53: Clarify which qualifiers are allowed on
+   <<interface-blocks,Interface Blocks>>.
+ * Private GLSL issue #55: Clarify which expressions are valid interpolants for
+   <<interpolation-functions,interpolation functions>>.
+ * Fix public GLSL issue #83: It is only opaque-type variables that are
+   required to keep their memory qualifiers (e.g., *readonly*) when
+   passed to a user-defined function.
+ * Subnormal values might be flushed to 0.0 by *intBitsToFloat*().
+ * Clarify error conditions when declaring atomic counters.
+ * Clarified that 'precise' cannot qualify structure definitions.
+ * Private Bugzilla #15755: Clarify storage size of precision qualified
+   <<interface-blocks,interface block>> members in application visible memory.
+
+=== Changes from {slabbrev} {apiversion} revision 5
+
+  * Incorporated the GL_KHR_vulkan_glsl specification.
+  * Clarify it is same location that triggers default-uniform block matching
+    rules.
+    See <<uniform-variable-layout-qualifiers, Uniform Variable Layout Qualifiers>>.
+
+[[changes-from-glsl-es-3.2-revision-4]]
+=== Changes from {slabbrev} {apiversion} revision 4
+
+  * Clarified that this specification completely defines the {slname}.
+    Normatively reference C++ only for the preprocessor.
+
+  * Private GLSL issues 7, 38: Corrected the values of some builtin constants.
+    The values were given correctly in the {apispec}.
+
+  * Private GLSL issue 30: Clarify that output packing rules apply to the last
+    vertex pipeline stage, not necessarily the vertex stage.
+
+  * Private GLSL issue 15: Clarify the ordering of bindings for arrays of arrays.
+
+  * Private GLSL issue 14: Uniform variables need only match at link time if they
+    are statically used.
+
+  * For *precise* computations, the controlling expressions for
+    control flow and ternary operators (*?:*) are not included.
+
+[[changes-from-glsl-es-3.2-revision-3]]
+=== Changes from {slabbrev} {apiversion} revision 3
+
+  * Matching of default uniforms when shaders are linked.
+  * _gl_DepthRange_ is only guaranteed to be available in the fragment
+    stage.
+  * Clarification of definition of static use.
+  * Sampling behavior in the absence of *sample* and *centroid*.
+  * Clarified the requirements when the specification uses the terms
+    _should_/_should not_ and _undefined behavior_.
+  * Arrayed blocks cannot have layout location qualifiers on members
+  * *barrier*() defines a partial order which includes tessellation control
+    shader outputs.
+  * Vertex shader integer output qualification.
+  * Incorrect use of predefined pragmas.
+  * Clarified use of *readonly* and *writeonly* qualifiers.
+  * USAMPLERBUFFER added to grammar.
+  * Clarified precision qualifiers can be used in interface blocks.
+  * Clarified *memoryBarrierShared* only applies to the current workgroup.
+  * The layout qualifier _invocations_ must not be zero.
+  * The layout qualifier _local_size_ must not be zero.
+  * Clarified the definition of static assignment.
+  * Removed list of types with no default precision.
+  * Removed scoping rules from the grammar. Refer instead to the <<scoping,scoping>> section.
+  * Require a statement after the final label of a switch.
+  * Define *gl_BoundingBox*.
+  * *length*() expressions returning a constant-value may not include side effects.
+  * Clarified that variables may be declared *readonly writeonly*.
+  * Use of constant expressions within *#line* directives is undefined.
+  * *gl_in* can be redeclared using unsized-array syntax.
+  * Clarified which sampler types may be used for depth and stencil textures.
+  * Added order-of-operation and other explanations to the
+    <<the-precise-qualifier, Precise Qualifier>> section.
+  * The *precise* qualifier applied to a block/struct applies recursively to the members.
+
+
+[[changes-from-glsl-es-3.2-revision-2]]
+=== Changes from {slabbrev} {apiversion} revision 2
+
+  * Updated value for _gl_MaxTessControlTotalOutputComponents_
+  * Clarified the allowed character set for pre-processing
+  * Integer division wrapping behavior
+  * Clarified pre-processor expressions (_pp-constant-expression_)
+  * UBO and SSBO precisions do not need to match for linked shaders
+    (consistent with GLSL ES 3.1)
+  * *modf* function
+  * Sequence and ternary operators with *void* type
+  * Sequence and ternary operators with array types
+
+[[changes-from-glsl-es-3.2-revision-1]]
+=== Changes from {slabbrev} {apiversion} revision 1
+
+  * Signed zeros must be supported
+  * Layout qualifier table
+  * Allowed optimizations when evaluating expressions
+  * Updated value for _gl_MaxTessControlInputComponents_
+  * Updated value for _gl_MaxTessControlOutputComponents_
+  * Updated value for _gl_MaxTessEvaluationInputComponents_
+  * Updated value for _gl_MaxTessEvaluationOutputComponents_
+  * Updated value for _gl_MaxGeometryOutputComponents_
+  * Require precisions in blocks to match when linking
+  * Updated conclusions in issues section
+
+[[changes-from-glsl-es-3.1-revision-4]]
+=== Changes from GLSL ES 3.1 revision 4
+
+  * Added the following extensions:
+  ** https://www.opengl.org/registry/specs/KHR/blend_equation_advanced.txt[KHR_blend_equation_advanced]
+  ** https://www.khronos.org/registry/gles/extensions/OES/OES_sample_variables.txt[OES_sample_variables]
+  ** https://www.khronos.org/registry/gles/extensions/OES/OES_shader_image_atomic.txt[OES_shader_image_atomic]
+  ** https://www.khronos.org/registry/gles/extensions/OES/OES_shader_multisample_interpolation.txt[OES_shader_multisample_interpolation]
+  ** https://www.khronos.org/registry/gles/extensions/OES/OES_texture_storage_multisample_2d_array.txt[OES_texture_storage_multisample_2d_array]
+  ** https://www.khronos.org/registry/gles/extensions/OES/OES_geometry_shader.txt[OES_geometry_shader]
+  ** https://www.khronos.org/registry/gles/extensions/OES/OES_gpu_shader5.txt[OES_gpu_shader5]
+  ** https://www.khronos.org/registry/gles/extensions/OES/OES_primitive_bounding_box.txt[OES_primitive_bounding_box]
+  ** https://www.khronos.org/registry/gles/extensions/OES/OES_shader_io_blocks.txt[OES_shader_io_blocks]
+  ** https://www.khronos.org/registry/gles/extensions/OES/OES_tessellation_shader.txt[OES_tessellation_shader]
+  ** https://www.khronos.org/registry/gles/extensions/OES/OES_texture_buffer.txt[OES_texture_buffer]
+  ** https://www.khronos.org/registry/gles/extensions/OES/OES_texture_cube_map_array.txt[OES_texture_cube_map_array]
+  ** https://www.opengl.org/registry/specs/KHR/robustness.txt[KHR_robustness]
+endif::ESSL[]
+
+
+[[overview]]
+== Overview
+
+This document describes _The {slname}, version {minor}_.
+
+Independent compilation units written in this language are called _shaders_.
+A _program_ is a set of shaders that are compiled and linked
+ifdef::GLSL[]
+together,
+completely creating one or more of the programmable stages of the
+API pipeline.
+All the shaders for a single programmable stage must be within the same
+program.
+A complete set of programmable stages can be put into a single program or
+the stages can be partitioned across multiple programs.
+endif::GLSL[]
+ifdef::ESSL[together.]
+The aim of this document is to thoroughly specify the programming language.
+The <<references, normative references>> will specify the API entry points
+used to manipulate and communicate with programs and shaders.
+
+
+[[error-handling]]
+== Error Handling
+
+Compilers, in general, accept programs that are ill-formed, due to the
+impossibility of detecting all ill-formed programs.
+Portability is only ensured for well-formed programs, which this
+specification describes.
+Compilers are encouraged to detect ill-formed programs and issue diagnostic
+messages, but are not required to do so for all cases.
+ifdef::GLSL[]
+Compile-time errors must be returned for lexically or grammatically
+incorrect shaders.
+Other errors are reported at compile time or link time as indicated.
+Code that is "`dead`" must still be error checked.
+For example:
+
+[source,c++]
+----
+if (false)     // changing false to true cannot uncover additional errors
+    statement; // statement must be error checked regardless
+----
+endif::GLSL[]
+ifdef::ESSL[]
+The compilation process is implementation-dependent but is generally split
+into a number of stages, each of which occurs at one of the following times:
+
+  * A call to _glCompileShader_
+  * A call to _glLinkProgram_
+  * A draw call or a call to _glValidateProgram_
+
+The implementation should report errors as early a possible but in any case
+must satisfy the following:
+
+  * All lexical, grammatical and semantic errors must have been detected
+    following a call to _glLinkProgram_
+  * Errors due to mismatch between the shaders (link-time errors) must have
+    been detected following a call to _glLinkProgram_
+  * Errors due to exceeding resource limits must have been detected
+    following any draw call or a call to _glValidateProgram_
+  * A call to _glValidateProgram_ must report all errors associated with a
+    program object given the current GL state.
+
+Where the specification uses the terms _required_, _must_/_must_ _not_,
+_does_/_does_ _not_, _disallowed_, or _not_ _supported_, the compiler or
+linker is required to detect and report any violations.
+Similarly when a condition or situation is an *error*, it must be reported.
+Use of any feature marked as _reserved_ is an error.
+Where the specification uses the terms _should_/_should_ _not_, _undefined_
+_behavior_, _undefined_ _value_ or _undefined_ _*results*_, implementations
+will not produce a compile-time error but are encouraged to issue a warning
+for violations.
+The run-time behavior of the program in these cases is not constrained (and
+so may include termination or system instability).
+It is expected that systems will be designed to handle these cases
+gracefully but specification of this is outside the scope of this
+specification.
+
+Implementations may not in general support functionality beyond the mandated
+parts of the specification without use of the relevant extension.
+The only exceptions are:
+
+  . If a feature is marked as optional.
+  . Where a maximum value is stated (e.g. the maximum number of vertex
+    outputs), the implementation may support a higher value than that
+    specified.
+
+Where the implementation supports more than the mandated specification,
+off-target compilers are encouraged to issue warnings if these features are
+used.
+
+The compilation process is split between the compiler and linker.
+The allocation of tasks between the compiler and linker is implementation
+dependent.
+Consequently there are many errors which may be detected either at compile
+or link time, depending on the implementation.
+endif::ESSL[]
+
+
+[[typographical-conventions]]
+== Typographical Conventions
+
+Italic, bold, and font choices have been used in this specification
+primarily to improve readability.
+Code fragments use a fixed width font.
+Identifiers embedded in text are italicized.
+Keywords embedded in text are bold.
+Operators are called by their name, followed by their symbol in bold in
+parentheses.
+The clarifying grammar fragments in the text use bold for literals and
+italics for non-terminals.
+The official grammar in "`<<shading-language-grammar,Shading Language
+Grammar>>`" uses all capitals for terminals and lower case for
+non-terminals.
+
+
+ifdef::GLSL[]
+[[deprecation]]
+== Deprecation
+
+The {slname} has deprecated some features.
+These are clearly called out in this specification as "`deprecated`".
+They are still present in this version of the language, but are targeted for
+potential removal in a future version of the shading language.
+The {apiname} API has a forward compatibility mode that will disallow use of
+deprecated features.
+If compiling in a mode where use of deprecated features is disallowed, their
+use causes compile-time or link-time errors.
+See the <<references,{apispec}>> for details on what causes deprecated
+language features to be accepted or to return an error.
+endif::GLSL[]
+
+
+ifdef::ESSL[]
+[[compatibility]]
+== Compatibility
+
+The {apiname} {apiversion} API is designed to work with GLSL ES v1.00,
+GLSL ES 3.00, GLSL ES 3.10 and GLSL ES {minor}.
+In general a shader written for versions prior to {apiname} {apiversion}
+should work without modification in {apiname} {apiversion}.
+
+When porting applications from an earlier to later version of the {slabbrev},
+the following points should be noted:
+
+  * Not all language constructs present in earlier versions of the language
+    are available in later versions e.g. attribute and varying qualifiers
+    are present in v1.00 but not v3.00.
+    However, the functionality of GLSL ES {minor} is a super-set of
+    GLSL ES 3.10.
+  * Some features of later versions of the API require language features
+    that are not present in earlier version of the language.
+  * It is an error to link shaders if they are written in different versions
+    of the language.
+  * The {apiname} 2.0 and 3.0 APIs do not support shaders written in GLSL ES
+    3.20.
+  * Using GLSL ES 1.00 shaders within {apiname} 3.x may extend the resources
+    available beyond the minima specified in GLSL ES 1.0.
+    Shaders which make use of this will not necessarily run on an {apiname}
+    2.0 implementation: Similarly for GLSL ES 3.00 shaders running within
+    {apiname} 3.2.
+  * Support of line continuation and support of UTF-8 characters within
+    comments is optional in GLSL ES 1.00 when used with the {apiname} 2.0
+    API.
+    However, support is mandated for both of these when a GLSL ES 1.00
+    shader is used with the {apiname} 3.x APIs.
+endif::ESSL[]
+
+

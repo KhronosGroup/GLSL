@@ -1,0 +1,195 @@
+[[acknowledgments]]
+= Acknowledgments
+
+This specification is based on the work of those who contributed to past
+versions of the Open GL and Open GL ES Language Specifications and the
+following contributors to this version:
+
+ifdef::editing-notes[]
+[NOTE]
+.editing-note
+====
+(Jon) Would like to make multicolumnar, at least in PDF output.
+====
+endif::editing-notes[]
+
+ifdef::GLSL[]
+Jeff Bolz, NVIDIA +
+Pierre Boudier, AMD +
+Pat Brown, NVIDIA +
+Frank Chen +
+Piers Daniell, NVIDIA +
+Chris Dodd, NVIDIA +
+Jason Green, Transgaming +
+Nick Haemel, NVIDIA +
+Brent Insko, Intel +
+Daniel Koch, NVIDIA +
+Jon Leech +
+Graeme Leese, Broadcom +
+Bill Licea-Kane, Qualcomm +
+Barthold Lichtenbelt, NVIDIA +
+Bruce Merry, ARM +
+Robert Ohannessian +
+Tom Olson, ARM +
+Brian Paul, VMware +
+Acorn Pooley, NVIDIA +
+Daniel Rakos, AMD +
+Christophe Riccio, AMD +
+Kevin Rogovin +
+Ian Romanick, Intel +
+Greg Roth, NVIDIA +
+Jeremy Sandmel, Apple +
+Graham Sellers, AMD +
+Dave Shreiner, ARM +
+Robert Simpson, Qualcomm +
+Eric Werness, NVIDIA +
+Mark Young, AMD
+endif::GLSL[]
+ifdef::ESSL[]
+Acorn Pooley, NVIDIA +
+Alberto Moreira, Qualcomm +
+Aleksandra Krstic, Qualcomm +
+Alon Or-bach, Nokia & Samsung +
+Andrzej Kacprowski, Intel +
+Arzhange Safdarzadeh, Intel +
+Aske Simon Christensen, ARM +
+Avi Shapira, Graphic Remedy +
+Barthold Lichtenbelt, NVIDIA +
+Ben Bowman, Imagination Technologies +
+Ben Brierton, Broadcom +
+Benj Lipchak, Apple +
+Benson Tao, Vivante +
+Bill Licea-Kane, Qualcomm +
+Brent Insko, Intel +
+Brian Murray, Freescale +
+Bruce Merry, ARM +
+Carlos Santa, TI +
+Cass Everitt, Epic Games & NVIDIA +
+Cemil Azizoglu, TI +
+Chang-Hyo Yu, Samsung +
+Chris Dodd, NVIDIA +
+Chris Knox, NVIDIA +
+Chris Tserng, TI +
+Clay Montgomery, TI +
+Daniel Kartch, NVIDIA +
+Daniel Koch, Transgaming& NVIDIA +
+Daoxiang Gong, Imagination Technologies +
+Dave Shreiner, ARM +
+David Garcia, AMD +
+David Jarmon, Vivante +
+Derek Cornish, Epic Games +
+Dominick Witczak, Mobica +
+Eben Upton, Broadcom +
+Ed Plowman, ARM +
+Eisaku Ohbuchi, DMP +
+Elan Lennard, ARM +
+Erik Faye-Lund, ARM +
+Graeme Leese, Broadcom +
+Graham Connor, Imagination Technologies +
+Graham Sellers, AMD +
+Greg Roth, NVIDIA +
+Guillaume Portier, Hi Corporation +
+Guofang Jiao, Qualcomm +
+Hans-Martin Will, Vincent +
+Hwanyong Lee, Huone +
+I-Gene Leong, NVIDIA +
+Ian Romanick, Intel +
+Ian South-Dickinson, NVIDIA +
+Ilan Aelion-Exch, Samsung +
+Inkyun Lee, Huone +
+Jacob Strm, Ericsson +
+James Adams, Broadcom +
+James Jones, Imagination Technologies +
+James McCombe, Imagination Technologies +
+Jamie Gennis, Google +
+Jan-Harald Fredriksen, ARM +
+Jani Vaisanen, Nokia +
+Jarkko Kemppainen, Symbio +
+Jeff Bolz, NVIDIA +
+Jeff Leger, Qualcomm +
+Jeff Vigil, Qualcomm +
+Jeremy Sandmel, Apple +
+Jeremy Thorne, Broadcom +
+Jim Hauxwell, Broadcom +
+Jinsung Kim, Huone +
+Jiyoung Yoon, Huone +
+John Kessenich, Google +
+Jon Kennedy, 3DLabs +
+Jon Leech, Khronos +
+Jonathan Putsman, Imagination Technologies +
+Joohoon Lee, Samsung +
+JoukoKylmäoja, Symbio +
+Jrn Nystad, ARM +
+Jussi Rasanen, NVIDIA +
+Kalle Raita, drawElements +
+Kari Pulli, Nokia +
+Keith Whitwell, VMware +
+Kent Miller, Netlogic Microsystems +
+Kimmo Nikkanen, Nokia +
+Konsta Karsisto, Nokia +
+Krzysztof Kaminski, Intel +
+Larry Seiler, Intel +
+Lars Remes, Symbio +
+Lee Thomason, Adobe +
+Lefan Zhong, Vivante +
+Marcus Lorentzon, Ericsson +
+Mark Butler, Imagination Technologies +
+Mark Callow, Hi Corporation +
+Mark Cresswell, Broadcom +
+Mark Snyder, Alt Software +
+Mark Young, AMD +
+Mathieu Robart, STM +
+Matt Netsch, Qualcomm +
+Matt Russo, Matrox +
+Maurice Ribble, Qualcomm +
+Max Kazakov, DMP +
+Mika Pesonen, Nokia +
+Mike Cai, Vivante +
+Mike Weiblen, Zebra Imaging & Qualcomm +
+Mila Smith, AMD +
+Nakhoon Baek, Kyungpook Univeristy +
+Nate Huang, NVIDIA +
+Neil Trevett, NVIDIA +
+Nelson Kidd, Intel +
+Nick Haemel, NVIDIA +
+Nick Penwarden, Epic Games +
+Niklas Smedberg, Epic Games +
+Nizar Romdan, ARM +
+Oliver Wohlmuth , Fujitsu +
+Pat Brown, NVIDIA +
+Paul Ruggieri, Qualcomm +
+Per Wennersten, Ericsson +
+Petri Talala, Symbio +
+Phil Huxley, ZiiLabs +
+Philip Hatcher, Freescale & Intel +
+Piers Daniell, NVIDIA +
+Pyry Haulos, drawElements +
+Piotr Tomaszewski, Ericsson +
+Piotr Uminski, Intel +
+Rami Mayer, Samsung +
+Rauli Laatikainen, RightWare +
+Rob Barris, NVIDIA +
+Rob Simpson, Qualcomm +
+Roj Langhi, Vivante +
+Rune Holm, ARM +
+Sami Kyostila, Nokia +
+Sean Ellis, ARM +
+Shereef Shehata, TI +
+Sila Kayo, Nokia +
+Slawomir Cygan, Intel +
+Slawomir Grajewski, Intel +
+Steve Hill, STM & Broadcom +
+Steven Olney, DMP +
+Suman Sharma, Intel +
+Tapani Palli, Nokia +
+Teemu Laakso, Symbio +
+Tero Karras, NVIDIA +
+Timo Suoranta, Imagination Technologies & Broadcom +
+Tom Cooksey, ARM +
+Tom McReynolds, NVIDIA +
+Tom Olson, TI & ARM +
+Tomi Aarnio, Nokia +
+Tommy Asano, Takumi +
+Wes Bang, Nokia +
+Yanjun Zhang, Vivante
+endif::ESSL[]

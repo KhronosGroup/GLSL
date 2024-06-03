@@ -29,9 +29,18 @@ MKDIR	 = mkdir -p
 CP	 = cp
 KATEX	 = katex
 
+# Where the repo root is
+ROOTDIR  = $(CURDIR)
+# Where the spec files are
+SPECDIR  = $(CURDIR)
+# Path to configs and asciidoc extensions used in generation
+CONFIGS  = $(ROOTDIR)/config
+# Images used by the spec. These are included in generated HTML now.
+IMAGEPATH = $(SPECDIR)/images
+
 # Target directories for output files
 # OUTDIR - base directory in which outputs are generated
-OUTDIR	 = out
+OUTDIR	 = $(ROOTDIR)/out
 
 # PDF Equations are written to SVGs, this dictates the location to store
 # those files (temporary)
@@ -69,7 +78,15 @@ endif
 
 ATTRIBOPTS   = -a revdate="$(SPECDATE)" \
 	       -a revremark="$(SPECREMARK)" \
-	       -a stem=latexmath
+	       -a stem=latexmath \
+	       -a config=$(ROOTDIR)/config \
+	       -a chapters=$(SPECDIR)/chapters \
+	       -a images=$(IMAGEPATH) \
+
+# Top-level spec source file
+SPECSRC      = $(SPECDIR)/core.adoc
+# Static files making up sections of the API spec.
+SPECFILES    = $(wildcard $(SPECDIR)/chapters/[A-Za-z]*.adoc)
 
 # Asciidoctor options
 
@@ -107,21 +124,21 @@ $(OUTDIR)/katex/README.md: katex/README.md | $(OUTDIR)
 # causing specs to *always* be regenerated.
 html: $(OUTDIR)/essl.html $(OUTDIR)/glsl.html
 
-$(OUTDIR)/essl.html: core.adoc | $(OUTDIR) katexinst
-	$(QUIET)$(ASCIIDOC) -b html5 $(ADOCOPTS) -a ESSL $(ADOCHTMLOPTS) -o $@ $<
+$(OUTDIR)/essl.html: $(SPECSRC) $(SPECFILES) | $(OUTDIR) katexinst
+	$(QUIET)$(ASCIIDOC) -b html5 $(ADOCOPTS) -a ESSL $(ADOCHTMLOPTS) -o $@ $(SPECSRC)
 
-$(OUTDIR)/glsl.html: core.adoc | $(OUTDIR) katexinst
-	$(QUIET)$(ASCIIDOC) -b html5 $(ADOCOPTS) -a GLSL $(ADOCHTMLOPTS) -o $@ $<
+$(OUTDIR)/glsl.html: $(SPECSRC) $(SPECFILES) | $(OUTDIR) katexinst
+	$(QUIET)$(ASCIIDOC) -b html5 $(ADOCOPTS) -a GLSL $(ADOCHTMLOPTS) -o $@ $(SPECSRC)
 
 pdf: $(OUTDIR)/glsl.pdf $(OUTDIR)/essl.pdf
 
-$(OUTDIR)/essl.pdf: core.adoc | $(OUTDIR)
+$(OUTDIR)/essl.pdf: $(SPECSRC) $(SPECFILES) | $(OUTDIR)
 	$(QUIET)$(MKDIR) $(PDFMATHDIR)
-	$(QUIET)$(ASCIIDOC) -b pdf $(ADOCOPTS) -a ESSL $(ADOCPDFOPTS) -o $@ $<
+	$(QUIET)$(ASCIIDOC) -b pdf $(ADOCOPTS) -a ESSL $(ADOCPDFOPTS) -o $@ $(SPECSRC)
 
-$(OUTDIR)/glsl.pdf: core.adoc | $(OUTDIR)
+$(OUTDIR)/glsl.pdf: $(SPECSRC) $(SPECFILES) | $(OUTDIR)
 	$(QUIET)$(MKDIR) $(PDFMATHDIR)
-	$(QUIET)$(ASCIIDOC) -b pdf $(ADOCOPTS) -a GLSL $(ADOCPDFOPTS) -o $@ $<
+	$(QUIET)$(ASCIIDOC) -b pdf $(ADOCOPTS) -a GLSL $(ADOCPDFOPTS) -o $@ $(SPECSRC)
 
 $(OUTDIR):
 	$(QUIET)$(MKDIR) $(OUTDIR)
@@ -132,7 +149,7 @@ REFLOWOPTS = -overwrite
 
 reflow:
 	$(QUIET) echo "Warning: please verify the spec outputs build without changes!"
-	$(PYTHON) $(REFLOW) $(REFLOWOPTS) core.adoc
+	$(PYTHON) $(REFLOW) $(REFLOWOPTS) $(SPECSRC) $(SPECFILES)
 
 # Clean generated and output files
 

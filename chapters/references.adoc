@@ -1,0 +1,23 @@
+[[references]]
+= Normative References
+
+  . International Standard ISO/IEC 14882:1998(E).
+    Programming Languages - C++. Referenced for preprocessor only
+  . "`OpenGL^R^ ES, Version 3.2`",
+    https://www.khronos.org/registry/OpenGL/index_es.php, November 3, 2016.
+  . "`The OpenGL^R^ Graphics System: A Specification, Version 4.6 (Core
+    Profile)`", https://www.khronos.org/registry/OpenGL/index_gl.php, June
+    1, 2016.
+ifdef::ESSL[]
+  . International Standard ISO/IEC 646:1991.
+    Information technology - ISO 7-bit coded character set for information
+    interchange
+  . The Unicode Standard Version 6.0 - Core Specification.
+endif::ESSL[]
+  . IEEE 754-2008.
+    _IEEE Standard for Floating-Point Arithmetic_
+  . "`SPIR-V Specification, Version 1.6, Revision 2`" ,
+    https://www.khronos.org/registry/spir-v/.
+  . "`Vulkan^R^ 1.3.226 - A Specification`",
+    https://www.khronos.org/registry/vulkan/,
+    September 1, 2022.

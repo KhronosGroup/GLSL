@@ -1,0 +1,166 @@
+ifdef::ESSL[]
+[[counting-of-inputs-and-outputs]]
+= Counting of Inputs and Outputs
+
+This section applies to outputs from the last active vertex processing stage
+and inputs to the fragment stage.
+GLSL ES {minor} specifies the storage available for such variables in terms of
+an array of 4-vectors.
+The assumption is that variables will be packed into these arrays without
+wasting space.
+This places significant burden on implementations since optimal packing is
+computationally intensive.
+Implementations may have more internal resources than exposed to the
+application and so avoid the need to perform packing but this is also
+considered an expensive solution.
+
+GLSL ES {minor} therefore relaxes the requirements for packing by
+specifying a simpler algorithm that may be used.
+This algorithm specifies a minimum requirement for when a set of variables
+must be supported by an implementation.
+The implementation is allowed to support more than the minimum and so may
+use a more efficient algorithm and/or may support more registers than the
+virtual target machine.
+
+Outputs from the last active vertex stage and inputs to the fragment stage are
+counted separately.
+If statically used in the fragment shader, the built-in special variables
+(_gl_FragCoord_, _gl_FrontFacing_ and _gl_PointCoord_) are included when
+calculating the storage requirements of fragment inputs.
+
+If the last active vertex-pipeline shader and fragment shader are linked
+together, inputs and outputs are only counted if they are statically used
+within the shader.
+If the shaders are each compiled into a separable program, all declared inputs
+and outputs are counted.
+
+[NOTE]
+.Note
+====
+GLSL ES {minor} does not require the implementation to remove
+outputs which are not statically used in the fragment shader.
+====
+
+For the algorithm used, failing resource allocation for a variable must
+result in an error.
+
+The resource allocation of variables must succeed for all cases where the
+following packing algorithm succeeds:
+
+  * The target architecture consists of a grid of registers, 16 rows by 4
+    columns.
+    Each register can contain a scalar value, i.e. a float, int or uint.
+  * Variables with an explicit location are allocated first.
+    When attempting to allocate a location for other variables, if there is
+    a conflict, the search moves to the next available free location.
+  * Structures are assumed to be flattened.
+    Each data member is treated as if it were at global scope.
+  * Variables are packed into the registers one at a time so that they each
+    occupy a contiguous sub-rectangle.
+    No splitting of variables is permitted.
+  * The orientation of variables is fixed.
+    Vectors always occupy registers in a single row.
+    Elements of an array must be in different rows.
+    E.g. *vec4* will always occupy one row; float[16] will occupy one
+    column.
+    Since it is not permitted to split a variable, large arrays e.g.
+    float[32] will always fail with this algorithm.
+  * Non-square matrices of type *matCxR* consume the same space as a square
+    matrix of type *matN* where N is the greater of C and R.
+    Variables of type *mat2* occupies 2 complete rows.
+    These rules allow implementations more flexibility in how variables are
+    stored.
+    + Other variables consume only the minimum space required.
+  * Arrays of size N are assumed to take N times the size of the base type.
+  * Variables are packed in the following order:
+  . *mat4* and arrays of *mat4*.
+  . *mat2* and arrays of *mat2* (since they occupy full rows)
+  . *vec4* and arrays of *vec4*
+  . *mat3* and arrays of *mat3*
+  . *vec3* and arrays of *vec3*
+  . *vec2* and arrays of *vec2*
+  . Scalar types and arrays of scalar types
+  * For each of the above types, the arrays are processed in order of size,
+    largest first.
+    Arrays of size 1 and the base type are considered equivalent.
+    The first type to be packed will be mat4[4], mat4[3], mat[2] followed by
+    mat4, mat2[4]...mat2[2], mat2, vec4[8], vec4[7],...vec4[1], vec4,
+    mat3[2], mat3 and so on.
+    The last variables to be packed will be float (and float[1]).
+  * For 2,3 and 4 component variables packing is started using the 1^st^
+    column of the 1^st^ row.
+    Variables are then allocated to successive rows, aligning them to the
+    1^st^ column.
+  * For 2 component variables, when there are no spare rows, the strategy is
+    switched to using the highest numbered row and the lowest numbered
+    column where the variable will fit.
+    (In practice, this means they will be aligned to the x or z component.)
+    Packing of any further 3 or 4 component variables will fail at this
+    point.
+  * 1 component variables (e.g. floats and arrays of floats) have their own
+    packing rule.
+    They are packed in order of size, largest first.
+    Each variable is placed in the column that leaves the least amount of
+    space in the column and aligned to the lowest available rows within that
+    column.
+    During this phase of packing, space will be available in up to 4
+    columns.
+    The space within each column is always contiguous in the case where no
+    variables have explicit locations.
+  * For each type, variables with the 'smooth' property are packed first,
+    followed by variables with the 'flat' property.
+  * Each row can contain either values with the 'smooth' property or the
+    'flat' property but not both.
+    If this situation is encountered during allocation, the algorithm skips
+    the component location and continues with the next available location.
+    These skipped locations may be used for other values later in the
+    allocation process.
+  * There is no backtracking.
+    Once a value is assigned a location, it cannot be changed, even if such
+    a change is required for a successful allocation.
+
+Example: pack the following types:
+
+[source,c++]
+----
+out vec4 a;     // top left
+out mat3 b;     // align to left, lowest numbered rows
+out mat2x3 c;   // same size as mat3, align to left
+out vec2 d[6];  // align to left, lowest numbered rows
+out vec2 e[4];  // Cannot align to left so align to z column, highest
+                // numbered rows
+out vec2 f;     // Align to left, lowest numbered rows.
+out float g[3]  // Column with minimum space
+out float h[2]; // Column with minimum space (choice of 3, any
+                // can be used)
+out float i;    // Column with minimum space
+----
+
+In this example, the variables happen to be listed in the order in which
+they are packed.
+Packing is independent of the order of declaration.
+
+[cols="",]
+|====
+|    | *x* | *y* | *z* | *w*
+| 0  | *a* | *a* | *a* | *a*
+| 1  | *b* | *b* | *b* |
+| 2  | *b* | *b* | *b* |
+| 3  | *b* | *b* | *b* |
+| 4  | *c* | *c* | *c* |
+| 5  | *c* | *c* | *c* |
+| 6  | *c* | *c* | *c* |
+| 7  | *d* | *d* | *g* |
+| 8  | *d* | *d* | *g* |
+| 9  | *d* | *d* | *g* |
+| 10 | *d* | *d* |     |
+| 11 | *d* | *d* |     |
+| 12 | *d* | *d* | *e* | *e*
+| 13 | *f* | *f* | *e* | *e*
+| 14 | *h* | *i* | *e* | *e*
+| 15 | *h* |     | *e* | *e*
+|====
+
+Some types e.g. mat4[8] will be too large to fit.
+These always fail with this algorithm.
+endif::ESSL[]
