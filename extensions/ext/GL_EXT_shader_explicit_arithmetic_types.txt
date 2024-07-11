@@ -1030,7 +1030,7 @@ Changes to Chapter 8 of the OpenGL Shading Language Specification:
     ------------------------------------------------------------------------------
 
     ---------------------------------------------------------------------------
-    | Function                          | Desciption                          |
+    | Function                          | Description                         |
     ---------------------------------------------------------------------------
     | int64_t packInt2x32(ivec2 v)      | Same as int64_t pack64(i32vec2 v)   |
     | uint64_t packUint2x32(uvec2 v)    | Same as uint64_t pack64(u32vec2 v)  |
