@@ -1,0 +1,142 @@
+Name
+
+    EXT_demote_to_helper_invocation
+
+Name Strings
+
+    GL_EXT_demote_to_helper_invocation
+
+Contact
+
+    Jeff Bolz, NVIDIA Corporation (jbolz 'at' nvidia.com)
+
+Contributors
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date:         September 19, 2019
+    Revision:                   2
+
+Number
+
+    TBD
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification, version 4.50 (revision 7), dated May 10, 2017.
+
+    Interacts with GL_KHR_vulkan_glsl.
+
+Overview
+
+    This extension adds a "demote" keyword that is similar to "discard" but
+    only suppresses subsequent writes and outputs to the framebuffer, and
+    does not terminate the execution of the invocation. For the remainder
+    of the execution, the invocation is "demoted" to act like a helper
+    invocation.
+
+New Procedures and Functions
+
+    None.
+
+New Tokens
+
+    None.
+
+Modifications to GL_KHR_vulkan_glsl
+
+    Add to the "Mapping to SPIR-V" section
+    
+    Mapping of demote keyword:
+
+      demote -> OpDemoteToHelperInvocation
+
+Modifications to the OpenGL Shading Language Specification, Version 4.50
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_EXT_demote_to_helper_invocation : <behavior>
+
+    where <behavior> is as specified in section 3.3
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+        #define GL_EXT_demote_to_helper_invocation     1
+
+
+    Add to section 3.6 Keywords:
+
+        demote
+
+
+    Modify section 7.1 Built-In Language Variables:
+
+    Add a new paragraph after the following paragraph:
+    
+     "The set of helper invocations generated when processing any set of
+     primitives is implementation dependent."
+
+    Non-helper invocations are "demoted" to helper invocations by the
+    *demote* statement. Demoting an invocation is similar to discarding it,
+    in that it will no longer write to memory or output to the framebuffer,
+    but the invocation still participates in computing derivatives. Demoting
+    an invocation does not cause non-uniform flow control. The implementation
+    may terminate helper invocations before the end of the shader as an
+    optimization, but doing so must not affect derivative calculations and
+    does not make control flow non-uniform. After an invocation is demoted,
+    the value of the gl_HelperInvocation input variable is undefined.
+    helperInvocationEXT() can be used to determine whether an invocation is
+    currently a helper invocation.
+
+
+    Add a new section 8.X Miscellaneous Functions:
+
+        bool helperInvocationEXT();
+
+    Returns true if the invocation is currently a helper invocation,
+    otherwise returns false. An invocation is currently a helper invocation
+    if it was originally invoked as a helper invocation or if it has been
+    demoted to a helper invocation by the *demote* statement.
+
+
+Changes to the grammar:
+
+    Add the token DEMOTE
+
+    Add a new rule:
+    
+      demote_statement:
+
+        DEMOTE
+
+    Under the rule for simple_statement, add:
+
+      | demote_statement
+
+Errors
+
+    None.
+
+Issues
+
+    None.
+
+Revision History
+
+    Revision 2
+      - Change dependencies so extension can be used with OpenGL.
+
+    Revision 1
+      - Internal revisions.

@@ -1,0 +1,172 @@
+Name
+
+    EXT_fragment_shading_rate
+
+Name Strings
+
+    GL_EXT_fragment_shading_rate
+
+Contact
+
+    Tobias Hector, AMD (tobias.hector 'at' amd.com)
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified:      June 6, 2020
+    Revision:           1
+
+Dependencies
+
+    This extension can be applied to OpenGL Shading Language versions 4.50
+    (#version 450) and higher.
+
+    This extension can be applied to OpenGL ES Shading Language versions 3.10
+    (#version 310) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification, version 4.60.7, dated July 10, 2019.
+
+    This extension interacts with OpenGL ES 3.2 and OES_sample_shading.
+
+Overview
+
+    This extension adds support for setting the fragment shading rate for a
+    primitive in vertex, geometry, and mesh shading stages, and querying the
+    shading rate in fragment shaders.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs supported by the SPV_KHR_variable_rate_fragment_shading
+    extension:
+
+    - gl_ShadingRateEXT -> ShadingRateKHR decorated variable
+    - gl_PrimitiveShadingRateEXT -> PrimitiveShadingRateKHR decorated variable
+    - gl_ShadingRateFlag2VerticalPixelsEXT -> 2VerticalPixels value
+    - gl_ShadingRateFlag4VerticalPixelsEXT -> 4VerticalPixels value
+    - gl_ShadingRateFlag2HorizontalPixelsEXT -> 2HorizontalPixels value
+    - gl_ShadingRateFlag4HorizontalPixelsEXT -> 4HorizontalPixels value
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_fragment_shading_rate : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+      #define GL_EXT_fragment_shading_rate          1
+
+    Modify Section 7.1, Built-In Language Variables, p. 138
+
+    (add to the list of vertex shader special variables, p. 138)
+
+      out int gl_PrimitiveShadingRateEXT
+
+    (add the following description of gl_PrimitiveShadingRateEXT to the 
+     the end of the vertex shader special variables section, p. 140)
+     
+    The output variable gl_PrimitiveShadingRateEXT is a bitmask
+    representing the shading rate used for fragments generated for this
+    primitive.
+    This rate may be modified before fragment shading commences; see the
+    Vulkan API specification for more details.
+
+    If gl_PrimitiveShadingRateEXT contains
+    gl_ShadingRateFlag2VerticalPixelsEXT, it requests that generated
+    fragments cover 2 pixels vertically.
+    If gl_PrimitiveShadingRateEXT contains
+    gl_ShadingRateFlag4VerticalPixelsEXT, it requests that generated
+    fragments cover 4 pixels vertically.
+    If no vertical flag is set, the current fragment shader invocation
+    covers a single pixel vertically.
+    gl_PrimitiveShadingRateEXT must not contain more than one vertical
+    shading rate flag.
+
+    If gl_PrimitiveShadingRateEXT contains
+    gl_ShadingRateFlag2HorizontalPixelsEXT, it requests that generated
+    fragments cover 2 pixels horizontally.
+    If gl_PrimitiveShadingRateEXT contains
+    gl_ShadingRateFlag4HorizontalPixelsEXT, it requests that generated
+    fragments cover 4 pixels horizontally.
+    If no horizontal flag is set, the current fragment shader invocation
+    covers a single pixel horizontally.
+    gl_PrimitiveShadingRateEXT must not contain more than one horizontal
+    shading rate flag.
+
+    (add to the list of geometry shader special variables, p. 142)
+
+      out int gl_PrimitiveShadingRateEXT
+
+    (add the following description of gl_PrimitiveShadingRateEXT to the 
+     the end of the geometry shader special variables section, p. 143)
+    
+    gl_PrimitiveShadingRateEXT has the same meaning and function as it
+    does in the vertex shader stage, applying to the next emitted
+    primitive.
+
+    (add to the list of fragment shader special variables, p. 144)
+
+      in int gl_ShadingRateEXT;
+
+    (add the following description of gl_ShadingRateEXT, before the
+     description of gl_HelperInvocation, at the bottom of p.145)
+
+    The input variable gl_ShadingRateEXT is a bitmask representing the
+    current fragment invocation's shading rate.
+
+    If gl_ShadingRateEXT contains gl_ShadingRateFlag2VerticalPixelsEXT,
+    the current fragment shader invocation covers 2 pixels vertically.
+    If gl_ShadingRateEXT contains gl_ShadingRateFlag4VerticalPixelsEXT,
+    the current fragment shader invocation covers 4 pixels vertically.
+    If no horizontal flag is set, the current fragment shader invocation
+    covers a single pixel horizontally.
+
+    If gl_ShadingRateEXT contains gl_ShadingRateFlag2HorizontalPixelsEXT,
+    the current fragment shader invocation covers 2 pixels horizontally.
+    If gl_ShadingRateEXT contains gl_ShadingRateFlag4HorizontalPixelsEXT,
+    the current fragment shader invocation covers 4 pixels horizontally.
+    If no horizontal flag is set, the current fragment shader invocation
+    covers a single pixel horizontally.
+    
+    
+    Modify Section 7.1, Built-In Language Variables, p. 138
+
+    (add to the list of Built-In Constants, p. 152)
+
+      const int gl_ShadingRateFlag2VerticalPixelsEXT = 1;
+      const int gl_ShadingRateFlag4VerticalPixelsEXT = 2;
+      const int gl_ShadingRateFlag2HorizontalPixelsEXT = 4;
+      const int gl_ShadingRateFlag4HorizontalPixelsEXT = 8;
+
+    Modify Section 8.13.1, Derivative Functions, p. 184
+
+    (add a new paragraph before the last paragraph "It is typical to consider
+    a 2x2 square", p. 184)
+
+    When using an fragment shading rate where each fragment covers multiple
+    columns and/or rows of pixels, the values of dx and/or dy in equations
+    1b and 2b above will be equal to the shading rate in each dimension.
+
+Issues
+
+    (1) Why is this a wholly separate extension from EXT_fragment_invocation_density?
+    
+    RESOLVED: This extension adds additional functionality that
+    necessitated using an enum-based mechanism for the shading rate. It's possible to
+    implement EXT_fragment_invocation_density on top of the same SPIR-V constructs,
+    but that is left as a decision for glsl to SPIR-V translation tools to make. 
+
+Revision History
+
+    Revision 1, 2020/10/06 (thector)
+    - Initial version
