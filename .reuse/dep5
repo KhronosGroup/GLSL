@@ -22,6 +22,6 @@ Files: config/copyright-spec.adoc
 Copyright: 2014-2024 The Khronos Group Inc
 License: LicenseRef-KhronosSpecCopyright
 
-Files: extensions/*/*.txt
+Files: extensions/*/*.txt extensions/extension_headers/*.glsl
 Copyright: Various dates, various Khronos Members
 License: LicenseRef-Proprietary
