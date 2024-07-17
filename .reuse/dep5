@@ -1,6 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: Vulkan-Docs
-Source: https://github.com/KhronosGroup/Vulkan-Docs
+Upstream-Name: GLSL
+Source: https://github.com/KhronosGroup/GLSL
 
 Files: images/*.svg images/*.odg config/*/docinfo-header.html
 Copyright: 2008-2024 The Khronos Group Inc.
