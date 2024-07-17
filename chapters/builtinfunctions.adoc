@@ -498,7 +498,7 @@ endif::GLSL[]
     | Splits _x_ into a floating-point significand in the range
       [eq]#[0.5,1.0]#, and an integral exponent of two, such that
 
-      [eq]#x = significant {cdot} 2^exponent^#
+      [eq]#x = significand {cdot} 2^exponent^#
 
       The significand is returned by the function and the exponent is
       returned in the parameter _exp_.
