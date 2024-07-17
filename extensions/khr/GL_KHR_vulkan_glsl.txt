@@ -33,8 +33,8 @@ Status
 
 Version
 
-    Last Modified Date: 25-Jul-2018
-    Revision: 46
+    Last Modified Date: 12-Dec-2023
+    Revision: 49
 
 Number
 
@@ -70,6 +70,9 @@ Overview
         * compatibility-mode-only features
         * gl_DepthRangeParameters and gl_NumSamples
         * gl_VertexID and gl_InstanceID
+        * aliasing of vertex input components
+          (see the Vulkan API specification)
+        * Rectangle textures (sampler*Rect, image*Rect)
 
     The following features are added:
         * push-constant buffers
@@ -364,6 +367,26 @@ Overview
         texture(sampler2D(t, s), ...);
 
     Note, layout() information is omitted above for clarity of this feature.
+
+    Rectangle Textures and Unnormalized Coordinates
+    -----------------------------------------------
+
+    Rectangle textures (gsampler*Rect, gimage2DRect) are not required in Vulkan,
+    which allows sampling any texture using unnormalized coordinates without
+    changing the shader source. For this reason, rectangle textures are removed.
+    In order to comply with Vulkan restrictions on mipmaps with unnormalized
+    coordinates, only texture functions which refer to a specific level of
+    detail may be used.
+
+    Thus, for example, the GLSL code:
+        uniform samplerRect s;
+        ...
+        foo = texture(s, coord);
+
+    should be replaced with:
+        uniform sampler2D s;  // API VkSampler enables unnormalizedCoordinates
+        ...
+        foo = textureLod(s, coord, 0);
         
     Texture Buffers (Uniform Texel Buffers)
     ---------------------------------------
@@ -764,20 +787,19 @@ Changes to Chapter 3 of the OpenGL Shading Language Specification
     Add the following keywords to section 3.6 Keywords:
 
         texture1D        texture2D        texture3D
-        textureCube      texture2DRect    texture1DArray
-        texture2DArray   textureBuffer    texture2DMS
-        texture2DMSArray textureCubeArray
+        textureCube      texture1DArray   texture2DArray
+        textureBuffer    texture2DMS      texture2DMSArray
+        textureCubeArray
 
         itexture1D        itexture2D       itexture3D
-        itextureCube      itexture2DRect   itexture1DArray
-        itexture2DArray   itextureBuffer
-        itexture2DMS      itexture2DMSArray
+        itextureCube      itexture1DArray  itexture2DArray
+        itextureBuffer    itexture2DMS     itexture2DMSArray
         itextureCubeArray
 
         utexture1D        utexture2D        utexture3D
-        utextureCube      utexture2DRect    utexture1DArray
-        utexture2DArray   utextureBuffer    utexture2DMS
-        utexture2DMSArray utextureCubeArray
+        utextureCube      utexture1DArray   utexture2DArray
+        utextureBuffer    utexture2DMS      utexture2DMSArray
+        utextureCubeArray
 
         sampler    samplerShadow
 
@@ -787,6 +809,9 @@ Changes to Chapter 3 of the OpenGL Shading Language Specification
     Move the following keywords in section 3.6 Keywords to the reserved
     section:
 
+        sampler2DRectShadow
+        sampler2DRect    isampler2DRect    usampler2DRect
+        image2DRect      iimage2DRect      uimage2DRect
         atomic_uint
         subroutine
 
@@ -802,7 +827,6 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
             texture2D
             texture3D
             textureCube
-            texture2DRect
             texture1DArray
             texture2DArray
             textureBuffer
@@ -820,7 +844,6 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
             itexture2D
             itexture3D
             itextureCube
-            itexture2DRect
             itexture1DArray
             itexture2DArray
             itextureBuffer
@@ -837,7 +860,6 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
             utexture2D
             utexture3D
             utextureCube
-            utexture2DRect
             utexture1DArray
             utexture2DArray
             utextureBuffer
@@ -1025,7 +1047,27 @@ Changes to Chapter 4 of the OpenGL Shading Language Specification
     or none of its members have a *location* layout qualifier, or a compile-
     time error results."]
 
-    Change section 4.4.1.3 "Fragment Shader Inputs" from
+    Change section 4.4.1 "Input Layout Qualifiers"
+
+      With one exception, location aliasing is allowed only if it does not
+      cause component aliasing
+
+    To
+
+      Location aliasing is allowed only if it does not cause component aliasing
+
+    Remove, from the same paragraph:
+
+      The one exception where component aliasing is permitted is for two input
+      variables (not block members) to a vertex shader, which are allowed to
+      have component aliasing. This vertex-variable component aliasing is
+      intended only to support vertex shaders where each execution path accesses
+      at most one input per each aliased component. Implementations are
+      permitted, but not required, to generate link-time errors if they detect
+      that every path through the vertex shader executable accesses multiple
+      inputs aliased to any single component.
+
+    Change section 4.4.1, under "Fragment Shader Inputs" from
 
       "By default, gl_FragCoord assumes a lower-left origin for window
       coordinates ... For example, the (x, y) location (0.5, 0.5) is
@@ -1353,7 +1395,7 @@ Changes to Chapter 5 of the OpenGL Shading Language Specification
          * the constructor's first argument must be a texture type
          * the constructor's second argument must be a scalar of type
            *sampler* or *samplerShadow*
-         * the dimensionality (1D, 2D, 3D, Cube, Rect, Buffer, MS, and Array)
+         * the dimensionality (1D, 2D, 3D, Cube, Buffer, MS, and Array)
            of the texture type must match that of the constructed sampler type
            (that is, the suffixes of the type of the first argument and the
            type of the constructor will be spelled the same way)
@@ -1535,6 +1577,11 @@ Changes to Chapter 8 of the OpenGL Shading Language Specification
 
     Remove section 8.14 Noise Functions
 
+    Remove the entry from the table in section 8.17 Shader Memory Control
+    Functions:
+
+        void memoryBarrierAtomicCounter()
+
     Add a section
 
       "8.X Subpass Functions
@@ -1691,6 +1738,11 @@ Revision History
 
     Rev.    Date         Author    Changes
     ----  -----------    -------  --------------------------------------------
+    49    12-Dec-2023    gnl21    Disallow Rect textures, add explanation of using
+                                  unnormalized coordinates with Vulkan.
+    48    16-Mar-2020    jbolz    Remove memoryBarrierAtomicCounter()
+    47    17-Mar-2019    JohnK    Add vertex-input aliasing to list of removed
+                                  features
     46    25-Jul-2018    JohnK    No longer require sampler constructors to
                                   check shadow matches: mismatches are allowed
     45    15-Dec-2017    TobiasH  moved resource binding examples in from Vulkan API spec

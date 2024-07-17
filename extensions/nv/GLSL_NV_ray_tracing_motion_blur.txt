@@ -1,0 +1,144 @@
+Name
+
+    NV_ray_tracing_motion_blur
+
+Name Strings
+
+    GL_NV_ray_tracing_motion_blur
+
+Contact
+    Eric Werness (ewerness 'at' nvidia.com), NVIDIA
+    Ashwin Lele  (alele 'at' nvidia.com), NVIDIA
+
+Contributors
+
+    Daniel Koch, NVIDIA
+
+Status
+
+    Complete 
+
+Version
+
+    Last Modified Date: 2023-04-06
+    Revision: 2
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.60
+    (#version 460) and higher.
+
+    This extension is written against revision 5 of the OpenGL Shading Language
+    version 4.60, dated September 4, 2017.
+
+    This extension requires GLSL_EXT_ray_tracing and interacts with
+    GLSL_NV_ray_tracing.
+
+
+Overview
+
+    This extension extends the GLSL support added for ray tracing in 
+    GLSL_EXT_ray_tracing extension to expose a new overloaded variant of built-in 
+    function call for recursive ray traversal 'traceRayMotionNV' and a new built-in 
+    variable 'gl_CurrentRayTimeNV' which can be used to calculate shading 
+    based on ray geometry intersection at a particular point in time.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+      gl_CurrentRayTimeNV -> CurrentRayTimeNV decorated OpVariable
+
+      traceRayMotionNV -> OpTraceRayMotionNV instruction
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_NV_ray_tracing_motion_blur                    : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+    New preprocessor #defines are added:
+
+      #define GL_NV_ray_tracing_motion_blur                      1
+
+Additions to Chapter 7 of the OpenGL Shading Language Specification
+(Built-in Variables)
+
+    Modify Section 7.1, Built-in Languages Variables
+
+    (Add to the list of builtin variables)
+
+    In the intersection, any-hit, closest-hit and miss shading languages,
+    following additional built-in variables are declared as follows
+
+        in    float  gl_CurrentRayTimeNV;
+
+    Add the following description for gl_CurrentRayTimeNV:
+
+    The input variable gl_CurrentRayTimeNV is available in the intersection,
+    any-hit, closest-hit and miss languages and provides the time parameter
+    as passed to the parent 'traceRayMotionNV' call. Result is undefined if 
+    parent call was 'traceNV' or 'traceRayEXT'. 
+
+
+Additions to Chapter 8 of the OpenGL Shading Language Specification
+(Built-in Functions)
+
+    (Modify Section 8.19, Ray Tracing Functions)
+
+    (Add following built-in)
+
+Syntax:
+
+    void traceRayMotionNV(accelerationStructureEXT topLevel,
+                   uint rayFlags,
+                   uint cullMask,
+                   uint sbtRecordOffset,
+                   uint sbtRecordStride,
+                   uint missIndex,
+                   vec3 origin,
+                   float Tmin,
+                   vec3 direction,
+                   float Tmax,
+                   float currentTime,
+                   int payload);
+
+    This function is only available in the ray generation, closest hit, and
+    miss shaders.
+
+    'traceRayMotionNV' operates the same as 'traceRayEXT', with the exception of
+    <currentTime> parameter.
+
+    The <currentTime> parameter is an additional parameter provided to
+    traversal call when compared with 'traceRayEXT'. It can be queried in
+    downstream stages to implement time-dependent behavior (like geometry transformations) 
+    and is used to intersect with motion geometry at the corresponding time.
+
+
+Interactions with GLSL_NV_ray_tracing
+
+    'accelerationStructureNV' and 'accelerationStructureEXT' are aliases and
+    use same SPIR-V opcodes so they can be used interchangeably for 'traceRayMotionNV' 
+
+    'rayPayloadNV' and 'rayPayloadEXT' storage classes are aliases and so are
+    'rayPayloadInNV' and 'rayPayloadInEXT' so variables decorated with location with 
+    these storage classes can be used interchangeably as compile-time constant
+    argument for the 'payload' parameter for 'traceRayMotionNV'.
+
+    
+
+Issues
+
+    TBD
+
+Revision History
+
+    Rev.  Date          Author     Changes
+    ----  -----------   ------     -------------------------------------------
+     2    2023-04-06    ewerness   Fix misnamed builtin in overview
+     1    2021-07-01    alele      Internal revisions.
