@@ -1,0 +1,1176 @@
+Name
+
+    EXT_shader_explicit_arithmetic_types
+
+Name Strings
+
+    GL_EXT_shader_explicit_arithmetic_types
+    GL_EXT_shader_explicit_arithmetic_types_int8
+    GL_EXT_shader_explicit_arithmetic_types_int16
+    GL_EXT_shader_explicit_arithmetic_types_int32
+    GL_EXT_shader_explicit_arithmetic_types_int64
+    GL_EXT_shader_explicit_arithmetic_types_float16
+    GL_EXT_shader_explicit_arithmetic_types_float32
+    GL_EXT_shader_explicit_arithmetic_types_float64
+
+Contact
+
+     Alexander Galazin (alexander.galazin 'at' arm.com)
+
+Contributors
+
+     Alexander Galazin, Arm
+     Jan-Harald Fredriksen, Arm
+     Hans-Kristian Arntzen, Arm
+     Neil Henning, AMD
+     Contributors to ARB_gpu_shader_int64
+     Contributors to AMD_gpu_shader_half_float
+     Contributors to NV_gpu_shader5
+     Contributors to AMD_gpu_shader_int16
+
+Notice
+
+    Copyright (c) 2018 The Khronos Group Inc. Copyright terms at
+        http://www.khronos.org/registry/speccopyright.html
+
+Status
+
+Number
+
+    TBD
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    All these versions map GLSL/ESSL semantics to the same SPIR-V 1.0
+    semantics (approximating the most recent versions of GLSL/ESSL).
+
+    This extension is written against the OpenGL Shading Language
+    specification, Language Version 4.50, Document Revision 6.
+
+    This extension interacts with ARB_gpu_shader_int64.
+
+    This extension interacts with AMD_gpu_shader_half_float.
+
+    This extension interacts with AMD_gpu_shader_int16.
+
+Overview
+
+    This extension modifies GLSL to expose explicit 8-bit integer, and 16-bit
+    integer and floating-point types. It also aliases existing float, double,
+    int, and uint types with more explicit type names.
+
+    This extension can be used together with GL_KHR_vulkan_glsl extension to
+    enable these types to be used in a high-level language for the Vulkan API.
+
+    This extension document adds support for the following extensions to be used
+    within GLSL:
+
+    - GL_EXT_shader_explicit_arithmetic_types_int8 - enables explicit 8-bit
+      signed and unsigned integer types.
+    - GL_EXT_shader_explicit_arithmetic_types_int16 - enables explicit 16-bit
+      signed and unsigned integer types
+    - GL_EXT_shader_explicit_arithmetic_types_int32 - enables explicit 32-bit
+      signed and unsigned integer types.
+    - GL_EXT_shader_explicit_arithmetic_types_int64 - enables explicit 64-bit
+      signed and unsigned integer types.
+    - GL_EXT_shader_explicit_arithmetic_types_float16 - enables explicit 16-bit
+      floating-point types.
+    - GL_EXT_shader_explicit_arithmetic_types_float32 - enables explicit 32-bit
+      floating-point types.
+    - GL_EXT_shader_explicit_arithmetic_types_float64 - enables explicit 64-bit
+      floating-point types.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.50
+
+Including the following line in a shader can be used to control the language
+features described in this extension:
+
+    #extension GL_EXT_shader_explicit_arithmetic_types         : <behavior>
+    #extension GL_EXT_shader_explicit_arithmetic_types_int8    : <behavior>
+    #extension GL_EXT_shader_explicit_arithmetic_types_int16   : <behavior>
+    #extension GL_EXT_shader_explicit_arithmetic_types_int32   : <behavior>
+    #extension GL_EXT_shader_explicit_arithmetic_types_int64   : <behavior>
+    #extension GL_EXT_shader_explicit_arithmetic_types_float16 : <behavior>
+    #extension GL_EXT_shader_explicit_arithmetic_types_float32 : <behavior>
+    #extension GL_EXT_shader_explicit_arithmetic_types_float64 : <behavior>
+
+where <behavior> is as specified in section 3.3.  If any of
+ - GL_EXT_shader_explicit_arithmetic_types_int8
+ - GL_EXT_shader_explicit_arithmetic_types_int16
+ - GL_EXT_shader_explicit_arithmetic_types_int32
+ - GL_EXT_shader_explicit_arithmetic_types_int64
+ - GL_EXT_shader_explicit_arithmetic_types_float16
+ - GL_EXT_shader_explicit_arithmetic_types_float32
+ - GL_EXT_shader_explicit_arithmetic_types_float64
+extension are enabled, the GL_EXT_shader_explicit_arithmetic_types extension is
+also implicitly enabled.
+
+New preprocessor #defines are added:
+
+    #define GL_EXT_shader_explicit_arithmetic_types_int8             1
+    #define GL_EXT_shader_explicit_arithmetic_types_int16            1
+    #define GL_EXT_shader_explicit_arithmetic_types_int32            1
+    #define GL_EXT_shader_explicit_arithmetic_types_int64            1
+    #define GL_EXT_shader_explicit_arithmetic_types_float16          1
+    #define GL_EXT_shader_explicit_arithmetic_types_float32          1
+    #define GL_EXT_shader_explicit_arithmetic_types_float64          1
+
+Such that if using a GL_EXT_shader_explicit_arithmetic_types_* extension is
+supported, the corresponding
+GL_EXT_shader_explicit_arithmetic_types_* #define is defined.
+
+Changes to Chapter 3 of the OpenGL Shading Language Specification
+
+    If the extension GL_EXT_shader_explicit_arithmetic_types_float64 is supported,
+    add the following keywords to section 3.6 Keywords:
+
+    float64_t   f64vec2     f64vec3    f64vec4
+    f64mat2     f64mat3     f64mat4
+    f64mat2x2   f64mat2x3   f64mat2x4
+    f64mat3x2   f64mat3x3   f64mat3x4
+    f64mat4x2   f64mat4x3   f64mat4x4
+
+    If the extension GL_EXT_shader_explicit_arithmetic_types_float32 is supported,
+    add the following keywords to section 3.6 Keywords:
+
+    float32_t   f32vec2     f32vec3    f32vec4
+    f32mat2     f32mat3     f32mat4
+    f32mat2x2   f32mat2x3   f32mat2x4
+    f32mat3x2   f32mat3x3   f32mat3x4
+    f32mat4x2   f32mat4x3   f32mat4x4
+
+    If the extension GL_EXT_shader_explicit_arithmetic_types_float16 is supported,
+    add the following keywords to section 3.6 Keywords:
+
+    float16_t   f16vec2     f16vec3    f16vec4
+    f16mat2     f16mat3     f16mat4
+    f16mat2x2   f16mat2x3   f16mat2x4
+    f16mat3x2   f16mat3x3   f16mat3x4
+    f16mat4x2   f16mat4x3   f16mat4x4
+
+    If the extension GL_EXT_shader_explicit_arithmetic_types_int64 is supported,
+    add the following keywords to section 3.6 Keywords:
+
+    int64_t     i64vec2     i64vec3    i64vec4
+    uint64_t    u64vec2     u64vec3    u64vec4
+
+    If the extension GL_EXT_shader_explicit_arithmetic_types_int32 is supported,
+    add the following keywords to section 3.6 Keywords:
+
+    int32_t     i32vec2     i32vec3    i32vec4
+    uint32_t    u32vec2     u32vec3    u32vec4
+
+    If the extension GL_EXT_shader_explicit_arithmetic_types_int16 is supported,
+    add the following keywords to section 3.6 Keywords:
+
+    int16_t     i16vec2     i16vec3    i16vec4
+    uint16_t    u16vec2     u16vec3    u16vec4
+
+    If the extension GL_EXT_shader_explicit_arithmetic_types_int8 is supported,
+    add the following keywords to section 3.6 Keywords:
+
+    int8_t      i8vec2      i8vec3     i8vec4
+    uint8_t     u8vec2      u8vec3     u8vec4
+
+Changes to Chapter 4 of the OpenGL Shading Language Specification
+
+    Add into the tables in section 4.1 a new table interleaved with the existing
+    tables:
+
+    Transparent types with explicit bit size
+    --------------------------------------------------------------------------
+    | Type        | Meaning                                                  |
+    |             |                                                          |
+    --------------------------------------------------------------------------
+    (if GL_EXT_shader_explicit_arithmetic_types_float64 is supported)
+    | float64_t   | a 64-bit floating-point scalar                           |
+    | f64vec2     | a two-component 64-bit floating-point vector             |
+    | f64vec3     | a three-component 64-bit floating-point vector           |
+    | f64vec4     | a four-component 64-bit floating-point vector            |
+    | f64mat2     | a 2x2 64-bit floating-point matrix                       |
+    | f64mat3     | a 3x3 64-bit floating-point matrix                       |
+    | f64mat4     | a 4x4 64-bit floating-point matrix                       |
+    | f64mat2x2   | same as f64mat2                                          |
+    | f64mat2x3   | a 64-bit floating point matrix with 2 columns and 3 rows |
+    | f64mat2x4   | a 64-bit floating point matrix with 2 columns and 4 rows |
+    | f64mat3x2   | a 64-bit floating point matrix with 3 columns and 2 rows |
+    | f64mat3x3   | same as f64mat3                                          |
+    | f64mat3x4   | a 64-bit floating point matrix with 3 columns and 4 rows |
+    | f64mat4x2   | a 64-bit floating point matrix with 4 columns and 2 rows |
+    | f64mat4x3   | a 64-bit floating point matrix with 2 columns and 3 rows |
+    | f64mat4x4   | same as f64mat4                                          |
+    (if GL_EXT_shader_explicit_arithmetic_types_float32 is supported)
+    | float32_t   | a 32-bit floating-point scalar                           |
+    | f32vec2     | a two-component 32-bit floating-point vector             |
+    | f32vec3     | a three-component 32-bit floating-point vector           |
+    | f32vec4     | a four-component 32-bit floating-point vector            |
+    | f32mat2     | a 2x2 32-bit floating-point matrix                       |
+    | f32mat3     | a 3x3 32-bit floating-point matrix                       |
+    | f32mat4     | a 4x4 32-bit floating-point matrix                       |
+    | f32mat2x2   | same as f32mat2                                          |
+    | f32mat2x3   | a 32-bit floating point matrix with 2 columns and 3 rows |
+    | f32mat2x4   | a 32-bit floating point matrix with 2 columns and 4 rows |
+    | f32mat3x2   | a 32-bit floating point matrix with 3 columns and 2 rows |
+    | f32mat3x3   | same as f32mat3                                          |
+    | f32mat3x4   | a 32-bit floating point matrix with 3 columns and 4 rows |
+    | f32mat4x2   | a 32-bit floating point matrix with 4 columns and 2 rows |
+    | f32mat4x3   | a 32-bit floating point matrix with 2 columns and 3 rows |
+    | f32mat4x4   | same as f32mat4                                          |
+    (if GL_EXT_shader_explicit_arithmetic_types_float16 is supported)
+    | float16_t   | a 16-bit floating-point scalar                           |
+    | f16vec2     | a two-component 16-bit floating-point vector             |
+    | f16vec3     | a three-component 16-bit floating-point vector           |
+    | f16vec4     | a four-component 16-bit floating-point vector            |
+    | f16mat2     | a 2x2 16-bit floating-point matrix                       |
+    | f16mat3     | a 3x3 16-bit floating-point matrix                       |
+    | f16mat4     | a 4x4 16-bit floating-point matrix                       |
+    | f16mat2x2   | same as f16mat2                                          |
+    | f16mat2x3   | a 16-bit floating point matrix with 2 columns and 3 rows |
+    | f16mat2x4   | a 16-bit floating point matrix with 2 columns and 4 rows |
+    | f16mat3x2   | a 16-bit floating point matrix with 3 columns and 2 rows |
+    | f16mat3x3   | same as f16mat3                                          |
+    | f16mat3x4   | a 16-bit floating point matrix with 3 columns and 4 rows |
+    | f16mat4x2   | a 16-bit floating point matrix with 4 columns and 2 rows |
+    | f16mat4x3   | a 16-bit floating point matrix with 2 columns and 3 rows |
+    | f16mat4x4   | same as f16mat4                                          |
+    (if GL_EXT_shader_explicit_arithmetic_types_int64 is supported)
+    | int64_t     | a 64-bit signed integer scalar                           |
+    | uint64_t    | a 64-bit unsigned integer scalar                         |
+    | i64vec2     | a two-component 64-bit signed integer vector             |
+    | i64vec3     | a three-component 64-bit signed integer vector           |
+    | i64vec4     | a four-component 64-bit signed integer vector            |
+    | u64vec2     | a two-component 64-bit unsigned integer vector           |
+    | u64vec3     | a three-component 64bit unsigned integer vector          |
+    | u64vec4     | a four-component 64-bit unsigned integer vector          |
+    (if GL_EXT_shader_explicit_arithmetic_types_int32 is supported)
+    | int32_t     | a 32-bit signed integer scalar                           |
+    | uint32_t    | a 32-bit unsigned integer scalar                         |
+    | i32vec2     | a two-component 32-bit signed integer vector             |
+    | i32vec3     | a three-component 32-bit signed integer vector           |
+    | i32vec4     | a four-component 32-bit signed integer vector            |
+    | u32vec2     | a two-component 32-bit unsigned integer vector           |
+    | u32vec3     | a three-component 32-bit unsigned integer vector         |
+    | u32vec4     | a four-component 32-bit unsigned integer vector          |
+    (if GL_EXT_shader_explicit_arithmetic_types_int16 is supported)
+    | int16_t     | a 16-bit signed integer scalar                           |
+    | uint16_t    | a 16-bit unsigned integer scalar                         |
+    | i16vec2     | a two-component 16-bit signed integer vector             |
+    | i16vec3     | a three-component 16-bit signed integer vector           |
+    | i16vec4     | a four-component 16-bit signed integer vector            |
+    | u16vec2     | a two-component 16-bit unsigned integer vector           |
+    | u16vec3     | a three-component 16-bit unsigned integer vector         |
+    | u16vec4     | a four-component 16-bit unsigned integer vector          |
+    (if GL_EXT_shader_explicit_arithmetic_types_int8 is supported)
+    | int8_t      | a 8-bit signed integer scalar                            |
+    | uint8_t     | a 8-bit unsigned integer scalar                          |
+    | i8vec2      | a two-component 8-bit signed integer vector              |
+    | i8vec3      | a three-component 8-bit signed integer vector            |
+    | i8vec4      | a four-component 8-bit signed integer vector             |
+    | u8vec2      | a two-component 8-bit unsigned integer vector            |
+    | u8vec3      | a three-component 8-bit unsigned integer vector          |
+    | u8vec4      | a four-component 8-bit unsigned integer vector           |
+    --------------------------------------------------------------------------
+
+    Modify subsection 4.1.3 Integers
+
+    Modify the first paragraph to say:
+     "Signed and unsigned integer variables are fully supported. In this
+      document, the term integer is meant to generally include both signed
+      and unsigned integers. Variables with the types "int8_t", "int16_t",
+      "int32_t", and "int64_t" represent signed integer values with exactly
+      8, 16, 32, or 64 bits, respectively, including a sign bit, in two's
+      complement form. Variables with the type "uint8_t", "uint16_t",
+      "uint32_t", and "uint64_t" represent unsigned integer values with
+      exactly 8, 16, 32, or 64 bits, respectively. Variables with the type
+      "int32_t" and "uint32_t" are equivalent to "int" and "uint" types,
+      respectively. Addition, subtraction, and shift operations resulting in
+      overflow or underflow will not cause any exception, nor will they
+      saturate, rather they will "wrap" to yield the low-order 8, 16 32, or 64
+      bits (for respective types) the result.
+      Division and multiplication operations resulting in overflow or underflow
+      will not cause any exception but will result in an undefined value."
+
+    Change "integer-suffix" definition:
+
+     "integer-suffix:
+         unsigned-suffix long-suffixopt
+         unsigned-suffix short-suffixopt
+         long-suffix
+         short-suffix
+
+      unsigned-suffix: one of
+          u U
+      long-suffix: one of
+          l L
+      short-suffix: one of
+          s S"
+
+    Modify the next paragraph to say:
+     "No white space is allowed between the digits of an integer constant,
+     including after the leading 0 or after the leading 0x or 0X of a constant,
+     or before the integer-suffix. When tokenizing, the maximal token matching
+     the above will be recognized before a new token is started.
+     When the suffix is present, the literal type is determined as follows:
+     -------------------------------------
+     | suffix           | type           |
+     -------------------------------------
+     | no suffix        | int, int32_t   |
+     | u or U           | uint, uint32_t |
+     | s or S           | int16_t        |
+     | both u/U and s/S | uint16_t       |
+     | l or L           | int64_t        |
+     | both u/U and l/L | uint64_t       |
+     -------------------------------------
+     A leading unary minus sign (-) is interpreted as an arithmetic
+     unary negation, not as part of the constant. Hence, literals themselves
+     are always expressed with non-negative syntax, though they could result
+     in a negative value. A suffix corresponding to a particular type must be
+     supported only if the extension enabling this type is supported."
+
+    Modify subsection 4.1.4 Floating-Point Variables:
+
+    Modify the first four sentences of the first paragraph to say:
+     "Half-precision, single-precision, and double-precision floating-point
+      variables are available for use in a variety of scalar calculations.
+      Generally, the term floating-point will refer to half-, single-,
+      and double-precision floating point. Floating-point variables are
+      defined as in the following examples:
+
+        float a, b = 1.5; // single-precision floating-point
+        double c, d = 2.0LF; // double-precision floating-point
+        float16_t e, f = 0.5HF; // half-precision floating-point
+
+      As an input value to one of the processing units, a half-precision,
+      single-precision, or double-precision floating-point variable is expected
+      to match the corresponding IEEE 754-2008 floating-point definition for
+      precision and dynamic range."
+
+    Modify the second paragraph to say:
+     "floating-suffix:
+          half-suffix single-suffix
+          double-suffix single-suffix
+          single-suffix
+
+      single-suffix: one of
+          f F
+      half-suffix: one of
+          h H
+      double-suffix: one of
+          L L"
+
+    (insert after second paragraph)
+     "Variables of type "float16_t" represent floating-point using
+      exactly 16 bits and are stored using the 16-bit floating-point
+      representation described in IEEE 754-2008.
+      Variables of type "float32_t" and "float" are equivalent and represent
+      floating-point with 32-bits floating-point representation
+      described in IEEE 754-2008.
+      Variables of type "float64_t" and "double" are equivalent and represent
+      floating-point with 64-bits floating-point representation
+      described in IEEE 754-2008.
+
+    Add the following sentences to the third paragraph:
+     "When the suffix is present, the literal type is determined as follows:
+     ----------------------------------------
+     | suffix            | type             |
+     ----------------------------------------
+     | no suffix         | float32_t, float |
+     | f or F            | float32_t, float |
+     | both l/L and f/F  | float64_t, double|
+     | both h/H and f/F  | float16_t        |
+     ----------------------------------------
+     A suffix corresponding to a particular type must be
+     supported only if the extension enabling this type is supported."
+
+    Modify the second sentence of subsection 4.1.6 Matrices to say:
+     "Matrix types beginning with "mat" or "f32mat" have single-precision
+     components, with "f16mat" have half-precision components, while matrix
+     types beginning with "dmat" of "f64mat" have double-precision components"
+
+     Modify subsection 4.1.10 Implicit Conversions to say:
+     "In some situations, an expression and its type will be implicitly
+      converted to a different type. Such conversion are classified into the
+      following types: integral promotions, floating point promotion,
+      integral conversions, floating point conversions, and
+      floating-integral conversions.
+
+      (Note: Expressions of type "int32_t", "uint32_t", "float32_t",
+      and "float64_t" are treated as identical to those of type "int", "uint",
+      "float", and "double" respectively. Implicit conversions to and from
+      these explicitly-sized types are allowed whenever conversions involving
+      the equivalent base type are allowed.)
+
+      The following table shows allowed integral promotions:
+      --------------------------------------------------------
+      | Type of    |     Can be implicitly promoted to       |
+      | expression |                                         |
+      --------------------------------------------------------
+      | int8_t     | int32_t                                 |
+      | int16_t    |                                         |
+      | uint8_t    |                                         |
+      | uint16_t   |                                         |
+      --------------------------------------------------------
+      | i8vec2     | i32vec2                                 |
+      | i16vec2    |                                         |
+      | u8vec2     |                                         |
+      | u16vec2    |                                         |
+      --------------------------------------------------------
+      | i8vec3     | i32vec3                                 |
+      | i16vec3    |                                         |
+      | u8vec3     |                                         |
+      | u16vec3    |                                         |
+      --------------------------------------------------------
+      | i8vec4     | i32vec4                                 |
+      | i16vec4    |                                         |
+      | u8vec4     |                                         |
+      | u16vec4    |                                         |
+      --------------------------------------------------------
+
+      The following table shows allowed floating-point promotions:
+      --------------------------------------------------------
+      | Type of    |     Can be implicitly promoted to       |
+      | expression |                                         |
+      --------------------------------------------------------
+      | float16_t  | float64_t                               |
+      | float32_t  |                                         |
+      --------------------------------------------------------
+      | f16vec2    | f64vec2                                 |
+      | f32vec2    |                                         |
+      --------------------------------------------------------
+      | f16vec3    | f64vec3                                 |
+      | f32vec3    |                                         |
+      --------------------------------------------------------
+      | f16vec4    | f64vec4                                 |
+      | f32vec4    |                                         |
+      --------------------------------------------------------
+      | f16mat2    | f64mat2                                 |
+      | f32mat2    |                                         |
+      --------------------------------------------------------
+      | f16mat3    | f64mat3                                 |
+      | f32mat3    |                                         |
+      --------------------------------------------------------
+      | f16mat4    | f64mat4                                 |
+      | f32mat4    |                                         |
+      --------------------------------------------------------
+      | f16mat2x3  | f64mat2x3                               |
+      | f32mat2x3  |                                         |
+      --------------------------------------------------------
+      | f16mat2x4  | f64mat2x4                               |
+      | f32mat2x4  |                                         |
+      --------------------------------------------------------
+      | f16mat3x2  | f64mat3x2                               |
+      | f32mat3x2  |                                         |
+      --------------------------------------------------------
+      | f16mat3x4  | f64mat3x4                               |
+      | f32mat3x4  |                                         |
+      --------------------------------------------------------
+      | f16mat4x2  | f64mat4x2                               |
+      | f32mat4x2  |                                         |
+      --------------------------------------------------------
+      | f16mat4x3  | f64mat4x3                               |
+      | f32mat4x3  |                                         |
+      --------------------------------------------------------
+
+       The following table shows allowed integral conversions:
+      -------------------------------------------------------------------------
+      | Type of    |     Can be implicitly converted to                       |
+      | expression |                                                          |
+      -------------------------------------------------------------------------
+      | int8_t     | uint8_t, int16_t, uint16_t, uint32_t, int64_t, uint64_t  |
+      | i8vec2     | u8vec2, i16vec2, u16vec2, u32vec2, i64vec2, u64vec2      |
+      | i8vec3     | u8vec3, i16vec3, u16vec3, u32vec3, i64vec3, u64vec3      |
+      | i8vec4     | u8vec4, i16vec4, u16vec4, u32vec4, i64vec4, u64vec4      |
+      | int16_t    | uint16_t, uint32_t, int64_t, uint64_t                    |
+      | i16vec2    | u16vec2, u32vec2, i64vec2, u64vec2                       |
+      | i16vec3    | u16vec3, u32vec3, i64vec3, u64vec3,                      |
+      | i16vec4    | u16vec4, u32vec4, i64vec4, u64vec4,                      |
+      | uint8_t    | int16_t, uint16_t, uint32_t, int64_t, uint64_t           |
+      | u8vec2     | i16vec2, u16vec2, u32vec2, i64vec2, u64vec2              |
+      | u8vec3     | i16vec3, u16vec3, u32vec3, i64vec3, u64vec3              |
+      | u8vec4     | i16vec4, u16vec4, u32vec4, i64vec4, u64vec4              |
+      | uint16_t   | uint32_t, int64_t, uint64_t                              |
+      | u16vec2    | u32vec2, i64vec2, u64vec2                                |
+      | u16vec3    | u32vec3, i64vec3, u64vec3                                |
+      | u16vec4    | u32vec4, i64vec4, u64vec4                                |
+      | int32_t    | uint32_t, int64_t, uint64_t                              |
+      | i32vec2    | u32vec2, i64vec2, u64vec2                                |
+      | i32vec3    | u32vec3, i64vec3, u64vec3                                |
+      | i32vec4    | u32vec4, i64vec4, u64vec4                                |
+      | uint32_t   | int64_t, uint64_t                                        |
+      | u32vec2    | i64vec2, u64vec2                                         |
+      | u32vec3    | i64vec3, u64vec3                                         |
+      | u32vec4    | i64vec4, u64vec4                                         |
+      | int64_t    | uint64_t                                                 |
+      | i64vec2    | u64vec2                                                  |
+      | i64vec3    | u64vec3                                                  |
+      | i64vec4    | u64vec4                                                  |
+      -------------------------------------------------------------------------
+
+      The following table shows allowed floating-point conversions:
+      --------------------------------------------------------
+      | Type of    |     Can be implicitly converted to      |
+      | expression |                                         |
+      --------------------------------------------------------
+      | float16_t  | float32_t                               |
+      | f16vec2    | f32vec2                                 |
+      | f16vec3    | f32vec3                                 |
+      | f16vec4    | f32vec4                                 |
+      | f16mat2    | f32mat2                                 |
+      | f16mat3    | f32mat3                                 |
+      | f16mat4    | f32mat4                                 |
+      | f16mat2x3  | f32mat2x3                               |
+      | f16mat2x4  | f32mat2x4                               |
+      | f16mat3x2  | f32mat3x2                               |
+      | f16mat3x4  | f32mat3x4                               |
+      | f16mat4x2  | f32mat4x2                               |
+      | f16mat4x3  | f32mat4x3                               |
+      --------------------------------------------------------
+
+      The following table shows allowed floating-integral conversions:
+      --------------------------------------------------------
+      | Type of    |     Can be implicitly converted to      |
+      | expression |                                         |
+      --------------------------------------------------------
+      | int8_t     | float16_t, float32_t, float64_t         |
+      | i8vec2     | f16vec2, f32vec2, f64vec2               |
+      | i8vec3     | f16vec3, f32vec3, f64vec3               |
+      | i8vec4     | f16vec4, f32vec4, f64vecv4              |
+      | int16_t    | float16_t, float32_t, float64_t         |
+      | i16vec2    | f16vec2, f32vec2, f64vec2               |
+      | i16vec3    | f16vec3, f32vec3, f64vec3               |
+      | i16vec4    | f16vec4, f32vec4, f64vec4               |
+      | uint8_t    | float16_t, float32_t, float64_t         |
+      | u8vec2     | f16vec2, f32vec2, f64vec2               |
+      | u8vec3     | f16vec3, f32vec3, f64vec3               |
+      | u8vec4     | f16vec4, f32vec4, f64vec4               |
+      | uint16_t   | float16_t, float32_t, float64_t         |
+      | u16vec2    | f16vec2, f32vec2, f64vec2               |
+      | u16vec3    | f16vec3, f32vec3, f64vec3               |
+      | u16vec4    | f16vec4, f32vec4, f64vec4               |
+      | int32_t    | float32_t, float64_t                    |
+      | i32vec2    | f32vec2, f64vec2                        |
+      | i32vec3    | f32vec3, f64vec3                        |
+      | i32vec4    | f32vec4, f64vec4                        |
+      | uint32_t   | float32_t, float64_t                    |
+      | u32vec2    | f32vec2, f64vec2                        |
+      | u32vec3    | f32vec3, f64vec3                        |
+      | u32vec4    | f32vec4, f64vec4                        |
+      | int64_t    | float64_t                               |
+      | i64vec2    | f64vec2                                 |
+      | i64vec3    | f64vec3                                 |
+      | i64vec4    | f64vec4                                 |
+      | uint64_t   | float64_t                               |
+      | u64vec2    | f64vec2                                 |
+      | u64vec3    | f64vec3                                 |
+      | u64vec4    | f64vec4                                 |
+      --------------------------------------------------------
+
+      No implicit conversions are provided to convert from unsigned to signed
+      integer types of the same rank, from floating-point to integer types,
+      from higher-precision to lower-precision types, from larger types to
+      smaller types, from scalars to vectors, from vectors to scalars, or
+      between matrix types with non-matching number of columns and rows. There
+      are no implicit array or structure conversions. For example, an array of
+      int32_t cannot be implicitly converted to an array of float32_t.
+
+      When an implicit conversion is done, it is not a re-interpretation of the
+      expression's bit pattern, but a conversion of its value to an equivalent
+      value in the new type. For example, the integer value -5 will be
+      converted to the floating-point value -5.0.
+
+      When converting integer values to floating-point values the result is
+      exact if possible. If the value being converted is in the range of
+      values that can be represented but the value cannot be represented
+      exactly, then choice of either the next lower or higher representable
+      value:
+          * is determined by the rounding mode requested through the API, or
+          * is implementation-defined if no rounding mode is requested.
+      Integer values having more bits of precision than a floating-point
+      mantissa will lose precision when converted to float. If the value being
+      converted is outside the range of values that can be represented,
+      the behavior is undefined.
+
+      When performing implicit conversion for binary operators, there may be
+      multiple data types to which the two operands can be converted. For
+      example, when adding an int32_t value to a uint32_t value, both values
+      can be implicitly converted to uint32_t, float32_t, and float64_t. In
+      such cases conversion happens as defined as follows:
+      (Note: In this paragraph vector and matrix types are referred to as
+      types derived from scalar types with the same bit width and bit
+      interpretation)
+        - If either operand has type float64_t or derived from float64_t,
+          the other shall be converted to float64_t or derived type.
+        - Otherwise, if either operand has type float32_t or derived from
+          float32_t, the other shall be converted to float32_t or derived type.
+        - Otherwise, if either operand has type float16_t or derived from
+          float16_t, the other shall be converted to float16_t or derived type.
+        - Otherwise, if both operands have integer types the following rules
+          shall be applied to the operands:
+          - If both operands have the same type, no further conversion
+            is needed.
+          - If both operands have signed integer types or both
+            have unsigned integer types, the operand with the type of lesser
+            integer conversion rank shall be converted to the type of the
+            operand with greater rank.
+          - Otherwise, if the operand that has unsigned integer type has rank
+            greater than to the rank of the type of the other
+            operand, the operand with signed integer type shall be converted
+            to the type of the operand with unsigned integer type.
+          - Otherwise, if the type of the operand with signed integer type can
+            represent all of the values of the type of the operand with
+            unsigned integer type, the operand with unsigned integer type
+            shall be converted to the type of the operand with signed
+            integer type.
+          - Otherwise, both operands shall be converted to the unsigned
+            integer type corresponding to the type of the operand with signed
+            integer type.
+
+      (Note: Unlike C++, in case both operands have integer types the above
+      rules do not require to perform integral promotions before any other
+      conversion is considered)
+
+      The conversions listed in the following subsections are done only as
+      indicated by other sections of this specification.
+
+      Every integer type has an integer conversion rank defined as follows:
+       - No two signed integer types have the same rank.
+       - The rank of a scalar signed integer type shall be greater than the rank
+         of any scalar signed integer type with a smaller size.
+       - The rank of int64_t shall be greater than the rank of int32_t, which
+         shall be greater than the rank of int16_t, which shall be greater
+         than the rank of int8_t.
+       - The rank of any vector signed integer type is equal to the rank of the
+         base scalar signed integer type.
+       - The rank of any scalar unsigned integer type shall equal the rank of
+         the corresponding scalar signed integer type.
+       - The rank of any vector unsigned integer type is equal to the rank of
+         the respective scalar unsigned integer type.
+
+   Modify Section 4.3.6, Output Variables
+   (add new bullet to the list in the second paragraph on p. 51)
+
+    "It is a compile-time error to declare a fragment shader output that
+     contains any of the following:
+       ...
+       * A 64-bit integer scalar or vector (int64_t, uint64_t, i64vec2, i64vec3,
+         i64vec4, u64vec2, u64vec3, u64vec4)"
+
+    Modify subsection 4.4.2.1 Transform Feedback Layout Qualifiers
+    (insert after the fourth paragraph in the section on p. 70)
+     "... will be a multiple of 8; if applied to an aggregrate containing a
+      float16_t, the offset must also be a multiple of 2, and the space taken in
+      he buffer will be a multiple of 2.""
+
+    Modify subsection 4.7.1 Range and Precision.
+
+    Modify the first sentence of the first paragraph to say:
+     "The precision of stored half-, single-, and double-precision
+     floating-point variables is defined by the IEEE 754-2008 standard for
+     16-bit, 32-bit, and 64-bit floating-point numbers."
+
+    Modify the first sentence of the second paragraph to say:
+    "The following rules apply to half, single and double-precision operations:
+     Positive and negative Infs and positive and negative zeros are generated as
+     dictated by IEEE 754-2008, but subject to the precisions
+     allowed in the following table."
+
+     For half precision operations, precisions are required as follows:
+     -----------------------------------------------------------------------
+     | Operation           | Precision                                     |
+     -----------------------------------------------------------------------
+     | a + b, a - b, a * b | Correctly rounded.                            |
+     | <, <=, ==, >, >=    | Correct result.                               |
+     | a / b, 1.0 / b      | 2.5 ULP for b in the range [2^(-14), 2^(14)]. |
+     | a * b + c           | Correctly rounded single operation or         |
+     |                     | sequence of two correctly rounded operations. |
+     | fma()               | Inherited from a * b + c.                     |
+     | pow(x, y)           | Inherited from exp2 (y * log2 (x)).           |
+     | exp (x), exp2 (x)   | (1 + 2 * |x|) ULP.                            |
+     | log (), log2()      | 3 ULP outside the range [0.5, 2.0].           |
+     |                     | Absolute error < 2^(-7) inside                |
+     |                     | the range [0.5, 2.0].                         |
+     | sqrt ()             | Inherited from 1.0 / inversesqrt().           |
+     | inversesqrt ()      | 2 ULP.                                        |
+     | implicit and        |                                               |
+     | explicit conversions|                                               |
+     | between types       | Correctly rounded                             |
+     -----------------------------------------------------------------------
+
+    Add the following sentence after the table with precision requirements for
+    single precision operations:
+     "The rounding mode is not defined but must not affect the result by more
+      than 1 ULP."
+
+    Add the following paragraph at the end of the subsection:
+     "Storage requirements are defined by variable type. The precision of
+      operations and built-in functions must preserve the storage precision
+      requirements of the variables involved."
+
+    Modify subsection 4.7.2 Precision Qualifiers.
+
+    Modify the first sentence to say:
+    "Only single-precision floating-point declaration without explicit bit size,
+     integer declaration without explicit bit size, or any opaque-type
+     declaration can have the type preceded by one of these precision
+     qualifiers:..."
+
+    Modify subsection 4.7.3 Default Precision Qualifiers.
+
+    Add the following paragraph after the first paragraph:
+    "Types with explicit bit size can not bit used in default precision
+     declarations."
+
+Changes to Chapter 5 of the OpenGL Shading Language Specification
+
+    Modify subsection 5.4.1, Conversion and Scalar Constructors
+    (add after the first list of constructor examples on p. 97)
+
+    int8_t(bool)              // convert a Boolean   value to a int8_t
+    int8_t(uint8_t)           // convert a uint8_t   value to a int8_t
+    int8_t(int16_t)           // convert a int16_t   value to a int8_t
+    int8_t(uint16_t)          // convert a uint16_t  value to a int8_t
+    int8_t(int32_t)           // convert a int32_t   value to a int8_t
+    int8_t(uint32_t)          // convert a uint32_t  value to a int8_t
+    int8_t(int64_t)           // convert a int64_t   value to a int8_t
+    int8_t(uint64_t)          // convert a uint64_t  value to a int8_t
+    int8_t(float16_t)         // convert a float16_t value to a int8_t
+    int8_t(float32_t)         // convert a float32_t value to a int8_t
+    int8_t(float64_t)         // convert a float64_t value to a int8_t
+    uint8_t(bool)             // convert a Boolean   value to a uint8_t
+    uint8_t(int8_t)           // convert a int8_t    value to a uint8_t
+    uint8_t(int16_t)          // convert a int16_t   value to a uint8_t
+    uint8_t(uint16_t)         // convert a uint16_t  value to a uint8_t
+    uint8_t(int32_t)          // convert a int32_t   value to a uint8_t
+    uint8_t(uint32_t)         // convert a uint32_t  value to a uint8_t
+    uint8_t(int64_t)          // convert a int64_t   value to a uint8_t
+    uint8_t(uint64_t)         // convert a uint64_t  value to a uint8_t
+    uint8_t(float16_t)        // convert a float16_t value to a uint8_t
+    uint8_t(float32_t)        // convert a float32_t value to a uint8_t
+    uint8_t(float64_t)        // convert a float64_t value to a uint8_t
+
+    int16_t(bool)             // convert a Boolean   value to a int16_t
+    int16_t(int8_t)           // convert a int8_t    value to a int16_t
+    int16_t(uint8_t)          // convert a uint8_t   value to a int16_t
+    int16_t(uint16_t)         // convert a uint16_t  value to a int16_t
+    int16_t(int32_t)          // convert a int32_t   value to a int16_t
+    int16_t(uint32_t)         // convert a uint32_t  value to a int16_t
+    int16_t(int64_t)          // convert a int64_t   value to a int16_t
+    int16_t(uint64_t)         // convert a uint64_t  value to a int16_t
+    int16_t(float16_t)        // convert a float16_t value to a int16_t
+    int16_t(float32_t)        // convert a float32_t value to a int16_t
+    int16_t(float64_t)        // convert a float64_t value to a int16_t
+    uint16_t(bool)            // convert a Boolean   value to a uint16_t
+    uint16_t(int8_t)          // convert a int8_t    value to a uint16_t
+    uint16_t(uint8_t)         // convert a uint8_t   value to a uint16_t
+    uint16_t(int16_t)         // convert a int16_t   value to a uint16_t
+    uint16_t(int32_t)         // convert a int32_t   value to a uint16_t
+    uint16_t(uint32_t)        // convert a uint32_t  value to a uint16_t
+    uint16_t(int64_t)         // convert a int64_t   value to a uint16_t
+    uint16_t(uint64_t)        // convert a uint64_t  value to a uint16_t
+    uint16_t(float16_t)       // convert a float16_t value to a uint16_t
+    uint16_t(float32_t)       // convert a float32_t value to a uint16_t
+    uint16_t(float64_t)       // convert a float64_t value to a uint16_t
+
+    int32_t(bool)             // convert a Boolean   value to a int32_t
+    int32_t(int8_t)           // convert a int8_t    value to a int32_t
+    int32_t(uint8_t)          // convert a uint8_t   value to a int32_t
+    int32_t(int16_t)          // convert a int16_t   value to a int32_t
+    int32_t(uint16_t)         // convert a uint16_t  value to a int32_t
+    int32_t(uint32_t)         // convert a uint32_t  value to a int32_t
+    int32_t(int64_t)          // convert a int64_t   value to a int32_t
+    int32_t(uint64_t)         // convert a uint64_t  value to a int32_t
+    int32_t(float16_t)        // convert a float16_t value to a int32_t
+    int32_t(float32_t)        // convert a float32_t value to a int32_t
+    int32_t(float64_t)        // convert a float64_t value to a int32_t
+    uint32_t(bool)            // convert a Boolean   value to a uint32_t
+    uint32_t(int8_t)          // convert a int8_t    value to a uint32_t
+    uint32_t(uint8_t)         // convert a uint8_t   value to a uint32_t
+    uint32_t(int16_t)         // convert a int16_t   value to a uint32_t
+    uint32_t(uint16_t)        // convert a uint16_t  value to a uint32_t
+    uint32_t(int32_t)         // convert a int32_t   value to a uint32_t
+    uint32_t(int64_t)         // convert a int64_t   value to a uint32_t
+    uint32_t(uint64_t)        // convert a uint64_t  value to a uint32_t
+    uint32_t(float16_t)       // convert a float16_t value to a uint32_t
+    uint32_t(float32_t)       // convert a float32_t value to a uint32_t
+    uint32_t(float64_t)       // convert a float64_t value to a uint32_t
+
+    int64_t(bool)             // convert a Boolean   value to a int64_t
+    int64_t(int8_t)           // convert a int8_t    value to a int64_t
+    int64_t(uint8_t)          // convert a uint8_t   value to a int64_t
+    int64_t(int16_t)          // convert a int16_t   value to a int64_t
+    int64_t(uint16_t)         // convert a uint16_t  value to a int64_t
+    int64_t(int32_t)          // convert a int32_t   value to a int64_t
+    int64_t(uint32_t)         // convert a uint32_t  value to a int64_t
+    int64_t(uint64_t)         // convert a uint64_t  value to a int64_t
+    int64_t(float16_t)        // convert a float16_t value to a int64_t
+    int64_t(float32_t)        // convert a float32_t value to a int64_t
+    int64_t(float64_t)        // convert a float64_t value to a int64_t
+    uint64_t(bool)            // convert a Boolean   value to a uint64_t
+    uint64_t(int8_t)          // convert a int8_t    value to a uint64_t
+    uint64_t(uint8_t)         // convert a uint8_t   value to a uint64_t
+    uint64_t(int16_t)         // convert a int16_t   value to a uint64_t
+    uint64_t(uint16_t)        // convert a uint16_t  value to a uint64_t
+    uint64_t(int32_t)         // convert a int32_t   value to a uint64_t
+    uint64_t(uint32_t)        // convert a uint32_t  value to a uint64_t
+    uint64_t(int64_t)         // convert a int64_t   value to a uint64_t
+    uint64_t(float16_t)       // convert a float16_t value to a uint64_t
+    uint64_t(float32_t)       // convert a float32_t value to a uint64_t
+    uint64_t(float64_t)       // convert a float64_t value to a uint64_t
+
+    float16_t(bool)             // convert a Boolean   value to a float16_t
+    float16_t(int8_t)           // convert a int8_t    value to a float16_t
+    float16_t(uint8_t)          // convert a uint8_t   value to a float16_t
+    float16_t(int16_t)          // convert a int16_t   value to a float16_t
+    float16_t(uint16_t)         // convert a uint16_t  value to a float16_t
+    float16_t(int32_t)          // convert a int32_t   value to a float16_t
+    float16_t(uint32_t)         // convert a uint32_t  value to a float16_t
+    float16_t(int64_t)          // convert a int64_t   value to a float16_t
+    float16_t(uint64_t)         // convert a uint64_t  value to a float16_t
+    float16_t(float32_t)        // convert a float32_t value to a float16_t
+    float16_t(float64_t)        // convert a float64_t value to a float16_t
+
+    float32_t(bool)             // convert a Boolean   value to a float32_t
+    float32_t(int8_t)           // convert a int8_t    value to a float32_t
+    float32_t(uint8_t)          // convert a uint8_t   value to a float32_t
+    float32_t(int16_t)          // convert a int16_t   value to a float32_t
+    float32_t(uint16_t)         // convert a uint16_t  value to a float32_t
+    float32_t(int32_t)          // convert a int32_t   value to a float32_t
+    float32_t(uint32_t)         // convert a uint32_t  value to a float32_t
+    float32_t(int64_t)          // convert a int64_t   value to a float32_t
+    float32_t(uint64_t)         // convert a uint64_t  value to a float32_t
+    float32_t(float16_t)        // convert a float16_t value to a float32_t
+    float32_t(float64_t)        // convert a float64_t value to a float32_t
+
+    float64_t(bool)             // convert a Boolean   value to a float64_t
+    float64_t(int8_t)           // convert a int8_t    value to a float64_t
+    float64_t(uint8_t)          // convert a uint8_t   value to a float64_t
+    float64_t(int16_t)          // convert a int16_t   value to a float64_t
+    float64_t(uint16_t)         // convert a uint16_t  value to a float64_t
+    float64_t(int32_t)          // convert a int32_t   value to a float64_t
+    float64_t(uint32_t)         // convert a uint32_t  value to a float64_t
+    float64_t(int64_t)          // convert a int64_t   value to a float64_t
+    float64_t(uint64_t)         // convert a uint64_t  value to a float64_t
+    float64_t(float16_t)        // convert a float16_t value to a float64_t
+    float64_t(float32_t)        // convert a float64_t value to a float64_t
+
+    bool(int8_t)                // convert a int8_t    value to a Boolean
+    bool(uint8_t)               // convert a uint8_t   value to a Boolean
+    bool(int16_t)               // convert a int16_t   value to a Boolean
+    bool(uint16_t)              // convert a uint16_t  value to a Boolean
+    bool(int32_t)               // convert a int32_t   value to a Boolean
+    bool(uint32_t)              // convert a uint32_t  value to a Boolean
+    bool(int64_t)               // convert a int64_t   value to a Boolean
+    bool(uint64_t)              // convert a uint64_t  value to a Boolean
+    bool(float16_t)             // convert a float16_t value to a Boolean
+    bool(float32_t)             // convert a float32_t value to a Boolean
+    bool(float64_t)             // convert a float64_t value to a Boolean
+
+    (modify the first sentence of last paragraph on p. 98)
+
+    "... other arguments.
+     If the basic type (bool, int8_t, uint8_t, int16_t, uint16_t, int32_t,
+     uint32_t, int, int64_t, uint64_t, float16_t, float32_t, float, float64_t,
+     or double) of a parameter to a constructor does not match the basic type of
+     the object being constructed the scalar construction rules (above) are used
+     to convert the parameters.""
+
+    Modify subsection 5.8 Assignments
+
+    Modify the third sentence of the second paragraph to say:
+     "The lvalue-expression and rvalue-expression must have the same type, or
+      the expression must have a type in the tables in section
+      4.1.10 "Implicit Conversions" that converts to the type of
+      lvalue-expression, in which case an implicit conversion will be done on
+      the rvalue-expression before the assignment is done."
+
+    Modify subsection 5.9 Expressions
+
+    Modify the third sentence in the description of the arithmetic binary
+    operators to say:
+      "All arithmetic binary operators result in the same fundamental type
+       (signed integer, unsigned integer, half-precision floating point,
+       single-precision floating point, or double-precision floating point) as
+       the operands they operate on, after operand type conversion."
+
+    Add the following sentence after the first sentence in the description of
+    the arithmetic binary operators:
+     "If the fundamental types in the operands match the operators must operate
+      exactly on the type defined by the involved operands, conversion to
+      larger types is not allowed."
+
+    Add the following sentence after the first sentence in the description of
+    the modulus operator:
+     "If the fundamental types in the operands match the operator must operate
+      exactly on the type defined by the involved operands, conversion to
+      larger types is not allowed."
+
+    Add the following sentence after the first sentence in the description of
+    the arithmetic unary operators:
+     "The operators must operate exactly on the type defined by the operand,
+      conversion to larger types is not allowed."
+
+    Add the following sentence after the first sentence in the description of
+    the one's complement operator:
+     "The operator must operate exactly on the type defined by the operand,
+      conversion to larger types is not allowed."
+
+    Modify the third and the fourth sentences in the description of the shift
+    operators to say:
+     "If the fundamental types in the operands match the operator must operate
+      exactly on the type defined by the involved operands, conversion to
+      larger types is not allowed. One operand can be signed while the other is
+      unsigned. If the fundamental types in the operands do not match,
+      then the conversions from section 4.1.10 "Implicit Conversions" are
+      applied to create matching types.
+      In all cases, the resulting type will be the same type as the converted
+      left  operand."
+
+Changes to Chapter 6 of the OpenGL Shading Language Specification
+
+     Modify subsection 6.1 Function Definitions
+
+     Modify the fifteenth paragraph of the subsection to say:
+     (overloading resolution rules)
+      "To determine whether the conversion for a single argument in one match
+       is better than that for another match, the conversion is assigned of the
+       three ranks ordered from best to worst:
+         1. Exact match: no conversion.
+         2. Promotion: integral or floating-point promotion.
+         3. Conversion: integral conversion, floating-point conversion,
+            floating-integral conversion.
+       A conversion C1 is better than a conversion C2 if the rank of C1 is
+       better than the rank of C2."
+
+Changes to Chapter 8 of the OpenGL Shading Language Specification:
+
+    Modify the sixth paragraph to say:
+     "When the built-in functions are specified below, where the
+     input arguments (and corresponding output) can be
+     float32_t, f32vec2, f32vec3, f32vec4, genF32Type is used as the argument.
+     When the built-in functions are specified below, where the
+     input arguments (and corresponding output) can be
+     float16_t, f16vec2, f16vec3, f16vec4, genF16Type is used as the argument.
+     When the built-in functions are specified below, where the
+     input arguments (and corresponding output) can be
+     genF16Type or genF32Type, genType is used as the argument.
+     Where the input arguments (and corresponding output) can be
+     int64_t, i64vec2, i64vec3, i64vec4, genI64Type is used as
+     the argument.
+     Where the input arguments (and corresponding output) can be
+     int32_t, i32vec2, i32vec3, i32vec4, genI32Type is used as
+     the argument.
+     Where the input arguments (and corresponding output) can be
+     int16_t, i16vec2, i16vec3, i16vec4, genI16Type is used as
+     the argument.
+     Where the input arguments (and corresponding output) can be
+     int8_t, i8vec2, i8vec3, i8vec4, genI8Type is used as
+     the argument.
+     Where the input arguments (and corresponding output) can be
+     genI64Type, genI32Type, genI16Type, genI8Type,
+     genIType is used as the argument.
+     Where the input arguments (and corresponding output) can be
+     uint64_t, u64vec2, u64vec3, u64vec4, genU64Type is used as
+     the argument.
+     Where the input arguments (and corresponding output) can be
+     uint32_t, u32vec2, u32vec3, u32vec4, genU32Type is used as
+     the argument.
+     Where the input arguments (and corresponding output) can be
+     uint16_t, u16vec2, u16vec3, u16vec4, genU16Type is used as
+     the argument.
+     Where the input arguments (and corresponding output) can be
+     uint8_t, u8vec2, u8vec3, u8vec4, genU8Type is used as
+     the argument.
+     Where the input arguments (and corresponding output) can be
+     genU64Type, genU32Type, genU16Type, genU8Type,
+     genUType is used as the argument.
+     Where the input arguments (or corresponding output) can be
+     bool, bvec2, bvec3, or bvec4, genBType is used as the argument.
+     Where the input arguments (and corresponding output) can be
+     float64_t, f64vec2, f64vec3, f64vec4,
+     double, dvec2, dvec3, dvec4, genDType is used as the argument.
+     For any specific use of a function, the actual types substituted for
+     genDType, genType, genIType, genUType, or genBType have to have the
+     same number of components and bits per component for all arguments and
+     for the return type. Similarly, hmat is used for any matrix basic type
+     with half-precision components, mat is used for any matrix basic type
+     with single-precision components and dmat is used for any matrix basic
+     type with double-precision components."
+
+    Add subsection 8.x Integer Pack and Unpack Functions.
+    ------------------------------------------------------------------------------
+    | Function                     | Description                                 |
+    ------------------------------------------------------------------------------
+    | int64_t  pack64(i32vec2 v)   | The pack functions return a signed or       |
+    | uint64_t pack64(u32vec2 v)   | unsigned integer of the given return type   |
+    | int64_t  pack64(i16vec4 v)   | obtained by packing the components of a     |
+    | uint64_t pack64(u16vec4 v)   | signed or unsigned integer vector.          |
+    | int32_t  pack32(i16vec2 v)   | The bits of the result are laid out exactly |
+    | uint32_t pack32(u16vec2 v)   | as if the vector components were laid       |
+    | int32_t  pack32(i8vec4 v)    | contiguously starting with the first        |
+    | uint32_t pack32(u8vec4 v)    | component                                   |
+    | int16_t  pack16(i8vec2 v)    |                                             |
+    | uint16_t pack16(u8vec2 v)    |                                             |
+    ------------------------------------------------------------------------------
+    | i32vec2 unpack32(int64_t v)  | The unpack functions return a signed or     |
+    | u32vec2 unpack32(uint64_t v) | unsigned integer vector of the return type  |
+    | i16vec4 unpack16(int64_t v)  | built from a given integer scalar.          |
+    | u16vec4 unpack16(uint64_t v) | The first of the  vector contains the 8-,   |
+    | i16vec2 unpack16(int32_t v)  | 16-, or 32- least significant bits of the   |
+    | u16vec2 unpack16(uint32_t v) | input; the last component contains the 8-   |
+    | i8vec4  unpack8(int32_t v)   | 16, or 32- most significant bits.           |
+    | u8vec4  unpack8(uint32_t v)  | The other components follow the natural     |
+    | i8vec2  unpack8(int16_t v )  | order of bits.                              |
+    | u8vec2  unpack8(uint16_t v)  |                                             |
+    ------------------------------------------------------------------------------
+
+    ---------------------------------------------------------------------------
+    | Function                          | Description                         |
+    ---------------------------------------------------------------------------
+    | int64_t packInt2x32(ivec2 v)      | Same as int64_t pack64(i32vec2 v)   |
+    | uint64_t packUint2x32(uvec2 v)    | Same as uint64_t pack64(u32vec2 v)  |
+    --------------------------------------------------------------------------|
+    | ivec2 unpackInt2x32(int64_t v)    | Same as i32vec2 unpac32k(int64_t  v |
+    | uvec2 unpackUint2x32(uint64_t v)  | Same as u32vec2 unpack32(uint64_t v |
+    ---------------------------------------------------------------------------
+
+    Changes to subsection 8.3 Common Functions.
+    Modify the description of the following functions to say:
+
+    ----------------------------------------------------------------------------------
+    | Function                                        | Description                  |
+    ----------------------------------------------------------------------------------
+    | genFType frexp(genFType x, out genI32Type exp)  |  Unchanged                   |
+    ----------------------------------------------------------------------------------
+    | genFType ldexp(genFType x, in genI32Type exp)   |  Unchanged                   |
+    ----------------------------------------------------------------------------------
+    | genI16Type halfBitsToInt16(genF16Type value)    | Returns a signed or unsigned |
+    | genU16Type halfBitsToUint16(genF16Type value)   | integer value representing   |
+    | genI32Type floatBitsToInt(genF32Type value)     | the encoding of a floating   |
+    | genU32Type floatBitsToUint(genF32Type value)    | point value.  The floating   |
+    | genI64Type doubleBitsToInt64(genDType value)    | point value's bit-level      |
+    | genU64Type doubleBitsToUint64(genDType value)   | representation is preserved. |
+    | genI16Type float16BitsToInt16(genF16Type value) |                              |
+    | genU16Type float16BitsToUint16(genF16Type value)|                              |
+    ----------------------------------------------------------------------------------
+    | genF16Type int16BitsToHalf(genI16Type value)    | Returns a floating point     |
+    | genF16Type uint16BitsToHalf(genU16Type value)   | value corresponding to a     |
+    | genF32Type intBitsToFloat(genI32Type value)     | signed  or unsigned integer  |
+    | genF32Type uintBitsToFloat(genU32Type value)    | encoding of a floating point |
+    | genDType int64BitsToDouble(genI64Type value)    | value. If a NaN is passed    |
+    | genDType uint64BitsToDouble(genU64Type value)   | in it will not signal, and   |
+    | genF16Type int16BitsToFloat16(genI16Type value) | the resulting value is       |
+    | genF16Type uint16BitsToFloat16(genU16Type value)| unspecified. If an Inf is    |
+    |                                                 | passed in, the resulting     |
+    |                                                 | value is the corresponding   |
+    |                                                 | Inf.                         |
+    ----------------------------------------------------------------------------------
+
+    Changes to subsection 8.4, Floating-Point and Integer Pack and Unpack Functions
+    (add to the table of pack and unpack functions on p. 149)
+
+    --------------------------------------------------------------------------------------------
+    | Syntax                            | Description                                          |
+    --------------------------------------------------------------------------------------------
+    | uint32_t packFloat2x16(f16vec2 v) | Returns an unsigned 32-bit integer obtained by       |
+    |                                   | packing the components of a two-component half-      |
+    |                                   | precision floating-point vector, respectively. The   |
+    |                                   | first vector component specifies the 16 least        |
+    |                                   | significant bits; the second component specifies the |
+    |                                   | 16 most significant bits.                            |
+    --------------------------------------------------------------------------------------------
+    |f16vec2 unpackFloat2x16(uint32_t v)| Returns a two-component half-precision floating-point|
+    |                                   | vector built from a 32-bit unsigned integer scalar,  |
+    |                                   | respectively. The first component of the vector      |
+    |                                   | contains the 16 least significant bits of the input; |
+    |                                   | the second component contains the 16 most            |
+    |                                   | significant bits.                                    |
+    --------------------------------------------------------------------------------------------
+    |                                   | Returns an unsigned 32- or 64-bit integer obtained   |
+    | int32_t  packInt2x16 (i16vec2 v)  | by packing the components of a two- or               |
+    | int64_t  packInt4x16 (i16vec4 v)  | four-component 16-bit signed or unsigned integer     |
+    | uint32_t packUint2x16(u16vec2 v)  | vector, respectively. The first vector component     |
+    | uint64_t packUint4x16(u16vec4 v)  | specifies the 16 least significant bits; the         |
+    |                                   | last component specifies the 16 most significant     |
+    |                                   | bits.                                                |
+    ------------------------------------+-------------------------------------------------------
+    |                                   | Returns a signed or unsigned integer vector built    |
+    | i16vec2 unpackInt2x16 (int32_t  v)| from a 32- or 64-bit signed or unsigned integer      |
+    | i16vec4 unpackInt4x16 (int64_t  v)| scalar, respectively. The first component of the     |
+    | u16vec2 unpackUint2x16(uint32_t v)| vector contains the 16 least significant bits of the |
+    | u16vec4 unpackUint4x16(uint64_t v)| input; the last component specifies the 16 most      |
+    |                                   | significant bits.                                    |
+    |                                   |                                                      |
+    --------------------------------------------------------------------------------------------
+
+
+    Changes to subsection 8.7 Vector Relational Functions.
+    Modify the first table to state:
+    --------------------------------------------
+    | Placeholder | Specific Types Allowed     |
+    --------------------------------------------
+    | bvec        | bvec2, bvec3, bvec4        |
+    --------------------------------------------
+    | ivec        | i64vec2, i64vec3, i64vec4, |
+    |             | i32vec2, i32vec3, i32vec4, |
+    |             | i16vec2, i16vec3, i16vec4, |
+    |             | i8vec2, i8vec3, i8vec4     |
+    --------------------------------------------
+    | uvec        | u64vec2, u64vec3, u64vec4, |
+    |             | u32vec2, u32vec3, u32vec4, |
+    |             | u16vec2, u16vec3, u16vec4, |
+    |             | u8vec2, u8vec3, u8vec4     |
+    --------------------------------------------
+    | vec         | vec2, vec3, vec4,          |
+    |             | f32vec2, f32vec3, f32vec4, |
+    |             | f16vec2, f16vec3, f16vec4, |
+    |             | dvec2, dvec3, dvec4,       |
+    |             | f64vec2, f64vec3, f64vec4  |
+    --------------------------------------------
+
+Interactions with ARB_gpu_shader_int64:
+
+    This extension fully incorporates the changes to the OpenGL Shading Language
+    Specification done in ARB_gpu_shader_int64 and can be used instead.
+
+Interactions with AMD_gpu_shader_half_float:
+
+    This extension fully incorporates the changes to the OpenGL Shading Language
+    Specification done in AMD_gpu_shader_half_float and can be used instead.
+
+Interactions with AMD_gpu_shader_int16:
+
+    This extension fully incorporates the changes to the OpenGL Shading Language
+    Specification done in AMD_gpu_shader_int16 and can be used instead.
+
+Issues
+
+1. Add f64/i64/u64 for completeness?
+   RESOLVED: Yes.
+
+2. f32 and float are aliased. Is this fine?
+   RESOLVED: Yes.
+
+3. Do we need more built-in functions? If yes, which ones?
+   RESOLVED: pack*/unpack* functions added.
+
+4. Ability to use the added types depends on a driver exposing particular
+   SPIR-V capabilities. E.g. f16 can be used only if the driver exposes
+   Float16, i8/u8 require Int8. Is this obvious enough or needs to be
+   explained in the extension?
+   RESOLVED: Explanation added KHR_vulkan_glsl.
+
+5. Should we disallow 64-bit integers as fragment shader outputs?
+   RESOLUTION: Yes, similar to ARB_gpu_shader_int64.
+
+Revision History
+
+    Rev.    Date         Author               Changes
+    ----  -----------    -------------------  --------------------------------
+       2  12-Dec-2023    Graeme Leese         Correct halfBitsToUint16 spelling
+       1  3-July-2017    Alexander Galazin    Initial draft

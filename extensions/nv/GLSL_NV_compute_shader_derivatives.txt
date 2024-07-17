@@ -14,6 +14,7 @@ Contributors
 
     Ashwin Lele, NVIDIA
     Jeff Bolz, NVIDIA
+    Michael Chock, NVIDIA
 
 Status
 
@@ -21,8 +22,8 @@ Status
 
 Version
 
-    Last Modified:      September 13, 2018
-    Revision:           3
+    Last Modified:      September 4, 2019
+    Revision:           5
 
 Dependencies
 
@@ -39,7 +40,11 @@ Dependencies
 
     This extension interacts with ARB_sparse_texture_clamp.
 
+    This extension interacts with EXT_sparse_texture2.
+
     This extension interacts with KHR_shader_subgroup.
+
+    This extension interacts with ARB_compute_variable_group_size.
 
 Overview
 
@@ -156,16 +161,16 @@ Modifications to the OpenGL Shading Language Specification, Version 4.50
 
     The layout qualifier "derivative_group_quadsNV" specifies that derivatives
     in compute shaders are evaluated over 2x2 groups of invocations whose
-    gl_LocalInvocationID values are of the form (2x+{0,1}, 2y+{0,1}, z).  It
-    is a compile-time error if this qualifier is used with a local group size
-    whose first or second dimension is not a multiple of two.
+    gl_LocalInvocationID values are of the form (2x+{0,1}, 2y+{0,1}, z).  It is
+    a compile- or link-time error if this qualifier is used with a local group
+    size whose first or second dimension is not a multiple of two.
 
     The layout qualifier "derivative_group_linearNV" specifies that
     derivatives in compute shaders are evaluated over groups of four
     invocations with consecutive gl_LocalInvocationIndex values of the form
-    4x+{0,1,2,3}.  It is a compile-time error if this qualifier is used with a
-    local group size whose total number of invocations is not a multiple of
-    four.
+    4x+{0,1,2,3}.  It is a compile- or link-time error if this qualifier is
+    used with a local group size whose total number of invocations is not a
+    multiple of four.
 
 
     Modify Section 8.9, Texture Functions, p. 162
@@ -298,6 +303,30 @@ Dependencies on ARB_sparse_texture_clamp
       sparseTextureGradOffsetClampARB
       textureGradOffsetClampARB
 
+Dependencies on EXT_sparse_texture2
+
+    If EXT_sparse_texture2 is supported, the texture lookup functions provided
+    by that extension will support automatic level of detail computation in
+    compute shaders, as defined in this extension.  Supported functions
+    include:
+
+      sparseTextureEXT (with or without LOD bias)
+      sparseTextureClampEXT (with or without LOD bias)
+      textureClampEXT (with or without LOD bias)
+      sparseTextureOffsetEXT (with or without LOD bias)
+      sparseTextureOffsetClampEXT (with or without LOD bias)
+      textureOffsetClampEXT (with or without LOD bias)
+
+    The following functions using derivatives provided by the shader were
+    already supported in compute shaders prior to this extension:
+
+      sparseTextureGradEXT
+      sparseTextureGradClampEXT
+      textureGradClampEXT
+      sparseTextureGradOffsetEXT
+      sparseTextureGradOffsetClampEXT
+      textureGradOffsetClampEXT
+
 Dependencies on KHR_shader_subgroup
 
     If the KHR_shader_subgroup_quads feature of KHR_shader_subgroup is
@@ -333,6 +362,23 @@ Dependencies on KHR_shader_subgroup
       - 3rd index has a local invocation index of the form 4n + 3
 
       for some integer value <n>.
+
+Dependencies on ARB_compute_variable_group_size
+
+    If ARB_compute_variable_group_size is supported, modify the language
+    specifying a compile- or link-time error for "bad" workgroup sizes to not
+    apply if the "local_size_variable" layout qualifier is specified.
+
+      The layout qualifier "derivative_group_quadsNV" ...  It is a compile- or
+      link-time error if this qualifier is used in a compute shader that does
+      not use the "local_size_variable" layout qualifier and whose local group
+      size has a first or second dimension that is not a multiple of two.
+
+      The layout qualifier "derivative_group_linearNV" ...  It is a compile- or
+      link-time error if this qualifier is used in a compute shader that does
+      not use the "local_size_variable" layout qualifier and whose local group
+      size has a total number of invocations that is not a multiple of four.
+
 
 Issues
 
@@ -389,9 +435,10 @@ Issues
         shadow1DProj(), and shadow2DProj().
 
       This extension also produces defined derivatives in texture lookup
-      functions from ARB_sparse_texture2 and ARB_sparse_texture_clamp.
+      functions from ARB_sparse_texture2, ARB_sparse_texture_clamp, and
+      EXT_sparse_texture2.
 
-    (4) How are derivatives handled when no "derviative_group" layout
+    (4) How are derivatives handled when no "derivative_group" layout
         qualifier is specified?  How are derivatives handled in divergent flow
         control?
 
@@ -413,7 +460,28 @@ Issues
       implementation will recognize divergence and produce derivatives of
       zero.
 
+    (5) How does this extension interact with ARB_compute_variable_group_size?
+
+      RESOLVED:  When derivatives are used with a compute shader with a variable
+      local group size, it is not possible to enforce a compile- or link-time
+      error that complains about "bad" local group sizes.  For OpenGL, we will
+      instead enforce this restriction at dispatch time by throwing an
+      INVALID_VALUE error.  As of September 2019, variable local group sizes are
+      not supported in Vulkan or SPIR-V.
+
+
 Revision History
+
+    Revision 5, 2019/09/04 (pbrown)
+    - Add interactions with ARB_compute_variable_group_size, where a compile-
+      or link-time error for bad local group sizes is not possible.  Also, fix
+      the language to specify that such errors can be either compile-time or
+      link-time -- it's not possible to throw a compile-time error if the
+      derivative mode is specified in one compilation unit and the local group
+      size is specified in another.
+
+    Revision 4, 2018/11/09 (mchock)
+    - Add interactions with EXT_sparse_texture2
 
     Revision 3, 2018/09/13 (pbrown)
     - Add interactions with KHR_shader_subgroup (KHR_shader_subgroup_quads)

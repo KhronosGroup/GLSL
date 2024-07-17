@@ -15,6 +15,7 @@ Contributors
 
     Yury Uralsky, NVIDIA
     Daniel Koch, NVIDIA
+    Sahil Parmar, NVIDIA
 
 Status
 
@@ -22,8 +23,8 @@ Status
 
 Version
 
-    Last Modified Date:     October 5, 2018
-    NVIDIA Revision:        5
+    Last Modified Date:     March 6, 2019
+    NVIDIA Revision:        7
 
 Dependencies
 
@@ -45,6 +46,8 @@ Dependencies
     This extension interacts with NVX_multiview_per_view_attributes.
 
     This extension interacts with ARB_shader_draw_parameters.
+
+    This extension interacts with EXT_clip_cull_distance.
 
 Overview
 
@@ -422,7 +425,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.50.6
 
     (add a new example to the second paragraph, p. 48)
 
-      primitive in vec3 triangleNormal;
+      perprimitiveNV in vec3 triangleNormal;
 
     (modify third paragraph, p. 48)
 
@@ -1105,6 +1108,12 @@ Interactions with ARB_shader_draw_parameters
     task or mesh workgroup. If the vertex or workgroup is not invoked by a
     Multi* form of a draw command, then the value of gl_DrawIDARB is zero.
 
+Interactions with EXT_clip_cull_distance
+
+    If implemented with OpenGL ES ESSL and EXT_clip_cull_distance is not
+    supported, remove references to gl_ClipDistance, gl_CullDistance,
+    gl_ClipDistancePerViewNV and gl_CullDistancePerViewNV.
+
 Issues
 
     (1) What are the matching requirements between mesh outputs declared
@@ -1265,9 +1274,15 @@ Issues
 
 Revision History
 
+    Version 7, March 6, 2019 (pknowles)
+    - Added EXT_clip_cull_distance interactions.
+
+    Version 6, October 22, 2018 (sparmar)
+    - Fix typo for per-primitive fragment shader input example
+
     Version 5, October 5, 2018 (pbrown)
     - Add an interaction with GLSL 4.60 and GL_KHR_vulkan_glsl to allow the
-      use of "local_size_[xyz]_in" where applicable.
+      use of "local_size_[xyz]_id" where applicable.
 
     Version 4, October 4, 2018 (pbrown)
     - Fix incorrect layout qualifier table entries.  "local_size_[xyz]" is

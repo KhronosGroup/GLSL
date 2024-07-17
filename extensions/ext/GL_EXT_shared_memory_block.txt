@@ -1,0 +1,219 @@
+Name
+
+  EXT_shared_memory_block
+
+Name Strings
+
+  GL_EXT_shared_memory_block
+
+Contact
+
+  Caio Marcelo de Oliveira Filho, Intel (caio.oliveira 'at' intel.com)
+
+Contributors
+
+  Caio Marcelo de Oliveira Filho, Intel
+  Jeff Bolz, NVIDIA Corporation
+  Graeme Leese, Broadcom
+
+Status
+
+  Complete
+
+Version
+
+  Last Modified Date:      June 8, 2020
+  Revision:                1
+
+Number
+
+  TBD
+
+Depenendencies
+
+  This extension can be applied to OpenGL GLSL versions 1.40
+  (#version 140) and higher.
+
+  This extension can be applied to OpenGL ES ESSL versions 3.10
+  (#version 310) and higher.
+
+  This extension is written against the OpenGL Shading Language
+  Specification, version 4.60 (revision 7), dated July 10, 2019.
+
+  This extension requires GL_KHR_vulkan_glsl.
+
+Overview
+
+  This extension adds the ability to declare shared variables in
+  blocks in compute shaders. When enabled, all shared variables must be
+  part of a block, and those blocks will alias each other.
+
+New Procedures and Functions
+
+  None.
+
+New Tokens
+
+  None.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+  Including the following line in a shader can be used to control the language
+  features described in this extension:
+
+    #extension GL_EXT_shared_memory_block : <behavior>
+
+  where <behavior> is as specified in section 3.3.
+
+  New preprocessor #defines are added to the OpenGL Shading Language:
+
+    #define GL_EXT_shared_memory_block    1
+
+
+  In section 4.3.8 Shared Variables:
+
+  Add a new paragraph after the paragraph that starts with "There is a
+  limit to the total size of all variables":
+
+    If Shared variables are grouped in blocks, each block will refer
+    to the same underlying storage. In that case the
+    MAX_COMPUTE_SHARED_MEMORY_SIZE limit applies to each block
+    independently.
+
+  In section 4.3.9 Interface Blocks:
+
+  Replace paragraph:
+
+    Input, output, uniform, and buffer variable declarations can be
+    grouped into named interface blocks to provide coarser granularity
+    backing than is achievable with individual declarations. They can
+    have an optional instance name, used in the shader to reference
+    their members. An output block of one programmable stage is backed
+    by a corresponding input block in the subsequent programmable
+    stage. A uniform block is backed by the application with a buffer
+    object. A block of buffer variables, called a shader storage
+    block, is also backed by the application with a buffer object. It
+    is a compile-time error to have an input block in a vertex shader
+    or an output block in a fragment shader. These uses are reserved
+    for future use.
+
+  With:
+
+    Input, output, uniform, buffer, and shared variable declarations
+    can be grouped into named interface blocks to provide coarser
+    granularity backing than is achievable with individual
+    declarations. They can have an optional instance name, used in the
+    shader to reference their members. An output block of one
+    programmable stage is backed by a corresponding input block in the
+    subsequent programmable stage. A uniform block is backed by the
+    application with a buffer object. A block of buffer variables,
+    called a shader storage block, is also backed by the application
+    with a buffer object. A block of shared variables, called a shared
+    block, is backed by the storage described in "Shared Variables".
+    It is a compile-time error to have an input block in a vertex
+    shader or an output block in a fragment shader. These uses are
+    reserved for future use.
+
+  Replace paragraph:
+
+    An interface block is started by an in, out, uniform, or buffer
+    keyword, followed by a block name, followed by an open curly brace
+    ({) as follows:
+
+  With:
+
+    An interface block is started by an in, out, uniform, buffer, or shared
+    keyword, followed by a block name, followed by an open curly brace
+    ({) as follows:
+
+  Add "shared" to the keywords that are part of "interface-qualifier".
+
+  Replace paragraph:
+
+    If no optional qualifier is used in a member-declaration, the
+    qualification of the member includes all in, out, patch, uniform,
+    or buffer as determined by interface-qualifier. If optional
+    qualifiers are used, they can include interpolation qualifiers,
+    auxiliary storage qualifiers, and storage qualifiers and they must
+    declare an input, output, or uniform member consistent with the
+    interface qualifier of the block: Input variables, output
+    variables, uniform variables, and buffer members can only be in in
+    blocks, out blocks, uniform blocks, and shader storage blocks,
+    respectively.
+
+  With:
+
+    If no optional qualifier is used in a member-declaration, the
+    qualification of the member includes all in, out, patch, uniform,
+    buffer, or shared as determined by interface-qualifier. If
+    optional qualifiers are used, they can include interpolation
+    qualifiers, auxiliary storage qualifiers, and storage qualifiers
+    and they must declare a member consistent with the interface
+    qualifier of the block.
+
+  Replace paragraph:
+
+    Repeating the in, out, patch, uniform, or buffer interface
+    qualifier for a member’s storage qualifier is optional. For
+    example,
+
+  With:
+
+    Repeating the in, out, patch, uniform, buffer, or shared interface
+    qualifier for a member’s storage qualifier is optional. For
+    example,
+
+  Add a new paragraph after the paragraph starting with "Matched block
+  names within a shader interface...":
+
+    Shared blocks are not considered part of the shader interface,
+    they are used only for grouping and aliasing inside a single
+    compute shader.
+
+  Add a paragraph at the end of the section:
+
+    Mixing shared blocks and shared variables that are not part of a
+    block in the same shader is not valid and produces either a
+    compile-time or a link-time error. Shared blocks cannot be
+    declared as arrays, it produces a compile-time error.
+
+  In section 4.4 Layout Qualifiers:
+
+  Modify the table to allow the "shared" interface-qualifier for the
+  following rows:
+
+    - shared / packed / std140 / std430
+    - row_major / column_major
+    - offset
+    - align
+
+  Add a new sub-section 4.4.10 Shared Block Layout Qualifier:
+
+    Shared blocks follow the same rules as Shader Storage Blocks, but
+    restricted to the layout qualifiers that can be used for Shared
+    blocks, described in the table "Layout Qualifiers".
+
+    The initial state of compilation for default layout qualifiers
+    also includes:
+
+      layout(std430, column_major) shared;
+
+
+Issues
+
+1. Can shared blocks be null initialized?
+
+   NO. While it is possible to do this in SPIR-V, there's no syntax to
+   null initialize blocks in GLSL.
+
+2. Should we support default layout qualifiers at global scope for
+   Shared?
+
+   YES. For consistency with Shader Storage Blocks. The initial state
+   for shared blocks is specified in the added sub-section 4.4.10.
+
+
+Revision History
+
+  Revision 1 (Caio Marcelo de Oliveira Filho)
+    - Internal revision

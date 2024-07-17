@@ -1,0 +1,96 @@
+Name
+
+    EXT_buffer_reference_uvec2
+
+Name Strings
+
+    GL_EXT_buffer_reference_uvec2
+
+Contact
+
+    John Kessenich, Google Inc. (johnkessenich 'at' google.com)
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date:         September 1, 2019
+    Revision:                   1
+
+Number
+
+    TBD
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.50
+    (#version 450) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification, version 4.60, dated July 23, 2017.
+
+    This extension requires GL_EXT_buffer_reference.
+
+Overview
+
+    This extension adds additional constructor support to
+    GL_EXT_buffer_reference to enable conversion of references to and from a
+    *uvec2*. That is, the 64 bits of address from the reference are constructed
+    to and from two 32-bit unsigned integers, represented as a vector of two
+    uints.
+
+    The intent is to not require 64-bit integer support to manipulate the
+    64-bits of address in a reference. E.g., a shader can use uaddCarry() to
+    add an offset to a reference address via *uvec2* objects, or compare an
+    address to 0, using a 'uvec2(0)' value.
+
+New Procedures and Functions
+
+    None.
+
+New Tokens
+
+    None.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_buffer_reference_uvec2 : <behavior>
+
+    where <behavior> is as specified in section 3.3. If
+    GL_EXT_buffer_reference_uvec2 is enabled, the
+    GL_EXT_buffer_reference extension is also implicitly enabled.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+      #define GL_EXT_buffer_reference_uvec2    1
+
+    Modify section 5.4.1 (Conversion and Scalar Constructors)
+
+    Add to the end of the section, right after the EXT_buffer_reference addition
+    for constructing to and from a uint64_t():
+
+      Buffer reference types can also be constructed from a *uvec2* value, and
+      a *uvec2* value can be constructed from a buffer reference type value.
+      The low-order 32 bits of the reference map to and from the 'x' component
+      of the *uvec2*.
+
+Errors
+
+    None.
+
+Issues
+
+    None.
+
+Revision History
+
+    Revision 1
+      - Internal revisions.

@@ -1,0 +1,96 @@
+Name
+
+    EXT_ray_cull_mask
+
+Name Strings
+
+    GL_EXT_ray_cull_mask
+
+Contact
+
+    Marius Bjorge, ARM
+
+Contributors
+
+    Marius Bjorge, ARM
+    Yunpeng Zhu, Huawei
+    Daniel Koch, NVIDIA
+    Eric Werness, NVIDIA
+    Members of the Vulkan Ray Tracing TSG
+
+Status
+
+    Complete
+
+Version
+
+    Last Modified Date: 2022-02-21
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.60
+    (#version 460) and higher.
+
+    This extension is written against revision 5 of the OpenGL Shading Language
+    version 4.60, dated September 4, 2017.
+
+    This extension interacts with revision 43 of the GL_KHR_vulkan_glsl
+    extension, dated October 25, 2017.
+
+    This extension requires GLSL_EXT_ray_tracing.
+
+Overview
+
+    This extension document adds support for the following extensions to be used
+    within GLSL:
+
+    - GL_EXT_ray_cull_mask - extends ray tracing operations.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+      gl_CullMaskEXT -> CullMaskKHR decorated OpVariable
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_ray_cull_mask                           : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+    New preprocessor #defines are added:
+
+      #define GL_EXT_ray_cull_mask                              1
+
+Additions to Chapter 7 of the OpenGL Shading Language Specification
+(Built-in Variables)
+
+    Modify Section 7.1, Built-in Languages Variables
+
+    In the miss, any-hit, closest-hit and intersection shading languages, built-in variable is declared as follows
+
+        // Ray cull mask
+        in     uint  gl_CullMaskEXT;
+
+    Add the following description for gl_CullMaskEXT:
+
+    gl_CullMaskEXT is available in the intersection, any-hit, closest-hit and miss
+    shading languages to specify the cull mask of the current ray. The value provided in this built-in
+    is obtained from the lower 8 bits of the variable, the upper 24 bits are zero. See the Ray Tracing chapter of
+    the Vulkan specification for more details.
+
+Issues
+
+    None
+
+Revision History
+
+    Rev.  Date          Author     Changes
+    ----  -----------   ------     -------------------------------------------
+     1    2022-02-21    mbjorge    Initial revisions

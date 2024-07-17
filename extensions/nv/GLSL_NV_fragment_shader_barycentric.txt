@@ -14,6 +14,7 @@ Contributors
 
     Ashwin Lele, NVIDIA
     Jeff Bolz, NVIDIA
+    Michael Chock, NVIDIA
 
 Status
 
@@ -21,8 +22,8 @@ Status
 
 Version
 
-    Last Modified:      September 11, 2018
-    Revision:           2
+    Last Modified:      April 8, 2019
+    Revision:           3
 
 Dependencies
 
@@ -34,6 +35,9 @@ Dependencies
 
     This extension is written against the OpenGL Shading Language
     Specification, version 4.60, dated July 23, 2017.
+
+    Additional changes are written against the OpenGL ES Shading
+    Language Specification, Version 3.20.5, dated December 12, 2018.
 
 Overview
 
@@ -100,7 +104,7 @@ Overview
     expected way for an implementation to map GLSL constructs to SPIR-V
     constructs:
 
-      pervertexNV auxiliary storage qualifier -> PerVertexNV Decoration
+      pervertexNV interpolation qualifier -> PerVertexNV Decoration
 
       gl_BaryCoordNV -> BaryCoordNV decorated OpVariable
       gl_BaryCoordNoPerspNV -> BaryCoordNoPerspNV decorated OpVariable
@@ -131,17 +135,6 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
       pervertexNV
 
 
-    Modify Section 4.3, Storage Qualifiers (p. 41)
-
-    (add to table of auxiliary storage qualifiers, p. 42)
-
-    Auxiliary Storage
-       Qualifier          Meaning
-    ------------------    ------------------------------------------
-     pervertexNV          no interpolation; fragment shader reads
-                          previous-stage outputs with a vertex number
-
-
     Modify Section 4.3.4, Input Variables (p. 45)
 
     (modify third paragraph, p. 46, to document that fragment shader inputs
@@ -159,7 +152,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     input variable (or input block, see interface blocks below) needs to be
     declared as an array. For example,
 
-      in float foo[]; // geometry shader input for vertex “out float foo”
+      in float foo[]; // geometry shader input for vertex "out float foo"
 
     (modify fourth paragraph, p. 46, to document how the array size for
      "arrayed" inputs is obtained for tessellation shaders and per-vertex
@@ -271,6 +264,60 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     gl_BaryCoordNoPerspNV are three-component vectors providing barycentric
     coordinates for the fragment.  The values for these built-ins are derived
     as described in the OpenGL or Vulkan API Specifications.
+
+
+Modifications to the OpenGL ES Shading Language Specification, Version 3.20.5
+
+    Incorporate all applicable modifications to the OpenGL Shading Language
+    Specification, Version 4.60 above.
+
+
+    Modify Section 4.3.4, Input Variables, P. 44
+
+    (modify the fragment shader input restrictions, p. 46)
+
+    It is a compile-time error to declare a fragment shader input with, or that
+    contains, any of the following types:
+
+      * A boolean type
+      * An opaque type
+      * An array of arrays (unless the input has a "pervertexNV" qualifier)
+      * An array of structures (unless the input has a "pervertexNV" qualifier)
+      * A structure containing an array
+      * A structure containing a structure
+
+    A fragment shader input declared with a pervertexNV qualifier must be an
+    array.  The contained type of the array must not be any of the types listed
+    above.
+
+    Fragment shader inputs that are, or contain, integral types must be
+    qualified with the interpolation qualifier "flat", or with the
+    interpolation qualifier "pervertexNV".
+
+
+    Modify Section 9.2.1, Linked Shaders, p. 160
+
+    (modify the "Interpolation" row in the table, p. 160)
+
+    Qualifier      Qualifier    in/out  Default   uniform Block  buffer Block
+    Class                               Uniforms
+    -------------  -----------  ------  --------  -------------  ------------
+    Interpolation  smooth       Yes     N/A       N/A            N/A
+                   flat
+                   -----------  ------  --------  -------------  ------------
+                   pervertexNV  No      N/A       N/A            N/A
+
+
+    Modify Section 9.2.2, Separable Programs, p. 161
+
+    (modify the "Interpolation" row in the table, p. 161)
+
+    Qualifier Class  Qualifier    in/out
+    ---------------  -----------  ------
+    Interpolation    smooth       Yes
+                     flat
+                     -----------  ------
+                     pervertexNV  No
 
 
 Issues
@@ -462,6 +509,9 @@ Issues
       (i.e., shader middleware) and not shading language extensions.
 
 Revision History
+
+    Revision 3, 2019/04/08 (mchock)
+    - Add modifications specific to ESSL.
 
     Revision 2, 2018/09/11 (pbrown)
     - Prepare the extension spec for publication.
