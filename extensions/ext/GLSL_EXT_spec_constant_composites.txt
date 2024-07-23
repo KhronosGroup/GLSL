@@ -1,0 +1,73 @@
+Name
+
+    EXT_spec_constant_composites
+
+Name Strings
+
+    GL_EXT_spec_constant_composites
+
+Contact
+
+    Jeff Bolz (jbolz 'at' nvidia.com), NVIDIA
+
+Contributors
+
+Notice
+
+    Copyright (c) 2024 Khronos
+
+Status
+
+    Draft.
+
+Version
+
+    Last Modified Date: 26-Mar-2024
+    Revision: 1
+
+Number
+
+    TBD
+
+Dependencies
+
+    Written against SPIR-V 1.6.
+    Written against GLSL 4.60.8.
+
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+Overview
+
+    This extension allows composite constructors to result in
+    specialization constants.
+
+Add to Chapter 3 of the OpenGL Shading Language Specification
+
+    Including the following line in a shader will control the language
+    features described in this extension:
+
+      #extension GL_EXT_spec_constant_composites : <behavior>
+
+    Where <behavior> is as specified in section 3.3.
+
+    This new definition is added to the OpenGL Shading Language:
+
+      #define GL_EXT_spec_constant_composites 1
+
+Changes to Chapter 5 "Operators and Expressions" to the OpenGL Shading Language
+Specification:
+
+    In section 5.12, "Specialization-Constant Operations", add "composite
+    constructors" to the list of operations that can result in spec constants.
+
+Issues
+
+Revision History
+
+    Rev.    Date         Author    Changes
+    ----  -----------    -------  ----------------------------------------------
+    1     26-Mar-2024    jbolz    initial draft
