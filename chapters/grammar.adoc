@@ -1,0 +1,729 @@
+// Copyright 2008-2024 The Khronos Group Inc.
+// SPDX-License-Identifier: CC-BY-4.0
+
+[[shading-language-grammar]]
+= Shading Language Grammar
+
+The grammar is fed from the output of lexical analysis.
+The tokens returned from lexical analysis are
+
+[role="bnf"]
+--
+CONST BOOL FLOAT INT UINT
+ifdef::GLSL[DOUBLE]
+
+BVEC2 BVEC3 BVEC4 IVEC2 IVEC3 IVEC4 UVEC2 UVEC3 UVEC4 VEC2 VEC3 VEC4
+
+MAT2 MAT3 MAT4
+MAT2X2 MAT2X3 MAT2X4
+MAT3X2 MAT3X3 MAT3X4
+MAT4X2 MAT4X3 MAT4X4
+
+ifdef::GLSL[]
+DVEC2 DVEC3 DVEC4 DMAT2 DMAT3 DMAT4
+DMAT2X2 DMAT2X3 DMAT2X4
+DMAT3X2 DMAT3X3 DMAT3X4
+DMAT4X2 DMAT4X3 DMAT4X4
+endif::GLSL[]
+
+CENTROID IN OUT INOUT UNIFORM PATCH SAMPLE BUFFER SHARED
+COHERENT VOLATILE RESTRICT READONLY WRITEONLY
+ifdef::GLSL[NOPERSPECTIVE]
+FLAT SMOOTH LAYOUT
+
+ATOMIC_UINT
+
+SAMPLER2D SAMPLER3D SAMPLERCUBE SAMPLER2DSHADOW
+SAMPLERCUBESHADOW SAMPLER2DARRAY SAMPLER2DARRAYSHADOW
+ISAMPLER2D ISAMPLER3D ISAMPLERCUBE ISAMPLER2DARRAY
+USAMPLER2D USAMPLER3D USAMPLERCUBE USAMPLER2DARRAY
+
+ifdef::GLSL[]
+SAMPLER1D SAMPLER1DSHADOW
+SAMPLER1DARRAY SAMPLER1DARRAYSHADOW
+ISAMPLER1D ISAMPLER1DARRAY
+USAMPLER1D USAMPLER1DARRAY
+SAMPLER2DRECT SAMPLER2DRECTSHADOW ISAMPLER2DRECT USAMPLER2DRECT
+endif::GLSL[]
+
+SAMPLERBUFFER ISAMPLERBUFFER USAMPLERBUFFER
+SAMPLERCUBEARRAY SAMPLERCUBEARRAYSHADOW
+ISAMPLERCUBEARRAY USAMPLERCUBEARRAY
+SAMPLER2DMS ISAMPLER2DMS USAMPLER2DMS
+SAMPLER2DMSARRAY ISAMPLER2DMSARRAY USAMPLER2DMSARRAY
+IMAGE2D IIMAGE2D UIMAGE2D
+IMAGE3D IIMAGE3D UIMAGE3D
+IMAGECUBE IIMAGECUBE UIMAGECUBE
+IMAGEBUFFER IIMAGEBUFFER UIMAGEBUFFER
+IMAGE2DARRAY IIMAGE2DARRAY UIMAGE2DARRAY
+IMAGECUBEARRAY IIMAGECUBEARRAY UIMAGECUBEARRAY
+
+ifdef::GLSL[]
+IMAGE1D IIMAGE1D UIMAGE1D
+IMAGE1DARRAY IIMAGE1DARRAY UIMAGE1DARRAY
+IMAGE2DRECT IIMAGE2DRECT UIMAGE2DRECT
+IMAGE2DMS IIMAGE2DMS UIMAGE2DMS
+IMAGE2DMSARRAY IIMAGE2DMSARRAY UIMAGE2DMSARRAY
+endif::GLSL[]
+
+STRUCT VOID
+
+WHILE BREAK CONTINUE DO ELSE FOR IF DISCARD RETURN SWITCH CASE DEFAULT
+ifdef::GLSL[SUBROUTINE]
+
+IDENTIFIER TYPE_NAME
+FLOATCONSTANT INTCONSTANT UINTCONSTANT BOOLCONSTANT
+ifdef::GLSL[DOUBLECONSTANT]
+FIELD_SELECTION
+
+LEFT_OP RIGHT_OP
+INC_OP DEC_OP LE_OP GE_OP EQ_OP NE_OP
+AND_OP OR_OP XOR_OP MUL_ASSIGN DIV_ASSIGN ADD_ASSIGN
+MOD_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN XOR_ASSIGN OR_ASSIGN
+SUB_ASSIGN
+LEFT_PAREN RIGHT_PAREN LEFT_BRACKET RIGHT_BRACKET LEFT_BRACE RIGHT_BRACE DOT
+COMMA COLON EQUAL SEMICOLON BANG DASH TILDE PLUS STAR SLASH PERCENT
+LEFT_ANGLE RIGHT_ANGLE VERTICAL_BAR CARET AMPERSAND QUESTION
+
+INVARIANT PRECISE
+HIGH_PRECISION MEDIUM_PRECISION LOW_PRECISION PRECISION
+--
+
+The following describes the grammar for the {slname} in terms of the above
+tokens.
+The starting rule is _translation_unit_.
+ifdef::GLSL[]
+An empty shader (one having no tokens to parse, after pre-processing) is
+valid, resulting in no compile-time errors, even though the grammar below
+does not have a rule to accept an empty token stream.
+endif::GLSL[]
+
+[role="bnf"]
+--
+_variable_identifier_ : ::
+    _IDENTIFIER_
+
+_primary_expression_ : ::
+    _variable_identifier_ +
+    _INTCONSTANT_ +
+    _UINTCONSTANT_ +
+    _FLOATCONSTANT_ +
+    _BOOLCONSTANT_ +
+ifdef::GLSL[]
+    _DOUBLECONSTANT_ +
+endif::GLSL[]
+    _LEFT_PAREN_ _expression_ _RIGHT_PAREN_
+
+_postfix_expression_ : ::
+    _primary_expression_ +
+    _postfix_expression_ _LEFT_BRACKET_ _integer_expression_ _RIGHT_BRACKET_ +
+    _function_call_ +
+    _postfix_expression_ _DOT_ _FIELD_SELECTION_ +
+    _postfix_expression_ _INC_OP_ +
+    _postfix_expression_ _DEC_OP_
+
+[NOTE]
+====
+FIELD_SELECTION includes members in structures, component selection for
+vectors and the 'length' identifier for the length() method
+====
+
+_integer_expression_ : ::
+    _expression_
+
+_function_call_ : ::
+    _function_call_or_method_
+
+_function_call_or_method_ : ::
+    _function_call_generic_
+
+_function_call_generic_ : ::
+    _function_call_header_with_parameters_ _RIGHT_PAREN_ +
+    _function_call_header_no_parameters_ _RIGHT_PAREN_
+
+_function_call_header_no_parameters_ : ::
+    _function_call_header_ _VOID_ +
+    _function_call_header_
+
+_function_call_header_with_parameters_ : ::
+    _function_call_header_ _assignment_expression_ +
+    _function_call_header_with_parameters_ _COMMA_ _assignment_expression_
+
+_function_call_header_ : ::
+    _function_identifier_ _LEFT_PAREN_
+
+[NOTE]
+====
+Grammar Note: Constructors look like functions, but lexical analysis
+recognized most of them as keywords.
+They are now recognized through _type_specifier_.
+====
+
+[NOTE]
+====
+ifdef::GLSL[]
+Methods (*.length*), subroutine array calls, and identifiers are recognized
+through _postfix_expression_.
+endif::GLSL[]
+ifdef::ESSL[]
+Methods (*.length*) and identifiers are recognized through
+_postfix_expression_.
+endif::ESSL[]
+====
+
+_function_identifier_ : ::
+    _type_specifier_ +
+    _postfix_expression_
+
+_unary_expression_ : ::
+    _postfix_expression_ +
+    _INC_OP_ _unary_expression_ +
+    _DEC_OP_ _unary_expression_ +
+    _unary_operator_ _unary_expression_
+
+[NOTE]
+====
+Grammar Note: No traditional style type casts.
+====
+
+_unary_operator_ : ::
+    _PLUS_ +
+    _DASH_ +
+    _BANG_ +
+    _TILDE_
+
+[NOTE]
+====
+Grammar Note: No '*' or '&' unary ops.
+Pointers are not supported.
+====
+
+_multiplicative_expression_ : ::
+    _unary_expression_ +
+    _multiplicative_expression_ _STAR_ _unary_expression_ +
+    _multiplicative_expression_ _SLASH_ _unary_expression_ +
+    _multiplicative_expression_ _PERCENT_ _unary_expression_
+
+_additive_expression_ : ::
+    _multiplicative_expression_ +
+    _additive_expression_ _PLUS_ _multiplicative_expression_ +
+    _additive_expression_ _DASH_ _multiplicative_expression_
+
+_shift_expression_ : ::
+    _additive_expression_ +
+    _shift_expression_ _LEFT_OP_ _additive_expression_ +
+    _shift_expression_ _RIGHT_OP_ _additive_expression_
+
+_relational_expression_ : ::
+    _shift_expression_ +
+    _relational_expression_ _LEFT_ANGLE_ _shift_expression_ +
+    _relational_expression_ _RIGHT_ANGLE_ _shift_expression_ +
+    _relational_expression_ _LE_OP_ _shift_expression_ +
+    _relational_expression_ _GE_OP_ _shift_expression_
+
+_equality_expression_ : ::
+    _relational_expression_ +
+    _equality_expression_ _EQ_OP_ _relational_expression_ +
+    _equality_expression_ _NE_OP_ _relational_expression_
+
+_and_expression_ : ::
+    _equality_expression_ +
+    _and_expression_ _AMPERSAND_ _equality_expression_
+
+_exclusive_or_expression_ : ::
+    _and_expression_ +
+    _exclusive_or_expression_ _CARET_ _and_expression_
+
+_inclusive_or_expression_ : ::
+    _exclusive_or_expression_ +
+    _inclusive_or_expression_ _VERTICAL_BAR_ _exclusive_or_expression_
+
+_logical_and_expression_ : ::
+    _inclusive_or_expression_ +
+    _logical_and_expression_ _AND_OP_ _inclusive_or_expression_
+
+_logical_xor_expression_ : ::
+    _logical_and_expression_ +
+    _logical_xor_expression_ _XOR_OP_ _logical_and_expression_
+
+_logical_or_expression_ : ::
+    _logical_xor_expression_ +
+    _logical_or_expression_ _OR_OP_ _logical_xor_expression_
+
+_conditional_expression_ : ::
+    _logical_or_expression_ +
+    _logical_or_expression_ _QUESTION_ _expression_ _COLON_
+    _assignment_expression_
+
+_assignment_expression_ : ::
+    _conditional_expression_ +
+    _unary_expression_ _assignment_operator_ _assignment_expression_
+
+_assignment_operator_ : ::
+    _EQUAL_ +
+    _MUL_ASSIGN_ +
+    _DIV_ASSIGN_ +
+    _MOD_ASSIGN_ +
+    _ADD_ASSIGN_ +
+    _SUB_ASSIGN_ +
+    _LEFT_ASSIGN_ +
+    _RIGHT_ASSIGN_ +
+    _AND_ASSIGN_ +
+    _XOR_ASSIGN_ +
+    _OR_ASSIGN_
+
+_expression_ : ::
+    _assignment_expression_ +
+    _expression_ _COMMA_ _assignment_expression_
+
+_constant_expression_ : ::
+    _conditional_expression_
+
+_declaration_ : ::
+    _function_prototype_ _SEMICOLON_ +
+    _init_declarator_list_ _SEMICOLON_ +
+    _PRECISION_ _precision_qualifier_ _type_specifier_ _SEMICOLON_ +
+    _type_qualifier_ _IDENTIFIER_ _LEFT_BRACE_ _struct_declaration_list_
+    _RIGHT_BRACE_ _SEMICOLON_ +
+    _type_qualifier_ _IDENTIFIER_ _LEFT_BRACE_ _struct_declaration_list_
+    _RIGHT_BRACE_ _IDENTIFIER_ _SEMICOLON_ +
+    _type_qualifier_ _IDENTIFIER_ _LEFT_BRACE_ _struct_declaration_list_
+    _RIGHT_BRACE_ _IDENTIFIER_ _array_specifier_ _SEMICOLON_ +
+    _type_qualifier_ _SEMICOLON_ +
+    _type_qualifier_ _IDENTIFIER_ _SEMICOLON_ +
+    _type_qualifier_ _IDENTIFIER_ _identifier_list_ _SEMICOLON_
+
+_identifier_list_ : ::
+    _COMMA_ _IDENTIFIER_ +
+    _identifier_list_ _COMMA_ _IDENTIFIER_
+
+_function_prototype_ : ::
+    _function_declarator_ _RIGHT_PAREN_
+
+_function_declarator_ : ::
+    _function_header_ +
+    _function_header_with_parameters_
+
+_function_header_with_parameters_ : ::
+    _function_header_ _parameter_declaration_ +
+    _function_header_with_parameters_ _COMMA_ _parameter_declaration_
+
+_function_header_ : ::
+    _fully_specified_type_ _IDENTIFIER_ _LEFT_PAREN_
+
+_parameter_declarator_ : ::
+    _type_specifier_ _IDENTIFIER_ +
+    _type_specifier_ _IDENTIFIER_ _array_specifier_
+
+_parameter_declaration_ : ::
+    _type_qualifier_ _parameter_declarator_ +
+    _parameter_declarator_ +
+    _type_qualifier_ _parameter_type_specifier_ +
+    _parameter_type_specifier_
+
+_parameter_type_specifier_ : ::
+    _type_specifier_
+
+_init_declarator_list_ : ::
+    _single_declaration_ +
+    _init_declarator_list_ _COMMA_ _IDENTIFIER_ +
+    _init_declarator_list_ _COMMA_ _IDENTIFIER_ _array_specifier_ +
+    _init_declarator_list_ _COMMA_ _IDENTIFIER_ _array_specifier_ _EQUAL_
+    _initializer_ +
+    _init_declarator_list_ _COMMA_ _IDENTIFIER_ _EQUAL_ _initializer_
+
+_single_declaration_ : ::
+    _fully_specified_type_ +
+    _fully_specified_type_ _IDENTIFIER_ +
+    _fully_specified_type_ _IDENTIFIER_ _array_specifier_ +
+    _fully_specified_type_ _IDENTIFIER_ _array_specifier_ _EQUAL_
+    _initializer_ +
+    _fully_specified_type_ _IDENTIFIER_ _EQUAL_ _initializer_
+
+[NOTE]
+====
+Grammar Note: No 'enum', or 'typedef'.
+====
+
+_fully_specified_type_ : ::
+    _type_specifier_ +
+    _type_qualifier_ _type_specifier_
+
+_invariant_qualifier_ : ::
+    _INVARIANT_
+
+_interpolation_qualifier_ : ::
+    _SMOOTH_ +
+ifdef::GLSL[]
+    _FLAT_ +
+    _NOPERSPECTIVE_
+endif::GLSL[]
+ifdef::ESSL[]
+    _FLAT_
+endif::ESSL[]
+
+_layout_qualifier_ : ::
+    _LAYOUT_ _LEFT_PAREN_ _layout_qualifier_id_list_ _RIGHT_PAREN_
+
+_layout_qualifier_id_list_ : ::
+    _layout_qualifier_id_ +
+    _layout_qualifier_id_list_ _COMMA_ _layout_qualifier_id_
+
+_layout_qualifier_id_ : ::
+    _IDENTIFIER_ +
+ifdef::GLSL[]
+    _IDENTIFIER_ _EQUAL_ _constant_expression_ +
+endif::GLSL[]
+ifdef::ESSL[]
+    _IDENTIFIER_ _EQUAL_ _INTCONSTANT_ +
+    _IDENTIFIER_ _EQUAL_ _UINTCONSTANT_ +
+endif::ESSL[]
+    _SHARED_
+
+_precise_qualifier_ : ::
+    _PRECISE_
+
+_type_qualifier_ : ::
+    _single_type_qualifier_ +
+    _type_qualifier_ _single_type_qualifier_
+
+_single_type_qualifier_ : ::
+    _storage_qualifier_ +
+    _layout_qualifier_ +
+    _precision_qualifier_ +
+    _interpolation_qualifier_ +
+    _invariant_qualifier_ +
+    _precise_qualifier_
+
+_storage_qualifier_ : ::
+    _CONST_ +
+    _IN_ +
+    _OUT_ +
+    _INOUT_ +
+    _CENTROID_ +
+    _PATCH_ +
+    _SAMPLE_ +
+    _UNIFORM_ +
+    _BUFFER_ +
+    _SHARED_ +
+    _COHERENT_ +
+    _VOLATILE_ +
+    _RESTRICT_ +
+    _READONLY_ +
+ifdef::ESSL[]
+    _WRITEONLY_
+endif::ESSL[]
+ifdef::GLSL[]
+    _WRITEONLY_ +
+    _SUBROUTINE_ +
+    _SUBROUTINE_ _LEFT_PAREN_ _type_name_list_ _RIGHT_PAREN_
+
+_type_name_list_ : ::
+    _TYPE_NAME_ +
+    _type_name_list_ _COMMA_ _TYPE_NAME_
+endif::GLSL[]
+
+_type_specifier_ : ::
+    _type_specifier_nonarray_ +
+    _type_specifier_nonarray_ _array_specifier_
+
+_array_specifier_ : ::
+    _LEFT_BRACKET_ _RIGHT_BRACKET_ +
+    _LEFT_BRACKET_ _conditional_expression_ _RIGHT_BRACKET_ +
+    _array_specifier_ _LEFT_BRACKET_ _RIGHT_BRACKET_ +
+    _array_specifier_ _LEFT_BRACKET_ _conditional_expression_ _RIGHT_BRACKET_
+
+_type_specifier_nonarray_ : ::
+    _VOID_ +
+    _FLOAT_ +
+ifdef::GLSL[]
+    _DOUBLE_ +
+endif::GLSL[]
+    _INT_ +
+    _UINT_ +
+    _BOOL_ +
+    _VEC2_ +
+    _VEC3_ +
+    _VEC4_ +
+ifdef::GLSL[]
+    _DVEC2_ +
+    _DVEC3_ +
+    _DVEC4_ +
+endif::GLSL[]
+    _BVEC2_ +
+    _BVEC3_ +
+    _BVEC4_ +
+    _IVEC2_ +
+    _IVEC3_ +
+    _IVEC4_ +
+    _UVEC2_ +
+    _UVEC3_ +
+    _UVEC4_ +
+    _MAT2_ +
+    _MAT3_ +
+    _MAT4_ +
+    _MAT2X2_ +
+    _MAT2X3_ +
+    _MAT2X4_ +
+    _MAT3X2_ +
+    _MAT3X3_ +
+    _MAT3X4_ +
+    _MAT4X2_ +
+    _MAT4X3_ +
+    _MAT4X4_ +
+ifdef::GLSL[]
+    _DMAT2_ +
+    _DMAT3_ +
+    _DMAT4_ +
+    _DMAT2X2_ +
+    _DMAT2X3_ +
+    _DMAT2X4_ +
+    _DMAT3X2_ +
+    _DMAT3X3_ +
+    _DMAT3X4_ +
+    _DMAT4X2_ +
+    _DMAT4X3_ +
+    _DMAT4X4_ +
+endif::GLSL[]
+    _ATOMIC_UINT_ +
+    _SAMPLER2D_ +
+    _SAMPLER3D_ +
+    _SAMPLERCUBE_ +
+    _SAMPLER2DSHADOW_ +
+    _SAMPLERCUBESHADOW_ +
+    _SAMPLER2DARRAY_ +
+    _SAMPLER2DARRAYSHADOW_ +
+    _SAMPLERCUBEARRAY_ +
+    _SAMPLERCUBEARRAYSHADOW_ +
+    _ISAMPLER2D_ +
+    _ISAMPLER3D_ +
+    _ISAMPLERCUBE_ +
+    _ISAMPLER2DARRAY_ +
+    _ISAMPLERCUBEARRAY_ +
+    _USAMPLER2D_ +
+    _USAMPLER3D_ +
+    _USAMPLERCUBE_ +
+    _USAMPLER2DARRAY_ +
+    _USAMPLERCUBEARRAY_ +
+ifdef::GLSL[]
+    _SAMPLER1D_ +
+    _SAMPLER1DSHADOW_ +
+    _SAMPLER1DARRAY_ +
+    _SAMPLER1DARRAYSHADOW_ +
+    _ISAMPLER1D_ +
+    _ISAMPLER1DARRAY_ +
+    _USAMPLER1D_ +
+    _USAMPLER1DARRAY_ +
+    _SAMPLER2DRECT_ +
+    _SAMPLER2DRECTSHADOW_ +
+    _ISAMPLER2DRECT_ +
+    _USAMPLER2DRECT_ +
+endif::GLSL[]
+    _SAMPLERBUFFER_ +
+    _ISAMPLERBUFFER_ +
+    _USAMPLERBUFFER_ +
+    _SAMPLER2DMS_ +
+    _ISAMPLER2DMS_ +
+    _USAMPLER2DMS_ +
+    _SAMPLER2DMSARRAY_ +
+    _ISAMPLER2DMSARRAY_ +
+    _USAMPLER2DMSARRAY_ +
+    _IMAGE2D_ +
+    _IIMAGE2D_ +
+    _UIMAGE2D_ +
+    _IMAGE3D_ +
+    _IIMAGE3D_ +
+    _UIMAGE3D_ +
+    _IMAGECUBE_ +
+    _IIMAGECUBE_ +
+    _UIMAGECUBE_ +
+    _IMAGEBUFFER_ +
+    _IIMAGEBUFFER_ +
+    _UIMAGEBUFFER_ +
+ifdef::GLSL[]
+    _IMAGE1D_ +
+    _IIMAGE1D_ +
+    _UIMAGE1D_ +
+    _IMAGE1DARRAY_ +
+    _IIMAGE1DARRAY_ +
+    _UIMAGE1DARRAY_ +
+    _IMAGE2DRECT_ +
+    _IIMAGE2DRECT_ +
+    _UIMAGE2DRECT_ +
+endif::GLSL[]
+    _IMAGE2DARRAY_ +
+    _IIMAGE2DARRAY_ +
+    _UIMAGE2DARRAY_ +
+    _IMAGECUBEARRAY_ +
+    _IIMAGECUBEARRAY_ +
+    _UIMAGECUBEARRAY_ +
+ifdef::GLSL[]
+    _IMAGE2DMS_ +
+    _IIMAGE2DMS_ +
+    _UIMAGE2DMS_ +
+    _IMAGE2DMSARRAY_ +
+    _IIMAGE2DMSARRAY_ +
+    _UIMAGE2DMSARRAY_ +
+endif::GLSL[]
+    _struct_specifier_ +
+    _TYPE_NAME_
+
+_precision_qualifier_ : ::
+    _HIGH_PRECISION_ +
+    _MEDIUM_PRECISION_ +
+    _LOW_PRECISION_
+
+_struct_specifier_ : ::
+    _STRUCT_ _IDENTIFIER_ _LEFT_BRACE_ _struct_declaration_list_
+    _RIGHT_BRACE_ +
+    _STRUCT_ _LEFT_BRACE_ _struct_declaration_list_ _RIGHT_BRACE_
+
+_struct_declaration_list_ : ::
+    _struct_declaration_ +
+    _struct_declaration_list_ _struct_declaration_
+
+_struct_declaration_ : ::
+    _type_specifier_ _struct_declarator_list_ _SEMICOLON_ +
+    _type_qualifier_ _type_specifier_ _struct_declarator_list_ _SEMICOLON_
+
+_struct_declarator_list_ : ::
+    _struct_declarator_ +
+    _struct_declarator_list_ _COMMA_ _struct_declarator_
+
+_struct_declarator_ : ::
+    _IDENTIFIER_ +
+    _IDENTIFIER_ _array_specifier_
+
+_initializer_ : ::
+ifdef::GLSL[]
+    _assignment_expression_ +
+    _LEFT_BRACE_ _initializer_list_ _RIGHT_BRACE_ +
+    _LEFT_BRACE_ _initializer_list_ _COMMA_ _RIGHT_BRACE_
+
+_initializer_list_ : ::
+    _initializer_ +
+    _initializer_list_ _COMMA_ _initializer_
+endif::GLSL[]
+ifdef::ESSL[]
+    _assignment_expression_
+endif::ESSL[]
+
+_declaration_statement_ : ::
+    _declaration_
+
+_statement_ : ::
+    _compound_statement_ +
+    _simple_statement_
+
+[NOTE]
+====
+Grammar Note: labeled statements for SWITCH only; 'goto' is not supported.
+====
+
+_simple_statement_ : ::
+    _declaration_statement_ +
+    _expression_statement_ +
+    _selection_statement_ +
+    _switch_statement_ +
+    _case_label_ +
+    _iteration_statement_ +
+    _jump_statement_
+
+_compound_statement_ : ::
+    _LEFT_BRACE_ _RIGHT_BRACE_ +
+    _LEFT_BRACE_ _statement_list_ _RIGHT_BRACE_
+
+_statement_no_new_scope_ : ::
+    _compound_statement_no_new_scope_ +
+    _simple_statement_
+
+_compound_statement_no_new_scope_ : ::
+    _LEFT_BRACE_ _RIGHT_BRACE_ +
+    _LEFT_BRACE_ _statement_list_ _RIGHT_BRACE_
+
+_statement_list_ : ::
+    _statement_ +
+    _statement_list_ _statement_
+
+_expression_statement_ : ::
+    _SEMICOLON_ +
+    _expression_ _SEMICOLON_
+
+_selection_statement_ : ::
+    _IF_ _LEFT_PAREN_ _expression_ _RIGHT_PAREN_ _selection_rest_statement_
+
+_selection_rest_statement_ : ::
+    _statement_ _ELSE_ _statement_ +
+    _statement_
+
+_condition_ : ::
+    _expression_ +
+    _fully_specified_type_ _IDENTIFIER_ _EQUAL_ _initializer_
+
+_switch_statement_ : ::
+    _SWITCH_ _LEFT_PAREN_ _expression_ _RIGHT_PAREN_ _LEFT_BRACE_
+    _switch_statement_list_ +
+    _RIGHT_BRACE_
+
+_switch_statement_list_ : ::
+    /* _nothing_ */ +
+    _statement_list_
+
+_case_label_ : ::
+    _CASE_ _expression_ _COLON_ +
+    _DEFAULT_ _COLON_
+
+_iteration_statement_ : ::
+    _WHILE_ _LEFT_PAREN_ _condition_ _RIGHT_PAREN_ _statement_no_new_scope_ +
+    _DO_ _statement_ _WHILE_ _LEFT_PAREN_ _expression_ _RIGHT_PAREN_
+    _SEMICOLON_ +
+    _FOR_ _LEFT_PAREN_ _for_init_statement_ _for_rest_statement_
+    _RIGHT_PAREN_ _statement_no_new_scope_
+
+_for_init_statement_ : ::
+    _expression_statement_ +
+    _declaration_statement_
+
+_conditionopt_ : ::
+    _condition_ +
+    /* _empty_ */
+
+_for_rest_statement_ : ::
+    _conditionopt_ _SEMICOLON_ +
+    _conditionopt_ _SEMICOLON_ _expression_
+
+_jump_statement_ : ::
+    _CONTINUE_ _SEMICOLON_ +
+    _BREAK_ _SEMICOLON_ +
+    _RETURN_ _SEMICOLON_ +
+    _RETURN_ _expression_ _SEMICOLON_ +
+    _DISCARD_ _SEMICOLON_ // Fragment shader only.
+
+[NOTE]
+====
+Grammar Note: No 'goto'.
+Gotos are not supported.
+====
+
+_translation_unit_ : ::
+    _external_declaration_ +
+    _translation_unit_ _external_declaration_
+
+_external_declaration_ : ::
+    _function_definition_ +
+ifdef::GLSL[]
+    _declaration_ +
+    _SEMICOLON_
+endif::GLSL[]
+ifdef::ESSL[]
+    _declaration_
+endif::ESSL[]
+
+_function_definition_ : ::
+    _function_prototype_ _compound_statement_no_new_scope_
+
+--
+
+In general the above grammar describes a super set of the {slname}.
+Certain constructs that are valid purely in terms of the grammar are
+disallowed by statements elsewhere in this specification.

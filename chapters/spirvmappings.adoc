@@ -1,0 +1,709 @@
+// Copyright 2008-2024 The Khronos Group Inc.
+// SPDX-License-Identifier: CC-BY-4.0
+
+[[spirvmappings]]
+= Non-Normative SPIR-V Mappings
+
+This appendix includes:
+
+- a comparison of feature differences with SPIR-V versus without, for both Vulkan and OpenGL
+- a discussion of how GLSL features logically map to SPIR-V features.
+
+
+== Feature Comparisons
+
+The following features are removed for both OpenGL and Vulkan:
+
+* subroutines
+* shared and packed block layouts
+* the already deprecated texturing functions (e.g., `texture2D()`)
+* the already deprecated noise functions (e.g., `noise1()`)
+* compatibility-profile features
+* _gl_DepthRangeParameters_ and _gl_NumSamples_
+
+Vulkan removed the following features, which are still present for OpenGL:
+
+* Default uniforms, for non-opaque types:
+  The *UniformConstant* storage class can be used on individual
+  variables at global scope. (That is, uniforms don't have to be in a
+  block, unless they are built-in members that are in block in GLSL
+  version 4.5 or above.)
+* GLSL atomic-counter bindings have the _offset_ layout qualifier ->
+  SPIR-V *AtomicCounter* storage class using the *Offset* decoration
+* GLSL _origin_lower_left_ -> SPIR-V *OriginLowerLeft*
+* special rules for locations for input doubles in the vertex shader
+* _gl_VertexID_ and _gl_InstanceID_ (more detail follows)
+
+The following features are added for both OpenGL and Vulkan:
+
+* specialization constants
+* _offset_ can organize members in a different order than declaration order
+* _offset_ and _align_ layout qualifiers for uniform/buffer blocks for
+  versions that did not support them
+
+Vulkan Only: The following features are added:
+
+* push-constant buffers
+* shader combining of separate textures and samplers (SPIR-V *OpTypeSampler*)
+* descriptor sets (*DescriptorSet* must be 0, if present)
+* _gl_VertexIndex_ and _gl_InstanceIndex_
+* subpass-input targets and input attachments (_input_attachment_index_)
+
+The following features are changed in both OpenGL and Vulkan:
+
+* _gl_FragColor_ will no longer indicate an implicit broadcast
+
+Vulkan Only: The following features are changed:
+
+* precision qualifiers (*mediump* and *lowp*) will be respected for all
+  versions, not dropped for desktop versions (default precision for
+  desktop versions is *highp* for all types)
+* arrays of uniforms and buffer blocks take only one binding number for
+  the entire object, not one per array element
+* the default origin is _origin_upper_left_ instead of _origin_lower_left_
+
+Vulkan does not allow multi-dimensional arrays of resources like
+UBOs and SSBOs in its SPIR-V environment spec. SPIR-V supports
+it and OpenGL already allows this for GLSL shaders. SPIR-V
+for OpenGL also allows it.
+
+
+== Mapping from GLSL to SPIR-V
+
+
+=== Specialization Constants
+
+SPIR-V specialization constants, which can be set later by the client API,
+can be declared using `layout(constant_id=...)`. For example, to make a
+specialization constant with a default value of 12:
+
+    layout(constant_id = 17) const int arraySize = 12;
+
+Above, `17` is the ID by which the API or other tools can later refer to
+this specific specialization constant.  The API or an intermediate tool can
+then change its value to another constant integer before it is fully
+lowered to executable code.  If it is never changed before final lowering,
+it will retain the value of 12.
+
+Specialization constants have const semantics, except they don't fold.
+Hence, an array can be declared with `arraySize` from above:
+
+    vec4 data[arraySize];  // legal, even though arraySize might change
+
+Specialization constants can be in expressions:
+
+    vec4 data2[arraySize + 2];
+
+This will make `data2` be sized by 2 more than whatever constant value
+`arraySize` has when it is time to lower the shader to executable code.
+
+An expression formed with specialization constants also behaves in the
+shader like a specialization constant, not a like a constant.
+
+    arraySize + 2       // a specialization constant (with no constant_id)
+
+Such expressions can be used in the same places as a constant.
+
+The _constant_id_ can only be applied to a scalar integer, a scalar floating-point
+or a scalar Boolean.
+
+Only basic operators and constructors can be applied to a specialization
+constant and still result in a specialization constant:
+
+    layout(constant_id = 17) const int arraySize = 12;
+    sin(float(arraySize));    // result is not a specialization constant
+
+While SPIR-V specialization constants are only for scalars, a vector
+can be made by operations on scalars:
+
+    layout(constant_id = 18) const int scX = 1;
+    layout(constant_id = 19) const int scZ = 1;
+    const vec3 scVec = vec3(scX, 1, scZ);  // partially specialized vector
+
+A built-in variable can have a _constant_id_ attached to it:
+
+    layout(constant_id = 18) gl_MaxImageUnits;
+
+This makes it behave as a specialization constant.  It is not a full
+redeclaration; all other characteristics are left intact from the
+original built-in declaration.
+
+The built-in vector _gl_WorkGroupSize_ can be specialized using special
+layout `local_size_\{xyz}_id` applied to the *in* qualifier.  For example:
+
+    layout(local_size_x_id = 18, local_size_z_id = 19) in;
+
+This leaves _gl_WorkGroupSize.y_ as a non-specialization constant, with
+_gl_WorkGroupSize_ being a partially specialized vector.  Its _x_ and _z_
+components can be later specialized using the ID's 18 and 19.
+
+
+=== Vulkan Only: Push Constants
+
+Push constants reside in a uniform block declared using the new
+layout-qualifier-id _push_constant_ applied to a uniform-block declaration.
+The API writes a set of constants to a push-constant buffer, and the shader
+reads them from a _push_constant_ block:
+
+    layout(push_constant) uniform BlockName {
+        int member1;
+        float member2;
+        ...
+    } InstanceName; // optional instance name
+    ... = InstanceName.member2; // read a push constant
+
+The memory accounting used for the _push_constant_ uniform block is different
+than for other uniform blocks:  There is a separate small pool of memory
+it must fit within.  By default, a _push_constant_ buffer follows the std430
+packing rules.
+
+
+=== Vulkan Only: Descriptor Sets
+
+Each shader resource in a descriptor set is assigned a tuple of (set
+number, binding number, array element) that defines its location within
+a descriptor set layout.
+In GLSL, the set number and binding number are assigned via the _set_
+and _binding_ layout qualifiers respectively, and the array element is
+implicitly assigned consecutively starting with index equal to zero for
+the first element of an array (and array element is zero for non-array
+variables):
+
+    // Assign set number = M, binding number = N, array element = 0
+    layout (set=M, binding=N) uniform sampler2D variableName;
+
+    // Assign set number = M, binding number = N for all array elements,
+    // and array element = i for the ith member of an array of size I.
+    layout (set=M, binding=N) uniform sampler2D variableNameArray[I];
+
+For example, two combined texture/sampler objects can be declared in two
+different descriptor sets as follows
+
+    layout(set = 0, binding = 0) uniform sampler2D ts3;
+    layout(set = 1, binding = 0) uniform sampler2D ts4;
+
+See the API documentation for more detail on the operation model of
+descriptor sets.
+
+
+=== Vulkan Only: Samplers, Images, Textures, and Buffers
+
+
+==== Storage Images
+
+Storage images are declared in GLSL shader source using uniform image
+variables of the appropriate dimensionality as well as a format layout
+qualifier (if necessary):
+
+    layout (set=m, binding=n, r32f) uniform image2D myStorageImage;
+
+Which maps to the following SPIR-V:
+
+            ...
+    %1 = OpExtInstImport "GLSL.std.450"
+            ...
+            OpName %9 "myStorageImage"
+            OpDecorate %9 DescriptorSet m
+            OpDecorate %9 Binding n
+    %2 = OpTypeVoid
+    %3 = OpTypeFunction %2
+    %6 = OpTypeFloat 32
+    %7 = OpTypeImage %6 2D 0 0 0 2 R32f
+    %8 = OpTypePointer UniformConstant %7
+    %9 = OpVariable %8 UniformConstant
+            ...
+
+
+==== Samplers
+
+SPIR-V samplers are declared in GLSL shader source using uniform *sampler* and
+*samplerShadow* types:
+
+    layout (set=m, binding=n) uniform sampler mySampler;
+
+Which maps to the following SPIR-V:
+
+            ...
+    %1 = OpExtInstImport "GLSL.std.450"
+            ...
+            OpName %8 "mySampler"
+            OpDecorate %8 DescriptorSet m
+            OpDecorate %8 Binding n
+    %2 = OpTypeVoid
+    %3 = OpTypeFunction %2
+    %6 = OpTypeSampler
+    %7 = OpTypePointer UniformConstant %6
+    %8 = OpVariable %7 UniformConstant
+            ...
+
+
+==== Textures (Sampled Images)
+
+Textures are declared in GLSL shader source using uniform texture
+variables of the appropriate dimensionality:
+
+    layout (set=m, binding=n) uniform texture2D mySampledImage;
+
+Which maps to the following SPIR-V:
+
+            ...
+    %1 = OpExtInstImport "GLSL.std.450"
+            ...
+            OpName %9 "mySampledImage"
+            OpDecorate %9 DescriptorSet m
+            OpDecorate %9 Binding n
+    %2 = OpTypeVoid
+    %3 = OpTypeFunction %2
+    %6 = OpTypeFloat 32
+    %7 = OpTypeImage %6 2D 0 0 0 1 Unknown
+    %8 = OpTypePointer UniformConstant %7
+    %9 = OpVariable %8 UniformConstant
+            ...
+
+
+==== Combined Texture and Samplers
+
+Combined textures and samplers are declared in GLSL shader source using
+uniform texture-combined sampler variables of the appropriate dimensionality:
+
+    layout (set=m, binding=n) uniform sampler2D myCombinedImageSampler;
+
+Which maps to the following SPIR-V:
+
+            ...
+    %1 = OpExtInstImport "GLSL.std.450"
+            ...
+            OpName %10 "myCombinedImageSampler"
+            OpDecorate %10 DescriptorSet m
+            OpDecorate %10 Binding n
+    %2 = OpTypeVoid
+    %3 = OpTypeFunction %2
+    %6 = OpTypeFloat 32
+    %7 = OpTypeImage %6 2D 0 0 0 1 Unknown
+    %8 = OpTypeSampledImage %7
+    %9 = OpTypePointer UniformConstant %8
+    %10 = OpVariable %9 UniformConstant
+            ...
+
+Note that a combined image sampler descriptor can be referred to as just
+an image or sampler in the shader as per the above sections.
+
+
+==== Combining Separate Samplers and Textures
+
+A sampler, declared with the keyword *sampler*, contains just filtering
+information, containing neither a texture nor an image:
+
+    uniform sampler s;    // a handle to filtering information
+
+A texture, declared with keywords like *texture2D*, contains just image
+information, not filtering information:
+
+    uniform texture2D t;  // a handle to a texture (an image in SPIR-V)
+
+Constructors can then be used to combine a sampler and a texture at the
+point of making a texture lookup call:
+
+    texture(sampler2D(t, s), ...);
+
+Note, `layout()` information is omitted above for clarity of this feature.
+
+
+==== Texture Buffers (Uniform Texel Buffers)
+
+Texture buffers are declared in GLSL shader source using uniform
+textureBuffer variables:
+
+    layout (set=m, binding=n) uniform textureBuffer myUniformTexelBuffer;
+
+Which maps to the following SPIR-V:
+
+            ...
+    %1 = OpExtInstImport "GLSL.std.450"
+            ...
+            OpName %9 "myUniformTexelBuffer"
+            OpDecorate %9 DescriptorSet m
+            OpDecorate %9 Binding n
+    %2 = OpTypeVoid
+    %3 = OpTypeFunction %2
+    %6 = OpTypeFloat 32
+    %7 = OpTypeImage %6 Buffer 0 0 0 1 Unknown
+    %8 = OpTypePointer UniformConstant %7
+    %9 = OpVariable %8 UniformConstant
+            ...
+
+
+==== Image Buffers (Storage Texel Buffers)
+
+Image buffers are declared in GLSL shader source using uniform
+imageBuffer variables:
+
+    layout (set=m, binding=n, r32f) uniform imageBuffer myStorageTexelBuffer;
+
+Which maps to the following SPIR-V:
+
+            ...
+    %1 = OpExtInstImport "GLSL.std.450"
+            ...
+            OpName %9 "myStorageTexelBuffer"
+            OpDecorate %9 DescriptorSet m
+            OpDecorate %9 Binding n
+    %2 = OpTypeVoid
+    %3 = OpTypeFunction %2
+    %6 = OpTypeFloat 32
+    %7 = OpTypeImage %6 Buffer 0 0 0 2 R32f
+    %8 = OpTypePointer UniformConstant %7
+    %9 = OpVariable %8 UniformConstant
+            ...
+
+
+==== Storage Buffers
+
+Storage buffers are declared in GLSL shader source using buffer storage
+qualifier and block syntax:
+
+    layout (set=m, binding=n) buffer myStorageBuffer
+    {
+        vec4 myElement[];
+    };
+
+Which maps to the following SPIR-V:
+
+            ...
+    %1 = OpExtInstImport "GLSL.std.450"
+            ...
+            OpName %9 "myStorageBuffer"
+            OpMemberName %9 0 "myElement"
+            OpName %11 ""
+            OpDecorate %8 ArrayStride 16
+            OpMemberDecorate %9 0 Offset 0
+            OpDecorate %9 BufferBlock
+            OpDecorate %11 DescriptorSet m
+            OpDecorate %11 Binding n
+    %2 = OpTypeVoid
+    %3 = OpTypeFunction %2
+    %6 = OpTypeFloat 32
+    %7 = OpTypeVector %6 4
+    %8 = OpTypeRuntimeArray %7
+    %9 = OpTypeStruct %8
+    %10 = OpTypePointer Uniform %9
+    %11 = OpVariable %10 Uniform
+            ...
+
+
+==== Uniform Buffers
+
+Uniform buffers are declared in GLSL shader source using the uniform storage
+qualifier and block syntax:
+
+    layout (set=m, binding=n) uniform myUniformBuffer
+    {
+        vec4 myElement[32];
+    };
+
+Which maps to the following SPIR-V:
+
+            ...
+    %1 = OpExtInstImport "GLSL.std.450"
+            ...
+            OpName %11 "myUniformBuffer"
+            OpMemberName %11 0 "myElement"
+            OpName %13 ""
+            OpDecorate %10 ArrayStride 16
+            OpMemberDecorate %11 0 Offset 0
+            OpDecorate %11 Block
+            OpDecorate %13 DescriptorSet m
+            OpDecorate %13 Binding n
+    %2 = OpTypeVoid
+    %3 = OpTypeFunction %2
+    %6 = OpTypeFloat 32
+    %7 = OpTypeVector %6 4
+    %8 = OpTypeInt 32 0
+    %9 = OpConstant %8 32
+    %10 = OpTypeArray %7 %9
+    %11 = OpTypeStruct %10
+    %12 = OpTypePointer Uniform %11
+    %13 = OpVariable %12 Uniform
+            ...
+
+
+==== Subpass Inputs
+
+Within a rendering pass, a subpass can write results to an output target
+that can then be read by the next subpass as an input subpass.  The
+"Subpass Input" feature regards the ability to read an output target.
+
+Subpass inputs are read through a new set of types, available only
+to fragment shaders:
+
+    subpassInput
+    subpassInputMS
+    isubpassInput
+    isubpassInputMS
+    usubpassInput
+    usubpassInputMS
+
+Unlike sampler and image objects, subpass inputs are implicitly addressed
+by the fragment's (_x_, _y_, _layer_) coordinate.
+
+Input attachments are decorated with their input attachment index in
+addition to descriptor set and binding numbers.
+
+    layout (input_attachment_index=i, set=m, binding=n) uniform subpassInput myInputAttachment;
+
+Which maps to the following SPIR-V:
+
+            ...
+    %1 = OpExtInstImport "GLSL.std.450"
+            ...
+            OpName %9 "myInputAttachment"
+            OpDecorate %9 DescriptorSet m
+            OpDecorate %9 Binding n
+            OpDecorate %9 InputAttachmentIndex i
+    %2 = OpTypeVoid
+    %3 = OpTypeFunction %2
+    %6 = OpTypeFloat 32
+    %7 = OpTypeImage %6 SubpassData 0 0 0 2 Unknown
+    %8 = OpTypePointer UniformConstant %7
+    %9 = OpVariable %8 UniformConstant
+            ...
+
+An _input_attachment_index_ of i selects the ith entry in the input pass
+list. (See API specification for more information.)
+
+These objects support reading the subpass input through the following
+functions:
+
+    gvec4 subpassLoad(gsubpassInput   subpass);
+    gvec4 subpassLoad(gsubpassInputMS subpass, int sample);
+
+
+=== Mapping Variables
+
+
+==== _gl_FragColor_
+
+The fragment-stage built-in _gl_FragColor_, which implies a broadcast to all
+outputs, is not present in SPIR-V. Shaders where writing to _gl_FragColor_
+is allowed can still write to it, but it only means to write to an output:
+
+- of the same type as _gl_FragColor_
+- decorated with location 0
+- not decorated as a built-in variable.
+
+There is no implicit broadcast.
+
+
+==== Vulkan _gl_VertexIndex_ and _gl_InstanceIndex_
+
+Adds two new built-in variables, _gl_VertexIndex_ and _gl_InstanceIndex_ to
+replace the existing built-in variables _gl_VertexID_ and _gl_InstanceID_.
+
+In the situations where the indexing is relative to some base offset,
+these built-in variables are defined, for Vulkan, to take on values as
+follows:
+
+    gl_VertexIndex             base, base+1, base+2, ...
+    gl_InstanceIndex           base, base+1, base+2, ...
+
+Where it depends on the situation what the base actually is.
+
+
+==== Storage Classes:
+
+    uniform sampler2D...;        -> UniformConstant
+    uniform blockN { ... } ...;  -> Uniform, with Block decoration
+    in / out variable            -> Input/Output, possibly with block (below)
+    in / out block...            -> Input/Output, with Block decoration
+    buffer  blockN { ... } ...;  -> Uniform, with BufferBlock decoration
+    shared                       -> Workgroup
+    <normal global>              -> Private
+
+    Vulkan Only: buffer  blockN { ... } ...;  -> StorageBuffer, when requested
+    OpenGL Only: uniform variable (non-block) -> UniformConstant
+    OpenGL Only: ... uniform atomic_uint ...  -> AtomicCounter
+
+
+==== Input/Output
+
+Mapping of input/output blocks or variables is the same for all versions
+of GLSL or ESSL. To the extent variables or members are available in a
+version, its location is as follows:
+
+These are mapped to SPIR-V individual variables, with similarly spelled
+built-in decorations (except as noted):
+
+Any stage:
+
+    in gl_VertexIndex          (Vulkan only)
+    in gl_VertexID             (OpenGL only)
+    in gl_InstanceIndex        (Vulkan only)
+    in gl_InstanceID           (OpenGL only)
+    in gl_InvocationID
+    in gl_PatchVerticesIn      (PatchVertices)
+    in gl_PrimitiveIDIn        (PrimitiveID)
+    in/out gl_PrimitiveID      (in/out based only on storage qualifier)
+    in gl_TessCoord
+
+    in/out gl_Layer
+    in/out gl_ViewportIndex
+
+    patch in/out gl_TessLevelOuter  (uses Patch decoration)
+    patch in/out gl_TessLevelInner  (uses Patch decoration)
+
+Compute stage only:
+
+    in gl_NumWorkGroups
+    in gl_WorkGroupSize
+    in gl_WorkGroupID
+    in gl_LocalInvocationID
+    in gl_GlobalInvocationID
+    in gl_LocalInvocationIndex
+
+Fragment stage only:
+
+    in gl_FragCoord
+    in gl_FrontFacing
+ifdef::GLSL[]
+    in gl_ClipDistance
+    in gl_CullDistance
+endif::GLSL[]
+    in gl_PointCoord
+    in gl_SampleID
+    in gl_SamplePosition
+    in gl_HelperInvocation
+    out gl_FragDepth
+    in gl_SampleMaskIn        (SampleMask)
+    out gl_SampleMask         (in/out based only on storage qualifier)
+
+These are mapped to SPIR-V blocks, as implied by the pseudo code, with
+the members decorated with similarly spelled built-in decorations:
+
+Non-fragment stage:
+
+    in/out gl_PerVertex {   // some subset of these members will be used
+        gl_Position
+        gl_PointSize
+ifdef::GLSL[]
+        gl_ClipDistance
+        gl_CullDistance
+endif::GLSL[]
+    }                       // name of block is for debug only
+
+There is at most one input and one output block per stage in SPIR-V.
+The subset and order of members will match between stages sharing an
+interface.
+
+
+=== Vulkan Only: Mapping of Precision Qualifiers
+
+    lowp     -> RelaxedPrecision, on storage variable and operation
+    mediump  -> RelaxedPrecision, on storage variable and operation
+    highp    -> 32-bit, same as int or float
+
+    portability tool/mode  -> OpQuantizeToF16
+
+
+=== Mapping of *precise*:
+
+    precise -> NoContraction
+
+
+=== OpenGL Mapping of *atomic_uint* _offset_ layout qualifier
+
+    offset         ->  Offset (decoration)
+
+
+=== Mapping of Images
+
+    imageLoad()   -> OpImageRead
+    imageStore()  -> OpImageWrite
+    texelFetch()  -> OpImageFetch
+    subpassInput  -> OpTypeImage with Dim of SubpassData (Vulkan only)
+    subpassLoad() -> OpImageRead                         (Vulkan only)
+
+    imageAtomicXXX(params, data)  -> %ptr = OpImageTexelPointer params
+                                            OpAtomicXXX %ptr, data
+
+    XXXQueryXXX(combined) -> %image = OpImage combined
+                                    OpXXXQueryXXX %image
+
+
+=== Mapping of Layouts
+
+    std140/std430  ->  explicit Offset, ArrayStride, and MatrixStride
+                        Decoration on struct members
+    shared/packed  ->  not allowed
+    <default>      ->  not shared, but std140 or std430
+    xfb_offset     ->  Offset Decoration on the object or struct member
+    xfb_buffer     ->  XfbBuffer Decoration on the object
+    xfb_stride     ->  XfbStride Decoration on the object
+    any xfb_*      ->  the Xfb Execution Mode is set
+    captured XFB   ->  has both XfbBuffer and Offset
+    non-captured   ->  lacking XfbBuffer or Offset
+
+    max_vertices   ->  OutputVertices
+
+
+=== Mapping of barriers
+
+    barrier() (compute) -> OpControlBarrier(/*Execution*/Workgroup,
+                                            /*Memory*/Workgroup,
+                                            /*Semantics*/AcquireRelease |
+                                                        WorkgroupMemory)
+
+    barrier() (tess control) -> OpControlBarrier(/*Execution*/Workgroup,
+                                                /*Memory*/Invocation,
+                                                /*Semantics*/None)
+
+    memoryBarrier() -> OpMemoryBarrier(/*Memory*/Device,
+                                        /*Semantics*/AcquireRelease |
+                                                    UniformMemory |
+                                                    WorkgroupMemory |
+                                                    ImageMemory)
+
+    memoryBarrierBuffer() -> OpMemoryBarrier(/*Memory*/Device,
+                                            /*Semantics*/AcquireRelease |
+                                                        UniformMemory)
+
+    memoryBarrierShared() -> OpMemoryBarrier(/*Memory*/Device,
+                                            /*Semantics*/AcquireRelease |
+                                                        WorkgroupMemory)
+
+    memoryBarrierImage() -> OpMemoryBarrier(/*Memory*/Device,
+                                            /*Semantics*/AcquireRelease |
+                                                        ImageMemory)
+
+    groupMemoryBarrier() -> OpMemoryBarrier(/*Memory*/Workgroup,
+                                            /*Semantics*/AcquireRelease |
+                                                        UniformMemory |
+                                                        WorkgroupMemory |
+                                                        ImageMemory)
+
+
+=== Mapping of atomics
+
+    all atomic builtin functions -> Semantics = None(Relaxed)
+
+    atomicExchange()             -> OpAtomicExchange
+    imageAtomicExchange()        -> OpAtomicExchange
+    atomicCompSwap()             -> OpAtomicCompareExchange
+    imageAtomicCompSwap()        -> OpAtomicCompareExchange
+    N/A                          -> OpAtomicCompareExchangeWeak
+
+
+=== OpenGL Only: Mapping of Atomics
+
+    atomicCounterIncrement -> OpAtomicIIncrement
+    atomicCounterDecrement -> OpAtomicIDecrement
+    atomicCounter          -> OpAtomicLoad
+
+
+=== Mapping of other instructions
+
+    %     -> OpUMod/OpSMod
+    mod() -> OpFMod
+    N/A   -> OpSRem/OpFRem
+
+    pack/unpack (conversion)    -> pack/unpack in GLSL extended instructions
+    pack/unpack (no conversion) -> OpBitcast

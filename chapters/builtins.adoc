@@ -1,0 +1,1603 @@
+// Copyright 2008-2024 The Khronos Group Inc.
+// SPDX-License-Identifier: CC-BY-4.0
+
+[[built-in-variables]]
+= Built-In Variables
+
+
+[[built-in-language-variables]]
+== Built-In Language Variables
+
+Some operations occur outside shader functionality and need to provide
+values to or receive values from shader executables.
+Shaders communicate with fixed-function pipeline stages, and
+optionally with other shader executables, through the use of built-in input
+and output variables.
+
+
+[[vertex-shader-special-variables]]
+=== Vertex Shader Special Variables
+
+The built-in vertex shader variables are intrinsically declared as follows:
+
+ifdef::GLSL[]
+[source,c++]
+----
+in int gl_VertexID;       // only present when not targeting Vulkan
+in int gl_InstanceID;     // only present when not targeting Vulkan
+in int gl_VertexIndex;    // only present when targeting Vulkan
+in int gl_InstanceIndex;  // only present when targeting Vulkan
+in int gl_DrawID;
+in int gl_BaseVertex;
+in int gl_BaseInstance;
+
+out gl_PerVertex {
+    vec4 gl_Position;
+    float gl_PointSize;
+    float gl_ClipDistance[];
+    float gl_CullDistance[];
+};
+----
+endif::GLSL[]
+ifdef::ESSL[]
+[source,c++]
+----
+in highp int gl_VertexID;      // only present when not targeting Vulkan
+in highp int gl_InstanceID;    // only present when not targeting Vulkan
+in highp int gl_VertexIndex;   // only present when targeting Vulkan
+in highp int gl_InstanceIndex; // only present when targeting Vulkan
+
+out gl_PerVertex {
+    out highp vec4 gl_Position;
+    out highp float gl_PointSize;
+};
+----
+endif::ESSL[]
+
+The variable _gl_Position_ is intended for writing the homogeneous vertex
+position.
+It can be written at any time during shader execution.
+This value will be used by primitive assembly, clipping, culling, and other
+fixed functionality operations, if present, that operate on primitives after
+vertex processing has occurred.
+Its value is undefined after the vertex processing stage if the vertex
+shader executable does not write _gl_Position_.
+
+The variable _gl_PointSize_ is intended for a shader to write the size of
+the point to be rasterized.
+It is measured in pixels.
+If _gl_PointSize_ is not written to, its value is undefined in subsequent
+pipe stages.
+
+ifdef::GLSL[]
+The variable _gl_ClipDistance_ is intended for writing clip distances, and
+provides the forward compatible mechanism for controlling user clipping.
+The element _gl_ClipDistance[i]_ specifies a clip distance for each half-space
+_i_.
+A distance of 0 means the vertex is on the boundary of the half-space, a positive distance means
+the vertex is inside the clip volume, and a negative distance means the point
+is outside the clip volume.
+The clip distances will be linearly interpolated across the primitive and
+the portion of the primitive with interpolated distances less than 0 will be
+clipped.
+
+The _gl_ClipDistance_ array is predeclared as unsized and must be either explicitly
+sized by the shader redeclaring it with a size or implicitly sized by
+indexing it only with constant integral expressions.
+This needs to size the array to include all the clip half-spaces that are enabled
+via the API; if the size does not include all enabled half-spaces,
+results are undefined.
+The size can be at most _gl_MaxClipDistances_.
+The number of varying components (see _gl_MaxVaryingComponents)_ consumed by
+_gl_ClipDistance_ will match the size of the array, no matter how many
+half-spaces are enabled.
+The shader must also set all values in _gl_ClipDistance_ that have been
+enabled via the API, or results are undefined.
+Values written into _gl_ClipDistance_ for half-spaces that are not enabled have
+no effect.
+
+The variable _gl_CullDistance_ provides a mechanism for controlling user
+culling.
+The element _gl_CullDistance[i]_ specifies a cull distance for half-space _i_.
+A distance of 0 means the vertex is on the boundary of the half-space, a positive distance means
+the vertex is inside the cull volume, and a negative distance means the
+point is outside the cull volume.
+Primitives whose vertices all have a negative cull distance for half-spaces _i_
+will be discarded.
+
+The _gl_CullDistance_ array is predeclared as unsized and must be either explicitly
+sized by the shader redeclaring it with a size or implicitly sized by
+indexing it only with constant integral expressions.
+The size determines the number and set of enabled cull distances and can be
+at most _gl_MaxCullDistances_.
+The number of varying components (see _gl_MaxVaryingComponents_) consumed by
+_gl_CullDistance_ will match the size of the array.
+Shaders writing _gl_CullDistance_ must write all enabled distances, or
+culling results are undefined.
+
+As an output variable, _gl_CullDistance_ provides the place for the shader
+to write these distances.
+As an input in all but the fragment language, it reads the values written in
+the previous shader stage.
+In the fragment language, _gl_CullDistance_ array contains linearly
+interpolated values for the vertex values written by a shader to the
+_gl_CullDistance_ vertex output variable.
+
+It is a compile-time or link-time error for the set of shaders forming a
+program to have the sum of the sizes of the _gl_ClipDistance_ and
+_gl_CullDistance_ arrays to be larger than
+_gl_MaxCombinedClipAndCullDistances_.
+endif::GLSL[]
+
+The variable _gl_VertexID_ is a vertex shader input variable that holds an
+integer index for the vertex, as defined under "`Shader Inputs`" in section
+11.1.3.9 "`Shader Inputs`" of the <<references,{apispec}>>.
+It is only present when not targeting Vulkan.
+Even when present, the value of _gl_VertexID_ is not always defined.
+
+The variable _gl_InstanceID_ is a vertex shader input variable that holds
+the instance number of the current primitive in an instanced draw call (see
+"`Shader Inputs`" in section 11.1.3.9 "`Shader Inputs`" of the
+<<references,{apispec}>>).
+It is only present when not targeting Vulkan.
+If the current primitive does not come from an instanced draw call, the
+value of _gl_InstanceID_ is zero.
+
+The variable _gl_VertexIndex_ is a vertex language input variable that
+holds an integer index for the vertex, relative to a base.
+It is only present when targeting Vulkan.
+Even when present, the value of _gl_VertexIndex_ is not always defined.
+
+The variable _gl_InstanceIndex_ is a vertex language input variable that
+holds the instance number of the current primitive in an instanced draw
+call, relative to a base.
+It is only present when targeting Vulkan.
+If the current primitive does not come from an instanced draw call,
+the value of gl_InstanceIndex is zero.
+
+ifdef::GLSL[]
+The variable _gl_DrawID_ is a vertex shader input variable that holds the
+integer index of the drawing command to which the current vertex belongs
+(see "`Shader Inputs`" in section 11.1.3.9 of the <<references,{apispec}>>).
+If the vertex is not invoked by a *Multi** form of a draw command, then the
+value of _gl_DrawID_ is zero.
+
+The variable _gl_BaseVertex_ is a vertex shader input variable that holds
+the integer value passed to the baseVertex parameter of the command that
+resulted in the current shader invocation (see "`Shader Inputs`" in section
+11.1.3.9 of the <<references,{apispec}>>).
+
+The variable _gl_BaseInstance_ is a vertex shader input variable that holds
+the integer value passed to the baseInstance parameter of the command that
+resulted in the current shader invocation (see "`Shader Inputs`" in section
+11.1.3.9 of the <<references,{apispec}>>).
+endif::GLSL[]
+
+
+[[tessellation-control-shader-special-variables]]
+=== Tessellation Control Shader Special Variables
+
+In the tessellation control shader, built-in variables are intrinsically
+declared as:
+
+ifdef::GLSL[]
+[source,c++]
+----
+in gl_PerVertex {
+    vec4 gl_Position;
+    float gl_PointSize;
+    float gl_ClipDistance[];
+    float gl_CullDistance[];
+} gl_in[gl_MaxPatchVertices];
+
+in int gl_PatchVerticesIn;
+in int gl_PrimitiveID;
+in int gl_InvocationID;
+
+out gl_PerVertex {
+    vec4 gl_Position;
+    float gl_PointSize;
+    float gl_ClipDistance[];
+    float gl_CullDistance[];
+} gl_out[];
+
+patch out float gl_TessLevelOuter[4];
+patch out float gl_TessLevelInner[2];
+----
+endif::GLSL[]
+ifdef::ESSL[]
+[source,c++]
+----
+in gl_PerVertex {
+    highp vec4 gl_Position;
+} gl_in[gl_MaxPatchVertices];
+
+in highp int gl_PatchVerticesIn;
+in highp int gl_PrimitiveID;
+in highp int gl_InvocationID;
+
+out gl_PerVertex {
+    highp vec4 gl_Position;
+} gl_out[];
+
+patch out highp float gl_TessLevelOuter[4];
+patch out highp float gl_TessLevelInner[2];
+patch out highp vec4 gl_BoundingBox[2];
+----
+endif::ESSL[]
+
+
+[[tessellation-control-input-variables]]
+==== Tessellation Control Input Variables
+
+ifdef::GLSL[]
+_gl_Position_, _gl_PointSize_, _gl_ClipDistance_, and _gl_CullDistance_
+contain the values written in the previous shader stage to the corresponding
+outputs.
+endif::GLSL[]
+ifdef::ESSL[]
+_gl_Position_ contains the output written in the previous shader stage to
+_gl_Position_.
+endif::ESSL[]
+
+_gl_PatchVerticesIn_ contains the number of vertices in the input patch
+being processed by the shader.
+A single shader can read patches of differing sizes, so the value of
+_gl_PatchVerticesIn_ may differ between patches.
+
+_gl_PrimitiveID_ contains the number of primitives processed by the shader
+since the current set of rendering primitives was started.
+
+_gl_InvocationID_ contains the number of the output patch vertex assigned to
+the tessellation control shader invocation.
+It is assigned integer values in the range [0, N-1], where N is the number
+of output patch vertices per primitive.
+
+
+[[tessellation-control-output-variables]]
+==== Tessellation Control Output Variables
+
+ifdef::GLSL[]
+_gl_Position_, _gl_PointSize_, _gl_ClipDistance_, and _gl_CullDistance_ are
+used in the same fashion as the corresponding output variables in the vertex
+shader.
+endif::GLSL[]
+ifdef::ESSL[]
+_gl_Position_ is used in the same fashion as the corresponding output
+variable in the vertex shader.
+endif::ESSL[]
+
+The values written to _gl_TessLevelOuter_ and _gl_TessLevelInner_ are
+assigned to the corresponding outer and inner tessellation levels of the
+output patch.
+They are used by the tessellation primitive generator to control primitive
+tessellation and may be read by tessellation evaluation shaders.
+
+ifdef::ESSL[]
+The values written to _gl_BoundingBox_ specify the minimum and maximum
+clip-space extents of a bounding box containing all primitives generated
+from the patch by the primitive generator, geometry shader, and clipping.
+Fragments may or may not be generated for portions of these primitives
+that extend outside the window-coordinate projection of this bounding
+box.
+endif::ESSL[]
+
+
+[[tessellation-evaluation-shader-special-variables]]
+=== Tessellation Evaluation Shader Special Variables
+
+In the tessellation evaluation shader, built-in variables are intrinsically
+declared as:
+
+ifdef::GLSL[]
+[source,c++]
+----
+in gl_PerVertex {
+    vec4 gl_Position;
+    float gl_PointSize;
+    float gl_ClipDistance[];
+    float gl_CullDistance[];
+} gl_in[gl_MaxPatchVertices];
+
+in int gl_PatchVerticesIn;
+in int gl_PrimitiveID;
+in vec3 gl_TessCoord;
+patch in float gl_TessLevelOuter[4];
+patch in float gl_TessLevelInner[2];
+
+out gl_PerVertex {
+    vec4 gl_Position;
+    float gl_PointSize;
+    float gl_ClipDistance[];
+    float gl_CullDistance[];
+};
+----
+endif::GLSL[]
+ifdef::ESSL[]
+[source,c++]
+----
+in gl_PerVertex {
+    highp vec4 gl_Position;
+} gl_in[gl_MaxPatchVertices];
+
+in highp int gl_PatchVerticesIn;
+in highp int gl_PrimitiveID;
+in highp vec3 gl_TessCoord;
+patch in highp float gl_TessLevelOuter[4];
+patch in highp float gl_TessLevelInner[2];
+
+out gl_PerVertex {
+    highp vec4 gl_Position;
+};
+----
+endif::ESSL[]
+
+
+[[tessellation-evaluation-input-variables]]
+==== Tessellation Evaluation Input Variables
+
+ifdef::GLSL[]
+_gl_Position_, _gl_PointSize_, _gl_ClipDistance_, and _gl_CullDistance_
+contain the values written in the previous shader stage to the corresponding
+outputs.
+endif::GLSL[]
+ifdef::ESSL[]
+_gl_Position_ contains the output written in the previous shader stage to
+_gl_Position_.
+endif::ESSL[]
+
+_gl_PatchVerticesIn_ and _gl_PrimitiveID_ are defined in the same fashion as
+the corresponding input variables in the tessellation control shader.
+
+_gl_TessCoord_ specifies a three-component _(u,v,w)_ vector identifying the
+position of the vertex being processed by the shader relative to the
+primitive being tessellated.
+Its values will obey the properties
+
+[source,c++]
+----
+gl_TessCoord.x == 1.0 - (1.0 - gl_TessCoord.x) // two operations performed
+gl_TessCoord.y == 1.0 - (1.0 - gl_TessCoord.y) // two operations performed
+gl_TessCoord.z == 1.0 - (1.0 - gl_TessCoord.z) // two operations performed
+----
+
+to aid in replicating subdivision computations.
+
+ifdef::GLSL[If a tessellation control shader is active, the input variables]
+_gl_TessLevelOuter_ and _gl_TessLevelInner_ are filled with the
+ifdef::GLSL[]
+corresponding outputs written by the tessellation control shader.
+Otherwise, they are assigned with default tessellation levels specified in
+section 11.2.3.3 "`Tessellation Evaluation Shader Inputs`" of the
+<<references,{apispec}>>.
+endif::GLSL[]
+ifdef::ESSL[]
+corresponding outputs written by the active tessellation control shader.
+endif::ESSL[]
+
+
+[[tessellation-evaluation-output-variables]]
+==== Tessellation Evaluation Output Variables
+
+ifdef::GLSL[]
+_gl_Position_, _gl_PointSize_, _gl_ClipDistance_, and _gl_CullDistance_ are
+used in the same fashion as the corresponding output variables in the vertex
+shader.
+endif::GLSL[]
+ifdef::ESSL[]
+_gl_Position_ is used in the same fashion as the corresponding output
+variable in the vertex shader.
+endif::ESSL[]
+
+
+[[geometry-shader-special-variables]]
+=== Geometry Shader Special Variables
+
+In the geometry shader, built-in variables are intrinsically declared as:
+
+ifdef::GLSL[]
+[source,c++]
+----
+in gl_PerVertex {
+    vec4 gl_Position;
+    float gl_PointSize;
+    float gl_ClipDistance[];
+    float gl_CullDistance[];
+} gl_in[];
+
+in int gl_PrimitiveIDIn;
+in int gl_InvocationID;
+
+out gl_PerVertex {
+    vec4 gl_Position;
+    float gl_PointSize;
+    float gl_ClipDistance[];
+    float gl_CullDistance[];
+};
+
+out int gl_PrimitiveID;
+out int gl_Layer;
+out int gl_ViewportIndex;
+----
+endif::GLSL[]
+ifdef::ESSL[]
+[source,c++]
+----
+in gl_PerVertex {
+    highp vec4 gl_Position;
+} gl_in[];
+
+in highp int gl_PrimitiveIDIn;
+in highp int gl_InvocationID;
+
+out gl_PerVertex {
+    highp vec4 gl_Position;
+};
+
+out highp int gl_PrimitiveID;
+out highp int gl_Layer;
+----
+endif::ESSL[]
+
+
+[[geometry-shader-input-variables]]
+==== Geometry Shader Input Variables
+
+ifdef::GLSL[]
+_gl_Position_, _gl_PointSize_, _gl_ClipDistance_, and _gl_CullDistance_
+contain the values written in the previous shader stage to the corresponding
+outputs.
+endif::GLSL[]
+ifdef::ESSL[]
+_gl_Position_ contains the output written in the previous shader stage to
+_gl_Position_.
+endif::ESSL[]
+
+_gl_PrimitiveIDIn_ contains the number of primitives processed by the shader
+since the current set of rendering primitives was started.
+
+_gl_InvocationID_ contains the invocation number assigned to the geometry
+shader invocation.
+It is assigned integer values in the range [0, N-1], where N is the number
+of geometry shader invocations per primitive.
+
+
+[[geometry-shader-output-variables]]
+==== Geometry Shader Output Variables
+
+ifdef::GLSL[]
+_gl_Position_, _gl_PointSize_, _gl_ClipDistance_, and _gl_CullDistance_ are
+used in the same fashion as the corresponding output variables in the vertex
+shader.
+endif::GLSL[]
+ifdef::ESSL[]
+_gl_Position_ is used in the same fashion as the corresponding output
+variable in the vertex shader.
+endif::ESSL[]
+
+_gl_PrimitiveID_ is filled with a single integer that serves as a primitive
+identifier to the fragment shader.
+This is then available to fragment shaders, which will select the written
+primitive ID from the provoking vertex of the primitive being shaded.
+If a fragment shader using _gl_PrimitiveID_ is active and a geometry shader
+is also active, the geometry shader must write to _gl_PrimitiveID_ or the
+fragment shader input _gl_PrimitiveID_ is undefined.
+ifdef::GLSL[See section 11.3.4.5 "`Geometry Shader Outputs`" of the]
+ifdef::ESSL[See section 11.3.4.4 "`Geometry Shader Outputs`" of the]
+<<references,{apispec}>> for more information.
+
+_gl_Layer_ is used to select a specific layer (or face and layer of a cube
+map) of a multi-layer framebuffer attachment.
+The actual layer used will come from one of the vertices in the primitive
+being shaded.
+Which vertex the layer comes from is determined as discussed in section
+ifdef::GLSL[]
+11.3.4.6 "`Layer and Viewport Selection`" of the <<references,{apispec}>>
+endif::GLSL[]
+ifdef::ESSL[]
+11.3.4.4 of the <<references,{apispec}>>
+endif::ESSL[]
+but may be undefined, so it is best to write the same layer value for all
+vertices of a primitive.
+If a shader statically assigns a value to _gl_Layer_, layered rendering mode
+is enabled.
+ifdef::GLSL[]
+See section 11.3.4.5 "`Geometry Shader Outputs`" and section 9.4.9 "`Layered
+endif::GLSL[]
+ifdef::ESSL[]
+See section 11.3.4.4 "`Geometry Shader Outputs`" and section 9.8 "`Layered
+endif::ESSL[]
+Framebuffers`" of the <<references,{apispec}>> for more information.
+If a shader statically assigns a value to _gl_Layer_, and there is an
+execution path through the shader that does not set _gl_Layer_, then the
+value of _gl_Layer_ is undefined for executions of the shader that take that
+path.
+
+The output variable _gl_Layer_ takes on a special value when used with an
+array of cube map textures.
+Instead of only referring to the layer, it is used to select a cube map face
+and a layer.
+Setting _gl_Layer_ to the value _layer*6+face_ will render to face _face_ of
+the cube defined in layer _layer_.
+ifdef::GLSL[]
+The face values are defined in table 9.3 of section 9.4.9 "`Layered
+Framebuffers`" of the <<references,{apispec}>>,
+endif::GLSL[]
+ifdef::ESSL[]
+The face values are defined in table 8.25 of the <<references,{apispec}>>,
+endif::ESSL[]
+but repeated below for clarity.
+
+[options="header"]
+|====
+| Face Value | Resulting Target
+| 0          | TEXTURE_CUBE_MAP_POSITIVE_X
+| 1          | TEXTURE_CUBE_MAP_NEGATIVE_X
+| 2          | TEXTURE_CUBE_MAP_POSITIVE_Y
+| 3          | TEXTURE_CUBE_MAP_NEGATIVE_Y
+| 4          | TEXTURE_CUBE_MAP_POSITIVE_Z
+| 5          | TEXTURE_CUBE_MAP_NEGATIVE_Z
+|====
+
+For example, to render to the positive _y_ cube map face located in the 5th
+layer of the cube map array, _gl_Layer_ should be set to _5 * 6 + 2_.
+
+ifdef::GLSL[]
+The output variable _gl_ViewportIndex_ provides the index of the viewport to
+which the next primitive emitted from the geometry shader should be drawn.
+Primitives generated by the geometry shader will undergo viewport
+transformation and scissor testing using the viewport transformation and
+scissor rectangle selected by the value of _gl_ViewportIndex_.
+The viewport index used will come from one of the vertices in the primitive
+being shaded.
+However, which vertex the viewport index comes from is
+implementation-dependent, so it is best to use the same viewport index for
+all vertices of the primitive.
+If a geometry shader does not assign a value to _gl_ViewportIndex_, viewport
+transform and scissor rectangle zero will be used.
+If a geometry shader statically assigns a value to _gl_ViewportIndex_ and
+there is a path through the shader that does not assign a value to
+_gl_ViewportIndex_, the value of _gl_ViewportIndex_ is undefined for
+executions of the shader that take that path.
+See section 11.3.4.6 "`Layer and Viewport Selection`" of the
+<<references,{apispec}>> for more information.
+endif::GLSL[]
+
+
+[[fragment-shader-special-variables]]
+=== Fragment Shader Special Variables
+
+The built-in special variables that are accessible from a fragment shader
+are intrinsically declared as follows:
+
+ifdef::GLSL[]
+[source,c++]
+----
+in vec4 gl_FragCoord;
+in bool gl_FrontFacing;
+in float gl_ClipDistance[];
+in float gl_CullDistance[];
+in vec2 gl_PointCoord;
+in int gl_PrimitiveID;
+in int gl_SampleID;
+in vec2 gl_SamplePosition;
+in int gl_SampleMaskIn[];
+in int gl_Layer;
+in int gl_ViewportIndex;
+in bool gl_HelperInvocation;
+
+out float gl_FragDepth;
+out int gl_SampleMask[];
+----
+endif::GLSL[]
+ifdef::ESSL[]
+[source,c++]
+----
+in highp vec4 gl_FragCoord;
+in bool gl_FrontFacing;
+out highp float gl_FragDepth;
+in mediump vec2 gl_PointCoord;
+in bool gl_HelperInvocation;
+in highp int gl_PrimitiveID;
+in highp int gl_Layer;
+in lowp int gl_SampleID;
+in mediump vec2 gl_SamplePosition;
+in highp int gl_SampleMaskIn[(gl_MaxSamples+31)/32];
+out highp int gl_SampleMask[(gl_MaxSamples+31)/32];
+----
+endif::ESSL[]
+
+The output of the fragment shader executable is processed by the fixed
+function operations at the back end of the API pipeline.
+
+The fixed functionality computed depth for a fragment may be obtained by
+reading _gl_FragCoord.z_, described below.
+
+Writing to _gl_FragDepth_ will establish the depth value for the fragment
+being processed.
+If depth buffering is enabled, and no shader writes _gl_FragDepth_, then the
+fixed function value for depth will be used as the fragment's depth value.
+If a shader statically assigns a value to _gl_FragDepth_, and there is an
+execution path through the shader that does not set _gl_FragDepth_, then the
+value of the fragment's depth may be undefined for executions of the shader
+that take that path.
+That is, if the set of linked fragment shaders statically contain a write to
+_gl_FragDepth_, then it is responsible for always writing it.
+
+If a shader executes the *discard* keyword, the fragment is discarded, and
+the values of any user-defined fragment outputs, _gl_FragDepth_, and
+_gl_SampleMask_ become irrelevant.
+
+The variable _gl_FragCoord_ is available as an input variable from within
+fragment shaders and it holds the window relative coordinates (_x_, _y_,
+_z_, _1/w_) values for the fragment.
+If multi-sampling, this value can be for any location within the pixel, or
+one of the fragment samples.
+The use of *centroid* does not further restrict this value to be inside the
+current primitive.
+This value is the result of the fixed functionality that interpolates
+primitives after vertex processing to generate fragments.
+The _z_ component is the depth value that would be used for the fragment's
+depth if no shader contained any writes to _gl_FragDepth_.
+This is useful for invariance if a shader conditionally computes
+_gl_FragDepth_ but otherwise wants the fixed functionality fragment depth.
+
+Fragment shaders have access to the input built-in variable
+_gl_FrontFacing_, whose value is *true* if the fragment belongs to a
+front-facing primitive.
+One use of this is to emulate two-sided lighting by selecting one of two
+colors calculated by a vertex or geometry shader.
+
+The values in _gl_PointCoord_ are two-dimensional coordinates indicating
+where within a point primitive the current fragment is located, when point
+sprites are enabled.
+They range from 0.0 to 1.0 across the point.
+If the current primitive is not a point, or if point sprites are not
+enabled, then the values read from _gl_PointCoord_ are undefined.
+
+For both the input array _gl_SampleMaskIn[]_ and the output array
+_gl_SampleMask[]_, bit _B_ of mask _M_ (_gl_SampleMaskIn[M]_ or
+_gl_SampleMask[M]_) corresponds to sample _32*M+B_.
+These arrays have *ceil*(_s_/32) elements, where _s_ is the maximum number
+of color samples supported by the implementation.
+
+The input variable _gl_SampleMaskIn_ indicates the set of samples covered by
+the primitive generating the fragment during multisample rasterization.
+It has a sample bit set if and only if the sample is considered covered for
+this fragment shader invocation.
+
+The output array _gl_SampleMask[]_ sets the sample mask for the fragment
+being processed.
+Coverage for the current fragment will become the logical AND of the
+coverage mask and the output _gl_SampleMask_.
+This array must be sized in the fragment shader either implicitly or
+explicitly, to be no larger than the implementation-dependent maximum
+sample-mask (as an array of 32bit elements), determined by the maximum
+number of samples..
+If the fragment shader statically assigns a value to _gl_SampleMask_, the
+sample mask will be undefined for any array elements of any fragment shader
+invocations that fail to assign a value.
+If a shader does not statically assign a value to _gl_SampleMask_, the
+sample mask has no effect on the processing of a fragment.
+
+The input variable _gl_SampleID_ is filled with the sample number of the
+sample currently being processed.
+This variable is in the range _0_ to _gl_NumSamples-1_, where
+_gl_NumSamples_ is the total number of samples in the framebuffer, or 1 if
+rendering to a non-multisample framebuffer.
+Any static use of this variable in a fragment shader causes the entire
+shader to be evaluated per-sample.
+
+The input variable _gl_SamplePosition_ contains the position of the current
+sample within the multisample draw buffer.
+The _x_ and _y_ components of _gl_SamplePosition_ contain the sub-pixel
+coordinate of the current sample and will have values in the range 0.0 to
+1.0.
+Any static use of this variable in a fragment shader causes the entire
+shader to be evaluated per sample.
+
+The value _gl_HelperInvocation_ is *true* if the fragment shader invocation
+is considered a _helper invocation_ and is *false* otherwise.
+A helper invocation is a fragment shader invocation that is created solely
+for the purposes of evaluating derivatives for use in non-helper fragment
+shader invocations.
+Such derivatives are computed implicitly in the built-in function
+*texture*() (see "`<<texture-functions,Texture Functions>>`"), and
+explicitly in the derivative functions in
+"`<<derivative-functions,Derivative Functions>>`", for example *dFdx*() and
+*dFdy*().
+
+Fragment shader helper invocations execute the same shader code as
+non-helper invocations, but will not have side effects that modify the
+framebuffer or other shader-accessible memory.
+In particular:
+
+  * Fragments corresponding to helper invocations are discarded when shader
+    execution is complete, without updating the framebuffer.
+  * Stores to image and buffer variables performed by helper invocations
+    have no effect on the underlying image or buffer memory.
+  * Atomic operations to image, buffer, or atomic counter variables
+    performed by helper invocations have no effect on the underlying image
+    or buffer memory.
+    The values returned by such atomic operations are undefined.
+
+Helper invocations may be generated for pixels not covered by a primitive
+being rendered.
+While fragment shader inputs qualified with *centroid* are normally required
+to be sampled in the intersection of the pixel and the primitive, the
+requirement is ignored for such pixels since there is no intersection
+between the pixel and primitive.
+
+Helper invocations may also be generated for fragments that are covered by a
+primitive being rendered when the fragment is killed by early fragment tests
+(using the *early_fragment_tests* qualifier) or where the implementation is
+able to determine that executing the fragment shader would have no effect
+other than assisting in computing derivatives for other fragment shader
+invocations.
+
+The set of helper invocations generated when processing any set of
+primitives is implementation-dependent.
+
+ifdef::GLSL[]
+_gl_ClipDistance_ contains linearly interpolated values for the vertex-
+pipeline values written by a shader to the _gl_ClipDistance_ output
+variable. Only elements in this array that have clipping enabled will
+have defined values.
+
+_gl_CullDistance_ contains linearly interpolated values for the vertex-
+pipeline values written by a shader to the _gl_CullDistance_ output
+variable.
+endif::GLSL[]
+
+The input variable _gl_PrimitiveID_ is filled with the value written to the
+_gl_PrimitiveID_ geometry shader output, if a geometry shader is present.
+Otherwise, it is filled with the number of primitives processed by the
+shader since the current set of rendering primitives was started.
+
+The input variable _gl_Layer_ is filled with the value written to the
+_gl_Layer_ geometry shader output, if a geometry shader is present.
+If the geometry stage does not dynamically assign a value to _gl_Layer_, the
+value of _gl_Layer_ in the fragment stage will be undefined.
+If the geometry stage makes no static assignment to _gl_Layer_, the input
+value in the fragment stage will be zero.
+Otherwise, the fragment stage will read the same value written by the
+geometry stage, even if that value is out of range.
+If a fragment shader contains a static access to _gl_Layer_, it will count
+against the implementation defined limit for the maximum number of inputs to
+the fragment stage.
+
+ifdef::GLSL[]
+The input variable _gl_ViewportIndex_ is filled with the value written to
+the output variable _gl_ViewportIndex_ in the geometry stage, if a geometry
+shader is present.
+If the geometry stage does not dynamically assign a value to
+_gl_ViewportIndex_, the value of _gl_ViewportIndex_ in the fragment shader
+will be undefined.
+If the geometry stage makes no static assignment to _gl_ViewportIndex_, the
+fragment stage will read zero.
+Otherwise, the fragment stage will read the same value written by the
+geometry stage, even if that value is out of range.
+If a fragment shader contains a static access to _gl_ViewportIndex_, it will
+count against the implementation defined limit for the maximum number of
+inputs to the fragment stage.
+endif::GLSL[]
+
+
+[[compute-shader-special-variables]]
+=== Compute Shader Special Variables
+
+In the compute shader, built-in variables are declared as follows:
+
+[source,c++]
+----
+// workgroup dimensions
+in uvec3 gl_NumWorkGroups;
+const uvec3 gl_WorkGroupSize;
+
+// workgroup and invocation IDs
+in uvec3 gl_WorkGroupID;
+in uvec3 gl_LocalInvocationID;
+
+// derived variables
+in uvec3 gl_GlobalInvocationID;
+in uint gl_LocalInvocationIndex;
+----
+
+The built-in variable _gl_NumWorkGroups_ is a compute-shader input variable
+containing the number of workgroups in each dimension of the dispatch that
+will execute the compute shader.
+Its content is equal to the values specified in the _num_groups_x_,
+_num_groups_y_, and _num_groups_z_ parameters passed to the
+_DispatchCompute_ API entry point.
+
+The built-in constant _gl_WorkGroupSize_ is a compute-shader constant
+containing the workgroup size of the shader.
+The size of the workgroup in the _X_, _Y_, and _Z_ dimensions is stored in
+the _x_, _y_, and _z_ components.
+The constant values in _gl_WorkGroupSize_ will match those specified in the
+required *local_size_x*, *local_size_y*, and *local_size_z* layout
+qualifiers for the current shader.
+This is a constant so that it can be used to size arrays of memory that can
+be shared within the workgroup.
+It is a compile-time error to use _gl_WorkGroupSize_ in a shader that does
+not declare a fixed workgroup size, or before that shader has declared a
+fixed workgroup size, using *local_size_x*, *local_size_y*, and
+*local_size_z*. Use of variables whose values are derived from
+_gl_WorkGroupSize_, however, is not constrained to follow a declaration of the
+fixed workgroup size.
+
+The built-in variable _gl_WorkGroupID_ is a compute-shader input variable
+containing the three-dimensional index of the workgroup that the
+current invocation is executing in.
+The possible values range across the parameters passed into
+_DispatchCompute_, i.e., from (0, 0, 0) to (_gl_NumWorkGroups.x_ - 1,
+_gl_NumWorkGroups.y_ - 1, _gl_NumWorkGroups.z_ -1).
+
+The built-in variable _gl_LocalInvocationID_ is a compute-shader input
+variable containing the three-dimensional index of the current work item
+within the workgroup.
+The possible values for this variable range across the workgroup
+size, i.e., (0,0,0) to (_gl_WorkGroupSize.x_ - 1, _gl_WorkGroupSize.y_ - 1,
+_gl_WorkGroupSize.z_ - 1). Use of _gl_LocalInvocationID_ is allowed
+before declarations of *local_size_x*, *local_size_y*, and *local_size_z*.
+
+The built-in variable _gl_GlobalInvocationID_ is a compute shader input
+variable containing the global index of the current work item.
+This value uniquely identifies this invocation from all other invocations
+across all workgroups initiated by the current _DispatchCompute_ call.
+This is computed as:
+
+[source,c++]
+----
+gl_GlobalInvocationID =
+    gl_WorkGroupID * gl_WorkGroupSize + gl_LocalInvocationID;
+----
+
+The built-in variable _gl_LocalInvocationIndex_ is a compute shader input
+variable that contains the one-dimensional representation of the
+_gl_LocalInvocationID_.
+This is computed as:
+
+[source,c++]
+----
+gl_LocalInvocationIndex =
+    gl_LocalInvocationID.z * gl_WorkGroupSize.x * gl_WorkGroupSize.y +
+    gl_LocalInvocationID.y * gl_WorkGroupSize.x +
+    gl_LocalInvocationID.x;
+----
+
+Use of _gl_LocalInvocationIndex_ is allowed before declarations of
+*local_size_x*, *local_size_y*, and *local_size_z*.
+
+ifdef::GLSL[]
+[[compatibility-profile-built-in-language-variables]]
+=== Compatibility Profile Built-In Language Variables
+
+When using the compatibility profile, the GL can provide fixed functionality
+behavior for the vertex and fragment programmable pipeline stages.
+For example, mixing a fixed functionality vertex stage with a programmable
+fragment stage.
+
+The following built-in vertex, tessellation control, tessellation
+evaluation, and geometry output variables are available to specify inputs
+for the subsequent programmable shader stage or the fixed functionality
+fragment stage.
+A particular one should be written to if any functionality in a
+corresponding fragment shader or fixed pipeline uses it or state derived
+from it.
+Otherwise, behavior is undefined.
+The following members are added to the output _gl_PerVertex_ block in these
+languages:
+
+[source,c++]
+----
+out gl_PerVertex { // part of the gl_PerVertex block described in 7.1
+    // in addition to other gl_PerVertex members...
+    vec4  gl_ClipVertex;
+    vec4  gl_FrontColor;
+    vec4  gl_BackColor;
+    vec4  gl_FrontSecondaryColor;
+    vec4  gl_BackSecondaryColor;
+    vec4  gl_TexCoord[];
+    float gl_FogFragCoord;
+};
+----
+
+The output variable _gl_ClipVertex_ provides a place for vertex and geometry
+shaders to write the coordinate to be used with the user clipping half-spaces.
+Writing to _gl_ClipDistance_ is the preferred method for user clipping.
+It is a compile-time or link-time error for the set of shaders forming a
+program to statically read or write both _gl_ClipVertex_ and either
+_gl_ClipDistance_ or _gl_CullDistance_.
+If neither _gl_ClipVertex_ nor _gl_ClipDistance_ is written, their values
+are undefined and any clipping against user clip half-spaces is also undefined.
+
+Similarly to what was previously described for the core profile, the
+_gl_PerVertex_ block can be redeclared in a shader to explicitly include
+these additional members.
+For example:
+
+[source,c++]
+----
+out gl_PerVertex {
+    vec4 gl_Position;    // will use gl_Position
+    vec4 gl_FrontColor;  // will consume gl_color in the fragment shader
+    vec4 gl_BackColor;
+    vec4 gl_TexCoord[3]; // 3 elements of gl_TexCoord will be used
+}; // no other aspects of the fixed interface will be used
+----
+
+The user must ensure the clip vertex and user clipping half-spaces are defined in
+the same coordinate space.
+
+The output variables _gl_FrontColor_, _glFrontSecondaryColor_,
+_gl_BackColor_, and _glBackSecondaryColor_ assign primary and secondary
+colors for front and back faces of primitives containing the vertex being
+processed.
+The output variable _gl_TexCoord_ assigns texture coordinates for the vertex
+being processed.
+
+For _gl_FogFragCoord_, the value written will be used as the "`c`" value in
+section 16.4 "`Fog`" of the Compatibility profile of the
+<<references,{apispec}>>, by the fixed functionality pipeline.
+For example, if the z-coordinate of the fragment in eye space is desired as
+"`c`", then that's what the vertex shader executable should write into
+_gl_FogFragCoord_.
+
+As with all arrays, indices used to subscript _gl_TexCoord_ must either be a
+constant integral expressions, or this array must be redeclared by the
+shader with a size.
+The size can be at most _gl_MaxTextureCoords_.
+Using indices close to 0 may aid the implementation in preserving varying
+resources.
+The redeclaration of _gl_TexCoord_ can also be done at global scope as, for
+example:
+
+[source,c++]
+----
+in vec4 gl_TexCoord[3];
+out vec4 gl_TexCoord[4];
+----
+
+(This treatment is a special case for _gl_TexCoord[]_, not a general method
+for redeclaring members of blocks.) It is a compile-time error to redeclare
+_gl_TexCoord[]_ at global scope if there is a redeclaration of the
+corresponding built-in block; only one form of redeclaration is allowed
+within a shader (and hence within a stage, as block redeclarations must
+match across all shaders using it).
+
+In the tessellation control, evaluation, and geometry shaders, the outputs
+of the previous stage described above are also available in the input
+_gl_PerVertex_ block in these languages.
+
+[source,c++]
+----
+in gl_PerVertex { // part of the gl_PerVertex block described in 7.1
+    // in addition to other gl_PerVertex members...
+    vec4  gl_ClipVertex;
+    vec4  gl_FrontColor;
+    vec4  gl_BackColor;
+    vec4  gl_FrontSecondaryColor;
+    vec4  gl_BackSecondaryColor;
+    vec4  gl_TexCoord[];
+    float gl_FogFragCoord;
+} gl_in[];
+----
+
+These can be redeclared to establish an explicit pipeline interface, the
+same way as described above for the output block _gl_PerVertex_, and the
+input redeclaration must match the output redeclaration of the previous
+stage.
+However, when a built-in interface block with an instance name is redeclared
+(e.g. _gl_in_), the instance name must be included in the redeclaration.
+It is a compile-time error to not include the built-in instance name or to
+change its name.
+For example,
+
+[source,c++]
+----
+in gl_PerVertex {
+    vec4 gl_ClipVertex;
+    vec4 gl_FrontColor;
+} gl_in[]; // must be present and must be "gl_in[]"
+----
+
+Built-in block arrays predeclared with a size can be redeclared with unsized syntax.
+This keeps their size equal to the original predeclared size.
+
+Treatment of _gl_TexCoord[]_ redeclaration is also identical to that
+described for the output block _gl_TexCoord[]_ redeclaration.
+
+The following fragment input block is also available in a fragment shader
+when using the compatibility profile:
+
+[source,c++]
+----
+in gl_PerFragment {
+    in float gl_FogFragCoord;
+    in vec4  gl_TexCoord[];
+    in vec4  gl_Color;
+    in vec4  gl_SecondaryColor;
+};
+----
+
+The values in _gl_Color_ and _gl_SecondaryColor_ will be derived
+automatically by the system from _gl_FrontColor_, _gl_BackColor_,
+_gl_FrontSecondaryColor_, and _gl_BackSecondaryColor_ based on which face is
+visible in the primitive producing the fragment.
+If fixed functionality is used for vertex processing, then _gl_FogFragCoord_
+will either be the z-coordinate of the fragment in eye space, or the
+interpolation of the fog coordinate, as described in section 16.4 "`Fog`" of
+the Compatibility profile of the <<references,{apispec}>>.
+The _gl_TexCoord[]_ values are the interpolated _gl_TexCoord[]_ values from
+a vertex shader or the texture coordinates of any fixed pipeline based
+vertex functionality.
+
+Indices to the fragment shader _gl_TexCoord_ array are as described above in
+the vertex shader text.
+
+As described above for the input and output _gl_PerVertex_ blocks, the
+_gl_PerFragment_ block can be redeclared to create an explicit interface to
+another program.
+When matching these interfaces between separate programs, members in the
+_gl_PerVertex_ output block must be declared if and only if the
+corresponding fragment shader members generated from them are present in the
+_gl_PerFragment_ input block.
+These matches are described in detail in section 7.4.1 "`Shader Interface
+Matching`" of the <<references,{apispec}>>.
+If they don't match within a program, a link-time error will result.
+If the mismatch is between two programs, values passed between programs are
+undefined.
+Unlike with all other block matching, the order of declaration within
+_gl_PerFragment_ does not have to match across shaders and does not have to
+correspond with order of declaration in a matching _gl_PerVertex_
+redeclaration.
+
+The following fragment output variables are available in a fragment shader
+when using the compatibility profile:
+
+[source,c++]
+----
+out vec4 gl_FragColor;
+out vec4 gl_FragData[gl_MaxDrawBuffers];
+----
+
+Writing to _gl_FragColor_ specifies the fragment color that will be used by
+the subsequent fixed functionality pipeline.
+If subsequent fixed functionality consumes fragment color and an execution
+of the fragment shader executable does not write a value to _gl_FragColor_
+then the fragment color consumed is undefined.
+
+The variable _gl_FragData_ is an array.
+Writing to _gl_FragData[n]_ specifies the fragment data that will be used by
+the subsequent fixed functionality pipeline for data _n_.
+If subsequent fixed functionality consumes fragment data and an execution of
+a fragment shader executable does not write a value to it, then the fragment
+data consumed is undefined.
+
+If a shader statically assigns a value to _gl_FragColor_, it may not assign
+a value to any element of _gl_FragData_.
+If a shader statically writes a value to any element of _gl_FragData_, it
+may not assign a value to _gl_FragColor_.
+That is, a shader may assign values to either _gl_FragColor_ or
+_gl_FragData_, but not both.
+Multiple shaders linked together must also consistently write just one of
+these variables.
+Similarly, if user-declared output variables are in use (statically assigned
+to), then the built-in variables _gl_FragColor_ and _gl_FragData_ may not be
+assigned to.
+These incorrect usages all generate compile-time or link-time errors.
+
+If a shader executes the *discard* keyword, the fragment is discarded, and
+the values of _gl_FragDepth_ and _gl_FragColor_ become irrelevant.
+
+
+[[compatibility-profile-vertex-shader-built-in-inputs]]
+== Compatibility Profile Vertex Shader Built-In Inputs
+
+The following predeclared input names can be used from within a vertex
+shader to access the current values of {apiname} state when using the
+compatibility profile.
+
+[source,c++]
+----
+in vec4 gl_Color;
+in vec4 gl_SecondaryColor;
+in vec3 gl_Normal;
+in vec4 gl_Vertex;
+in vec4 gl_MultiTexCoord0;
+in vec4 gl_MultiTexCoord1;
+in vec4 gl_MultiTexCoord2;
+in vec4 gl_MultiTexCoord3;
+in vec4 gl_MultiTexCoord4;
+in vec4 gl_MultiTexCoord5;
+in vec4 gl_MultiTexCoord6;
+in vec4 gl_MultiTexCoord7;
+in float gl_FogCoord;
+----
+endif::GLSL[]
+
+
+[[built-in-constants]]
+== Built-In Constants
+
+The following built-in constants are declared in all shaders.
+The actual values used are implementation-dependent, but must be at least
+the value shown.
+
+[source,c++]
+----
+//
+// Implementation-dependent constants. The example values below
+// are the minimum values allowed for these maximums.
+//
+
+----
+
+ifdef::GLSL[]
+[source,c++]
+----
+const int gl_MaxVertexAttribs = 16;
+const int gl_MaxVertexUniformVectors = 256;
+const int gl_MaxVertexUniformComponents = 1024;
+const int gl_MaxVertexOutputComponents = 64;
+const int gl_MaxVaryingComponents = 60;
+const int gl_MaxVaryingVectors = 15;
+const int gl_MaxVertexTextureImageUnits = 16;
+const int gl_MaxVertexImageUniforms = 0;
+const int gl_MaxVertexAtomicCounters = 0;
+const int gl_MaxVertexAtomicCounterBuffers = 0;
+
+const int gl_MaxTessPatchComponents = 120;
+const int gl_MaxPatchVertices = 32;
+const int gl_MaxTessGenLevel = 64;
+
+const int gl_MaxTessControlInputComponents = 128;
+const int gl_MaxTessControlOutputComponents = 128;
+const int gl_MaxTessControlTextureImageUnits = 16;
+const int gl_MaxTessControlUniformComponents = 1024;
+const int gl_MaxTessControlTotalOutputComponents = 4096;
+const int gl_MaxTessControlImageUniforms = 0;
+const int gl_MaxTessControlAtomicCounters = 0;
+const int gl_MaxTessControlAtomicCounterBuffers = 0;
+
+const int gl_MaxTessEvaluationInputComponents = 128;
+const int gl_MaxTessEvaluationOutputComponents = 128;
+const int gl_MaxTessEvaluationTextureImageUnits = 16;
+const int gl_MaxTessEvaluationUniformComponents = 1024;
+const int gl_MaxTessEvaluationImageUniforms = 0;
+const int gl_MaxTessEvaluationAtomicCounters = 0;
+const int gl_MaxTessEvaluationAtomicCounterBuffers = 0;
+
+const int gl_MaxGeometryInputComponents = 64;
+const int gl_MaxGeometryOutputComponents = 128;
+const int gl_MaxGeometryImageUniforms = 0;
+const int gl_MaxGeometryTextureImageUnits = 16;
+const int gl_MaxGeometryOutputVertices = 256;
+const int gl_MaxGeometryTotalOutputComponents = 1024;
+const int gl_MaxGeometryUniformComponents = 1024;
+const int gl_MaxGeometryVaryingComponents = 64;            // deprecated
+const int gl_MaxGeometryAtomicCounters = 0;
+const int gl_MaxGeometryAtomicCounterBuffers = 0;
+
+const int gl_MaxFragmentImageUniforms = 8;
+const int gl_MaxFragmentInputComponents = 128;
+const int gl_MaxFragmentUniformVectors = 256;
+const int gl_MaxFragmentUniformComponents = 1024;
+const int gl_MaxFragmentAtomicCounters = 8;
+const int gl_MaxFragmentAtomicCounterBuffers = 1;
+
+const int gl_MaxDrawBuffers = 8;
+const int gl_MaxTextureImageUnits = 16;
+const int gl_MinProgramTexelOffset = -8;
+const int gl_MaxProgramTexelOffset = 7;
+const int gl_MaxImageUnits = 8;
+const int gl_MaxSamples = 4;
+const int gl_MaxImageSamples = 0;
+const int gl_MaxClipDistances = 8;
+const int gl_MaxCullDistances = 8;
+const int gl_MaxViewports = 16;
+
+const int gl_MaxComputeImageUniforms = 8;
+const ivec3 gl_MaxComputeWorkGroupCount = { 65535, 65535, 65535 };
+const ivec3 gl_MaxComputeWorkGroupSize = { 1024, 1024, 64 };
+const int gl_MaxComputeUniformComponents = 1024;
+const int gl_MaxComputeTextureImageUnits = 16;
+const int gl_MaxComputeAtomicCounters = 8;
+const int gl_MaxComputeAtomicCounterBuffers = 8;
+
+const int gl_MaxCombinedTextureImageUnits = 96;
+const int gl_MaxCombinedImageUniforms = 48;
+const int gl_MaxCombinedImageUnitsAndFragmentOutputs = 8;  // deprecated
+const int gl_MaxCombinedShaderOutputResources = 16;
+const int gl_MaxCombinedAtomicCounters = 8;
+const int gl_MaxCombinedAtomicCounterBuffers = 1;
+const int gl_MaxCombinedClipAndCullDistances = 8;
+const int gl_MaxAtomicCounterBindings = 1;
+const int gl_MaxAtomicCounterBufferSize = 32;
+
+const int gl_MaxTransformFeedbackBuffers = 4;
+const int gl_MaxTransformFeedbackInterleavedComponents = 64;
+
+const highp int gl_MaxInputAttachments = 1;  // only present when targeting Vulkan
+----
+endif::GLSL[]
+
+ifdef::ESSL[]
+[source,c++]
+----
+const mediump int gl_MaxVertexAttribs = 16;
+const mediump int gl_MaxVertexUniformVectors = 256;
+const mediump int gl_MaxVertexOutputVectors = 16;
+const mediump int gl_MaxVertexTextureImageUnits = 16;
+const mediump int gl_MaxVertexImageUniforms = 0;
+const mediump int gl_MaxVertexAtomicCounters = 0;
+const mediump int gl_MaxVertexAtomicCounterBuffers = 0;
+
+const mediump int gl_MaxTessControlInputComponents = 64;
+const mediump int gl_MaxTessControlOutputComponents = 64;
+const mediump int gl_MaxTessControlTextureImageUnits = 16;
+const mediump int gl_MaxTessControlUniformComponents = 1024;
+const mediump int gl_MaxTessControlTotalOutputComponents = 2048;
+const mediump int gl_MaxTessControlImageUniforms = 0;
+const mediump int gl_MaxTessControlAtomicCounters = 0;
+const mediump int gl_MaxTessControlAtomicCounterBuffers = 0;
+
+const mediump int gl_MaxTessPatchComponents = 120;
+const mediump int gl_MaxPatchVertices = 32;
+const mediump int gl_MaxTessGenLevel = 64;
+
+const mediump int gl_MaxTessEvaluationInputComponents = 64;
+const mediump int gl_MaxTessEvaluationOutputComponents = 64;
+const mediump int gl_MaxTessEvaluationTextureImageUnits = 16;
+const mediump int gl_MaxTessEvaluationUniformComponents = 1024;
+const mediump int gl_MaxTessEvaluationImageUniforms = 0;
+const mediump int gl_MaxTessEvaluationAtomicCounters = 0;
+const mediump int gl_MaxTessEvaluationAtomicCounterBuffers = 0;
+
+const mediump int gl_MaxGeometryInputComponents = 64;
+const mediump int gl_MaxGeometryOutputComponents = 64;
+const mediump int gl_MaxGeometryImageUniforms = 0;
+const mediump int gl_MaxGeometryTextureImageUnits = 16;
+const mediump int gl_MaxGeometryOutputVertices = 256;
+const mediump int gl_MaxGeometryTotalOutputComponents = 1024;
+const mediump int gl_MaxGeometryUniformComponents = 1024;
+const mediump int gl_MaxGeometryAtomicCounters = 0;
+const mediump int gl_MaxGeometryAtomicCounterBuffers = 0;
+
+const mediump int gl_MaxFragmentInputVectors = 15;
+const mediump int gl_MaxFragmentImageUniforms = 4;
+const mediump int gl_MaxFragmentUniformVectors = 256;
+const mediump int gl_MaxFragmentAtomicCounters = 8;
+const mediump int gl_MaxFragmentAtomicCounterBuffers = 1;
+
+const mediump int gl_MaxDrawBuffers = 4;
+const mediump int gl_MaxTextureImageUnits = 16;
+const mediump int gl_MinProgramTexelOffset = -8;
+const mediump int gl_MaxProgramTexelOffset = 7;
+const mediump int gl_MaxImageUnits = 4;
+const mediump int gl_MaxSamples = 4;
+
+const mediump int gl_MaxComputeImageUniforms = 4;
+const highp ivec3 gl_MaxComputeWorkGroupCount = ivec3(65535, 65535, 65535);
+const highp ivec3 gl_MaxComputeWorkGroupSize = ivec3(128, 128, 64);
+const mediump int gl_MaxComputeUniformComponents = 1024;
+const mediump int gl_MaxComputeTextureImageUnits = 16;
+const mediump int gl_MaxComputeAtomicCounters = 8;
+const mediump int gl_MaxComputeAtomicCounterBuffers = 1;
+
+const mediump int gl_MaxCombinedTextureImageUnits = 96;
+const mediump int gl_MaxCombinedImageUniforms = 4;
+const mediump int gl_MaxCombinedShaderOutputResources = 4;
+const mediump int gl_MaxCombinedAtomicCounters = 8;
+const mediump int gl_MaxCombinedAtomicCounterBuffers = 1;
+const mediump int gl_MaxAtomicCounterBindings = 1;
+const mediump int gl_MaxAtomicCounterBufferSize = 32;
+
+const highp int gl_MaxInputAttachments = 1;  // only present when targeting Vulkan
+----
+endif::ESSL[]
+
+ifdef::GLSL[]
+The constant _gl_MaxVaryingFloats_ is removed in the core profile, use
+_gl_MaxVaryingComponents_ instead.
+
+
+[[compatibility-profile-built-in-constants]]
+=== Compatibility Profile Built-In Constants
+
+[source,c++]
+----
+const int gl_MaxTextureUnits = 2;
+const int gl_MaxTextureCoords = 8;
+const int gl_MaxClipPlanes = 8;
+const int gl_MaxVaryingFloats = 60;
+----
+endif::GLSL[]
+
+
+[[built-in-uniform-state]]
+== Built-In Uniform State
+
+Built-in uniform state is not available when generating SPIR-V.
+Otherwise, as an aid to accessing {apiname} processing state, the following
+uniform variables are built into the {slname}.
+
+ifdef::GLSL[]
+[source,c++]
+----
+//
+// Depth range in window coordinates,
+// section 13.6.1 "Controlling the Viewport" in the
+// OpenGL Specification.
+//
+// Note: Depth-range state is only for viewport 0.
+//
+struct gl_DepthRangeParameters {
+    float near; // n
+    float far;  // f
+    float diff; // f - n
+};
+uniform gl_DepthRangeParameters gl_DepthRange;
+uniform int gl_NumSamples;
+----
+endif::GLSL[]
+ifdef::ESSL[]
+[source,c++]
+----
+//
+// Depth range in window coordinates,
+// section 12.5.1 "Controlling the Viewport" in the
+// OpenGL ES Specification.
+//
+struct gl_DepthRangeParameters {
+    highp float near; // n
+    highp float far;  // f
+    highp float diff; // f - n
+};
+uniform gl_DepthRangeParameters gl_DepthRange;
+uniform lowp int gl_NumSamples;
+----
+endif::ESSL[]
+
+These variables are only guaranteed to be available in the fragment stage.
+In other stages, their presence and function is implementation-defined.
+
+
+ifdef::GLSL[]
+[[compatibility-profile-state]]
+=== Compatibility Profile State
+
+These variables are present only in the compatibility profile.
+They are not available to compute shaders, but are available to all other
+shaders.
+
+[source,c++]
+----
+//
+// compatibility profile only
+//
+uniform mat4 gl_ModelViewMatrix;
+uniform mat4 gl_ProjectionMatrix;
+uniform mat4 gl_ModelViewProjectionMatrix;
+uniform mat4 gl_TextureMatrix[gl_MaxTextureCoords];
+
+//
+// compatibility profile only
+//
+uniform mat3 gl_NormalMatrix; // transpose of the inverse of the
+                              // upper leftmost 3x3 of gl_ModelViewMatrix
+
+uniform mat4 gl_ModelViewMatrixInverse;
+uniform mat4 gl_ProjectionMatrixInverse;
+uniform mat4 gl_ModelViewProjectionMatrixInverse;
+uniform mat4 gl_TextureMatrixInverse[gl_MaxTextureCoords];
+
+uniform mat4 gl_ModelViewMatrixTranspose;
+uniform mat4 gl_ProjectionMatrixTranspose;
+uniform mat4 gl_ModelViewProjectionMatrixTranspose;
+uniform mat4 gl_TextureMatrixTranspose[gl_MaxTextureCoords];
+
+uniform mat4 gl_ModelViewMatrixInverseTranspose;
+uniform mat4 gl_ProjectionMatrixInverseTranspose;
+uniform mat4 gl_ModelViewProjectionMatrixInverseTranspose;
+uniform mat4 gl_TextureMatrixInverseTranspose[gl_MaxTextureCoords];
+
+//
+// compatibility profile only
+//
+uniform float gl_NormalScale;
+
+//
+// compatibility profile only
+//
+uniform vec4 gl_ClipPlane[gl_MaxClipPlanes];
+
+//
+// compatibility profile only
+//
+struct gl_PointParameters {
+    float size;
+    float sizeMin;
+    float sizeMax;
+    float fadeThresholdSize;
+    float distanceConstantAttenuation;
+    float distanceLinearAttenuation;
+    float distanceQuadraticAttenuation;
+};
+
+uniform gl_PointParameters gl_Point;
+
+//
+// compatibility profile only
+//
+struct gl_MaterialParameters {
+ vec4 emission;   // Ecm
+ vec4 ambient;    // Acm
+ vec4 diffuse;    // Dcm
+ vec4 specular;   // Scm
+ float shininess; // Srm
+};
+uniform gl_MaterialParameters gl_FrontMaterial;
+uniform gl_MaterialParameters gl_BackMaterial;
+
+//
+// compatibility profile only
+//
+struct gl_LightSourceParameters {
+    vec4 ambient;               // Acli
+    vec4 diffuse;               // Dcli
+    vec4 specular;              // Scli
+    vec4 position;              // Ppli
+    vec4 halfVector;            // Derived: Hi
+    vec3 spotDirection;         // Sdli
+    float spotExponent;         // Srli
+    float spotCutoff;           // Crli
+                                // (range: [0.0,90.0], 180.0)
+    float spotCosCutoff;        // Derived: cos(Crli)
+                                // (range: [1.0,0.0],-1.0)
+    float constantAttenuation;  // K0
+    float linearAttenuation;    // K1
+    float quadraticAttenuation; // K2
+};
+
+uniform gl_LightSourceParameters gl_LightSource[gl_MaxLights];
+
+struct gl_LightModelParameters {
+    vec4 ambient;                  // Acs
+};
+
+uniform gl_LightModelParameters gl_LightModel;
+
+//
+// compatibility profile only
+//
+// Derived state from products of light and material.
+//
+
+struct gl_LightModelProducts {
+    vec4 sceneColor; // Derived. Ecm + Acm * Acs
+};
+
+uniform gl_LightModelProducts gl_FrontLightModelProduct;
+uniform gl_LightModelProducts gl_BackLightModelProduct;
+
+struct gl_LightProducts {
+    vec4 ambient; // Acm * Acli
+    vec4 diffuse; // Dcm * Dcli
+    vec4 specular; // Scm * Scli
+};
+
+uniform gl_LightProducts gl_FrontLightProduct[gl_MaxLights];
+uniform gl_LightProducts gl_BackLightProduct[gl_MaxLights];
+
+//
+// compatibility profile only
+//
+uniform vec4 gl_TextureEnvColor[gl_MaxTextureUnits];
+uniform vec4 gl_EyePlaneS[gl_MaxTextureCoords];
+uniform vec4 gl_EyePlaneT[gl_MaxTextureCoords];
+uniform vec4 gl_EyePlaneR[gl_MaxTextureCoords];
+uniform vec4 gl_EyePlaneQ[gl_MaxTextureCoords];
+uniform vec4 gl_ObjectPlaneS[gl_MaxTextureCoords];
+uniform vec4 gl_ObjectPlaneT[gl_MaxTextureCoords];
+uniform vec4 gl_ObjectPlaneR[gl_MaxTextureCoords];
+uniform vec4 gl_ObjectPlaneQ[gl_MaxTextureCoords];
+
+//
+// compatibility profile only
+//
+struct gl_FogParameters {
+    vec4 color;
+    float density;
+    float start;
+    float end;
+    float scale; // Derived: 1.0 / (end - start)
+};
+
+uniform gl_FogParameters gl_Fog;
+----
+endif::GLSL[]
+
+
+[[redeclaring-built-in-blocks]]
+== Redeclaring Built-In Blocks
+
+The _gl_PerVertex_ block can be redeclared in a shader to explicitly
+indicate what subset of the fixed pipeline interface will be used.
+This is necessary to establish the interface between multiple programs.
+ifdef::GLSL[]
+For example:
+
+[source,c++]
+----
+out gl_PerVertex {
+    vec4 gl_Position;   // will use gl_Position
+    float gl_PointSize; // will use gl_PointSize
+    vec4 t;             // error, only gl_PerVertex members allowed
+}; // no other members of gl_PerVertex will be used
+----
+
+This establishes the output interface the shader will use with the
+subsequent pipeline stage.
+It must be a subset of the built-in members of _gl_PerVertex_.
+Such a redeclaration can also add the *invariant* qualifier, interpolation
+qualifiers, and the layout qualifiers *xfb_offset*, *xfb_buffer*, and
+*xfb_stride*.
+It can also add an array size for unsized arrays.
+For example:
+
+[source,c++]
+----
+out layout(xfb_buffer = 1, xfb_stride = 16) gl_PerVertex {
+    vec4 gl_Position;
+    layout(xfb_offset = 0) float gl_ClipDistance[4];
+};
+----
+endif::GLSL[]
+ifdef::ESSL[]
+If the _gl_PerVertex_ block is not redefined in a given program, the
+intrinsically declared definition of that block is used for the program
+interface.
+
+For example:
+
+[source,c++]
+----
+out gl_PerVertex {
+    highp vec4 gl_Position; // will use gl_Position
+    highp vec4 t;           // error, only gl_PerVertex members allowed
+}; // no other members of gl_PerVertex will be used
+----
+
+This establishes the output interface the shader will use with the
+subsequent pipeline stage.
+It must be a subset of the built-in members of _gl_PerVertex_.
+Such a redeclaration can also add the *invariant* qualifier and
+interpolation qualifiers.
+endif::ESSL[]
+
+Other layout qualifiers, like *location*, cannot be added to such a
+redeclaration, unless specifically stated.
+
+If a built-in interface block is redeclared, it must appear in the shader
+before any use of any member included in the built-in declaration, or a
+compile-time error will result.
+It is also a compile-time error to redeclare the block more than once or to
+redeclare a built-in block and then use a member from that built-in block
+that was not included in the redeclaration.
+Also, if a built-in interface block is redeclared, no member of the built-in
+declaration can be redeclared outside the block redeclaration.
+If multiple shaders using members of a built-in block belonging to the same
+interface are linked together in the same program, they must all redeclare
+the built-in block in the same way, as described in
+"`<<interface-blocks,Interface Blocks>>`" for interface block matching, or a
+link-time error will result.
+It will also be a link-time error if some shaders in a program redeclare a
+specific built-in interface block while another shader in that program does
+not redeclare that interface block yet still uses a member of that interface
+block.
+If a built-in block interface is formed across shaders in different
+programs, the shaders must all redeclare the built-in block in the same way
+(as described for a single program), or the values passed along the
+interface are undefined.

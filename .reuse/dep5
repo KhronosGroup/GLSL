@@ -1,0 +1,27 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: GLSL
+Source: https://github.com/KhronosGroup/GLSL
+
+Files: images/*.svg images/*.odg config/*/docinfo-header.html
+Copyright: 2008-2024 The Khronos Group Inc.
+License: CC-BY-4.0
+
+Files: katex/*
+Copyright: 2013-2019 Khan Academy and other contributors
+License: MIT
+
+Files: config/khronos.css
+Copyright: 2013 Dan Allen
+License: MIT
+
+Files: config/fonts/*
+Copyright: 2019 M+ Fonts Project
+License: LicenseRef-MPLUS
+
+Files: config/copyright-spec.adoc
+Copyright: 2014-2024 The Khronos Group Inc
+License: LicenseRef-KhronosSpecCopyright
+
+Files: extensions/*/*.txt extensions/extension_headers/*.glsl
+Copyright: Various dates, various Khronos Members
+License: LicenseRef-Proprietary

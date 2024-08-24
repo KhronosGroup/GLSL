@@ -1,0 +1,189 @@
+// This is version V10_Feb23 of the Khronos Specification Copyright License
+// Header, reformatted for asciidoc markup and for expository purposes in
+// the Khronos Sample Specification repository.
+
+// Some sections of this license are optional and are selected by
+// asciidoc attributes set when building specifications including this
+// file.
+// Comments starting with NOTE: indicate that the following paragraph(s)
+// need to be modified to incorporate language suitable to the specification
+// being generated.
+//
+// Optional sections include:
+//
+// - The "Ratified Specifications" section includes one of two mutually
+//   exclusive paragraphs.
+//   Set the :ratified_spec: attribute when generating a specification
+//   containing no non-ratified extensions.
+//   Do not set this attribute otherwise.
+// - The "Successor Specification" section is included when generating a
+//   specification derived from a differently named specification (for
+//   example, Vulkan is a Successor of OpenGL).
+//   Set the :successor_spec: attribute and modify this section as described
+//   below if needed.
+// - The "Normative Wording" section is included if the Working Group
+//   explicitly requests restating of the Khronos Intellectual Property
+//   Rights Policy.
+//   Set the :normative_spec_wording: attribute and modify this section as
+//   described below if needed.
+// - The "Normative References" section is included if a specification
+//   contains normative references to other specification that are created
+//   externally to Khronos.
+//   Set the :normative_spec_references: attribute and modify this section
+//   as described below if needed.
+
+// NOTE: asciidoc attributes controlling inclusion of sections can be set
+// here by uncommenting the appropriate lines, or on the asciidoctor command
+// line.
+
+:ratified_spec:
+// :successor_spec:
+// :normative_spec_wording:
+:normative_spec_references:
+
+
+// NOTE: The Copyright statement should include the year of the
+// Specification's release.
+// If this is a new version of an existing Specification, include a range of
+// dates starting from the year that the initial version of the
+// Specification was released.
+// E.g. if this is version 4.0 of a Specification released in 2023, and V1.0
+// of the Specification was released in 2012, then the first line should
+// replace "[insert date(s)]" with "2012-2023".
+
+Copyright 2008-2024 The Khronos Group Inc.
+
+This Specification is protected by copyright laws and contains material
+proprietary to Khronos.
+Except as described by these terms, it or any components may not be
+reproduced, republished, distributed, transmitted, displayed, broadcast or
+otherwise exploited in any manner without the express prior written
+permission of Khronos.
+
+Khronos grants a conditional copyright license to use and reproduce the
+unmodified Specification for any purpose, without fee or royalty, EXCEPT no
+licenses to any patent, trademark or other intellectual property rights are
+granted under these terms.
+
+Khronos makes no, and expressly disclaims any, representations or
+warranties, express or implied, regarding this Specification, including,
+without limitation: merchantability, fitness for a particular purpose,
+non-infringement of any intellectual property, correctness, accuracy,
+completeness, timeliness, and reliability.
+Under no circumstances will Khronos, or any of its Promoters, Contributors
+or Members, or their respective partners, officers, directors, employees,
+agents or representatives be liable for any damages, whether direct,
+indirect, special or consequential damages for lost revenues, lost profits,
+or otherwise, arising from or in connection with these materials.
+
+// "Ratified Specifications" section (two mutually exclusive paragraphs)
+
+// Specifications that contain no non-ratified extensions
+ifdef::ratified_spec[]
+
+This Specification has been created under the Khronos Intellectual Property
+Rights Policy, which is Attachment A of the Khronos Group Membership
+Agreement available at https://www.khronos.org/files/member_agreement.pdf.
+Parties desiring to implement the Specification and make use of Khronos
+trademarks in relation to that implementation, and receive reciprocal patent
+license protection under the Khronos Intellectual Property Rights Policy
+must become Adopters and confirm the implementation as conformant under the
+process defined by Khronos for this Specification; see
+https://www.khronos.org/adopters .
+
+endif::ratified_spec[]
+
+// Specifications that contain non-ratified extensions
+// NOTE: fill in the API name and a link to where it is published below.
+
+ifndef::ratified_spec[]
+
+This document contains extensions which are not ratified by Khronos, and as
+such is not a ratified Specification, though it contains text from (and is a
+superset of) the ratified [API name] Specification that can be found at
+[API link].
+
+endif::ratified_spec[]
+
+
+// Optional "Successor Specification" section
+// NOTE: fill in [insert successor specifications here] below
+
+ifdef::successor_spec[]
+
+This Specification contains substantially unmodified functionality from, and
+is a successor to, Khronos specifications including [insert successor
+specifications here].
+
+endif::successor_spec[]
+
+
+// Optional "Normative Wording" section
+
+ifdef::normative_spec_wording[]
+
+The Khronos Intellectual Property Rights Policy defines the terms 'Scope',
+'Compliant Portion', and 'Necessary Patent Claims'.
+
+// NOTE: Replace the asciidoc "xref-informative" xref below with the anchor
+// within this spec, and name of the section discussing informative
+// language.
+
+Some parts of this Specification are purely informative and so are EXCLUDED
+from the Scope of this Specification.
+The <<xref-informative, document conventions section of the Introduction>>
+defines how these parts of the Specification are identified.
+
+// NOTE: If this specification has an introductory section discussing
+// "technical terminology", and/or a Glossary, replace the corresponding
+// terms below with xrefs to those sections.
+
+Where this Specification uses technical terminology, defined in the Glossary
+or otherwise, that refer to enabling technologies that are not expressly set
+forth in this Specification, those enabling technologies are EXCLUDED from
+the Scope of this Specification.
+For clarity, enabling technologies not disclosed with particularity in this
+Specification (e.g. semiconductor manufacturing technology, hardware
+architecture, processor architecture or microarchitecture, memory
+architecture, compiler technology, object oriented technology, basic
+operating system technology, compression technology, algorithms, and so on)
+are NOT to be considered expressly set forth; only those application program
+interfaces and data structures disclosed with particularity are included in
+the Scope of this Specification.
+
+For purposes of the Khronos Intellectual Property Rights Policy as it
+relates to the definition of Necessary Patent Claims, all recommended or
+optional features, behaviors and functionality set forth in this
+Specification, if implemented, are considered to be included as Compliant
+Portions.
+
+endif::normative_spec_wording[]
+
+
+// Optional "Normative References" section
+
+ifdef::normative_spec_references[]
+
+Where this Specification identifies specific sections of external
+references, only those specifically identified sections define normative
+functionality.
+The Khronos Intellectual Property Rights Policy excludes external references
+to materials and associated enabling technology not created by Khronos from
+the Scope of this Specification, and any licenses that may be required to
+implement such referenced materials and associated technologies must be
+obtained separately and may involve royalty payments.
+
+endif::normative_spec_references[]
+
+
+// Trademark section
+// NOTE: make sure that all relevant marks are included, since this list
+// grows over time. Trademarks that are not referenced by this Specification
+// can be removed.
+
+Khronos and Vulkan are registered trademarks, and
+SPIR-V is a trademark of The Khronos Group Inc.
+OpenGL is a registered trademark and the OpenGL ES and OpenGL SC logos are
+trademarks of Hewlett Packard Enterprise used under license by Khronos.
+All other product names, trademarks, and/or company names are used solely
+for identification and belong to their respective owners.

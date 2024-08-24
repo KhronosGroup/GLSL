@@ -1,0 +1,84 @@
+// Copyright 2008-2024 The Khronos Group Inc.
+// SPDX-License-Identifier: CC-BY-4.0
+
+= GLSL
+
+This repository contains source for the GLSL Specification and GLSL
+extensions.
+
+It is notably for Vulkan related GLSL extensions, but technically for those
+that do not live in the Khronos registries for OpenGL or OpenGL ES.
+
+== Differences between Gitlab and GitHub repositories
+
+  * The Khronos internal gitlab version of this repository is a (lagging)
+    mirror of the public repository at https://github.com/KhronosGroup/GLSL,
+    and additionally contains GLSL spec source that is not yet published.
+  * Once something moves to GitHub, the GitHub version will be considered
+    the true source of the extension.
+
+== This Project Contains
+
+  * new shading language extension proposals and discussions
+  * issue tracking for these unreleased extensions
+
+== Extension Specifications in this Repository
+
+:repo: https://github.com/KhronosGroup/GLSL/blob/master/extensions
+
+- link:{repo}/khr/GL_KHR_vulkan_glsl.txt[GL_KHR_vulkan_glsl]
+- link:{repo}/ext/GL_EXT_vulkan_glsl_relaxed.txt[GL_EXT_vulkan_glsl_relaxed]
+- link:{repo}/ext/GL_EXT_control_flow_attributes.txt[GL_EXT_control_flow_attributes]
+- link:{repo}/ext/GL_EXT_device_group.txt[GL_EXT_device_group]
+- link:{repo}/ext/GL_EXT_multiview.txt[GL_EXT_multiview]
+- link:{repo}/amd/GL_AMD_shader_fragment_mask.txt[GL_AMD_shader_fragment_mask]
+- link:{repo}/nvx/GL_NVX_multiview_per_view_attributes.txt[GL_NVX_multiview_per_view_attributes]
+- link:{repo}/khr/GL_KHR_shader_subgroup.txt[GL_KHR_shader_subgroup]
+- link:{repo}/nv/GL_NV_shader_subgroup_partitioned.txt[GL_NV_shader_subgroup_partitioned]
+- link:{repo}/ext/GL_EXT_nonuniform_qualifier.txt[GL_EXT_nonuniform_qualifier]
+- link:{repo}/ext/GL_EXT_samplerless_texture_functions.txt[GL_EXT_samplerless_texture_functions]
+- link:{repo}/ext/GL_EXT_shader_16bit_storage.txt[GL_EXT_shader_16bit_storage]
+- link:{repo}/khr/GL_KHR_memory_scope_semantics.txt[GL_KHR_memory_scope_semantics]
+- link:{repo}/nv/GLSL_NV_compute_shader_derivatives.txt[GL_NV_compute_shader_derivatives]
+- link:{repo}/nv/GLSL_NV_fragment_shader_barycentric.txt[GL_NV_fragment_shader_barycentric]
+- link:{repo}/nv/GLSL_NV_mesh_shader.txt[GL_NV_mesh_shader]
+- link:{repo}/nv/GLSL_NV_shader_texture_footprint.txt[GL_NV_shader_texture_footprint]
+- link:{repo}/nv/GLSL_NV_shading_rate_image.txt[GL_NV_shading_rate_image]
+- link:{repo}/nv/GLSL_NV_ray_tracing.txt[GL_NV_ray_tracing]
+- link:{repo}/ext/GL_EXT_subgroupuniform_qualifier.txt[GL_EXT_subgroupuniform_qualifier]
+- link:{repo}/ext/GL_EXT_scalar_block_layout.txt[GL_EXT_scalar_block_layout]
+- link:{repo}/ext/GLSL_EXT_fragment_invocation_density.txt[GL_EXT_fragment_invocation_density]
+- link:{repo}/ext/GL_EXT_shader_explicit_arithmetic_types.txt[GL_EXT_shader_explicit_arithmetic_types]
+- link:{repo}/ext/GLSL_EXT_buffer_reference.txt[GL_EXT_buffer_reference]
+- link:{repo}/nv/GLSL_NV_cooperative_matrix.txt[GL_NV_cooperative_matrix]
+- link:{repo}/ext/GLSL_EXT_buffer_reference2.txt[GL_EXT_buffer_reference2]
+- link:{repo}/nv/GLSL_NV_shader_sm_builtins.txt[GL_NV_shader_sm_builtins]
+- link:{repo}/ext/GLSL_EXT_demote_to_helper_invocation.txt[GL_EXT_demote_to_helper_invocation]
+- link:{repo}/ext/GL_EXT_shader_realtime_clock.txt[GL_EXT_shader_realtime_clock]
+- link:{repo}/ext/GLSL_EXT_buffer_reference_uvec2.txt[GL_EXT_buffer_reference_uvec2]
+- link:{repo}/ext/GLSL_EXT_shader_subgroup_extended_types.txt[GL_EXT_shader_subgroup_extended_types]
+- link:{repo}/ext/GLSL_EXT_debug_printf.txt[GL_EXT_debug_printf]
+- link:{repo}/ext/GLSL_EXT_ray_tracing.txt[GL_EXT_ray_tracing]
+- link:{repo}/ext/GLSL_EXT_ray_query.txt[GL_EXT_ray_query]
+- link:{repo}/ext/GLSL_EXT_ray_flags_primitive_culling.txt[GL_EXT_ray_flags_primitive_culling]
+- link:{repo}/ext/GLSL_EXT_shader_atomic_float.txt[GL_EXT_shader_atomic_float]
+- link:{repo}/ext/GLSL_EXT_fragment_shading_rate.txt[GL_EXT_fragment_shading_rate]
+- link:{repo}/ext/GLSL_EXT_shader_image_int64.txt[GL_EXT_shader_image_int64]
+- link:{repo}/nv/GLSL_NV_primitive_shading_rate.txt[GL_NV_primitive_shading_rate]
+- link:{repo}/ext/GL_EXT_shared_memory_block.txt[GL_EXT_shared_memory_block]
+- link:{repo}/huawei/GLSL_HUAWEI_subpass_shading.txt[GL_HUAWEI_subpass_shading]
+- link:{repo}/ext/GL_EXT_subgroup_uniform_control_flow.txt[GL_EXT_subgroup_uniform_control_flow]
+- link:{repo}/nv/GLSL_NV_ray_tracing_motion_blur.txt[GL_NV_ray_tracing_motion_blur]
+- link:{repo}/ext/GLSL_EXT_ray_cull_mask.txt[GL_EXT_ray_cull_mask]
+- link:{repo}/ext/GLSL_EXT_fragment_shader_barycentric.txt[GL_EXT_fragment_shader_barycentric]
+- link:{repo}/ext/GLSL_EXT_mesh_shader.txt[GL_EXT_mesh_shader]
+- link:{repo}/ext/GLSL_EXT_opacity_micromap.txt[GL_EXT_opacity_micromap]
+- link:{repo}/nv/GLSL_NV_shader_invocation_reorder.txt[GL_NV_shader_invocation_reorder]
+- link:{repo}/arm/GLSL_ARM_shader_core_builtins.txt[GL_ARM_shader_core_builtins]
+- link:{repo}/huawei/GLSL_HUAWEI_cluster_culling_shader.txt[GL_HUAWEI_cluster_culling_shader]
+- link:{repo}/qcom/GLSL_QCOM_image_processing.txt[GL_QCOM_image_processing]
+- link:{repo}/ext/GLSL_EXT_ray_tracing_position_fetch.txt[GL_EXT_ray_tracing_position_fetch]
+- link:{repo}/ext/GL_EXT_null_initializer.txt[GL_EXT_null_initializer]
+- link:{repo}/ext/GL_EXT_terminate_invocation.txt[GL_EXT_terminate_invocation]
+- link:{repo}/khr/GLSL_KHR_cooperative_matrix.txt[GL_KHR_cooperative_matrix]
+- link:{repo}/nv/GLSL_NV_displacement_micromap.txt[GL_NV_displacement_micromap]
