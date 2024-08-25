@@ -118,7 +118,7 @@ can be made by operations on scalars:
 
     layout(constant_id = 18) const int scX = 1;
     layout(constant_id = 19) const int scZ = 1;
-    const vec3 scVec = vec3(scX, 1, scZ);  // partially specialized vector
+    const ivec3 scVec = ivec3(scX, 1, scZ);  // partially specialized vector
 
 A built-in variable can have a _constant_id_ attached to it:
 
