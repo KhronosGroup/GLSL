@@ -100,11 +100,9 @@ endif::GLSL[]
 
 [role="bnf"]
 --
-_variable_identifier_ : ::
-    _IDENTIFIER_
 
 _primary_expression_ : ::
-    _variable_identifier_ +
+    _IDENTIFIER_ +
     _INTCONSTANT_ +
     _UINTCONSTANT_ +
     _FLOATCONSTANT_ +
@@ -116,7 +114,7 @@ endif::GLSL[]
 
 _postfix_expression_ : ::
     _primary_expression_ +
-    _postfix_expression_ _LEFT_BRACKET_ _integer_expression_ _RIGHT_BRACKET_ +
+    _postfix_expression_ _LEFT_BRACKET_ _expression_ _RIGHT_BRACKET_ +
     _function_call_ +
     _postfix_expression_ _DOT_ _FIELD_SELECTION_ +
     _postfix_expression_ _INC_OP_ +
@@ -128,16 +126,7 @@ FIELD_SELECTION includes members in structures, component selection for
 vectors and the 'length' identifier for the length() method
 ====
 
-_integer_expression_ : ::
-    _expression_
-
 _function_call_ : ::
-    _function_call_or_method_
-
-_function_call_or_method_ : ::
-    _function_call_generic_
-
-_function_call_generic_ : ::
     _function_call_header_with_parameters_ _RIGHT_PAREN_ +
     _function_call_header_no_parameters_ _RIGHT_PAREN_
 
@@ -170,6 +159,9 @@ Methods (*.length*) and identifiers are recognized through
 _postfix_expression_.
 endif::ESSL[]
 ====
+
+_function_definition_ : ::
+    _function_prototype_ _compound_statement_no_new_scope_
 
 _function_identifier_ : ::
     _type_specifier_ +
@@ -276,11 +268,8 @@ _expression_ : ::
     _assignment_expression_ +
     _expression_ _COMMA_ _assignment_expression_
 
-_constant_expression_ : ::
-    _conditional_expression_
-
 _declaration_ : ::
-    _function_prototype_ _SEMICOLON_ +
+    _function_declarator_ _RIGHT_PAREN_ _SEMICOLON_ +
     _init_declarator_list_ _SEMICOLON_ +
     _PRECISION_ _precision_qualifier_ _type_specifier_ _SEMICOLON_ +
     _type_qualifier_ _IDENTIFIER_ _LEFT_BRACE_ _struct_declaration_list_
@@ -296,9 +285,6 @@ _declaration_ : ::
 _identifier_list_ : ::
     _COMMA_ _IDENTIFIER_ +
     _identifier_list_ _COMMA_ _IDENTIFIER_
-
-_function_prototype_ : ::
-    _function_declarator_ _RIGHT_PAREN_
 
 _function_declarator_ : ::
     _function_header_ +
@@ -318,10 +304,7 @@ _parameter_declarator_ : ::
 _parameter_declaration_ : ::
     _type_qualifier_ _parameter_declarator_ +
     _parameter_declarator_ +
-    _type_qualifier_ _parameter_type_specifier_ +
-    _parameter_type_specifier_
-
-_parameter_type_specifier_ : ::
+    _type_qualifier_ _type_specifier_ +
     _type_specifier_
 
 _init_declarator_list_ : ::
@@ -349,9 +332,6 @@ _fully_specified_type_ : ::
     _type_specifier_ +
     _type_qualifier_ _type_specifier_
 
-_invariant_qualifier_ : ::
-    _INVARIANT_
-
 _interpolation_qualifier_ : ::
     _SMOOTH_ +
 ifdef::GLSL[]
@@ -362,9 +342,6 @@ ifdef::ESSL[]
     _FLAT_
 endif::ESSL[]
 
-_layout_qualifier_ : ::
-    _LAYOUT_ _LEFT_PAREN_ _layout_qualifier_id_list_ _RIGHT_PAREN_
-
 _layout_qualifier_id_list_ : ::
     _layout_qualifier_id_ +
     _layout_qualifier_id_list_ _COMMA_ _layout_qualifier_id_
@@ -372,7 +349,7 @@ _layout_qualifier_id_list_ : ::
 _layout_qualifier_id_ : ::
     _IDENTIFIER_ +
 ifdef::GLSL[]
-    _IDENTIFIER_ _EQUAL_ _constant_expression_ +
+    _IDENTIFIER_ _EQUAL_ __conditional_expression__ +
 endif::GLSL[]
 ifdef::ESSL[]
     _IDENTIFIER_ _EQUAL_ _INTCONSTANT_ +
@@ -380,20 +357,17 @@ ifdef::ESSL[]
 endif::ESSL[]
     _SHARED_
 
-_precise_qualifier_ : ::
-    _PRECISE_
-
 _type_qualifier_ : ::
     _single_type_qualifier_ +
     _type_qualifier_ _single_type_qualifier_
 
 _single_type_qualifier_ : ::
     _storage_qualifier_ +
-    _layout_qualifier_ +
+    _LAYOUT_ _LEFT_PAREN_ _layout_qualifier_id_list_ _RIGHT_PAREN_ +
     _precision_qualifier_ +
     _interpolation_qualifier_ +
-    _invariant_qualifier_ +
-    _precise_qualifier_
+    _INVARIANT_ +
+    _PRECISE_
 
 _storage_qualifier_ : ::
     _CONST_ +
@@ -574,8 +548,7 @@ _precision_qualifier_ : ::
     _LOW_PRECISION_
 
 _struct_specifier_ : ::
-    _STRUCT_ _IDENTIFIER_ _LEFT_BRACE_ _struct_declaration_list_
-    _RIGHT_BRACE_ +
+    _STRUCT_ _IDENTIFIER_ _LEFT_BRACE_ _struct_declaration_list_ _RIGHT_BRACE_ +
     _STRUCT_ _LEFT_BRACE_ _struct_declaration_list_ _RIGHT_BRACE_
 
 _struct_declaration_list_ : ::
@@ -608,9 +581,6 @@ ifdef::ESSL[]
     _assignment_expression_
 endif::ESSL[]
 
-_declaration_statement_ : ::
-    _declaration_
-
 _statement_ : ::
     _compound_statement_ +
     _simple_statement_
@@ -621,7 +591,7 @@ Grammar Note: labeled statements for SWITCH only; 'goto' is not supported.
 ====
 
 _simple_statement_ : ::
-    _declaration_statement_ +
+    _declaration_ +
     _expression_statement_ +
     _selection_statement_ +
     _switch_statement_ +
@@ -682,7 +652,7 @@ _iteration_statement_ : ::
 
 _for_init_statement_ : ::
     _expression_statement_ +
-    _declaration_statement_
+    _declaration_
 
 _conditionopt_ : ::
     /* _empty_ */ +
@@ -718,9 +688,6 @@ endif::GLSL[]
 ifdef::ESSL[]
     _declaration_
 endif::ESSL[]
-
-_function_definition_ : ::
-    _function_prototype_ _compound_statement_no_new_scope_
 
 --
 
