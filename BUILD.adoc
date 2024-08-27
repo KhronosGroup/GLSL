@@ -1,0 +1,219 @@
+// Copyright 2014-2024 The Khronos Group Inc.
+// SPDX-License-Identifier: CC-BY-4.0
+
+= OpenGL^(R)^ Shading Language Specification Build Instructions and Notes
+:toc2:
+:toclevels: 1
+
+
+[[intro]]
+== Introduction
+
+This file describes how to build the OpenGL and OpenGL ES Shading Language
+(GLSL) Specifications.
+
+It documents how to set up your build environment, build steps and targets,
+and contains some troubleshooting advice.
+
+
+[[building]]
+== Building the Spec
+
+First, clone the Khronos Gitlab repository containing the GLSL
+specification to your local Linux, Windows, or Mac PS.
+Instructions are found in the 'Code' dropdown menu at at
+https://gitlab.khronos.org/opengl/GLSL .
+
+Next, install all the necessary build tools (see <<depends,Software
+Dependencies>> below).
+If you are using the <<depends-docker, Khronos-Provided Docker Image>>,
+which we strongly recommend, two ways to build using the image are:
+
+    $ # assuming a Linux docker host
+    $ scripts/runDocker
+
+    $ # assuming a Linux podman host
+    $ scripts/runPodman
+
+executed from the specification repository root.
+
+`runDocker` runs the Docker image with the cloned repository mounted under
+/glsl and accesses it as a specified user (set to your own user and group
+ID), so that it does not get filled with files owned by another user.
+The script leaves you inside a bash shell in the running image.
+Execute the commands:
+
+    $ cd /glsl
+    $ make
+
+to build HTML5 and PDF specification outputs for the GLSL and ESSL 4.60
+specifications in `out/glsl.html`, `out/essl.html`. `out/glsl.pdf`, and
+`out/essl.pdf`.
+
+The `html` and `pdf` targets build just those output formats.
+
+If you are not using our Docker image to build with, and you have a
+<<depends-nondocker, Non-Docker Build Environment>> with the entire
+toolchain installed, you can just invoke the same `make` commands from the
+repository root.
+
+[NOTE]
+.Note
+====
+You can modify the `runDocker` script to change the `docker` command-line
+options, but it is important to always use the Docker image specified in
+that script, so you have a known-good version of the spec toolchain.
+====
+
+
+[[images]]
+=== Images Used in the Specification
+
+All images used in the specification are in the `images/` directory in
+SVG format, and were created with Inkscape.
+We recommend using Inkscape to modify or create new images, due to problems
+using SVG files created by some other tools; especially in the PDF builds.
+
+
+[[styles]]
+== Our Stylesheets
+
+NOTE: Section mostly TBD.
+
+We use the default Asciidoctor stylesheet.
+
+Markup follows the
+link:https://registry.khronos.org/vulkan/specs/1.3/styleguide.html[Vulkan
+Style Guide], although most of the conventions in that document are not
+needed for the GLSL Specifications.
+
+
+[[equations]]
+== Imbedding Equations
+
+Many equations can be written using the _eq_ asciidoc role, which covers
+many common equations, or just straight asciidoc markup.
+
+For more complex equations, such as multi-case statements, matrices, and
+complex fractions, equations should be written using the latexmath: inline
+and block macros. The contents of the latexmath: blocks should be LaTeX math
+notation. No delimiters are required.
+
+LaTeX math is passed through unmodified to the HTML output, which is
+subsequently rendered with the KaTeX engine when the html is loaded. A local
+copy of the KaTeX release is kept in `katex/` and copied to the HTML output
+directory during spec generation. Math is processed into SVGs via
+asciidoctor-mathematical for PDF output.
+
+The following caveats apply:
+
+  * The special characters `<` , `>` , and `&` can currently be used only in
+    +++[latexmath]+++ block macros, not in +++latexmath:[]+++ inline macros.
+    Instead use `\lt` for `<` and `\gt` for `>`. `&` is an alignment construct
+    for multiline equations, and should only appear in block macros anyway.
+  * AMSmath environments (e.g. pass:[\begin{equation*}], pass:[{align*}],
+    etc.) cannot be used in KaTeX at present, and have been replaced with
+    constructs supported by KaTeX such as pass:[{aligned}].
+  * Arbitrary LaTeX constructs cannot be used. KaTeX and
+    asciidoctor-mathematical are only equation renderers, not full LaTeX
+    engines. So imbedding LaTeX like \Large or pass:[\hbox{\tt\small VK\_FOO}]
+    may not work in any of the backends, and should be avoided.
+
+
+[[depends]]
+== Software Dependencies
+
+This section describes the software components used by the specification
+toolchain.
+
+In the past, we previously specified package versions and instructions for
+installing the toolchain in multiple desktop environments including Linux,
+MacOS X, and Microsoft Windows.
+The underlying components evolve rapidly, and we have not kept those
+instructions up to date.
+
+
+[[depends-docker]]
+=== Khronos-Provided Docker Image
+
+Khronos has published a Docker image containing a Debian Linux distribution
+with the entire toolchain preinstalled.
+
+We will occasionally update this image if needed, and we recommend people
+needing to build from this repository use the Docker image.
+
+Docker installation is beyond the scope of this document.
+Refer to link:https://docs.docker.com/get-docker/[the Docker website] for
+information about installing Docker on Linux, Windows, and MacOS X.
+
+Another way to execute the Docker image is using the open source podman
+container tool. See link:https://podman.io/get-started[the Podman website]
+for information about installing podman on Linux, Windows, and MacOS X.
+
+The build image is *named* `khronosgroup/docker-images:asciidoctor-spec`.
+However, due to local and CI caching problems when this image is updated on
+dockerhub, we use the SHA256 of the latest image update, rather than the
+image name. The SHA256 can be determined from
+
+    $ git grep -h sha256: .gitlab-ci.yml
+
+which will print a line like
+
+    image: khronosgroup/docker-images@sha256:42123ba13792c4e809d037b69152c2230ad97fbf43b677338075ab9c928ab6ed
+
+Everything following `image: ` is the <imagename> to use. The first time you
+try to run a container with this <imagename>, as is done by the `runDocker`
+and `runPodman` scripts described above under <<building, Building the
+Spec>>, the image will be pulled from Dockerhub and cached locally on your
+machine.
+
+This image is used to build Specification output documents or other Makefile
+targets.
+
+[NOTE]
+.Note
+====
+When we update the image on Dockerhub, it is to add new components or update
+versions of components used in the specification toolchain.
+To save space, you may want to periodically purge old images using `docker
+images` and `docker rmi -f`.
+====
+
+
+[[depends-nondocker]]
+=== Non-Docker Build Environments
+
+We do not actively support building outside of our Docker image, but it is
+straightforward to reproduce our toolchain in a Debian (or similar APT-based
+Linux) distribution by executing the same steps as the
+link:https://github.com/KhronosGroup/DockerContainers/blob/main/asciidoctor-spec.Dockerfile[Dockerfile]
+used to build our Docker image.
+
+It should be possible to apply the same steps in a Windows Subsystem for
+Linux (WSL2) environment on Windows 10, as well.
+
+For other native environments, such as MacOS X and older Unix-like
+environments for Windows such as MinGW and Cygwin, we provided instructions
+in older versions of this document.
+While those instructions are out of date and have been removed from current
+versions of this document, you may be able to make use of instructions in an
+link:https://github.com/KhronosGroup/Vulkan-Docs/blob/v1.2.135/BUILD.adoc#depends[
+older version of the Vulkan BUILD.adoc]
+
+[NOTE]
+.Note
+====
+While you do not have to use our Docker image, we cannot support every
+possible build environment.
+The Docker image is a straightforward way to build the specification in most
+modern desktop environments, without needing to install and update the spec
+toolchain yourself.
+====
+
+
+[[history]]
+== Revision History
+
+  * 2024-06-03 - Updated to recommend the Khronos Docker image
+  * 2017-03-05 - Updated for move to OpenGL/GLSL repository.
+  * 2017-01-30 - Lifted and modified from Vulkan README
