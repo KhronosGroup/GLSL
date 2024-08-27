@@ -84,3 +84,4 @@ that do not live in the Khronos registries for OpenGL or OpenGL ES.
 - link:{repo}/nv/GLSL_NV_displacement_micromap.txt[GL_NV_displacement_micromap]
 - link:{repo}/ext/GL_EXT_maximal_reconvergence.txt[GL_EXT_maximal_reconvergence]
 - link:{repo}/ext/GLSL_EXT_spec_constant_composites.txt[GL_EXT_spec_constant_composites]
+- link:{repo}/qcom/GLSL_QCOM_image_processing2.txt[GL_QCOM_image_processing2]
