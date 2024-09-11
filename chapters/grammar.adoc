@@ -298,10 +298,10 @@ _identifier_list_ : ::
     _identifier_list_ _COMMA_ _IDENTIFIER_
 
 _function_prototype_ : ::
-    _fully_specified_type_ _IDENTIFIER_ _LEFT_PAREN_ _parameter_declaration_list_opt_ _RIGHT_PAREN_ +
+    _fully_specified_type_ _IDENTIFIER_ _LEFT_PAREN_ _parameter_declaration_list_opt_ _RIGHT_PAREN_
 
 _parameter_declaration_list_opt_ : ::
-    /* _empty_ */
+    /* _empty_ */ +
     _parameter_declaration_list_
 
 _parameter_declaration_list_ : ::
