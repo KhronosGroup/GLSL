@@ -290,11 +290,10 @@ _declaration_ : ::
     _type_qualifier_ _IDENTIFIER_ _LEFT_BRACE_ _struct_declaration_list_
     _RIGHT_BRACE_ _IDENTIFIER_ _array_specifier_ _SEMICOLON_ +
     _type_qualifier_ _SEMICOLON_ +
-    _type_qualifier_ _IDENTIFIER_ _SEMICOLON_ +
-    _type_qualifier_ _IDENTIFIER_ _identifier_list_ _SEMICOLON_
+    _type_qualifier_ _identifier_list_ _SEMICOLON_
 
 _identifier_list_ : ::
-    _COMMA_ _IDENTIFIER_ +
+    _IDENTIFIER_ +
     _identifier_list_ _COMMA_ _IDENTIFIER_
 
 _function_prototype_ : ::
