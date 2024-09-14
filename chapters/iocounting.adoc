@@ -124,7 +124,7 @@ following packing algorithm succeeds:
 
 Example: pack the following types:
 
-[source,c++]
+[source,glsl]
 ----
 out vec4 a;     // top left
 out mat3 b;     // align to left, lowest numbered rows
