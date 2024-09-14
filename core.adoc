@@ -56,7 +56,7 @@ endif::ESSL[]
 :numbered:
 :imagewidth: 800
 :fullimagewidth: width="800"
-:source-highlighter: coderay
+:source-highlighter: rouge
 :attribute-missing: warn
 
 // Various special / math symbols. This is easier to edit with than Unicode.

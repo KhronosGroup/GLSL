@@ -87,7 +87,8 @@ ADOCEXTS     = -r $(CURDIR)/config/vulkan-macros.rb
 ADOCOPTS     = -d book $(ATTRIBOPTS) $(NOTEOPTS) $(VERBOSE) $(ADOCEXTS)
 
 # This uses KaTeX for latexmath: blocks in HTML output instead of MathJax
-ADOCHTMLEXTS = -r $(CURDIR)/config/katex_replace.rb
+ADOCHTMLEXTS = -r $(CURDIR)/config/katex_replace.rb \
+	       -r $(CURDIR)/config/rouge-extend-css.rb
 ADOCHTMLOPTS = $(ADOCHTMLEXTS) -a katexpath=../katex
 
 ADOCPDFEXTS  = -r $(ADOCPDF) -r asciidoctor-mathematical
