@@ -141,6 +141,25 @@ _function_call_header_with_parameters_ : ::
 _function_call_header_ : ::
     _function_identifier_ _LEFT_PAREN_
 
+_function_definition_ : ::
+    _function_declarator_ _RIGHT_PAREN_ _compound_statement_no_new_scope_
+
+_function_identifier_ : ::
+    _type_specifier_ +
+    _postfix_expression_
+
+_function_declarator_ : ::
+    _function_header_ +
+    _function_header_with_parameters_
+
+_function_header_with_parameters_ : ::
+    _function_header_ _parameter_declaration_ +
+    _function_header_with_parameters_ _COMMA_ _parameter_declaration_
+
+_function_header_ : ::
+    _fully_specified_type_ _IDENTIFIER_ _LEFT_PAREN_
+
+
 [NOTE]
 ====
 Grammar Note: Constructors look like functions, but lexical analysis
@@ -159,13 +178,6 @@ Methods (*.length*) and identifiers are recognized through
 _postfix_expression_.
 endif::ESSL[]
 ====
-
-_function_definition_ : ::
-    _function_prototype_ _compound_statement_no_new_scope_
-
-_function_identifier_ : ::
-    _type_specifier_ +
-    _postfix_expression_
 
 _unary_expression_ : ::
     _postfix_expression_ +
@@ -285,17 +297,6 @@ _declaration_ : ::
 _identifier_list_ : ::
     _COMMA_ _IDENTIFIER_ +
     _identifier_list_ _COMMA_ _IDENTIFIER_
-
-_function_declarator_ : ::
-    _function_header_ +
-    _function_header_with_parameters_
-
-_function_header_with_parameters_ : ::
-    _function_header_ _parameter_declaration_ +
-    _function_header_with_parameters_ _COMMA_ _parameter_declaration_
-
-_function_header_ : ::
-    _fully_specified_type_ _IDENTIFIER_ _LEFT_PAREN_
 
 _parameter_declarator_ : ::
     _type_specifier_ _IDENTIFIER_ +
