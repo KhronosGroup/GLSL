@@ -71,7 +71,7 @@ This qualification cannot be set explicitly and may be different from the
 precision qualification of the result.
 
 ifdef::GLSL[]
-Note: In general, as has been noted, precision qualification is ignored
+NOTE: In general, as has been noted, precision qualification is ignored
 unless targeting Vulkan.
 endif::GLSL[]
 
@@ -130,59 +130,140 @@ If the divisor of a ratio is 0, then results will be undefined.
 These all operate component-wise.
 The description is per component.
 
-[options="header"]
-|====
-| Syntax | Description
-| genFType *radians*(genFType _degrees_)
-    | Converts _degrees_ to radians, i.e.,
-      [eq]#({pi} / 180) {cdot} degrees#.
-| genFType *degrees*(genFType _radians_)
-    | Converts _radians_ to degrees, i.e.,
-      [eq]#(180 / {pi}) {cdot} radians#.
-| genFType *sin*(genFType _angle_)
-    | The standard trigonometric sine function.
-| genFType *cos*(genFType _angle_)
-    | The standard trigonometric cosine function.
-| genFType *tan*(genFType _angle_)
-    | The standard trigonometric tangent.
-| genFType *asin*(genFType _x_)
-    | Arc sine.
-      Returns an angle whose sine is _x_.
-      The range of values returned by this function is
-      [eq]#[-{pi} / 2, {pi} / 2]#.
-      Results are undefined if [eq]#{vert}x{vert} > 1#.
-| genFType *acos*(genFType _x_)
-    | Arc cosine.
-      Returns an angle whose cosine is _x_.
-      The range of values returned by this function is [eq]#[0,{pi}]#.
-      Results are undefined if [eq]#{vert}x{vert} > 1#.
-| genFType *atan*(genFType _y_, genFType _x_)
-    | Arc tangent.
-      Returns an angle whose tangent is [eq]#y / x#.
-      The signs of _x_ and _y_ are used to determine what quadrant the angle
-      is in.
-      The range of values returned by this function is [eq]#[-{pi}, {pi}]#.
-      Results are undefined if _x_ and _y_ are both 0.
-| genFType *atan*(genFType _y_over_x_)
-    | Arc tangent.
-      Returns an angle whose tangent is _y_over_x_.
-      The range of values returned by this function is
-      [eq]#[-{pi} / 2, {pi} / 2]#.
-| genFType *sinh*(genFType _x_)
-    | Returns the hyperbolic sine function [eq]#(e^x^ - e^-x^) / 2#.
-| genFType *cosh*(genFType _x_)
-    | Returns the hyperbolic cosine function [eq]#(e^x^ + e^-x^) / 2#.
-| genFType *tanh*(genFType _x_)
-    | Returns the hyperbolic tangent function [eq]#sinh(x) / cosh(x)#.
-| genFType *asinh*(genFType _x_)
-    | Arc hyperbolic sine; returns the inverse of *sinh*.
-| genFType *acosh*(genFType _x_)
-    | Arc hyperbolic cosine; returns the non-negative inverse of *cosh*.
-      Results are undefined if [eq]#x < 1#.
-| genFType *atanh*(genFType _x_)
-    | Arc hyperbolic tangent; returns the inverse of *tanh*.
-      Results are undefined if [eq]#{vert}x{vert} {geq} 1#.
-|====
+=== Radians
+[source,glsl]
+----
+genFType radians(genFType degrees)
+----
+
+Converts _degrees_ to radians, i.e., [eq]#({pi} / 180) {cdot} degrees#.
+
+=== Degrees
+[source,glsl]
+----
+genFType degrees(genFType radians)
+----
+
+Converts _radians_ to degrees, i.e., [eq]#(180 / {pi}) {cdot} radians#.
+
+=== Sin
+[source,glsl]
+----
+genFType sin(genFType angle)
+----
+
+The standard trigonometric sine function.
+
+=== Cos
+[source,glsl]
+----
+genFType cos(genFType angle)
+----
+
+The standard trigonometric cosine function.
+
+=== Tan
+[source,glsl]
+----
+genFType tan(genFType angle)
+----
+
+The standard trigonometric tangent.
+
+=== Asin
+[source,glsl]
+----
+genFType asin(genFType x)
+----
+
+Arc sine. Returns an angle whose sine is _x_.
+
+The range of values returned by this function is [eq]#[-{pi} / 2, {pi} / 2]#.
+Results are undefined if [eq]#{vert}x{vert} > 1#.
+
+=== Acos
+[source,glsl]
+----
+genFType acos(genFType x)
+----
+
+Arc cosine. Returns an angle whose cosine is _x_.
+
+The range of values returned by this function is [eq]#[0,{pi}]#.
+Results are undefined if [eq]#{vert}x{vert} > 1#.
+
+=== Atan
+[source,glsl]
+----
+genFType atan(genFType y, genFType x)
+----
+
+Arc tangent. Returns an angle whose tangent is [eq]#y / x#.
+
+The signs of _x_ and _y_ are used to determine what quadrant the angle is in.
+The range of values returned by this function is [eq]#[-{pi}, {pi}]#.
+Results are undefined if _x_ and _y_ are both 0.
+
+[source,glsl]
+----
+genFType atan(genFType y_over_x)
+----
+
+Arc tangent. Returns an angle whose tangent is _y_over_x_.
+
+The range of values returned by this function is [eq]#[-{pi} / 2, {pi} / 2]#.
+
+=== Sinh
+[source,glsl]
+----
+genFType sinh(genFType x)
+----
+
+Returns the hyperbolic sine function [eq]#(e^x^ - e^-x^) / 2#.
+
+=== Cosh
+[source,glsl]
+----
+genFType cosh(genFType x)
+----
+
+Returns the hyperbolic cosine function [eq]#(e^x^ + e^-x^) / 2#.
+
+=== Tanh
+[source,glsl]
+----
+genFType tanh(genFType x)
+----
+
+Returns the hyperbolic tangent function [eq]#sinh(x) / cosh(x)#.
+
+=== Asinh
+[source,glsl]
+----
+genFType asinh(genFType x)
+----
+
+Arc hyperbolic sine; returns the inverse of *sinh*.
+
+=== Acosh
+[source,glsl]
+----
+genFType acosh(genFType x)
+----
+
+Arc hyperbolic cosine. Returns the non-negative inverse of *cosh*.
+
+Results are undefined if [eq]#x < 1#.
+
+=== Atanh
+[source,glsl]
+----
+genFType atanh(genFType x)
+----
+
+Arc hyperbolic tangent. Returns the inverse of *tanh*.
+
+Results are undefined if [eq]#{vert}x{vert} {geq} 1#.
 
 
 [[exponential-functions]]
@@ -191,44 +272,80 @@ The description is per component.
 These all operate component-wise.
 The description is per component.
 
-[options="header"]
-|====
-| Syntax | Description
-| genFType *pow*(genFType _x_, genFType _y_)
-    | Returns _x_ raised to the _y_ power, i.e., [eq]#x^y^#.
-      Results are undefined if [eq]#x < 0#.
-      Results are undefined if [eq]#x = 0# and [eq]#y {leq} 0#.
-| genFType *exp*(genFType _x_)
-    | Returns the natural exponentiation of _x_, i.e., [eq]#e^x^#.
-| genFType *log*(genFType _x_)
-    | Returns the natural logarithm of _x_, i.e., returns the value _y_
-      which satisfies the equation [eq]#x = e^y^#.
-      Results are undefined if [eq]#x {leq} 0#.
-| genFType *exp2*(genFType _x_)
-    | Returns 2 raised to the _x_ power, i.e., [eq]#2^x^#.
-| genFType *log2*(genFType _x_)
-    | Returns the base 2 logarithm of _x_, i.e., returns the value _y_ which
-      satisfies the equation [eq]#x = 2^y^#.
-      Results are undefined if [eq]#x {leq} 0#.
+=== Pow
+[source,glsl]
+----
+genFType pow(genFType x, genFType y)
+----
+
+Returns _x_ raised to the _y_ power, i.e., [eq]#x^y^#.
+
+Results are undefined if [eq]#x < 0#.
+Results are undefined if [eq]#x = 0# and [eq]#y {leq} 0#.
+
+=== Exp
+[source,glsl]
+----
+genFType exp(genFType x)
+----
+
+Returns the natural exponentiation of _x_, i.e., [eq]#e^x^#.
+
+=== Log
+[source,glsl]
+----
+genFType log(genFType x)
+----
+
+Returns the natural logarithm of _x_, i.e., returns the value _y_
+which satisfies the equation [eq]#x = e^y^#.
+
+Results are undefined if [eq]#x {leq} 0#.
+
+=== Exp2
+[source,glsl]
+----
+genFType exp2(genFType x)
+----
+
+Returns 2 raised to the _x_ power, i.e., [eq]#2^x^#.
+
+=== Log2
+[source,glsl]
+----
+genFType log2(genFType x)
+----
+
+Returns the base 2 logarithm of _x_, i.e., returns the value _y_ which
+satisfies the equation [eq]#x = 2^y^#.
+
+Results are undefined if [eq]#x {leq} 0#.
+
+=== Sqrt
+[source,glsl]
+----
+genFType sqrt(genFType x)
 ifdef::GLSL[]
-| genFType *sqrt*(genFType _x_) +
-  genDType *sqrt*(genDType _x_)
+genDType sqrt(genDType x)
 endif::GLSL[]
-ifdef::ESSL[]
-| genFType *sqrt*(genFType _x_)
-endif::ESSL[]
-    | Returns [eq]#sqrt(x)#.
-      Results are undefined if [eq]#x < 0#.
+----
+
+Returns [eq]#sqrt(x)#.
+
+Results are undefined if [eq]#x < 0#.
+
+=== Inverse Sqrt
+[source,glsl]
+----
+genFType inversesqrt(genFType x)
 ifdef::GLSL[]
-| genFType *inversesqrt*(genFType _x_) +
-  genDType *inversesqrt*(genDType _x_)
+genDType inversesqrt(genDType x)
 endif::GLSL[]
-ifdef::ESSL[]
-| genFType *inversesqrt*(genFType _x_)
-endif::ESSL[]
-    | Returns [eq]#1 / sqrt(x)#.
-      Results are undefined if [eq]#x {leq} 0#.
-|====
+----
+
+Returns [eq]#1 / sqrt(x)#.
+
+Results are undefined if [eq]#x {leq} 0#.
 
 
 [[common-functions]]
@@ -237,199 +354,300 @@ endif::ESSL[]
 These all operate component-wise.
 The description is per component.
 
-[options="header"]
-|====
-| Syntax | Description
-| genFType *abs*(genFType _x_) +
+=== Abs
+[source,glsl]
+----
+genFType abs(genFType x)
 ifdef::GLSL[]
-  genIType *abs*(genIType _x_) +
-  genDType *abs*(genDType _x_)
+genIType abs(genIType x)
+genDType abs(genDType x)
 endif::GLSL[]
 ifdef::ESSL[]
-  genIType *abs*(genIType _x_)
+genIType abs(genIType x)
 endif::ESSL[]
-    | Returns _x_ if [eq]#x {geq} 0#; otherwise it returns -_x_.
-| genFType *sign*(genFType _x_) +
-ifdef::GLSL[]
-  genIType *sign*(genIType _x_) +
-  genDType *sign*(genDType _x_)
-endif::GLSL[]
-ifdef::ESSL[]
-  genIType *sign*(genIType _x_)
-endif::ESSL[]
-    | Returns 1.0 if _x_ > 0, 0.0 if _x_ = 0, or -1.0 if _x_ < 0.
-ifdef::GLSL[]
-| genFType *floor*(genFType _x_) +
-  genDType *floor*(genDType _x_)
-endif::GLSL[]
-ifdef::ESSL[]
-| genFType *floor*(genFType _x_)
-endif::ESSL[]
-    | Returns a value equal to the nearest integer that is less than or
-      equal to _x_.
-ifdef::GLSL[]
-| genFType *trunc*(genFType _x_) +
-  genDType *trunc*(genDType _x_)
-endif::GLSL[]
-ifdef::ESSL[]
-| genFType *trunc*(genFType _x_)
-endif::ESSL[]
-    | Returns a value equal to the nearest integer to _x_ whose absolute
-      value is not larger than the absolute value of _x_.
-ifdef::GLSL[]
-| genFType *round*(genFType _x_) +
-  genDType *round*(genDType _x_)
-endif::GLSL[]
-ifdef::ESSL[]
-| genFType *round*(genFType _x_)
-endif::ESSL[]
-    | Returns a value equal to the nearest integer to _x_.
-      The fraction 0.5 will round in a direction chosen by the
-      implementation, presumably the direction that is fastest.
-      This includes the possibility that *round*(_x_) returns the same value
-      as *roundEven*(_x_) for all values of _x_.
-ifdef::GLSL[]
-| genFType *roundEven*(genFType _x_) +
-  genDType *roundEven*(genDType _x_)
-endif::GLSL[]
-ifdef::ESSL[]
-| genFType *roundEven*(genFType _x_)
-endif::ESSL[]
-    | Returns a value equal to the nearest integer to _x_.
-      A fractional part of 0.5 will round toward the nearest even integer.
-      (Both 3.5 and 4.5 for x will return 4.0.)
-ifdef::GLSL[]
-| genFType *ceil*(genFType _x_) +
-  genDType *ceil*(genDType _x_)
-endif::GLSL[]
-ifdef::ESSL[]
-| genFType *ceil*(genFType _x_)
-endif::ESSL[]
-    | Returns a value equal to the nearest integer that is greater than or
-      equal to _x_.
-ifdef::GLSL[]
-| genFType *fract*(genFType _x_) +
-  genDType *fract*(genDType _x_) +
-endif::GLSL[]
-ifdef::ESSL[]
-| genFType *fract*(genFType _x_)
-endif::ESSL[]
-    | Returns _x_ - *floor*(_x_).
-| genFType *mod*(genFType _x_, float _y_) +
-ifdef::GLSL[]
-  genFType *mod*(genFType _x_, genFType _y_) +
-  genDType *mod*(genDType _x_, double _y_) +
-  genDType *mod*(genDType _x_, genDType _y_) +
-endif::GLSL[]
-ifdef::ESSL[]
-  genFType *mod*(genFType _x_, genFType _y_)
-endif::ESSL[]
-    | Modulus.
-      Returns [eq]#x - y {cdot} *floor*(x / y)#.
+----
 
-      Note that implementations may use a cheap approximation to the remainder,
-      and the error can be large due to the discontinuity in *floor*. This can
-      produce mathematically unexpected results in some cases, such as
-      *mod*(_x_,_x_) computing _x_ rather than 0, and can also cause the result
-      to have a different sign than the infinitely precise result.
+Returns _x_ if [eq]#x {geq} 0#; otherwise it returns -_x_.
+
+=== Sign
+[source,glsl]
+----
+genFType sign(genFType x)
 ifdef::GLSL[]
-| genFType *modf*(genFType _x_, out genFType _i_) +
-  genDType *modf*(genDType _x_, out genDType _i_)
+genIType sign(genIType x)
+genDType sign(genDType x)
 endif::GLSL[]
 ifdef::ESSL[]
-| genFType *modf*(genFType _x_, out genFType _i_) +
+genIType sign(genIType x)
 endif::ESSL[]
-   | Returns the fractional part of _x_ and sets _i_ to the integer part (as
-      a whole number floating-point value).
-      Both the return value and the output parameter will have the same sign
-      as _x_.
+----
+
+Returns 1.0 if _x_ > 0, 0.0 if _x_ = 0, or -1.0 if _x_ < 0.
+
+=== Floor
+[source,glsl]
+----
+ifdef::GLSL[]
+genFType floor(genFType x)
+genDType floor(genDType x)
+endif::GLSL[]
+ifdef::ESSL[]
+genFType floor(genFType x)
+endif::ESSL[]
+----
+
+Returns a value equal to the nearest integer that is less than or equal to _x_.
+
+=== Trunc
+[source,glsl]
+----
+ifdef::GLSL[]
+genFType trunc(genFType x)
+genDType trunc(genDType x)
+endif::GLSL[]
+ifdef::ESSL[]
+genFType trunc(genFType x)
+endif::ESSL[]
+----
+
+Returns a value equal to the nearest integer to _x_ whose absolute
+value is not larger than the absolute value of _x_.
+
+=== Round
+[source,glsl]
+----
+ifdef::GLSL[]
+genFType round(genFType x)
+genDType round(genDType x)
+endif::GLSL[]
+ifdef::ESSL[]
+genFType round(genFType x)
+endif::ESSL[]
+----
+
+Returns a value equal to the nearest integer to _x_.
+
+The fraction 0.5 will round in a direction chosen by the
+implementation, presumably the direction that is fastest.
+This includes the possibility that *round*(_x_) returns the same value
+as *roundEven*(_x_) for all values of _x_.
+
+=== Round Even
+[source,glsl]
+----
+ifdef::GLSL[]
+genFType roundEven(genFType x)
+genDType roundEven(genDType x)
+endif::GLSL[]
+ifdef::ESSL[]
+genFType roundEven(genFType x)
+endif::ESSL[]
+----
+
+Returns a value equal to the nearest integer to _x_.
+
+A fractional part of 0.5 will round toward the nearest even integer.
+(Both 3.5 and 4.5 for x will return 4.0.)
+
+=== Ceil
+[source,glsl]
+----
+ifdef::GLSL[]
+genFType ceil(genFType x)
+genDType ceil(genDType x)
+endif::GLSL[]
+ifdef::ESSL[]
+genFType ceil(genFType x)
+endif::ESSL[]
+----
+
+Returns a value equal to the nearest integer that is greater than or equal to _x_.
+
+=== Fract
+[source,glsl]
+----
+ifdef::GLSL[]
+genFType fract(genFType x)
+genDType fract(genDType x)
+endif::GLSL[]
+ifdef::ESSL[]
+genFType fract(genFType x)
+endif::ESSL[]
+----
+
+Returns _x_ - *floor*(_x_).
+
+=== Mod
+[source,glsl]
+----
+genFType mod(genFType x, float y)
+ifdef::GLSL[]
+genFType mod(genFType x, genFType y)
+genDType mod(genDType x, double y)
+genDType mod(genDType x, genDType y)
+endif::GLSL[]
+ifdef::ESSL[]
+genFType mod(genFType x, genFType y)
+endif::ESSL[]
+----
+
+Modulus. Returns [eq]#x - y {cdot} *floor*(x / y)#.
+
+Note that implementations may use a cheap approximation to the remainder,
+and the error can be large due to the discontinuity in *floor*. This can
+produce mathematically unexpected results in some cases, such as
+*mod*(_x_,_x_) computing _x_ rather than 0, and can also cause the result
+to have a different sign than the infinitely precise result.
+
+=== Modf
+[source,glsl]
+----
+ifdef::GLSL[]
+genFType modf(genFType x, out genFType i)
+genDType modf(genDType x, out genDType i)
+endif::GLSL[]
+ifdef::ESSL[]
+genFType modf(genFType x, out genFType i)
+endif::ESSL[]
+----
+
+Returns the fractional part of _x_ and sets _i_ to the integer part (as
+a whole number floating-point value).
+
+Both the return value and the output parameter will have the same sign as _x_.
 ifdef::ESSL[]
       If _x_ has the value +/- Inf, the return value should be NaN and must
       be either NaN or 0.0.
       For *highp* non-constant expressions, the value returned must be
       consistent.
 endif::ESSL[]
-| genFType *min*(genFType _x_, genFType _y_) +
-  genFType *min*(genFType _x_, float _y_) +
+
+=== Min
+[source,glsl]
+----
+genFType min(genFType x, genFType y)
+genFType min(genFType x, float y)
 ifdef::GLSL[]
-  genDType *min*(genDType _x_, genDType _y_) +
-  genDType *min*(genDType _x_, double _y_) +
+genDType min(genDType x, genDType y)
+genDType min(genDType x, double y)
 endif::GLSL[]
-  genIType *min*(genIType _x_, genIType _y_) +
-  genIType *min*(genIType _x_, int _y_) +
-  genUType *min*(genUType _x_, genUType _y_) +
-  genUType *min*(genUType _x_, uint _y_)
-    | Returns _y_ if _y_ < _x;_ otherwise it returns _x_. Which operand is the result is undefined if one of the operands is a NaN.
-| genFType *max*(genFType _x_, genFType _y_) +
-  genFType *max*(genFType _x_, float _y_) +
+genIType min(genIType x, genIType y)
+genIType min(genIType x, int y)
+genUType min(genUType x, genUType y)
+genUType min(genUType x, uint y)
+----
+
+Returns _y_ if _y_ < _x;_ otherwise it returns _x_.
+
+Which operand is the result is undefined if one of the operands is a NaN.
+
+=== Max
+[source,glsl]
+----
+genFType max(genFType x, genFType y)
+genFType max(genFType x, float y)
 ifdef::GLSL[]
-  genDType *max*(genDType _x_, genDType _y_) +
-  genDType *max*(genDType _x_, double _y_) +
+genDType max(genDType x, genDType y)
+genDType max(genDType x, double y)
 endif::GLSL[]
-  genIType *max*(genIType _x_, genIType _y_) +
-  genIType *max*(genIType _x_, int _y_) +
-  genUType *max*(genUType _x_, genUType _y_) +
-  genUType *max*(genUType _x_, uint _y_)
-    | Returns _y_ if _x_ < _y;_ otherwise it returns _x_. Which operand is the result is undefined if one of the operands is a NaN.
-| genFType *clamp*(genFType _x_, genFType _minVal_, genFType _maxVal_) +
-  genFType *clamp*(genFType _x_, float _minVal_, float _maxVal_) +
+genIType max(genIType x, genIType y)
+genIType max(genIType x, int y)
+genUType max(genUType x, genUType y)
+genUType max(genUType x, uint y)
+----
+
+Returns _y_ if _x_ < _y;_ otherwise it returns _x_.
+
+Which operand is the result is undefined if one of the operands is a NaN.
+
+=== Clamp
+[source,glsl]
+----
+genFType clamp(genFType x, genFType _minVal_, genFType maxVal)
+genFType clamp(genFType x, float _minVal_, float maxVal)
 ifdef::GLSL[]
-  genDType *clamp*(genDType _x_, genDType _minVal_, genDType _maxVal_) +
-  genDType *clamp*(genDType _x_, double _minVal_, double _maxVal_) +
+genDType clamp(genDType x, genDType minVal, genDType maxVal)
+genDType clamp(genDType x, double minVal, double maxVal)
 endif::GLSL[]
-  genIType *clamp*(genIType _x_, genIType _minVal_, genIType _maxVal_) +
-  genIType *clamp*(genIType _x_, int _minVal_, int _maxVal_) +
-  genUType *clamp*(genUType _x_, genUType _minVal_, genUType _maxVal_) +
-  genUType *clamp*(genUType _x_, uint _minVal_, uint _maxVal_)
-    | Returns *min*(*max*(_x_, _minVal_), _maxVal_).
-      Results are undefined if _minVal_ > _maxVal_.
-| genFType *mix*(genFType _x_, genFType _y_, genFType _a_) +
-  genFType *mix*(genFType _x_, genFType _y_, float _a_) +
+genIType clamp(genIType x, genIType minVal, genIType maxVal)
+genIType clamp(genIType x, int minVal, int maxVal)
+genUType clamp(genUType x, genUType minVal, genUType maxVal)
+genUType clamp(genUType x, uint minVal, uint maxVal)
+----
+
+Returns *min*(*max*(_x_, _minVal_), _maxVal_).
+
+Results are undefined if _minVal_ > _maxVal_.
+
+=== Mix
+[source,glsl]
+----
+genFType mix(genFType x, genFType y, genFType a)
+genFType mix(genFType x, genFType y, float a)
 ifdef::GLSL[]
-  genDType *mix*(genDType _x_, genDType _y_, genDType _a_) +
-  genDType *mix*(genDType _x_, genDType _y_, double _a_) +
+genDType mix(genDType x, genDType y, genDType a)
+genDType mix(genDType x, genDType y, double a)
 endif::GLSL[]
-    | Returns the linear blend of _x_ and _y_, i.e.,
-      [eq]#x {cdot} (1 - a) + y {cdot} a#.
-| genFType *mix*(genFType _x_, genFType _y_,  genBType _a_) +
+----
+
+Returns the linear blend of _x_ and _y_, i.e., [eq]#x {cdot} (1 - a) + y {cdot} a#.
+
+[source,glsl]
+----
+genFType mix(genFType x, genFType y, genBType a)
 ifdef::GLSL[]
-  genDType *mix*(genDType _x_, genDType _y_, genBType _a_) +
+genDType mix(genDType x, genDType y, genBType a)
 endif::GLSL[]
-  genIType *mix*(genIType _x_, genIType _y_, genBType _a_) +
-  genUType *mix*(genUType _x_, genUType _y_, genBType _a_) +
-  genBType *mix*(genBType _x_, genBType _y_, genBType _a_)
-    | Selects which vector each returned component comes from.
-      For a component of _a_ that is *false*, the corresponding component of
-      _x_ is returned.
-      For a component of _a_ that is *true*, the corresponding component of
-      _y_ is returned.
-      Components of _x_ and _y_ that are not selected are allowed to be
-      invalid floating-point values and will have no effect on the results.
-      Thus, this provides different functionality than, for example, +
-      genFType *mix*(genFType _x_, genFType _y_, genFType(_a_)) +
-      where _a_ is a Boolean vector.
-| genFType *step*(genFType _edge_, genFType _x_) +
+genIType mix(genIType x, genIType y, genBType a)
+genUType mix(genUType x, genUType y, genBType a)
+genBType mix(genBType x, genBType y, genBType a)
+----
+
+Selects which vector each returned component comes from.
+
+For a component of _a_ that is *false*, the corresponding component of _x_ is returned.
+
+For a component of _a_ that is *true*, the corresponding component of _y_ is returned.
+
+Components of _x_ and _y_ that are not selected are allowed to be
+invalid floating-point values and will have no effect on the results.
+Thus, this provides different functionality than, for example, +
+genFType *mix*(genFType _x_, genFType _y_, genFType(_a_)) +
+where _a_ is a Boolean vector.
+
+=== Step
+[source,glsl]
+----
+genFType step(genFType edge, genFType x)
 ifdef::GLSL[]
-  genFType *step*(float _edge_, genFType _x_) +
-  genDType *step*(genDType _edge_, genDType _x_) +
-  genDType *step*(double _edge_, genDType _x_)
+genFType step(float edge, genFType x)
+genDType step(genDType edge, genDType x)
+genDType step(double edge, genDType x)
 endif::GLSL[]
 ifdef::ESSL[]
-  genFType *step*(float _edge_, genFType _x_)
+genFType step(float edge, genFType x)
 endif::ESSL[]
-    | Returns 0.0 if _x_ < _edge;_ otherwise it returns 1.0.
-| genFType *smoothstep*(genFType _edge0_, genFType _edge1_, genFType _x_) +
-  genFType *smoothstep*(float _edge0_, float _edge1_, genFType _x_) +
+----
+
+Returns 0.0 if _x_ < _edge;_ otherwise it returns 1.0.
+
+=== Smoothstep
+[source,glsl]
+----
+genFType smoothstep(genFType edge0, genFType edge1, genFType x)
+genFType smoothstep(float edge0, float edge1, genFType x)
 ifdef::GLSL[]
-  genDType *smoothstep*(genDType _edge0_, genDType _edge1_, genDType _x_) +
-  genDType *smoothstep*(double _edge0_, double _edge1_, genDType _x_) +
+genDType smoothstep(genDType edge0, genDType edge1, genDType x)
+genDType smoothstep(double edge0, double edge1, genDType x)
 endif::GLSL[]
-   a| Returns 0.0 if [eq]#x {leq} edge0# and 1.0 if [eq]#x {geq} edge1#, and
-      performs smooth Hermite interpolation between 0 and 1 when [eq]#edge0
-      < x < edge1#.
-      This is useful in cases where you would want a threshold function with
-      a smooth transition.
-      This is equivalent to:
+----
+
+Returns 0.0 if [eq]#x {leq} edge0# and 1.0 if [eq]#x {geq} edge1#, and
+performs smooth Hermite interpolation between 0 and 1 when [eq]#edge0 < x < edge1#.
+
+This is useful in cases where you would want a threshold function with a smooth transition.
+
+This is equivalent to:
 --
 [source,glsl]
 ----
@@ -438,55 +656,86 @@ t = clamp ((x - edge0) / (edge1 - edge0), 0, 1);
 return t * t * (3 - 2 * t);
 ----
 
-(And similarly for doubles.) Results are undefined if [eq]#edge0 {geq}
-edge1#.
+(And similarly for doubles.) Results are undefined if [eq]#edge0 {geq} edge1#.
 --
+
+=== Is NaN
+[source,glsl]
+----
 ifdef::GLSL[]
-| genBType *isnan*(genFType _x_) +
-  genBType *isnan*(genDType _x_)
+genBType isnan(genFType x)
+genBType isnan(genDType x)
 endif::GLSL[]
 ifdef::ESSL[]
-| genBType *isnan*(genFType _x_)
+genBType isnan(genFType x)
 endif::ESSL[]
-    | Returns *true* if _x_ holds a NaN.
-      Returns *false* otherwise.
-      Always returns *false* if NaNs are not implemented.
+----
+
+Returns *true* if _x_ holds a NaN. Returns *false* otherwise.
+
+Always returns *false* if NaNs are not implemented.
+
+=== Is Inf
+[source,glsl]
+----
 ifdef::GLSL[]
-| genBType *isinf*(genFType _x_) +
-  genBType *isinf*(genDType _x_)
+genBType isinf(genFType x)
+genBType isinf(genDType x)
 endif::GLSL[]
 ifdef::ESSL[]
-| genBType *isinf*(genFType _x_)
+genBType isinf(genFType x)
 endif::ESSL[]
-    | Returns *true* if _x_ holds a positive infinity or negative infinity.
-      Returns *false* otherwise.
-| genIType *floatBitsToInt*(highp genFType _value_) +
-  genUType *floatBitsToUint*(highp genFType _value_)
-    | Returns a signed or unsigned integer value representing the encoding
-      of a floating-point value.
-      The *float* value's bit-level representation is preserved.
-| genFType *intBitsToFloat*(highp genIType _value_) +
-  genFType *uintBitsToFloat*(highp genUType _value_)
-    | Returns a floating-point value corresponding to a signed or unsigned
-      integer encoding of a floating-point value.
+----
+
+Returns *true* if _x_ holds a positive infinity or negative infinity. Returns *false* otherwise.
+
+=== Float Bits to Int
+[source,glsl]
+----
+genIType floatBitsToInt(highp genFType value)
+genUType floatBitsToUint(highp genFType value)
+----
+
+Returns a signed or unsigned integer value representing the encoding of a floating-point value.
+
+The *float* value's bit-level representation is preserved.
+
+=== Int Bits to Float
+[source,glsl]
+----
+genFType intBitsToFloat(highp genIType value)
+genFType uintBitsToFloat(highp genUType value)
+----
+
+Returns a floating-point value corresponding to a signed or unsigned integer encoding of a
+floating-point value.
+
 ifdef::GLSL[]
-      If a NaN is passed in, it will not signal, and the resulting value is
-      unspecified.
-      If an Inf is passed in, the resulting value is the corresponding Inf.
+If a NaN is passed in, it will not signal, and the resulting value is unspecified.
+
+If an Inf is passed in, the resulting value is the corresponding Inf.
 endif::GLSL[]
 ifdef::ESSL[]
-      If an Inf or NaN is passed in, it will not signal, and the resulting
-      floating-point value is unspecified.
+If an Inf or NaN is passed in, it will not signal, and the resulting floating-point value is
+unspecified.
 endif::ESSL[]
-      If a subnormal number is passed in, the result might be flushed to 0.
-      Otherwise, the bit-level representation is preserved.
-| genFType *fma*(genFType _a_, genFType _b_, genFType _c_) +
+
+If a subnormal number is passed in, the result might be flushed to 0.
+Otherwise, the bit-level representation is preserved.
+
+=== Fma
+[source,glsl]
+----
+genFType fma(genFType a, genFType b, genFType c)
 ifdef::GLSL[]
-  genDType *fma*(genDType _a_, genDType _b_, genDType _c_)
+genDType fma(genDType a, genDType b, genDType c)
 endif::GLSL[]
-   a| Computes and returns `a * b + c`.
-      In uses where the return value is eventually consumed by a variable
-      declared as *precise*:
+----
+
+Computes and returns `a * b + c`.
+
+In uses where the return value is eventually consumed by a variable declared as *precise*:
+
 --
   * *fma*() is considered a single operation, whereas the expression `a * b
     + c` consumed by a variable declared *precise* is considered two
@@ -501,59 +750,70 @@ Otherwise, in the absence of *precise* consumption, there are no special
 constraints on the number of operations or difference in precision between
 *fma*() and the expression `a * b + c`.
 --
-| genFType *frexp*(highp genFType _x_, out highp genIType _exp_)
+
+=== Frexp
+[source,glsl]
+----
+genFType frexp(highp genFType x, out highp genIType exp)
 ifdef::GLSL[]
-  genDType *frexp*(genDType _x_, out genIType _exp_) +
+genDType frexp(genDType x, out genIType exp)
 endif::GLSL[]
-    | Splits _x_ into a floating-point significand in the range
-      [eq]#[0.5,1.0]#, and an integral exponent of two, such that
+----
 
-      [eq]#x = significand {cdot} 2^exponent^#
+Splits _x_ into a floating-point significand in the range
+[eq]#[0.5,1.0]#, and an integral exponent of two, such that
 
-      The significand is returned by the function and the exponent is
-      returned in the parameter _exp_.
-      For a floating-point value of zero, the significand and exponent are
-      both zero.
+[eq]#x = significand {cdot} 2^exponent^#
 
-      If an implementation supports signed zero, an input value of minus
-      zero should return a significand of minus zero.
-      For a floating-point value that is an infinity or is not a number, the
-      results are undefined.
+The significand is returned by the function and the exponent is
+returned in the parameter _exp_. For a floating-point value of zero, the
+significand and exponent are both zero.
 
-      If the input _x_ is a vector, this operation is performed in a
-      component-wise manner; the value returned by the function and the
-      value written to _exp_ are vectors with the same number of components
-      as _x_.
-| genFType *ldexp*(highp genFType _x_, highp genIType _exp_) +
+If an implementation supports signed zero, an input value of minus
+zero should return a significand of minus zero. For a floating-point value that
+is an infinity or is not a number, the results are undefined.
+
+If the input _x_ is a vector, this operation is performed in a
+component-wise manner; the value returned by the function and the
+value written to _exp_ are vectors with the same number of components as _x_.
+
+=== Ldexp
+[source,glsl]
+----
+genFType ldexp(highp genFType x, highp genIType exp)
 ifdef::GLSL[]
-  genDType *ldexp*(genDType _x_, genIType _exp_)
+genDType ldexp(genDType x, genIType exp)
 endif::GLSL[]
-    | Builds a floating-point number from _x_ and the corresponding integral
-      exponent of two in _exp_, returning:
+----
 
-      [eq]#significand {cdot} 2^exponent^#
+Builds a floating-point number from _x_ and the corresponding integral
+exponent of two in _exp_, returning:
 
-      If this product is too large to be represented in the floating-point
-      type, the result is undefined.
+[eq]#significand {cdot} 2^exponent^#
+
+If this product is too large to be represented in the floating-point
+type, the result is undefined.
 
 ifdef::GLSL[]
-      If _exp_ is greater than +128 (single-precision) or +1024
-      (double-precision), the value returned is undefined.
-      If _exp_ is less than -126 (single-precision) or -1022
-      (double-precision), the value returned may be flushed to zero.
+If _exp_ is greater than +128 (single-precision) or +1024
+(double-precision), the value returned is undefined.
+
+If _exp_ is less than -126 (single-precision) or -1022
+(double-precision), the value returned may be flushed to zero.
 endif::GLSL[]
 ifdef::ESSL[]
-      If _exp_ is greater than +128, the value returned is undefined.
-      If _exp_ is less than -126, the value returned may be flushed to zero.
+If _exp_ is greater than +128, the value returned is undefined.
+If _exp_ is less than -126, the value returned may be flushed to zero.
 endif::ESSL[]
-      Additionally, splitting the value into a significand and exponent
-      using *frexp*() and then reconstructing a floating-point value using
-      *ldexp*() should yield the original input for zero and all finite
-      non-subnormal values. +
-      If the input _x_ is a vector, this operation is performed in a
-      component-wise manner; the value passed in _exp_ and returned by the
-      function are vectors with the same number of components as _x_.
-|====
+
+Additionally, splitting the value into a significand and exponent
+using *frexp*() and then reconstructing a floating-point value using
+*ldexp*() should yield the original input for zero and all finite
+non-subnormal values.
+
+If the input _x_ is a vector, this operation is performed in a
+component-wise manner; the value passed in _exp_ and returned by the
+function are vectors with the same number of components as _x_.
 
 
 [[floating-point-pack-and-unpack-functions]]
@@ -562,86 +822,147 @@ endif::ESSL[]
 These functions do not operate component-wise, rather, as described in each
 case.
 
-[options="header"]
-|====
-| Syntax | Description
-| highp uint *packUnorm2x16*(vec2 _v_) +
-  highp uint *packSnorm2x16*(vec2 _v_) +
-  {highp} uint *packUnorm4x8*(vec4 _v_) +
-  {highp} uint *packSnorm4x8*(vec4 _v_)
-    | First, converts each component of the normalized floating-point value
-      _v_ into 16-bit (*2x16*) or 8-bit (*4x8*) integer values.
-      Then, the results are packed into the returned 32-bit unsigned
-      integer.
-
-      The conversion for component _c_ of _v_ to fixed point is done as
-      follows:
-
-      *packUnorm2x16*: *round*(*clamp*(_c_, 0, +1) * 65535.0) +
-      *packSnorm2x16:* *round*(*clamp*(_c_, -1, +1) * 32767.0) +
-      *packUnorm4x8*: *round*(*clamp*(_c_, 0, +1) * 255.0) +
-      *packSnorm4x8*: *round*(*clamp*(_c_, -1, +1) * 127.0)
-
-      The first component of the vector will be written to the least
-      significant bits of the output; the last component will be written to
-      the most significant bits.
-| {highp} vec2 *unpackUnorm2x16*(highp uint _p_) +
-  {highp} vec2 *unpackSnorm2x16*(highp uint _p_) +
-  {mediump} vec4 *unpackUnorm4x8*(highp uint _p_) +
-  {mediump} vec4 *unpackSnorm4x8*(highp uint _p_)
-    | First, unpacks a single 32-bit unsigned integer _p_ into a pair of
-      16-bit unsigned integers, a pair of 16-bit signed integers, four 8-bit
-      unsigned integers, or four 8-bit signed integers, respectively.
-      Then, each component is converted to a normalized floating-point value
-      to generate the returned two- or four-component vector.
-
-      The conversion for unpacked fixed-point value _f_ to floating-point is
-      done as follows:
-
-      *unpackUnorm2x16*: _f_ / 65535.0 +
-      *unpackSnorm2x16*: *clamp*(_f_ / 32767.0, -1, +1) +
-      *unpackUnorm4x8*: _f_ / 255.0 +
-      *unpackSnorm4x8*: *clamp*(_f_ / 127.0, -1, +1)
-
-      The first component of the returned vector will be extracted from the
-      least significant bits of the input; the last component will be
-      extracted from the most significant bits.
-| {highp} uint *packHalf2x16*({mediump} vec2 _v_)
-    | Returns an unsigned integer obtained by converting the components of a
-      two-component floating-point vector to the 16-bit floating-point
-      representation of the <<references, API>>, and
-      then packing these two 16-bit integers into a 32-bit unsigned integer.
-
-      The first vector component specifies the 16 least-significant bits of
-      the result; the second component specifies the 16 most-significant
-      bits.
-| {mediump} vec2 *unpackHalf2x16*({highp} uint _v_)
-    | Returns a two-component floating-point vector with components obtained
-      by unpacking a 32-bit unsigned integer into a pair of 16-bit values,
-      interpreting those values as 16-bit floating-point numbers according
-      to the <<references, API>>, and converting them to
-      32-bit floating-point values.
-
-      The first component of the vector is obtained from the 16
-      least-significant bits of _v_; the second component is obtained from
-      the 16 most-significant bits of _v_.
+=== Pack Unorm
+[source,glsl]
+----
+highp uint packUnorm2x16(vec2 v)
+highp uint packSnorm2x16(vec2 v)
 ifdef::GLSL[]
-| double *packDouble2x32*(uvec2 _v_) +
-    | Returns a double-precision value obtained by packing the components of
-      _v_ into a 64-bit value.
-      If an IEEE 754 Inf or NaN is created, it will not signal, and the
-      resulting floating-point value is unspecified.
-      Otherwise, the bit-level representation of _v_ is preserved.
-      The first vector component specifies the 32 least significant bits;
-      the second component specifies the 32 most significant bits.
-| uvec2 *unpackDouble2x32*(double _v_)
-    | Returns a two-component unsigned integer vector representation of _v_.
-      The bit-level representation of _v_ is preserved.
-      The first component of the vector contains the 32 least significant
-      bits of the double; the second component consists of the 32 most
-      significant bits.
+uint packUnorm4x8(vec4 v)
+uint packSnorm4x8(vec4 v)
 endif::GLSL[]
-|====
+ifdef::ESSL[]
+highp uint packUnorm4x8(vec4 v)
+highp uint packSnorm4x8(vec4 v)
+endif::ESSL[]
+----
+
+First, converts each component of the normalized floating-point value
+_v_ into 16-bit (*2x16*) or 8-bit (*4x8*) integer values.
+
+Then, the results are packed into the returned 32-bit unsigned
+integer.
+
+The conversion for component _c_ of _v_ to fixed point is done as
+follows:
+
+*packUnorm2x16*: `round(clamp(c, 0, +1) * 65535.0)` +
+*packSnorm2x16:* `round(clamp(c, -1, +1) * 32767.0)` +
+*packUnorm4x8*: `round(clamp(c, 0, +1) * 255.0)` +
+*packSnorm4x8*: `round(clamp(c, -1, +1) * 127.0)`
+
+The first component of the vector will be written to the least
+significant bits of the output; the last component will be written to
+the most significant bits.
+
+=== Unpack Unorm
+[source,glsl]
+----
+ifdef::GLSL[]
+vec2 unpackUnorm2x16(highp uint p)
+vec2 unpackSnorm2x16(highp uint p)
+vec4 unpackUnorm4x8(highp uint p)
+vec4 unpackSnorm4x8(highp uint p)
+endif::GLSL[]
+ifdef::ESSL[]
+highp vec2 unpackUnorm2x16(highp uint p)
+highp vec2 unpackSnorm2x16(highp uint p)
+mediump vec4 unpackUnorm4x8(highp uint p)
+mediump vec4 unpackSnorm4x8(highp uint p)
+endif::ESSL[]
+----
+
+First, unpacks a single 32-bit unsigned integer _p_ into a pair of
+16-bit unsigned integers, a pair of 16-bit signed integers, four 8-bit
+unsigned integers, or four 8-bit signed integers, respectively.
+
+Then, each component is converted to a normalized floating-point value
+to generate the returned two- or four-component vector.
+
+The conversion for unpacked fixed-point value _f_ to floating-point is
+done as follows:
+
+*unpackUnorm2x16*: `_f_ / 65535.0` +
+*unpackSnorm2x16*: `clamp(_f_ / 32767.0, -1, +1)` +
+*unpackUnorm4x8*: `_f_ / 255.0` +
+*unpackSnorm4x8*: `clamp(_f_ / 127.0, -1, +1)`
+
+The first component of the returned vector will be extracted from the
+least significant bits of the input; the last component will be
+extracted from the most significant bits.
+
+=== Pack Half 2x16
+[source,glsl]
+----
+ifdef::GLSL[]
+uint packHalf2x16(vec2 v)
+endif::GLSL[]
+ifdef::ESSL[]
+highp uint packHalf2x16(mediump vec2 v)
+endif::ESSL[]
+----
+
+Returns an unsigned integer obtained by converting the components of a
+two-component floating-point vector to the 16-bit floating-point
+representation of the <<references, API>>, and
+then packing these two 16-bit integers into a 32-bit unsigned integer.
+
+The first vector component specifies the 16 least-significant bits of
+the result; the second component specifies the 16 most-significant
+bits.
+
+=== Unpack Half 2x16
+[source,glsl]
+----
+ifdef::GLSL[]
+vec2 unpackHalf2x16(uint v)
+endif::GLSL[]
+ifdef::ESSL[]
+mediump vec2 unpackHalf2x16(highp uint v)
+endif::ESSL[]
+----
+
+Returns a two-component floating-point vector with components obtained
+by unpacking a 32-bit unsigned integer into a pair of 16-bit values,
+interpreting those values as 16-bit floating-point numbers according
+to the <<references, API>>, and converting them to
+32-bit floating-point values.
+
+The first component of the vector is obtained from the 16
+least-significant bits of _v_; the second component is obtained from
+the 16 most-significant bits of _v_.
+
+ifdef::GLSL[]
+=== Pack Double 2x32
+[source,glsl]
+----
+double packDouble2x32(uvec2 v)
+----
+
+Returns a double-precision value obtained by packing the components of
+_v_ into a 64-bit value.
+
+If an IEEE 754 Inf or NaN is created, it will not signal, and the
+resulting floating-point value is unspecified.
+
+Otherwise, the bit-level representation of _v_ is preserved.
+The first vector component specifies the 32 least significant bits;
+the second component specifies the 32 most significant bits.
+
+=== Unpack Double 2x32
+[source,glsl]
+----
+uvec2 unpackDouble2x32(double v)
+----
+
+Returns a two-component unsigned integer vector representation of _v_.
+
+The bit-level representation of _v_ is preserved.
+
+The first component of the vector contains the 32 least significant
+bits of the double; the second component consists of the 32 most
+significant bits.
+endif::GLSL[]
 
 
 [[geometric-functions]]
@@ -649,114 +970,130 @@ endif::GLSL[]
 
 These operate on vectors as vectors, not component-wise.
 
-[options="header"]
-|====
-| Syntax | Description
+=== Length
+[source,glsl]
+----
 ifdef::GLSL[]
-| float *length*(genFType _x_) +
-  double *length*(genDType _x_)
+float length(genFType x)
+double length(genDType x)
 endif::GLSL[]
 ifdef::ESSL[]
-| float *length*(genFType _x_)
+float length(genFType x)
 endif::ESSL[]
-   a| Returns the length of vector _x_, i.e.,
-      [eq]#sqrt( x~0~^2^ + x~1~^2^ + ... )#.
+----
+
+Returns the length of vector _x_, i.e., [eq]#sqrt( x~0~^2^ + x~1~^2^ + ... )#.
+
+=== Distance
+[source,glsl]
+----
 ifdef::GLSL[]
-| float *distance*(genFType _p0_, genFType _p1_) +
-  double *distance*(genDType _p0_, genDType _p1_)
+float distance(genFType p0, genFType p1)
+double distance(genDType p0, genDType p1)
 endif::GLSL[]
 ifdef::ESSL[]
-| float *distance*(genFType _p0_, genFType _p1_)
+float distance(genFType p0, genFType p1)
 endif::ESSL[]
-    | Returns the distance between _p0_ and _p1_, i.e.,
-      *length*(_p0_ - _p1_)
+----
+
+Returns the distance between _p0_ and _p1_, i.e., *length*(_p0_ - _p1_)
+
+=== Dot
+[source,glsl]
+----
+float dot(genFType x, genFType y)
 ifdef::GLSL[]
-| float *dot*(genFType _x_, genFType _y_) +
-  double *dot*(genDType _x_, genDType _y_)
+double dot(genDType x, genDType y)
 endif::GLSL[]
-ifdef::ESSL[]
-| float *dot*(genFType _x_, genFType _y_)
-endif::ESSL[]
-    | Returns the dot product of _x_ and _y_, i.e.,
-      [eq]#x~0~ {cdot} y~0~ + x~1~ {cdot} y~1~ + ...#
+----
+
+Returns the dot product of _x_ and _y_, i.e., [eq]#x~0~ {cdot} y~0~ + x~1~ {cdot} y~1~ + ...#
+
+=== Cross
+[source,glsl]
+----
+vec3 cross(vec3 x, vec3 y)
 ifdef::GLSL[]
-| vec3 *cross*(vec3 _x_, vec3 _y_) +
-  dvec3 *cross*(dvec3 _x_, dvec3 _y_)
+dvec3 cross(dvec3 x, dvec3 y)
 endif::GLSL[]
-ifdef::ESSL[]
-| vec3 *cross*(vec3 _x_, vec3 _y_)
-endif::ESSL[]
-   a| Returns the cross product of _x_ and _y_, i.e.,
+----
+
+Returns the cross product of _x_ and _y_, i.e.,
       [eq]#(x~1~ {cdot} y~2~ - y~1~ {cdot} x~2~,
             x~2~ {cdot} y~0~ - y~2~ {cdot} x~0~,
             x~0~ {cdot} y~1~ - y~0~ {cdot} x~1~)#.
-ifdef::GLSL[]
-| genFType *normalize*(genFType _x_) +
-  genDType *normalize*(genDType _x_)
-endif::GLSL[]
-ifdef::ESSL[]
-| genFType *normalize*(genFType _x_)
-endif::ESSL[]
-    | Returns a vector in the same direction as _x_ but with a length of 1,
-      i.e. _x_ / *length*(x).
-ifdef::GLSL[]
-| compatibility profile only +
-  vec4 *ftransform*()
-   a| Available only when using the compatibility profile.
-      For core {apiname}, use *invariant*. +
-      For vertex shaders only.
-      This function will ensure that the incoming vertex value will be
-      transformed in a way that produces exactly the same result as would be
-      produced by {apiname}'s fixed functionality transform.
-      It is intended to be used to compute _gl_Position_, e.g.
---
-{empty}:: _gl_Position_ = *ftransform*()
 
-This function should be used, for example, when an application is rendering
-the same geometry in separate passes, and one pass uses the fixed
-functionality path to render and another pass uses programmable shaders.
---
-endif::GLSL[]
-| genFType *faceforward*(genFType _N_, genFType _I_, genFType _Nref_) +
+=== Normalize
+[source,glsl]
+----
+genFType normalize(genFType x)
 ifdef::GLSL[]
-  genDType *faceforward*(genDType _N_, genDType _I_, genDType _Nref_)
+genDType normalize(genDType x)
 endif::GLSL[]
-    | If *dot*(_Nref_, _I_) < 0 return _N_, otherwise return -_N_.
+----
+
+Returns a vector in the same direction as _x_ but with a length of 1, i.e. _x_ / *length*(x).
+
 ifdef::GLSL[]
-| genFType *reflect*(genFType _I_, genFType _N_) +
-  genDType *reflect*(genDType _I_, genDType _N_)
+=== FTransform
+Compatibility profile only
+
+[source,glsl]
+----
+vec4 ftransform()
+----
+
+Available only when using the compatibility profile. For core {apiname}, use *invariant*.
+
+For vertex shaders only. This function will ensure that the incoming vertex value will be
+transformed in a way that produces exactly the same result as would be produced by {apiname}'s
+fixed functionality transform. It is intended to be used to compute _gl_Position_, e.g.
+
+[source,glsl]
+----
+gl_Position = ftransform()
+----
+
+This function should be used, for example, when an application is rendering the same geometry in
+separate passes, and one pass uses the fixed functionality path to render and another pass uses
+programmable shaders.
 endif::GLSL[]
-ifdef::ESSL[]
-| genFType *reflect*(genFType _I_, genFType _N_)
-endif::ESSL[]
-    | For the incident vector _I_ and surface orientation _N_, returns the
-      reflection direction: [eq]#I - 2 {cdot} *dot*(N, I) {cdot} N#.
-      _N_ must already be normalized in order to achieve the desired result.
-| genFType *refract*(genFType _I_, genFType _N_, float _eta_) +
+
+=== Face Forward
+[source,glsl]
+----
+genFType faceforward(genFType N, genFType I, genFType Nref)
 ifdef::GLSL[]
-  genDType *refract*(genDType _I_, genDType _N_, double _eta_)
+genDType faceforward(genDType N, genDType I, genDType Nref)
 endif::GLSL[]
-   a| For the incident vector _I_ and surface normal _N_, and the ratio of
-      indices of refraction _eta_, return the refraction vector.
-      The result is computed by the <<refraction-equation,refraction
-      equation>> shown below.
+----
 
-      The input parameters for the incident vector _I_ and the surface
-      normal _N_ must already be normalized to get the desired results.
-|====
+If *dot*(_Nref_, _I_) < 0 return _N_, otherwise return -_N_.
 
+=== Reflect
+[source,glsl]
+----
+genFType reflect(genFType I, genFType N)
+ifdef::GLSL[]
+genDType reflect(genDType I, genDType N)
+endif::GLSL[]
+----
 
-[[refraction-equation]]
-=== Refraction Equation
+For the incident vector _I_ and surface orientation _N_, returns the reflection direction:
+[eq]#I - 2 {cdot} *dot*(N, I) {cdot} N#. _N_ must already be normalized in order to achieve
+the desired result.
 
-ifdef::editing-notes[]
-[NOTE]
-.editing-note
-====
-(Jon) Moved to new section from *refract* table entry above because
-asciidoctor-mathematical doesn't support math blocks in table cells yet.
-====
-endif::editing-notes[]
+=== Refract
+[source,glsl]
+----
+genFType refract(genFType I, genFType N, float eta)
+ifdef::GLSL[]
+genDType refract(genDType I, genDType N, double eta)
+endif::GLSL[]
+----
+
+For the incident vector _I_ and surface normal _N_, and the ratio of indices of refraction
+_eta_, return the refraction vector. The result is computed by the refraction equation shown below.
 
 [latexmath]
 ++++
@@ -774,6 +1111,9 @@ result &=
 \end{aligned}
 ++++
 
+The input parameters for the incident vector _I_ and the surface normal _N_ must already be
+normalized to get the desired results.
+
 
 [[matrix-functions]]
 == Matrix Functions
@@ -784,52 +1124,80 @@ values are single precision, and a double-precision floating-point version,
 where all arguments and return values are double precision.
 Only the single-precision floating-point version is shown.
 
-[options="header"]
-|====
-| Syntax | Description
-| mat *matrixCompMult*(mat _x_, mat _y_)
-    | Multiply matrix _x_ by matrix _y_ component-wise, i.e., result[i][j]
-      is the scalar product of _x_[i][j] and _y_[i][j]. +
+=== MatrixCompMult
+[source,glsl]
+----
+mat matrixCompMult(mat x, mat y)
+----
 
-      Note: to get linear algebraic matrix multiplication, use the multiply
-      operator (***).
-| mat2 *outerProduct*(vec2 _c_, vec2 _r_) +
-  mat3 *outerProduct*(vec3 _c_, vec3 _r_) +
-  mat4 *outerProduct*(vec4 _c_, vec4 _r_) +
-  mat2x3 *outerProduct*(vec3 _c_, vec2 _r_) +
-  mat3x2 *outerProduct*(vec2 _c_, vec3 _r_) +
-  mat2x4 *outerProduct*(vec4 _c_, vec2 _r_) +
-  mat4x2 *outerProduct*(vec2 _c_, vec4 _r_) +
-  mat3x4 *outerProduct*(vec4 _c_, vec3 _r_) +
-  mat4x3 *outerProduct*(vec3 _c_, vec4 _r_)
-    | Treats the first parameter _c_ as a column vector (matrix with one
-      column) and the second parameter _r_ as a row vector (matrix with one
-      row) and does a linear algebraic matrix multiply _c_ * _r_, yielding a
-      matrix whose number of rows is the number of components in _c_ and
-      whose number of columns is the number of components in _r_.
-| mat2 *transpose*(mat2 _m_) +
-  mat3 *transpose*(mat3 _m_) +
-  mat4 *transpose*(mat4 _m_) +
-  mat2x3 *transpose*(mat3x2 _m_) +
-  mat3x2 *transpose*(mat2x3 _m_) +
-  mat2x4 *transpose*(mat4x2 _m_) +
-  mat4x2 *transpose*(mat2x4 _m_) +
-  mat3x4 *transpose*(mat4x3 _m_) +
-  mat4x3 *transpose*(mat3x4 _m_)
-    | Returns a matrix that is the transpose of _m_.
-      The input matrix _m_ is not modified.
-| float *determinant*(mat2 _m_) +
-  float *determinant*(mat3 _m_) +
-  float *determinant*(mat4 _m_)
-    | Returns the determinant of _m_.
-| mat2 *inverse*(mat2 _m_) +
-  mat3 *inverse*(mat3 _m_) +
-  mat4 *inverse*(mat4 _m_)
-    | Returns a matrix that is the inverse of _m_.
-      The input matrix _m_ is not modified.
-      The values in the returned matrix are undefined if _m_ is singular or
-      poorly-conditioned (nearly singular).
-|====
+Multiply matrix _x_ by matrix _y_ component-wise, i.e., `result[i][j]`
+is the scalar product of `_x_[i][j]` and `_y_[i][j]`.
+
+NOTE: To get linear algebraic matrix multiplication, use the multiply operator (***).
+
+=== OuterProduct
+[source,glsl]
+----
+mat2 outerProduct(vec2 c, vec2 r)
+mat3 outerProduct(vec3 c, vec3 r)
+mat4 outerProduct(vec4 c, vec4 r)
+mat2x3 outerProduct(vec3 c, vec2 r)
+mat3x2 outerProduct(vec2 c, vec3 r)
+mat2x4 outerProduct(vec4 c, vec2 r)
+mat4x2 outerProduct(vec2 c, vec4 r)
+mat3x4 outerProduct(vec4 c, vec3 r)
+mat4x3 outerProduct(vec3 c, vec4 r)
+----
+
+Treats the first parameter _c_ as a column vector (matrix with one
+column) and the second parameter _r_ as a row vector (matrix with one
+row) and does a linear algebraic matrix multiply _c_ * _r_, yielding a
+matrix whose number of rows is the number of components in _c_ and
+whose number of columns is the number of components in _r_.
+
+=== Transpose
+[source,glsl]
+----
+mat2 transpose(mat2 m)
+mat3 transpose(mat3 m)
+mat4 transpose(mat4 m)
+mat2x3 transpose(mat3x2 m)
+
+mat3x2 transpose(mat2x3 m)
+mat2x4 transpose(mat4x2 m)
+mat4x2 transpose(mat2x4 m)
+mat3x4 transpose(mat4x3 m)
+mat4x3 transpose(mat3x4 m)
+----
+
+Returns a matrix that is the transpose of _m_.
+
+The input matrix _m_ is not modified.
+
+=== Determinant
+[source,glsl]
+----
+float determinant(mat2 m)
+float determinant(mat3 m)
+float determinant(mat4 m)
+----
+
+Returns the determinant of _m_.
+
+=== Inverse
+[source,glsl]
+----
+mat2 inverse(mat2 m)
+mat3 inverse(mat3 m)
+mat4 inverse(mat4 m)
+----
+
+Returns a matrix that is the inverse of _m_.
+
+The input matrix _m_ is not modified.
+
+The values in the returned matrix are undefined if _m_ is singular or
+poorly-conditioned (nearly singular).
 
 
 [[vector-relational-functions]]
@@ -857,42 +1225,92 @@ endif::ESSL[]
 In all cases, the sizes of all the input and return vectors for any
 particular call must match.
 
-[options="header"]
-|====
-| Syntax | Description
-| bvec *lessThan*(vec x, vec y) +
-  bvec *lessThan*(ivec x, ivec y) +
-  bvec *lessThan*(uvec x, uvec y)
-    | Returns the component-wise compare of [eq]#x < y#.
-| bvec *lessThanEqual*(vec x, vec y) +
-  bvec *lessThanEqual*(ivec x, ivec y) +
-  bvec *lessThanEqual*(uvec x, uvec y)
-    | Returns the component-wise compare of [eq]#x {leq} y#.
-| bvec *greaterThan*(vec x, vec y) +
-  bvec *greaterThan*(ivec x, ivec y) +
-  bvec *greaterThan*(uvec x, uvec y)
-    | Returns the component-wise compare of [eq]#x > y#.
-| bvec *greaterThanEqual*(vec x, vec y) +
-  bvec *greaterThanEqual*(ivec x, ivec y) +
-  bvec *greaterThanEqual*(uvec x, uvec y)
-    | Returns the component-wise compare of [eq]#x {geq} y#.
-| bvec *equal*(vec x, vec y) +
-  bvec *equal*(ivec x, ivec y) +
-  bvec *equal*(uvec x, uvec y) +
-  bvec *equal*(bvec x, bvec y)
-    | Returns the component-wise compare of [eq]#x == y#.
-| bvec *notEqual*(vec x, vec y) +
-  bvec *notEqual*(ivec x, ivec y) +
-  bvec *notEqual*(uvec x, uvec y) +
-  bvec *notEqual*(bvec x, bvec y)
-    | Returns the component-wise compare of [eq]#x {neq} y#.
-| bool *any*(bvec x)
-    | Returns *true* if any component of _x_ is *true*.
-| bool *all*(bvec x)
-    | Returns *true* only if all components of _x_ are *true*.
-| bvec *not*(bvec x)
-    | Returns the component-wise logical complement of _x_.
-|====
+=== LessThan
+[source,glsl]
+----
+bvec lessThan(vec x, vec y)
+bvec lessThan(ivec x, ivec y)
+bvec lessThan(uvec x, uvec y)
+----
+
+Returns the component-wise compare of [eq]#x < y#.
+
+=== LessThanEqual
+[source,glsl]
+----
+bvec lessThanEqual(vec x, vec y)
+bvec lessThanEqual(ivec x, ivec y)
+bvec lessThanEqual(uvec x, uvec y)
+----
+
+Returns the component-wise compare of [eq]#x {leq} y#.
+
+=== GreaterThan
+[source,glsl]
+----
+bvec greaterThan(vec x, vec y)
+bvec greaterThan(ivec x, ivec y)
+bvec greaterThan(uvec x, uvec y)
+----
+
+Returns the component-wise compare of [eq]#x > y#.
+
+=== GreaterThanEqual
+[source,glsl]
+----
+bvec greaterThanEqual(vec x, vec y)
+bvec greaterThanEqual(ivec x, ivec y)
+bvec greaterThanEqual(uvec x, uvec y)
+----
+
+Returns the component-wise compare of [eq]#x {geq} y#.
+
+=== Equal
+[source,glsl]
+----
+bvec equal(vec x, vec y)
+bvec equal(ivec x, ivec y)
+bvec equal(uvec x, uvec y)
+bvec equal(bvec x, bvec y)
+----
+
+Returns the component-wise compare of [eq]#x == y#.
+
+=== NotEqual
+[source,glsl]
+----
+bvec notEqual(vec x, vec y)
+bvec notEqual(ivec x, ivec y)
+bvec notEqual(uvec x, uvec y)
+bvec notEqual(bvec x, bvec y)
+----
+
+Returns the component-wise compare of [eq]#x {neq} y#.
+
+=== Any
+[source,glsl]
+----
+bool any(bvec x)
+----
+
+Returns *true* if any component of _x_ is *true*.
+
+=== All
+[source,glsl]
+----
+bool all(bvec x)
+----
+
+Returns *true* only if all components of _x_ are *true*.
+
+=== Not
+[source,glsl]
+----
+bvec not(bvec x)
+----
+
+Returns the component-wise logical complement of _x_.
+
 
 
 [[integer-functions]]
@@ -906,80 +1324,147 @@ The lowest-order bit is bit 0.
 "`Bit number`" will always refer to counting up from the lowest-order bit as
 bit 0.
 
-[options="header"]
-|====
-| Syntax | Description
-| genUType *uaddCarry*(highp genUType _x_, highp genUType _y_, out lowp genUType _carry_)
-    | Adds 32-bit unsigned integers _x_ and _y_, returning the sum modulo
-      2^32^.
-      The value _carry_ is set to zero if the sum was less than 2^32^, or
-      one otherwise.
-| genUType *usubBorrow*(highp genUType _x_, highp genUType _y_, out lowp genUType _borrow_)
-    | Subtracts the 32-bit unsigned integer _y_ from _x_, returning the
-      difference if non-negative, or 2^32^ plus the difference otherwise.
-      The value _borrow_ is set to zero if [eq]#x {geq} y#, or one
-      otherwise.
-| void *umulExtended*(highp genUType _x_, highp genUType _y_, out highp genUType _msb_, out highp genUType _lsb_) +
-  void *imulExtended*(highp genIType _x_, highp genIType _y_, out highp genIType _msb_, out highp genIType _lsb_)
-    | Multiplies 32-bit unsigned or signed integers _x_ and _y_, producing a
-      64-bit result.
-      The 32 least-significant bits are returned in _lsb_.
-      The 32 most-significant bits are returned in _msb_.
-| genIType *bitfieldExtract*(genIType _value_, int _offset_, int _bits_) +
-  genUType *bitfieldExtract*(genUType _value_, int _offset_, int _bits_)
-    | Extracts bits [eq]#[offset, offset + bits - 1]# from _value_,
-      returning them in the least significant bits of the result. +
+=== UAddCarry
+[source,glsl]
+----
+genUType uaddCarry(highp genUType x, highp genUType y, out lowp genUType carry)
+----
 
-      For unsigned data types, the most significant bits of the result will
-      be set to zero.
-      For signed data types, the most significant bits will be set to the
-      value of bit [eq]#offset + bits - 1#. +
+Adds 32-bit unsigned integers _x_ and _y_, returning the sum modulo 2^32^.
 
-      If _bits_ is zero, the result will be zero.
-      The result will be undefined if _offset_ or _bits_ is negative, or if
-      the sum of _offset_ and _bits_ is greater than the number of bits used
-      to store the operand.
-      Note that for vector versions of *bitfieldExtract*(), a single pair of
-      _offset_ and _bits_ values is shared for all components.
-| genIType *bitfieldInsert*(genIType _base_, genIType _insert_, int _offset_, int _bits_) +
-  genUType *bitfieldInsert*(genUType _base_, genUType _insert_, int _offset_, int _bits_)
-    | Inserts the _bits_ least significant bits of _insert_ into _base_.
+The value _carry_ is set to zero if the sum was less than 2^32^, or one otherwise.
 
-      The result will have bits [eq]#[offset, offset + bits - 1]# taken from
-      bits [eq]#[0, bits - 1]# of _insert_, and all other bits taken
-      directly from the corresponding bits of _base_.
-      If _bits_ is zero, the result will simply be _base_.
-      The result will be undefined if _offset_ or _bits_ is negative, or if
-      the sum of _offset_ and _bits_ is greater than the number of bits used
-      to store the operand. +
-      Note that for vector versions of *bitfieldInsert*(), a single pair of
-      _offset_ and _bits_ values is shared for all components.
-| genIType *bitfieldReverse*(highp genIType _value_) +
-  genUType *bitfieldReverse*(highp genUType _value_)
-    | Reverses the bits of _value_.
-      The bit numbered _n_ of the result will be taken from bit [eq]#(bits -
-      1) - n# of _value_, where _bits_ is the total number of bits used to
-      represent _value_.
-| {lowp} genIType *bitCount*(genIType _value_) +
-  {lowp} genIType *bitCount*(genUType _value_)
-    | Returns the number of one bits in the binary representation of
-      _value_.
-| {lowp} genIType *findLSB*(genIType _value_) +
-  {lowp} genIType *findLSB*(genUType _value_)
-    | Returns the bit number of the least significant one bit in the binary
-      representation of _value_.
-      If _value_ is zero, -1 will be returned.
-| {lowp} genIType *findMSB*(highp genIType _value_) +
-  {lowp} genIType *findMSB*(highp genUType _value_)
-    | Returns the bit number of the most significant bit in the binary
-      representation of _value_.
+=== USubBorrow
+[source,glsl]
+----
+genUType usubBorrow(highp genUType x, highp genUType y, out lowp genUType borrow)
+----
 
-      For positive integers, the result will be the bit number of the most
-      significant one bit.
-      For negative integers, the result will be the bit number of the most
-      significant zero bit.
-      For a _value_ of zero or negative one, -1 will be returned.
-|====
+Subtracts the 32-bit unsigned integer _y_ from _x_, returning the difference if non-negative, or
+2^32^ plus the difference otherwise.
+
+The value _borrow_ is set to zero if [eq]#x {geq} y#, or one otherwise.
+
+===  Mul Extended
+[source,glsl]
+----
+void umulExtended(highp genUType x,
+                  highp genUType y,
+                  out highp genUType msb,
+                  out highp genUType lsb)
+void imulExtended(highp genIType x,
+                  highp genIType y,
+                  out highp genIType msb,
+                  out highp genIType lsb)
+----
+
+Multiplies 32-bit unsigned or signed integers _x_ and _y_, producing a 64-bit result.
+
+ * The 32 least-significant bits are returned in _lsb_.
+ * The 32 most-significant bits are returned in _msb_.
+
+=== BitfieldExtract
+[source,glsl]
+----
+genIType bitfieldExtract(genIType value, int offset, int bits)
+genUType bitfieldExtract(genUType value, int offset, int bits)
+----
+
+Extracts bits [eq]#[offset, offset + bits - 1]# from _value_, returning them in the least
+significant bits of the result.
+
+For unsigned data types, the most significant bits of the result will be set to zero.
+For signed data types, the most significant bits will be set to the value of bit
+[eq]#offset + bits - 1#.
+
+If _bits_ is zero, the result will be zero. The result will be undefined if _offset_ or _bits_ is
+negative, or if the sum of _offset_ and _bits_ is greater than the number of bits used to store the
+operand.
+
+Note that for vector versions of *bitfieldExtract*(), a single pair of _offset_ and _bits_ values
+is shared for all components.
+
+=== BitfieldInsert
+[source,glsl]
+----
+genIType bitfieldInsert(genIType base, genIType insert, int offset, int bits)
+genUType bitfieldInsert(genUType base, genUType insert, int offset, int bits)
+----
+
+Inserts the _bits_ least significant bits of _insert_ into _base_.
+
+The result will have bits [eq]#[offset, offset + bits - 1]# taken from bits [eq]#[0, bits - 1]# of
+_insert_, and all other bits taken directly from the corresponding bits of _base_.
+If _bits_ is zero, the result will simply be _base_. The result will be undefined if _offset_ or
+_bits_ is negative, or if the sum of _offset_ and _bits_ is greater than the number of bits used
+to store the operand.
+
+Note that for vector versions of *bitfieldInsert*(), a single pair of _offset_ and _bits_ values is
+shared for all components.
+
+=== BitfieldReverse
+[source,glsl]
+----
+genIType bitfieldReverse(highp genIType value)
+genUType bitfieldReverse(highp genUType value)
+----
+
+Reverses the bits of _value_.
+
+The bit numbered _n_ of the result will be taken from bit [eq]#(bits -1) - n# of _value_, where
+_bits_ is the total number of bits used to represent _value_.
+
+=== BitCount
+[source,glsl]
+----
+ifdef::GLSL[]
+genIType bitCount(genIType value)
+genIType bitCount(genUType value)
+endif::GLSL[]
+ifdef::ESSL[]
+lowp genIType bitCount(genIType value)
+lowp genIType bitCount(genUType value)
+endif::ESSL[]
+----
+
+Returns the number of one bits in the binary representation of _value_.
+
+=== FindLSB
+[source,glsl]
+----
+ifdef::GLSL[]
+genIType findLSB(genIType value)
+genIType findLSB(genUType value)
+endif::GLSL[]
+ifdef::ESSL[]
+lowp genIType findLSB(genIType value)
+lowp genIType findLSB(genUType value)
+endif::ESSL[]
+----
+
+Returns the bit number of the least significant one bit in the binary representation of _value_.
+
+If _value_ is zero, -1 will be returned.
+
+=== FindMSB
+[source,glsl]
+----
+ifdef::GLSL[]
+genIType findMSB(highp genIType value)
+genIType findMSB(highp genUType value)
+endif::GLSL[]
+ifdef::ESSL[]
+lowp genIType findMSB(highp genIType value)
+lowp genIType findMSB(highp genUType value)
+endif::ESSL[]
+
+----
+
+Returns the bit number of the most significant bit in the binary representation of _value_.
+
+For positive integers, the result will be the bit number of the most significant one bit.
+For negative integers, the result will be the bit number of the most significant zero bit.
+For a _value_ of zero or negative one, -1 will be returned.
 
 
 [[texture-functions]]
@@ -1148,420 +1633,410 @@ accessible level of the mipmap array (the value _q_ in section 8.14.3
 "`Mipmapping`" of the <<references,{apispec}>>) minus the base level.
 endif::GLSL[]
 
-[options="header"]
-|====
-| Syntax | Description
-|
+==== TextureSize
+[source,glsl]
+----
 ifdef::GLSL[]
-  {highp} int *textureSize*(gsampler1D _sampler_, int _lod_) +
+int textureSize(gsampler1D sampler, int lod)
+ivec2 textureSize(gsampler2D sampler, int lod)
+ivec3 textureSize(gsampler3D sampler, int lod)
+ivec2 textureSize(gsamplerCube sampler, int lod)
+int textureSize(sampler1DShadow sampler, int lod)
+ivec2 textureSize(sampler2DShadow sampler, int lod)
+ivec2 textureSize(samplerCubeShadow sampler, in lod)
+ivec3 textureSize(gsamplerCubeArray sampler, int lod)
+ivec3 textureSize(samplerCubeArrayShadow sampler, int lod)
+ivec2 textureSize(gsampler1DArray sampler, int lod)
+ivec2 textureSize(sampler1DArrayShadow sampler, int lod)
+ivec3 textureSize(gsampler2DArray sampler, int lod)
+ivec3 textureSize(sampler2DArrayShadow sampler, int lod)
+ivec2 textureSize(gsamler2DRet _samler)
+ivec2 textureSize(sampler2DectShadw _samler)
+int textureSize(gsamplerBuffer sampler)
+ivec2 textureSize(gsampler2DMS sampler)
+ivec3 textureSize(gsampler2DMSArray sampler)
 endif::GLSL[]
-  {highp} ivec2 *textureSize*(gsampler2D _sampler_, int _lod_) +
-  {highp} ivec3 *textureSize*(gsampler3D _sampler_, int _lod_) +
-  {highp} ivec2 *textureSize*(gsamplerCube _sampler_, int _lod_) +
+ifdef::ESSL[]
+highp ivec2 textureSize(gsampler2D sampler, int lod)
+highp ivec3 textureSize(gsampler3D sampler, int lod)
+highp ivec2 textureSize(gsamplerCube sampler, int lod)
+highp ivec2 textureSize(sampler2DShadow sampler, int lod)
+highp ivec2 textureSize(samplerCubeShadow sampler, in lod)
+highp ivec3 textureSize(gsamplerCubeArray sampler, int lod)
+highp ivec3 textureSize(samplerCubeArrayShadow sampler, int lod)
+highp ivec3 textureSize(gsampler2DArray sampler, int lod)
+highp ivec3 textureSize(sampler2DArrayShadow sampler, int lod)
+highp int textureSize(gsamplerBuffer sampler)
+highp ivec2 textureSize(gsampler2DMS sampler)
+highp ivec3 textureSize(gsampler2DMSArray sampler)
+endif::ESSL[]
+----
+
+Returns the dimensions of level _lod_ (if present) for the texture bound to _sampler_, as described
+in section 11.1.3.4 "`Texture Queries`" of the <<references,{apispec}>>.
+
+The components in the return value are filled in, in order, with the width, height, and depth of
+the texture.
+
+For the array forms, the last component of the return value is the number of layers in the texture
+array, or the number of cubes in the texture cube map array.
+
 ifdef::GLSL[]
-  {highp} int *textureSize*(sampler1DShadow _sampler_, int _lod_) +
+==== TextureQueryLod
+[source,glsl]
+----
+vec2 textureQueryLod(gsampler1D sampler, float P)
+vec2 textureQueryLod(gsampler2D sampler, vec2 P)
+vec2 textureQueryLod(gsampler3D sampler, vec3 P)
+vec2 textureQueryLod(gsamplerCube sampler, vec3 P)
+vec2 textureQueryLod(gsampler1DArray sampler, float P)
+vec2 textureQueryLod(gsampler2DArray sampler, vec2 P)
+vec2 textureQueryLod(gsamplerCubeArray sampler, vec3 P)
+vec2 textureQueryLod(sampler1DShadow sampler, float P)
+vec2 textureQueryLod(sampler2DShadow sampler, vec2 P)
+vec2 textureQueryLod(samplerCubeShadow sampler, vec3 P)
+vec2 textureQueryLod(sampler1DArrayShadow sampler, float P)
+vec2 textureQueryLod(sampler2DArrayShadow sampler, vec2 P)
+vec2 textureQueryLod(samplerCubeArrayShadow sampler, vec P)
+----
+
+Returns the mipmap array(s) that would be accessed in the _x_ component of the return value.
+
+Returns the computed level-of-detail relative to the base level in the _y_ component of the return
+value.
+
+If called on an incomplete texture, the results are undefined.
 endif::GLSL[]
-  {highp} ivec2 *textureSize*(sampler2DShadow _sampler_, int _lod_) +
-  {highp} ivec2 *textureSize*(samplerCubeShadow _sampler_, int _lod_)
-  {highp} ivec3 *textureSize*(gsamplerCubeArray _sampler_, int _lod_) +
-  {highp} ivec3 *textureSize*(samplerCubeArrayShadow _sampler_, int _lod_) +
+
 ifdef::GLSL[]
-  {highp} ivec2 *textureSize*(gsampler2DRect _sampler_) +
-  {highp} ivec2 *textureSize*(sampler2DRectShadow _sampler_) +
-  {highp} ivec2 *textureSize*(gsampler1DArray _sampler_, int _lod_) +
-  {highp} ivec2 *textureSize*(sampler1DArrayShadow _sampler_, int _lod_) +
-endif::GLSL[]
-  {highp} ivec3 *textureSize*(gsampler2DArray _sampler_, int _lod_) +
-  {highp} ivec3 *textureSize*(sampler2DArrayShadow _sampler_, int _lod_) +
-  {highp} int *textureSize*(gsamplerBuffer _sampler_) +
-  {highp} ivec2 *textureSize*(gsampler2DMS _sampler_) +
-  {highp} ivec3 *textureSize*(gsampler2DMSArray _sampler_)
-    | Returns the dimensions of level _lod_ (if present) for the texture
-      bound to _sampler_, as described in section
-      11.1.3.4 "`Texture Queries`" of the <<references,{apispec}>>. +
-      The components in the return value are filled in, in order, with the
-      width, height, and depth of the texture.
+==== TextureQueryLevels
+[source,glsl]
+----
+int textureQueryLevels(gsampler1D sampler)
+int textureQueryLevels(gsampler2D sampler)
+int textureQueryLevels(gsampler3D sampler)
+int textureQueryLevels(gsamplerCube sampler)
+int textureQueryLevels(gsampler1DArray sampler)
+int textureQueryLevels(gsampler2DArray sampler)
+int textureQueryLevels(gsamplerCubeArray sampler)
+int textureQueryLevels(sampler1DShadow sampler)
+int textureQueryLevels(sampler2DShadow sampler)
+int textureQueryLevels(samplerCubeShadow sampler)
+int textureQueryLevels(sampler1DArrayShadow sampler)
+int textureQueryLevels(sampler2DArrayShadow sampler)
+int textureQueryLevels(samplerCubeArrayShadow sampler)
+----
 
-      For the array forms, the last component of the return value is the
-      number of layers in the texture array, or the number of cubes in the
-      texture cube map array.
+Returns the number of mipmap levels accessible in the texture associated with _sampler_, as defined
+in the <<references,{apispec}.>>
+
+The value zero will be returned if no texture or an incomplete texture is associated with _sampler_.
+
+Available in all shader stages.
+endif::GLSL[]
+
 ifdef::GLSL[]
-| vec2 *textureQueryLod*(gsampler1D _sampler_, float _P_) +
-  vec2 *textureQueryLod*(gsampler2D _sampler_, vec2 _P_) +
-  vec2 *textureQueryLod*(gsampler3D _sampler_, vec3 _P_) +
-  vec2 *textureQueryLod*(gsamplerCube _sampler_, vec3 _P_) +
-  vec2 *textureQueryLod*(gsampler1DArray _sampler_, float _P_) +
-  vec2 *textureQueryLod*(gsampler2DArray _sampler_, vec2 _P_) +
-  vec2 *textureQueryLod*(gsamplerCubeArray _sampler_, vec3 _P_) +
-  vec2 *textureQueryLod*(sampler1DShadow _sampler_, float _P_) +
-  vec2 *textureQueryLod*(sampler2DShadow _sampler_, vec2 _P_) +
-  vec2 *textureQueryLod*(samplerCubeShadow _sampler_, vec3 _P_) +
-  vec2 *textureQueryLod*(sampler1DArrayShadow _sampler_, float _P_) +
-  vec2 *textureQueryLod*(sampler2DArrayShadow _sampler_, vec2 _P_) +
-  vec2 *textureQueryLod*(samplerCubeArrayShadow _sampler_, vec3 _P_)
-    | Returns the mipmap array(s) that would be accessed in the _x_
-      component of the return value.
+==== TextureSamples
+[source,glsl]
+----
+int textureSamples(gsampler2DMS sampler)
+int textureSamples(gsampler2DMSArray sampler)
+----
 
-      Returns the computed level-of-detail relative to the base level in the
-      _y_ component of the return value.
-
-      If called on an incomplete texture, the results are undefined.
-| int *textureQueryLevels*(gsampler1D _sampler_) +
-  int *textureQueryLevels*(gsampler2D _sampler_) +
-  int *textureQueryLevels*(gsampler3D _sampler_) +
-  int *textureQueryLevels*(gsamplerCube _sampler_) +
-  int *textureQueryLevels*(gsampler1DArray _sampler_) +
-  int *textureQueryLevels*(gsampler2DArray _sampler_) +
-  int *textureQueryLevels*(gsamplerCubeArray _sampler_) +
-  int *textureQueryLevels*(sampler1DShadow _sampler_) +
-  int *textureQueryLevels*(sampler2DShadow _sampler_) +
-  int *textureQueryLevels*(samplerCubeShadow _sampler_) +
-  int *textureQueryLevels*(sampler1DArrayShadow _sampler_) +
-  int *textureQueryLevels*(sampler2DArrayShadow _sampler_) +
-  int *textureQueryLevels*(samplerCubeArrayShadow _sampler_)
-    | Returns the number of mipmap levels accessible in the texture
-      associated with _sampler_, as defined in the <<references,{apispec}.>>
-
-      The value zero will be returned if no texture or an incomplete texture
-      is associated with _sampler_.
-
-      Available in all shader stages.
-| int *textureSamples*(gsampler2DMS _sampler_) +
-  int *textureSamples*(gsampler2DMSArray _sampler_)
-    | Returns the number of samples of the texture bound to _sampler_.
+Returns the number of samples of the texture bound to _sampler_.
 endif::GLSL[]
-|====
 
 
 [[texel-lookup-functions]]
 === Texel Lookup Functions
 
-[options="header"]
-|====
-| Syntax | Description
-|
+==== Texture
+[source,glsl]
+----
 ifdef::GLSL[]
-  gvec4 *texture*(gsampler1D _sampler_, float _P_ [, float _bias_] ) +
+gvec4 texture(gsampler1D sampler, float P [, float bias])
 endif::GLSL[]
-  gvec4 *texture*(gsampler2D _sampler_, vec2 _P_ [, float _bias_] ) +
-  gvec4 *texture*(gsampler3D _sampler_, vec3 _P_ [, float _bias_] ) +
-  gvec4 *texture*(gsamplerCube _sampler_, vec3 _P_[, float _bias_] ) +
+gvec4 texture(gsampler2D sampler, vec2 P [, float _bias])
+gvec4 texture(gsampler3D sampler, vec3 P [, float _bias])
+gvec4 texture(gsamplerCube sampler, vec3 P [, float _bias])
 ifdef::GLSL[]
-  float *texture*(sampler1DShadow _sampler_, vec3 _P_ [, float _bias_]) +
+float texture(sampler1DShadow sampler, vec3 P [, float bias])
 endif::GLSL[]
-  float *texture*(sampler2DShadow _sampler_, vec3 _P_ [, float _bias_]) +
-  float *texture*(samplerCubeShadow _sampler_, vec4 _P_ [, float _bias_] ) +
-  gvec4 *texture*(gsampler2DArray _sampler_, vec3 _P_ [, float _bias_] ) +
-  gvec4 *texture*(gsamplerCubeArray _sampler_, vec4 _P_ [, float _bias_] ) +
+float texture(sampler2DShadow sampler, vec3 P [, float bias])
+float texture(samplerCubeShadow sampler, vec4 P [, float bias])
+gvec4 texture(gsampler2DArray sampler, vec3 P [, float bias])
+gvec4 texture(gsamplerCubeArray sampler, vec4 P [, float bias])
 ifdef::GLSL[]
-  gvec4 *texture*(gsampler1DArray _sampler_, vec2 _P_ [, float _bias_] ) +
-  float *texture*(sampler1DArrayShadow _sampler_, vec3 _P_ [, float _bias_] ) +
+gvec4 texture(gsampler1DArray sampler, vec2 P [, float bias])
+float texture(sampler1DArrayShadow sampler, vec3 P [, float bias])
 endif::GLSL[]
-  float *texture*(sampler2DArrayShadow _sampler_, vec4 _P_) +
+float texture(sampler2DArrayShadow sampler, vec4 P)
 ifdef::GLSL[]
-  gvec4 *texture*(gsampler2DRect _sampler_, vec2 _P_) +
-  float *texture*(sampler2DRectShadow _sampler_, vec3 _P_) +
+gvec4 texture(gsampler2DRect sampler, vec2 P)
+float texture(sampler2DRectShadow sampler, vec3 P)
 endif::GLSL[]
-  float *texture*(samplerCubeArrayShadow _sampler_, vec4 _P_, float _compare_)
-    | Use the texture coordinate _P_ to do a texture lookup in the texture
-      currently bound to _sampler_.
+float texture(samplerCubeArrayShadow sampler, vec4 P, float compare)
+----
 
-      For shadow forms: When _compare_ is present, it is used as _D~ref~_
-      and the array layer comes from the last component of _P_.
-      When _compare_ is not present, the last component of _P_ is used as
-      _D~ref~_ and the array layer comes from the second to last component
-      of _P_.
+Use the texture coordinate _P_ to do a texture lookup in the texture currently bound to _sampler_.
+
+For shadow forms: When _compare_ is present, it is used as _D~ref~_ and the array layer comes from
+the last component of _P_. When _compare_ is not present, the last component of _P_ is used as
+_D~ref~_ and the array layer comes from the second to last component of _P_.
 ifdef::GLSL[]
-      (The second component of _P_ is unused for *1D* shadow lookups.)
+(The second component of _P_ is unused for *1D* shadow lookups.)
 endif::GLSL[]
 
-      For non-shadow forms: the array layer comes from the last component of
-      _P_.
-|
-ifdef::GLSL[]
-  gvec4 *textureProj*(gsampler1D _sampler_, vec2 _P_ [, float _bias_] ) +
-  gvec4 *textureProj*(gsampler1D _sampler_, vec4 _P_ [, float _bias_] ) +
-endif::GLSL[]
-  gvec4 *textureProj*(gsampler2D _sampler_, vec3 _P_ [, float _bias_] ) +
-  gvec4 *textureProj*(gsampler2D _sampler_, vec4 _P_ [, float _bias_] ) +
-  gvec4 *textureProj*(gsampler3D _sampler_, vec4 _P_ [, float _bias_] ) +
-ifdef::GLSL[]
-  float *textureProj*(sampler1DShadow _sampler_, vec4 _P_ [, float _bias_] ) +
-endif::GLSL[]
-  float *textureProj*(sampler2DShadow _sampler_, vec4 _P_ [, float _bias_] ) +
-ifdef::GLSL[]
-  gvec4 *textureProj*(gsampler2DRect _sampler_, vec3 _P_) +
-  gvec4 *textureProj*(gsampler2DRect _sampler_, vec4 _P_) +
-  float *textureProj*(sampler2DRectShadow _sampler_, vec4 _P_) +
-endif::GLSL[]
-    | Do a texture lookup with projection.
-      The texture coordinates consumed from _P_, not including the last
-      component of _P_, are divided by the last component of _P_ to
-      form projected coordinates _P'_.
-      The resulting third component of _P_ in the shadow forms is used as
-      _D~ref~_.
-      The third component of _P_ is ignored when _sampler_ has type
-      *gsampler2D* and _P_ has type *vec4*.
-      After these values are computed, texture lookup proceeds as in
-      *texture*.
-|
-ifdef::GLSL[]
-  gvec4 *textureLod*(gsampler1D _sampler_, float _P_, float _lod_) +
-endif::GLSL[]
-  gvec4 *textureLod*(gsampler2D _sampler_, vec2 _P_, float _lod_) +
-  gvec4 *textureLod*(gsampler3D _sampler_, vec3 _P_, float _lod_) +
-  gvec4 *textureLod*(gsamplerCube _sampler_, vec3 _P_, float _lod_) +
-  float *textureLod*(sampler2DShadow _sampler_, vec3 _P_, float _lod_) +
-ifdef::GLSL[]
-  float *textureLod*(sampler1DShadow _sampler_, vec3 _P_, float _lod_) +
-  gvec4 *textureLod*(gsampler1DArray _sampler_, vec2 _P_, float _lod_) +
-  float *textureLod*(sampler1DArrayShadow _sampler_, vec3 _P_, float _lod_) +
-endif::GLSL[]
-  gvec4 *textureLod*(gsampler2DArray _sampler_, vec3 _P_, float _lod_) +
-  gvec4 *textureLod*(gsamplerCubeArray _sampler_, vec4 _P_, float _lod_)
-   a| Do a texture lookup as in *texture* but with explicit level-of-detail;
-      _lod_ specifies [eq]#{lambda}~base~]# and sets the partial derivatives
-      as follows: +
-      (See section 8.14 "`Texture Minification`" and equations 8.4-8.6 of
-      the <<references,{apispec}>>.) +
-      +
-      [eq]#{partial}u / {partial}x =
-           {partial}v / {partial}x =
-           {partial}w / {partial}x = 0#
-      +
-      [eq]#{partial}u / {partial}y =
-           {partial}v / {partial}y =
-           {partial}w / {partial}y = 0#
-|
-ifdef::GLSL[]
-  gvec4 *textureOffset*(gsampler1D _sampler_, float _P_, int _offset_ [, float _bias_] ) +
-endif::GLSL[]
-  gvec4 *textureOffset*(gsampler2D _sampler_, vec2 _P_, ivec2 _offset_ [, float _bias_] ) +
-  gvec4 *textureOffset*(gsampler3D _sampler_, vec3 _P_, ivec3 _offset_ [, float _bias_] ) +
-  float *textureOffset*(sampler2DShadow _sampler_, vec3 _P_, ivec2 _offset_ [, float _bias_] ) +
-ifdef::GLSL[]
-  gvec4 *textureOffset*(gsampler2DRect _sampler_, vec2 _P_, ivec2 _offset_) +
-  float *textureOffset*(sampler2DRectShadow _sampler_, vec3 _P_, ivec2 _offset_) +
-  float *textureOffset*(sampler1DShadow _sampler_, vec3 _P_, int _offset_ [, float _bias_] ) +
-  gvec4 *textureOffset*(gsampler1DArray _sampler_, vec2 _P_, int _offset_ [, float _bias_] ) +
-endif::GLSL[]
-  gvec4 *textureOffset*(gsampler2DArray _sampler_, vec3 _P_, ivec2 _offset_ [, float _bias_] ) +
-ifdef::GLSL[]
-  float *textureOffset*(sampler1DArrayShadow _sampler_, vec3 _P_, int _offset_ [, float _bias_] ) +
-  float *textureOffset*(sampler2DArrayShadow _sampler_, vec4 _P_, ivec2 _offset_)
-endif::GLSL[]
-    | Do a texture lookup as in *texture* but with _offset_ added to the
-      [eq]#(u,v,w)# texel coordinates before looking up each texel.
-      The offset value must be a constant expression.
-      A limited range of offset values are supported; the minimum and
-      maximum offset values are implementation-dependent and given by
-      _gl_MinProgramTexelOffset_ and _gl_MaxProgramTexelOffset_,
-      respectively.
+For non-shadow forms: the array layer comes from the last component of _P_.
 
-      Note that _offset_ does not apply to the layer coordinate for texture
-      arrays.
-      This is explained in detail in section 8.14.2 "`Coordinate Wrapping
-      and Texel Selection`" of the <<references,{apispec}>>, where _offset_
-      is [eq]#({delta}~u~, {delta}~v~, {delta}~w~)#. +
-      Note that texel offsets are also not supported for cube maps.
-|
+==== TextureProj
+[source,glsl]
+----
 ifdef::GLSL[]
-  gvec4 *texelFetch*(gsampler1D _sampler_, int _P_, int _lod_) +
+gvec4 textureProj(gsampler1D sampler, vec2 P [, float bias])
+gvec4 textureProj(gsampler1D sampler, vec4 P [, float bias])
 endif::GLSL[]
-  gvec4 *texelFetch*(gsampler2D _sampler_, ivec2 _P_, int _lod_) +
-  gvec4 *texelFetch*(gsampler3D _sampler_, ivec3 _P_, int _lod_)
+gvec4 textureProj(gsampler2D sampler, vec3 P [, float bias])
+gvec4 textureProj(gsampler2D sampler, vec4 P [, float bias])
+gvec4 textureProj(gsampler3D sampler, vec4 P [, float bias])
 ifdef::GLSL[]
-  gvec4 *texelFetch*(gsampler2DRect _sampler_, ivec2 _P_) +
-  gvec4 *texelFetch*(gsampler1DArray _sampler_, ivec2 _P_, int _lod_) +
+float textureProj(sampler1DShadow sampler, vec4 P [, float bias])
 endif::GLSL[]
-  gvec4 *texelFetch*(gsampler2DArray _sampler_, ivec3 _P_, int _lod_) +
-  gvec4 *texelFetch*(gsamplerBuffer _sampler_, int _P_) +
-  gvec4 *texelFetch*(gsampler2DMS _sampler_, ivec2 _P_, int _sample_) +
-  gvec4 *texelFetch*(gsampler2DMSArray _sampler_, ivec3 _P_, int _sample_)
-    | Use integer texture coordinate _P_ to lookup a single texel from
-      _sampler_.
-      The array layer comes from the last component of _P_ for the array
-      forms.
-      The level-of-detail _lod_ (if present) is as described in sections
-      11.1.3.2 "`Texel Fetches`" and 8.14.1 "`Scale Factor and Level of
-      Detail`" of the <<references,{apispec}>>.
-|
+float textureProj(sampler2DShadow sampler, vec4 P [, float bias])
 ifdef::GLSL[]
-  gvec4 *texelFetchOffset*(gsampler1D _sampler_, int _P_, int _lod_, int _offset_) +
+gvec4 textureProj(gsampler2DRect sampler, vec3 P)
+gvec4 textureProj(gsampler2DRect sampler, vec4 P)
+float textureProj(sampler2DRectShadow sampler, vec4 P)
 endif::GLSL[]
-  gvec4 *texelFetchOffset*(gsampler2D _sampler_, ivec2 _P_, int _lod_, ivec2 _offset_) +
-  gvec4 *texelFetchOffset*(gsampler3D _sampler_, ivec3 _P_, int _lod_, ivec3 _offset_) +
-ifdef::GLSL[]
-  gvec4 *texelFetchOffset*(gsampler2DRect _sampler_, ivec2 _P_, ivec2 _offset_) +
-  gvec4 *texelFetchOffset*(gsampler1DArray _sampler_, ivec2 _P_, int _lod_, int _offset_) +
-endif::GLSL[]
-  gvec4 *texelFetchOffset*(gsampler2DArray _sampler_, ivec3 _P_, int _lod_, ivec2 _offset_)
-    | Fetch a single texel as in *texelFetch*, offset by _offset_ as
-      described in *textureOffset*.
-|
-ifdef::GLSL[]
-  gvec4 *textureProjOffset*(gsampler1D _sampler_, vec2 _P_, int _offset_ [, float _bias_] ) +
-  gvec4 *textureProjOffset*(gsampler1D _sampler_, vec4 _P_, int _offset_ [, float _bias_] ) +
-endif::GLSL[]
-  gvec4 *textureProjOffset*(gsampler2D _sampler_, vec3 _P_, ivec2 _offset_ [, float _bias_] ) +
-  gvec4 *textureProjOffset*(gsampler2D _sampler_, vec4 _P_, ivec2 _offset_ [, float _bias_] ) +
-  gvec4 *textureProjOffset*(gsampler3D _sampler_, vec4 _P_, ivec3 _offset_ [, float _bias_] ) +
-ifdef::GLSL[]
-  gvec4 *textureProjOffset*(gsampler2DRect _sampler_, vec3 _P_, ivec2 _offset_) +
-  gvec4 *textureProjOffset*(gsampler2DRect _sampler_, vec4 _P_, ivec2 _offset_) +
-  float *textureProjOffset*(sampler2DRectShadow _sampler_, vec4 _P_, ivec2 _offset_) +
-  float *textureProjOffset*(sampler1DShadow _sampler_, vec4 _P_, int _offset_ [, float _bias_] ) +
-endif::GLSL[]
-  float *textureProjOffset*(sampler2DShadow _sampler_, vec4 _P_, ivec2 _offset_ [, float _bias_] )
-    | Do a projective texture lookup as described in *textureProj*, offset
-      by _offset_ as described in *textureOffset*.
-|
-ifdef::GLSL[]
-  gvec4 *textureLodOffset*(gsampler1D _sampler_, float _P_, float _lod_, int _offset_) +
-endif::GLSL[]
-  gvec4 *textureLodOffset*(gsampler2D _sampler_, vec2 _P_, float _lod_, ivec2 _offset_) +
-  gvec4 *textureLodOffset*(gsampler3D _sampler_, vec3 _P_, float _lod_, ivec3 _offset_) +
-ifdef::GLSL[]
-  float *textureLodOffset*(sampler1DShadow _sampler_, vec3 _P_, float _lod_, int _offset_) +
-endif::GLSL[]
-  float *textureLodOffset*(sampler2DShadow _sampler_,  vec3 _P_, float _lod_, ivec2 _offset_) +
-ifdef::GLSL[]
-  gvec4 *textureLodOffset*(gsampler1DArray _sampler_, vec2 _P_, float _lod_, int _offset_) +
-endif::GLSL[]
-  gvec4 *textureLodOffset*(gsampler2DArray _sampler_, vec3 _P_, float _lod_, ivec2 _offset_) +
-ifdef::GLSL[]
-  float *textureLodOffset*(sampler1DArrayShadow _sampler_, vec3 _P_, float _lod_, int _offset_)
-endif::GLSL[]
-    | Do an offset texture lookup with explicit level-of-detail.
-      See *textureLod* and *textureOffset*.
-|
-ifdef::GLSL[]
-  gvec4 *textureProjLod*(gsampler1D _sampler_, vec2 _P_, float _lod_) +
-  gvec4 *textureProjLod*(gsampler1D _sampler_, vec4 _P_, float _lod_) +
-endif::GLSL[]
-  gvec4 *textureProjLod*(gsampler2D _sampler_, vec3 _P_, float _lod_) +
-  gvec4 *textureProjLod*(gsampler2D _sampler_, vec4 _P_, float _lod_) +
-  gvec4 *textureProjLod*(gsampler3D _sampler_, vec4 _P_, float _lod_) +
-ifdef::GLSL[]
-  float *textureProjLod*(sampler1DShadow _sampler_, vec4 _P_, float _lod_) +
-endif::GLSL[]
-  float *textureProjLod*(sampler2DShadow _sampler_, vec4 _P_, float _lod_)
-    | Do a projective texture lookup with explicit level-of-detail.
-      See *textureProj* and *textureLod*.
-|
-ifdef::GLSL[]
-  gvec4 *textureProjLodOffset*(gsampler1D _sampler_, vec2 _P_, float _lod_, int _offset_) +
-  gvec4 *textureProjLodOffset*(gsampler1D _sampler_, vec4 _P_, float _lod_, int _offset_) +
-endif::GLSL[]
-  gvec4 *textureProjLodOffset*(gsampler2D _sampler_, vec3 _P_, float _lod_, ivec2 _offset_) +
-  gvec4 *textureProjLodOffset*(gsampler2D _sampler_, vec4 _P_, float _lod_, ivec2 _offset_) +
-  gvec4 *textureProjLodOffset*(gsampler3D _sampler_, vec4 _P_, float _lod_, ivec3 _offset_) +
-ifdef::GLSL[]
-  float *textureProjLodOffset*(sampler1DShadow _sampler_, vec4 _P_, float _lod_, int _offset_) +
-endif::GLSL[]
-  float *textureProjLodOffset*(sampler2DShadow _sampler_, vec4 _P_, float _lod_, ivec2 _offset_)
-    | Do an offset projective texture lookup with explicit level-of-detail.
-      See *textureProj*, *textureLod*, and *textureOffset*.
-|
-ifdef::GLSL[]
-  gvec4 *textureGrad*(gsampler1D _sampler_, float _P_, float _dPdx_, float _dPdy_) +
-endif::GLSL[]
-  gvec4 *textureGrad*(gsampler2D _sampler_, vec2 _P_, vec2 _dPdx_, vec2 _dPdy_) +
-  gvec4 *textureGrad*(gsampler3D _sampler_, vec3 _P_, vec3 _dPdx_, vec3 _dPdy_) +
-  gvec4 *textureGrad*(gsamplerCube _sampler_, vec3 _P_, vec3 _dPdx_, vec3 _dPdy_) +
-ifdef::GLSL[]
-  gvec4 *textureGrad*(gsampler2DRect _sampler_, vec2 _P_, vec2 _dPdx_, vec2 _dPdy_) +
-  float *textureGrad*(sampler2DRectShadow _sampler_, vec3 _P_, vec2 _dPdx_, vec2 _dPdy_) +
-  float *textureGrad*(sampler1DShadow _sampler_, vec3 _P_, float _dPdx_, float _dPdy_) +
-  gvec4 *textureGrad*(gsampler1DArray _sampler_, vec2 _P_, float _dPdx_, float _dPdy_) +
-  float *textureGrad*(sampler1DArrayShadow _sampler_, vec3 _P_, float _dPdx_, float _dPdy_) +
-endif::GLSL[]
-  float *textureGrad*(sampler2DShadow _sampler_, vec3 _P_, vec2 _dPdx_, vec2 _dPdy_) +
-  float *textureGrad*(samplerCubeShadow _sampler_, vec4 _P_, vec3 _dPdx_, vec3 _dPdy_) +
-  gvec4 *textureGrad*(gsampler2DArray _sampler_, vec3 _P_, vec2 _dPdx_, vec2 _dPdy_) +
-  float *textureGrad*(sampler2DArrayShadow _sampler_, vec4 _P_, vec2 _dPdx_, vec2 _dPdy_) +
-  gvec4 *textureGrad*(gsamplerCubeArray _sampler_, vec4 _P_, vec3 _dPdx_, vec3 _dPdy_) +
-   a| Do a texture lookup as in *texture* but with <<explicit-gradients,
-      explicit gradients>> as shown below.
-      The partial derivatives of _P_ are with respect to window _x_ and
-      window _y_.
-      For the cube version, the partial derivatives of _P_ are assumed to be
-      in the coordinate system used before texture coordinates are projected
-      onto the appropriate cube face.
-|
-ifdef::GLSL[]
-  gvec4 *textureGradOffset*(gsampler1D _sampler_, float _P_, float _dPdx_, float _dPdy_, int _offset_) +
-endif::GLSL[]
-  gvec4 *textureGradOffset*(gsampler2D _sampler_, vec2 _P_, vec2 _dPdx_, vec2 _dPdy_, ivec2 _offset_) +
-  gvec4 *textureGradOffset*(gsampler3D _sampler_, vec3 _P_, vec3 _dPdx_, vec3 _dPdy_, ivec3 _offset_) +
-ifdef::GLSL[]
-  gvec4 *textureGradOffset*(gsampler2DRect _sampler_, vec2 _P_, vec2 _dPdx_, vec2 _dPdy_, ivec2 _offset_) +
-  float *textureGradOffset*(sampler2DRectShadow _sampler_, vec3 _P_, vec2 _dPdx_, vec2 _dPdy_, ivec2 _offset_) +
-  float *textureGradOffset*(sampler1DShadow _sampler_, vec3 _P_, float _dPdx_, float _dPdy_, int _offset_) +
-endif::GLSL[]
-  float *textureGradOffset*(sampler2DShadow _sampler_, vec3 _P_, vec2 _dPdx_, vec2 _dPdy_, ivec2 _offset_) +
-  gvec4 *textureGradOffset*(gsampler2DArray _sampler_, vec3 _P_, vec2 _dPdx_, vec2 _dPdy_, ivec2 _offset_) +
-ifdef::GLSL[]
-  gvec4 *textureGradOffset*(gsampler1DArray _sampler_, vec2 _P_, float _dPdx_, float _dPdy_, int _offset_) +
-  float *textureGradOffset*(sampler1DArrayShadow _sampler_, vec3 _P_, float _dPdx_, float _dPdy_, int _offset_) +
-endif::GLSL[]
-  float *textureGradOffset*(sampler2DArrayShadow _sampler_, vec4 _P_, vec2 _dPdx_, vec2 _dPdy_, ivec2 _offset_) +
-    | Do a texture lookup with both explicit gradient and offset, as
-      described in *textureGrad* and *textureOffset*.
-|
-ifdef::GLSL[]
-  gvec4 *textureProjGrad*(gsampler1D _sampler_, vec2 _P_, float _dPdx_, float _dPdy_) +
-  gvec4 *textureProjGrad*(gsampler1D _sampler_, vec4 _P_, float _dPdx_, float _dPdy_) +
-endif::GLSL[]
-  gvec4 *textureProjGrad*(gsampler2D _sampler_, vec3 _P_, vec2 _dPdx_, vec2 _dPdy_) +
-  gvec4 *textureProjGrad*(gsampler2D _sampler_, vec4 _P_, vec2 _dPdx_, vec2 _dPdy_) +
-  gvec4 *textureProjGrad*(gsampler3D _sampler_, vec4 _P_, vec3 _dPdx_, vec3 _dPdy_) +
-ifdef::GLSL[]
-  gvec4 *textureProjGrad*(gsampler2DRect _sampler_, vec3 _P_, vec2 _dPdx_, vec2 _dPdy_) +
-  gvec4 *textureProjGrad*(gsampler2DRect _sampler_, vec4 _P_, vec2 _dPdx_, vec2 _dPdy_) +
-  float *textureProjGrad*(sampler2DRectShadow _sampler_, vec4 _P_, vec2 _dPdx_, vec2 _dPdy_) +
-  float *textureProjGrad*(sampler1DShadow _sampler_, vec4 _P_, float _dPdx_, float _dPdy_) +
-endif::GLSL[]
-  float *textureProjGrad*(sampler2DShadow _sampler_, vec4 _P_, vec2 _dPdx_, vec2 _dPdy_)
-    | Do a texture lookup both projectively, as described in *textureProj*,
-      and with explicit gradient as described in *textureGrad*.
-      The partial derivatives _dPdx_ and _dPdy_ are assumed to be already
-      projected.
-|
-ifdef::GLSL[]
-  gvec4 *textureProjGradOffset*(gsampler1D _sampler_, vec2 _P_, float _dPdx_, float _dPdy_, int _offset_) +
-  gvec4 *textureProjGradOffset*(gsampler1D _sampler_, vec4 _P_, float _dPdx_, float _dPdy_, int _offset_) +
-endif::GLSL[]
-  gvec4 *textureProjGradOffset*(gsampler2D _sampler_, vec3 _P_, vec2 _dPdx_, vec2 _dPdy_, ivec2 _offset_) +
-  gvec4 *textureProjGradOffset*(gsampler2D _sampler_, vec4 _P_, vec2 _dPdx_, vec2 _dPdy_, ivec2 _offset_) +
-  gvec4 *textureProjGradOffset*(gsampler3D _sampler_, vec4 _P_, vec3 _dPdx_, vec3 _dPdy_, ivec3 _offset_) +
-ifdef::GLSL[]
-  gvec4 *textureProjGradOffset*(gsampler2DRect _sampler_, vec3 _P_, vec2 _dPdx_, vec2 _dPdy_, ivec2 _offset_) +
-  gvec4 *textureProjGradOffset*(gsampler2DRect _sampler_, vec4 _P_, vec2 _dPdx_, vec2 _dPdy_, ivec2 _offset_) +
-  float *textureProjGradOffset*(sampler2DRectShadow _sampler_, vec4 _P_, vec2 _dPdx_, vec2 _dPdy_, ivec2 _offset_) +
-  float *textureProjGradOffset*(sampler1DShadow _sampler_, vec4 _P_, float _dPdx_, float _dPdy_, int _offset_) +
-endif::GLSL[]
-  float *textureProjGradOffset*(sampler2DShadow _sampler_, vec4 _P_, vec2 _dPdx_, vec2 _dPdy_, ivec2 _offset_)
-    | Do a texture lookup projectively and with explicit gradient as
-      described in *textureProjGrad*, as well as with offset, as described in
-      *textureOffset*.
-|====
+----
 
+Do a texture lookup with projection.
+
+The texture coordinates consumed from _P_, not including the last component of _P_, are divided by
+the last component of _P_ to form projected coordinates _P'_. The resulting third component of _P_
+in the shadow forms is used as _D~ref~_. The third component of _P_ is ignored when _sampler_ has
+type *gsampler2D* and _P_ has type *vec4*. After these values are computed, texture lookup proceeds
+as in *texture*.
+
+==== TextureLod
+[source,glsl]
+----
+ifdef::GLSL[]
+gvec4 textureLod(gsampler1D sampler, float P float lod)
+endif::GLSL[]
+gvec4 textureLod(gsampler2D sampler, vec2 P, float lod)
+gvec4 textureLod(gsampler3D sampler, vec3 P, float lod)
+gvec4 textureLod(gsamplerCube sampler, vec3 P, float lod)
+float textureLod(sampler2DShadow sampler, vec3 P, float lod)
+ifdef::GLSL[]
+float textureLod(sampler1DShadow sampler, vec3 P, float lod)
+gvec4 textureLod(gsampler1DArray sampler, vec2 P, float lod)
+float textureLod(sampler1DArrayShadow sampler, vec3 P, float lod)
+endif::GLSL[]
+gvec4 textureLod(gsampler2DArray sampler, vec3 P, float lod)
+gvec4 textureLod(gsamplerCubeArray sampler, vec4 P, float lod)
+----
+
+Do a texture lookup as in *texture* but with explicit level-of-detail; _lod_ specifies
+[eq]#{lambda}~base~]# and sets the partial derivatives as follows:
+
+(See section 8.14 "`Texture Minification`" and equations 8.4-8.6 of the <<references,{apispec}>>.)
+
+[eq]#{partial}u / {partial}x =
+      {partial}v / {partial}x =
+      {partial}w / {partial}x = 0#
+
+[eq]#{partial}u / {partial}y =
+      {partial}v / {partial}y =
+      {partial}w / {partial}y = 0#
+
+==== TextureOffset
+[source,glsl]
+----
+ifdef::GLSL[]
+gvec4 textureOffset(gsampler1D sampler, float P, int offset [, float bias])
+endif::GLSL[]
+gvec4 textureOffset(gsampler2D sampler, vec2 P, ivec2 offset [, float bias])
+gvec4 textureOffset(gsampler3D sampler, vec3 P, ivec3 offset [, float bias])
+float textureOffset(sampler2DShadow sampler, vec3 P, ivec2 offset [, float bias])
+ifdef::GLSL[]
+gvec4 textureOffset(gsampler2DRect sampler, vec2 P, ivec2 offset)
+float textureOffset(sampler2DRectShadow sampler, vec3 P, ivec2 offset)
+float textureOffset(sampler1DShadow sampler, vec3 P, int offset [, float bias])
+gvec4 textureOffset(gsampler1DArray sampler, vec2 P, int offset [, float bias])
+endif::GLSL[]
+gvec4 textureOffset(gsampler2DArray sampler, vec3 P, ivec2 offset [, float bias])
+ifdef::GLSL[]
+float textureOffset(sampler1DArrayShadow sampler, vec3 P, int offset [, float bias])
+float textureOffset(sampler2DArrayShadow sampler, vec4 P, ivec2 offset)
+endif::GLSL[]
+----
+
+Do a texture lookup as in *texture* but with _offset_ added to the [eq]#(u,v,w)# texel coordinates
+before looking up each texel. The offset value must be a constant expression. A limited range of
+offset values are supported; the minimum and maximum offset values are implementation-dependent and
+given by _gl_MinProgramTexelOffset_ and _gl_MaxProgramTexelOffset_, respectively.
+
+Note that _offset_ does not apply to the layer coordinate for texture arrays.
+
+This is explained in detail in section 8.14.2 "`Coordinate Wrapping and Texel Selection`" of the
+<<references,{apispec}>>, where _offset_ is [eq]#({delta}~u~, {delta}~v~, {delta}~w~)#.
+
+Note that texel offsets are also not supported for cube maps.
+
+==== TexelFetch
+[source,glsl]
+----
+ifdef::GLSL[]
+gvec4 texelFetch(gsampler1D sampler, int P, int lod)
+endif::GLSL[]
+gvec4 texelFetch(gsampler2D sampler, ivec2 P, int lod)
+gvec4 texelFetch(gsampler3D sampler, ivec3 P, int lod)
+ifdef::GLSL[]
+gvec4 texelFetch(gsampler2DRect sampler, ivec2 P)
+gvec4 texelFetch(gsampler1DArray sampler, ivec2 P, int lod)
+endif::GLSL[]
+gvec4 texelFetch(gsampler2DArray sampler, ivec3 P, int lod)
+gvec4 texelFetch(gsamplerBuffer sampler, int P)
+gvec4 texelFetch(gsampler2DMS sampler, ivec2 P, int sample)
+gvec4 texelFetch(gsampler2DMSArray sampler, ivec3 P, int sample)
+----
+
+Use integer texture coordinate _P_ to lookup a single texel from _sampler_. The array layer comes
+from the last component of _P_ for the array forms. The level-of-detail _lod_ (if present) is as
+described in sections 11.1.3.2 "`Texel Fetches`" and 8.14.1 "`Scale Factor and Level of Detail`" of
+the <<references,{apispec}>>.
+
+==== TexelFetchOffset
+[source,glsl]
+----
+ifdef::GLSL[]
+gvec4 texelFetchOffset(gsampler1D sampler, int P, int lod, int offset)
+endif::GLSL[]
+gvec4 texelFetchOffset(gsampler2D sampler, ivec2 P, int lod, ivec2 offset)
+gvec4 texelFetchOffset(gsampler3D sampler, ivec3 P, int lod, ivec3 offset)
+ifdef::GLSL[]
+gvec4 texelFetchOffset(gsampler2DRect sampler, ivec2 P, ivec2 offset)
+gvec4 texelFetchOffset(gsampler1DArray sampler, ivec2 P, int lod, int offset)
+endif::GLSL[]
+gvec4 texelFetchOffset(gsampler2DArray sampler, ivec3 P, int lod, ivec2 offset)
+----
+
+Fetch a single texel as in *texelFetch*, offset by _offset_ as described in *textureOffset*.
+
+==== TextureProjOffset
+[source,glsl]
+----
+ifdef::GLSL[]
+gvec4 textureProjOffset(gsampler1D sampler, vec2 P, int offset [, float bias])
+gvec4 textureProjOffset(gsampler1D sampler, vec4 P, int offset [, float bias])
+endif::GLSL[]
+gvec4 textureProjOffset(gsampler2D sampler, vec3 P, ivec2 offset [, float bias])
+gvec4 textureProjOffset(gsampler2D sampler, vec4 P, ivec2 offset [, float bias])
+gvec4 textureProjOffset(gsampler3D sampler, vec4 P, ivec3 offset [, float bias])
+ifdef::GLSL[]
+gvec4 textureProjOffset(gsampler2DRect sampler, vec3 P, ivec2 offset)
+gvec4 textureProjOffset(gsampler2DRect sampler, vec4 P, ivec2 offset)
+float textureProjOffset(sampler2DRectShadow sampler, vec4 P, ivec2 offset)
+float textureProjOffset(sampler1DShadow sampler, vec4 P, int offset [, float bias])
+endif::GLSL[]
+float textureProjOffset(sampler2DShadow sampler, vec4 P, ivec2 offset [, float bias])
+----
+
+Do a projective texture lookup as described in *textureProj*, offset by _offset_ as described in
+*textureOffset*.
+
+==== TextureLodOffset
+[source,glsl]
+----
+ifdef::GLSL[]
+gvec4 textureLodOffset(gsampler1D sampler, float P, float lod, int offset)
+endif::GLSL[]
+gvec4 textureLodOffset(gsampler2D sampler, vec2 P, float lod, ivec2 offset)
+gvec4 textureLodOffset(gsampler3D sampler, vec3 P, float lod, ivec3 offset)
+ifdef::GLSL[]
+float textureLodOffset(sampler1DShadow sampler, vec3 P, float lod, int offset)
+endif::GLSL[]
+float textureLodOffset(sampler2DShadow sampler,  vec3 P, float lod, ivec2 offset)
+ifdef::GLSL[]
+gvec4 textureLodOffset(gsampler1DArray sampler, vec2 P, float lod, int offset)
+endif::GLSL[]
+gvec4 textureLodOffset(gsampler2DArray sampler, vec3 P, float lod, ivec2 offset)
+ifdef::GLSL[]
+float textureLodOffset(sampler1DArrayShadow sampler, vec3 P, float lod, int offset)
+endif::GLSL[]
+----
+
+Do an offset texture lookup with explicit level-of-detail. See *textureLod* and *textureOffset*.
+
+==== TextureProjLod
+[source,glsl]
+----
+ifdef::GLSL[]
+gvec4 textureProjLod(gsampler1D sampler, vec2 P, float lod)
+gvec4 textureProjLod(gsampler1D sampler, vec4 P, float lod)
+endif::GLSL[]
+gvec4 textureProjLod(gsampler2D sampler, vec3 P, float lod)
+gvec4 textureProjLod(gsampler2D sampler, vec4 P, float lod)
+gvec4 textureProjLod(gsampler3D sampler, vec4 P, float lod)
+ifdef::GLSL[]
+float textureProjLod(sampler1DShadow sampler, vec4 P, float lod)
+endif::GLSL[]
+float textureProjLod(sampler2DShadow sampler, vec4 P, float lod)
+----
+
+Do a projective texture lookup with explicit level-of-detail. See *textureProj* and *textureLod*.
+
+==== TextureProdLodOffset
+[source,glsl]
+----
+ifdef::GLSL[]
+gvec4 textureProjLodOffset(gsampler1D sampler, vec2 P, float lod, int offset)
+gvec4 textureProjLodOffset(gsampler1D sampler, vec4 P, float lod, int offset)
+endif::GLSL[]
+gvec4 textureProjLodOffset(gsampler2D sampler, vec3 P, float lod, ivec2 offset)
+gvec4 textureProjLodOffset(gsampler2D sampler, vec4 P, float lod, ivec2 offset)
+gvec4 textureProjLodOffset(gsampler3D sampler, vec4 P, float lod, ivec3 offset)
+ifdef::GLSL[]
+float textureProjLodOffset(sampler1DShadow sampler, vec4 P, float lod, int offset)
+endif::GLSL[]
+float textureProjLodOffset(sampler2DShadow sampler, vec4 P, float lod, ivec2 offset)
+----
+
+Do an offset projective texture lookup with explicit level-of-detail. See *textureProj*,
+*textureLod*, and *textureOffset*.
+
+==== TextureGrad
+[source,glsl]
+----
+ifdef::GLSL[]
+gvec4 textureGrad(gsampler1D sampler, float P, float dPdx, float dPdy)
+endif::GLSL[]
+gvec4 textureGrad*(gsampler2D sampler, vec2 P, vec2 dPdx, vec2 dPdy)
+gvec4 textureGrad*(gsampler3D sampler, vec3 P, vec3 dPdx, vec3 dPdy)
+gvec4 textureGrad*(gsamplerCube sampler, vec3 P, vec3 dPdx, vec3 dPdy)
+ifdef::GLSL[]
+gvec4 textureGrad(gsampler2DRect sampler, vec2 P, vec2 dPdx, vec2 dPdy)
+float textureGrad(sampler2DRectShadow sampler, vec3 P, vec2 dPdx, vec2 dPdy)
+float textureGrad(sampler1DShadow sampler, vec3 P, float dPdx, float dPdy)
+gvec4 textureGrad(gsampler1DArray sampler, vec2 P, float dPdx, float dPdy)
+float textureGrad(sampler1DArrayShadow sampler, vec3 P, float dPdx, float dPdy)
+endif::GLSL[]
+float textureGrad(sampler2DShadow sampler, vec3 P, vec2 dPdx, vec2 dPdy)
+float textureGrad(samplerCubeShadow sampler, vec4 P, vec3 dPdx, vec3 dPdy)
+gvec4 textureGrad(gsampler2DArray sampler, vec3 P, vec2 dPdx, vec2 dPdy)
+float textureGrad(sampler2DArrayShadow sampler, vec4 P, vec2 dPdx, vec2 dPdy)
+gvec4 textureGrad(gsamplerCubeArray sampler, vec4 P, vec3 dPdx, vec3 dPdy)
+----
+
+Do a texture lookup as in *texture* but with <<explicit-gradients, explicit gradients>> as shown
+below. The partial derivatives of _P_ are with respect to window _x_ and window _y_.
+
+For the cube version, the partial derivatives of _P_ are assumed to be in the coordinate system
+used before texture coordinates are projected onto the appropriate cube face.
 
 [[explicit-gradients]]
-=== Explicit Gradients
-
-ifdef::editing-notes[]
-[NOTE]
-.editing-note
-====
-(Jon) Moved to new section from *textureGrad* table entry above because
-asciidoctor-mathematical doesn't support math blocks in table cells yet.
-====
-endif::editing-notes[]
-
-In the *textureGrad* functions described above, explicit gradients control
-texture lookups as follows:
+===== Explicit Gradients
 
 ifdef::GLSL[]
 [latexmath]
@@ -1622,6 +2097,76 @@ ifdef::ESSL[]
 ++++
 endif::ESSL[]
 
+==== TextureGradOffset
+[source,glsl]
+----
+ifdef::GLSL[]
+gvec4 textureGradOffset(gsampler1D sampler, float P, float dPdx, float dPdy, int offset)
+endif::GLSL[]
+gvec4 textureGradOffset(gsampler2D sampler, vec2 P, vec2 dPdx, vec2 dPdy, ivec2 offset)
+gvec4 textureGradOffset(gsampler3D sampler, vec3 P, vec3 dPdx, vec3 dPdy, ivec3 offset)
+ifdef::GLSL[]
+gvec4 textureGradOffset(gsampler2DRect sampler, vec2 P, vec2 dPdx, vec2 dPdy, ivec2 offset)
+float textureGradOffset(sampler2DRectShadow sampler, vec3 P, vec2 dPdx, vec2 dPdy, ivec2 offset)
+float textureGradOffset(sampler1DShadow sampler, vec3 P, float dPdx, float dPdy, int offset)
+endif::GLSL[]
+float textureGradOffset(sampler2DShadow sampler, vec3 P, vec2 dPdx, vec2 dPdy, ivec2 offset)
+gvec4 textureGradOffset(gsampler2DArray sampler, vec3 P, vec2 dPdx, vec2 dPdy, ivec2 offset)
+ifdef::GLSL[]
+gvtextureGradOffset(gsampler1DArray sampler, vec2 P, float dPdx, float dPdy, int offset)
+float textureGradOffset(sampler1DArrayShadow sampler, vec3 P, float dPdx, float dPdy, int offset)
+endif::GLSL[]
+float textureGradOffset(sampler2DArrayShadow sampler, vec4 P, vec2 dPdx, vec2 dPdy, ivec2 offset)
+----
+
+Do a texture lookup with both explicit gradient and offset, as described in *textureGrad* and
+*textureOffset*.
+
+==== TextureProjGrad
+[source,glsl]
+----
+ifdef::GLSL[]
+gvec4 textureProjGrad(gsampler1D sampler, vec2 P, float dPdx, float dPdy)
+gvec4 textureProjGrad(gsampler1D sampler, vec4 P, float dPdx, float dPdy)
+endif::GLSL[]
+gvec4 textureProjGrad(gsampler2D sampler, vec3 P, vec2 dPdx, vec2 dPdy)
+gvec4 textureProjGrad(gsampler2D sampler, vec4 P, vec2 dPdx, vec2 dPdy)
+gvec4 textureProjGrad(gsampler3D sampler, vec4 P, vec3 dPdx, vec3 dPdy)
+ifdef::GLSL[]
+gvec4 textureProjGrad(gsampler2DRect sampler, vec3 P, vec2 dPdx, vec2 dPdy)
+gvec4 textureProjGrad(gsampler2DRect sampler, vec4 P, vec2 dPdx, vec2 dPdy)
+float textureProjGrad(sampler2DRectShadow sampler, vec4 P, vec2 dPdx, vec2 dPdy)
+float textureProjGrad(sampler1DShadow sampler, vec4 P, float dPdx, float dPdy)
+endif::GLSL[]
+float textureProjGrad(sampler2DShadow sampler, vec4 P, vec2 dPdx, vec2 dPdy)
+----
+
+Do a texture lookup both projectively, as described in *textureProj*, and with explicit gradient as
+described in *textureGrad*. The partial derivatives _dPdx_ and _dPdy_ are assumed to be already
+projected.
+
+==== TextureProjGradOffset
+[source,glsl]
+----
+ifdef::GLSL[]
+gvec4 textureProjGradOffset(gsampler1D sampler, vec2 P, float dPdx, float dPdy, int offset)
+gvec4 textureProjGradOffset(gsampler1D sampler, vec4 P, float dPdx, float dPdy, int offset)
+endif::GLSL[]
+gvec4 textureProjGradOffset(gsampler2D sampler, vec3 P, vec2 dPdx, vec2 dPdy, ivec2 offset)
+gvec4 textureProjGradOffset(gsampler2D sampler, vec4 P, vec2 dPdx, vec2 dPdy, ivec2 offset)
+gvec4 textureProjGradOffset(gsampler3D sampler, vec4 P, vec3 dPdx, vec3 dPdy, ivec3 offset)
+ifdef::GLSL[]
+gvec4 textureProjGradOffset(gsampler2DRect sampler, vec3 P, vec2 dPdx, vec2 dPdy, ivec2 offset)
+gvec4 textureProjGradOffset(gsampler2DRect sampler, vec4 P, vec2 dPdx, vec2 dPdy, ivec2 offset)
+float textureProjGradOffset(sampler2DRectShadow sampler, vec4 P, vec2 dPdx, vec2 dPdy, ivec2 offset)
+float textureProjGradOffset(sampler1DShadow sampler, vec4 P, float dPdx, float dPdy, int offset)
+endif::GLSL[]
+float textureProjGradOffset(sampler2DShadow sampler, vec4 P, vec2 dPdx, vec2 dPdy, ivec2 offset)
+----
+
+Do a texture lookup projectively and with explicit gradient as described in *textureProjGrad*, as
+well as with offset, as described in *textureOffset*.
+
 
 [[texture-gather-functions]]
 === Texture Gather Functions
@@ -1677,25 +2222,27 @@ each of the four T~i0j0~ texels in the same manner as for the
 *textureGather* function.
 endif::ESSL[]
 
-[options="header"]
-|====
-| Syntax | Description
-| gvec4 *textureGather*(gsampler2D _sampler_, vec2 _P_ [, int _comp_]) +
-  gvec4 *textureGather*(gsampler2DArray _sampler_, vec3 _P_ [, int _comp_]) +
-  gvec4 *textureGather*(gsamplerCube _sampler_, vec3 _P_ [, int _comp_]) +
-  gvec4 *textureGather*(gsamplerCubeArray _sampler_, vec4 _P_[, int _comp_]) +
+==== TextureGather
+[source,glsl]
+----
+gvec4 textureGather(gsampler2D sampler, vec2 P [, int comp])
+gvec4 textureGather(gsampler2DArray sampler, vec3 P [, int comp])
+gvec4 textureGather(gsamplerCube sampler, vec3 P [, int comp])
+gvec4 textureGather(gsamplerCubeArray sampler, vec4 P [, int comp])
 ifdef::GLSL[]
-  gvec4 *textureGather*(gsampler2DRect _sampler_, vec2 _P_[, int _comp_]) +
+gvec4 textureGather(gsampler2DRect sampler, vec2 P [, int comp])
 endif::GLSL[]
-  vec4 *textureGather*(sampler2DShadow _sampler_, vec2 _P_, float _refZ_) +
-  vec4 *textureGather*(sampler2DArrayShadow _sampler_, vec3 _P_, float _refZ_) +
-  vec4 *textureGather*(samplerCubeShadow _sampler_, vec3 _P_, float _refZ_) +
-  vec4 *textureGather*(samplerCubeArrayShadow _sampler_, vec4 _P_, float _refZ_) +
+vec4 textureGather(sampler2DShadow sampler, vec2 P, float refZ)
+vec4 textureGather(sampler2DArrayShadow sampler, vec3 P, float refZ)
+vec4 textureGather(samplerCubeShadow sampler, vec3 P, float refZ)
+vec4 textureGather(samplerCubeArrayShadow sampler, vec4 P, float refZ)
 ifdef::GLSL[]
-  vec4 *textureGather*(sampler2DRectShadow _sampler_, vec2 _P_, float _refZ_)
+vec4 textureGather(sampler2DRectShadow sampler, vec2 P, float refZ)
 endif::GLSL[]
-   a| Returns the value +
---
+----
+
+Returns the value
+
 [source,glsl]
 ----
 vec4(Sample_i0_j1(P, base).comp,
@@ -1708,40 +2255,46 @@ If specified, the value of _comp_ must be a constant integer expression with
 a value of 0, 1, 2, or 3, identifying the _x_, _y_, _z_, or _w_
 post-swizzled component of the four-component vector lookup result for each
 texel, respectively.
+
 If _comp_ is not specified, it is treated as 0, selecting the _x_ component
 of each texel to generate the result.
---
-| gvec4 *textureGatherOffset*(gsampler2D _sampler_, vec2 _P_, ivec2 _offset_, [ int _comp_]) +
-  gvec4 *textureGatherOffset*(gsampler2DArray _sampler_, vec3 _P_, ivec2 _offset_ [ int _comp_]) +
-  vec4 *textureGatherOffset*(sampler2DShadow _sampler_, vec2 _P_, float _refZ_, ivec2 _offset_) +
-  vec4 *textureGatherOffset*(sampler2DArrayShadow _sampler_, vec3 _P_, float _refZ_, ivec2 _offset_) +
-ifdef::GLSL[]
-  gvec4 *textureGatherOffset*(gsampler2DRect _sampler_, vec2 _P_, ivec2 _offset_ [ int _comp_]) +
-  vec4 *textureGatherOffset*(sampler2DRectShadow _sampler_, vec2 _P_, float _refZ_, ivec2 _offset_)
-endif::GLSL[]
-    | Perform a texture gather operation as in *textureGather* by _offset_
-      as described in *textureOffset* except that the _offset_ can be
-      variable (non constant) and the implementation-dependent minimum and
-      maximum offset values are given by MIN_PROGRAM_TEXTURE_GATHER_OFFSET
-      and MAX_PROGRAM_TEXTURE_GATHER_OFFSET, respectively.
-| gvec4 *textureGatherOffsets*(gsampler2D _sampler_, vec2 _P_, ivec2 _offsets_[4] [, int _comp_]) +
-  gvec4 *textureGatherOffsets*(gsampler2DArray _sampler_, vec3 _P_, ivec2 _offsets_[4]   [, int _comp_]) +
-  vec4 *textureGatherOffsets*(sampler2DShadow _sampler_, vec2 _P_, float _refZ_, ivec2 _offsets_[4]) +
-  vec4 *textureGatherOffsets*(sampler2DArrayShadow _sampler_, vec3 _P_, float _refZ_, ivec2 _offsets_[4]) +
-ifdef::GLSL[]
-  gvec4 *textureGatherOffsets*(gsampler2DRect _sampler_, vec2 _P_, ivec2 _offsets_[4] [, int _comp_]) +
-  vec4 *textureGatherOffsets*(sampler2DRectShadow _sampler_, vec2 _P_, float _refZ_, ivec2 _offsets_[4])
-endif::GLSL[]
-    | Operate identically to *textureGatherOffset* except that _offsets_ is
-      used to determine the location of the four texels to sample.
-      Each of the four texels is obtained by applying the corresponding
-      offset in _offsets_ as a (_u_, _v_) coordinate offset to _P_,
-      identifying the four-texel LINEAR footprint, and then selecting the
-      texel _i~0~ j~0~_ of that footprint.
-      The specified values in _offsets_ must be constant integral
-      expressions.
-|====
 
+==== TextureGatherOffset
+[source,glsl]
+----
+gvec4 textureGatherOffset(gsampler2D sampler, vec2 P, ivec2 offset [, int comp])
+gvec4 textureGatherOffset(gsampler2DArray sampler, vec3 P, ivec2 offset [, int comp])
+vec4 textureGatherOffset(sampler2DShadow sampler, vec2 P, float refZ, ivec2 offset)
+vec4 textureGatherOffset(sampler2DArrayShadow sampler, vec3 P, float refZ, ivec2 offset)
+ifdef::GLSL[]
+gvec4 textureGatherOffset(gsampler2DRect sampler, vec2 P, ivec2 offset [, int comp_])
+vec4 textureGatherOffset(sampler2DRectShadow sampler, vec2 P, float refZ, ivec2 offset)
+endif::GLSL[]
+----
+
+Perform a texture gather operation as in *textureGather* by _offset_ as described in
+*textureOffset* except that the _offset_ can be variable (non constant) and the
+implementation-dependent minimum and maximum offset values are given by
+MIN_PROGRAM_TEXTURE_GATHER_OFFSET and MAX_PROGRAM_TEXTURE_GATHER_OFFSET, respectively.
+
+==== TextureGatherOffsets
+[source,glsl]
+----
+gvec4 textureGatherOffsets(gsampler2D sampler, vec2 P, ivec2 offsets[4] [, int comp])
+gvec4 textureGatherOffsets(gsampler2DArray sampler, vec3 P, ivec2 offsets[4] [, int comp_])
+vec4 textureGatherOffsets(sampler2DShadow sampler, vec2 P, float refZ, ivec2 offsets[4])
+vec4 textureGatherOffsets(sampler2DArrayShadow sampler, vec3 P, float refZ, ivec2 offsets[4])
+ifdef::GLSL[]
+gvec4 textureGatherOffsets(gsampler2DRect sampler, vec2 P, ivec2 offsets[4] [, int comp])
+vec4 textureGatherOffsets(sampler2DRectShadow sampler, vec2 P, float refZ, ivec2 offsets[4])
+endif::GLSL[]
+----
+
+Operate identically to *textureGatherOffset* except that _offsets_ is used to determine the
+location of the four texels to sample. Each of the four texels is obtained by applying the
+corresponding offset in _offsets_ as a (_u_, _v_) coordinate offset to _P_, identifying the
+four-texel LINEAR footprint, and then selecting the texel _i~0~ j~0~_ of that footprint. The
+specified values in _offsets_ must be constant integral expressions.
 
 ifdef::GLSL[]
 [[compatibility-profile-texture-functions]]
@@ -1749,46 +2302,69 @@ ifdef::GLSL[]
 
 The following texture functions are only in the compatibility profile.
 
-[options="header"]
-|====
-| Syntax | Description
-| vec4 *texture1D*(sampler1D _sampler_, float _coord_ [, float _bias_] ) +
-  vec4 *texture1DProj*(sampler1D _sampler_, vec2 _coord_ [, float _bias_] ) +
-  vec4 *texture1DProj*(sampler1D _sampler_, vec4 _coord_ [, float _bias_] ) +
-  vec4 *texture1DLod*(sampler1D _sampler_, float _coord_, float _lod_) +
-  vec4 *texture1DProjLod*(sampler1D _sampler_, vec2 _coord_, float _lod_) +
-  vec4 *texture1DProjLod*(sampler1D _sampler_, vec4 _coord_, float _lod_)
-    | See corresponding signature above without "`1D`" in the name.
-| vec4 *texture2D*(sampler2D _sampler_, vec2 _coord_ [, float _bias_] ) +
-  vec4 *texture2DProj*(sampler2D _sampler_, vec3 _coord_ [, float _bias_] ) +
-  vec4 *texture2DProj*(sampler2D _sampler_, vec4 _coord_ [, float _bias_] ) +
-  vec4 *texture2DLod*(sampler2D _sampler_, vec2 _coord_, float _lod_) +
-  vec4 *texture2DProjLod*(sampler2D _sampler_, vec3 _coord_, float _lod_) +
-  vec4 *texture2DProjLod*(sampler2D _sampler_, vec4 _coord_, float _lod_)
-    | See corresponding signature above without "`2D`" in the name.
-| vec4 *texture3D*(sampler3D _sampler_, vec3 _coord_ [, float _bias_] ) +
-  vec4 *texture3DProj*(sampler3D _sampler_, vec4 _coord_ [, float _bias_] ) +
-  vec4 *texture3DLod*(sampler3D _sampler_, vec3 _coord_, float _lod_) +
-  vec4 *texture3DProjLod*(sampler3D _sampler_, vec4 _coord_, float _lod_)
-    | See corresponding signature above without "`3D`" in the name. +
-      Use the texture coordinate _coord_ to do a texture lookup in the 3D
-      texture currently bound to _sampler_.
-      For the projective ("`*Proj*`") versions, the texture coordinate is
-      divided by _coord.q_.
-| vec4 *textureCube*(samplerCube _sampler_, vec3 _coord_ [, float _bias_] ) +
-  vec4 *textureCubeLod*(samplerCube _sampler_, vec3 _coord_, float _lod_)
-    | See corresponding signature above without "`Cube`" in the name.
-| vec4 *shadow1D*(sampler1DShadow _sampler_, vec3 _coord_ [, float _bias_] ) +
-  vec4 *shadow2D*(sampler2DShadow _sampler_, vec3 _coord_ [, float _bias_] ) +
-  vec4 *shadow1DProj*(sampler1DShadow _sampler_, vec4 _coord_ [, float _bias_] ) +
-  vec4 *shadow2DProj*(sampler2DShadow _sampler_, vec4 _coord_ [, float _bias_] ) +
-  vec4 *shadow1DLod*(sampler1DShadow _sampler_, vec3 _coord_, float _lod_) +
-  vec4 *shadow2DLod*(sampler2DShadow _sampler_, vec3 _coord_, float _lod_) +
-  vec4 *shadow1DProjLod*(sampler1DShadow _sampler_, vec4 _coord_, float _lod_) +
-  vec4 *shadow2DProjLod*(sampler2DShadow _sampler_, vec4 coord, float _lod_)
-    | Same functionality as the "`*texture*`" based names above with the
-      same signature.
-|====
+==== Texture1D
+[source,glsl]
+----
+vec4 texture1D(sampler1D sampler, float coord [, float bias])
+vec4 texture1DProj(sampler1D sampler, vec2 coord [, float bias])
+vec4 texture1DProj(sampler1D sampler, vec4 coord [, float bias])
+vec4 texture1DLod(sampler1D sampler, float coord, float lod)
+vec4 texture1DProjLod(sampler1D sampler, vec2 coord, float lod)
+vec4 texture1DProjLod(sampler1D sampler, vec4 coord, float lod)
+----
+
+See corresponding signature above without "`1D`" in the name.
+
+
+==== Texture2D
+[source,glsl]
+----
+vec4 texture2D(sampler2D sampler, vec2 coord [, float bias])
+vec4 texture2DProj(sampler2D sampler, vec3 coord [, float bias])
+vec4 texture2DProj(sampler2D sampler, vec4 coord [, float bias])
+vec4 texture2DLod(sampler2D sampler, vec2 coord, float lod)
+vec4 texture2DProjLod(sampler2D sampler, vec3 coord, float lod)
+vec4 texture2DProjLod(sampler2D sampler, vec4 coord, float lod)
+----
+
+See corresponding signature above without "`2D`" in the name.
+
+==== Texture3D
+[source,glsl]
+----
+vec4 texture3D(sampler3D sampler, vec3 coord [, float bias])
+vec4 texture3DProj(sampler3D sampler, vec4 coord [, float bias])
+vec4 texture3DLod(sampler3D sampler, vec3 coord, float lod)
+vec4 texture3DProjLod(sampler3D sampler, vec4 coord, float lod)
+----
+
+See corresponding signature above without "`3D`" in the name. Use the texture coordinate _coord_
+to do a texture lookup in the 3D texture currently bound to _sampler_. For the projective
+("`*Proj*`") versions, the texture coordinate is divided by _coord.q_.
+
+==== TextureCube
+[source,glsl]
+----
+vec4 textureCube(samplerCube sampler, vec3 coord [, float bias])
+vec4 textureCubeLod(samplerCube sampler, vec3 coord, float lod)
+----
+
+See corresponding signature above without "`Cube`" in the name.
+
+==== Shadow
+[source,glsl]
+----
+vec4 shadow1D(sampler1DShadow sampler, vec3 coord [, float bias])
+vec4 shadow2D(sampler2DShadow sampler, vec3 coord [, float bias])
+vec4 shadow1DProj(sampler1DShadow sampler, vec4 coord [, float bias])
+vec4 shadow2DProj(sampler2DShadow sampler, vec4 coord [, float bias])
+vec4 shadow1DLod(sampler1DShadow sampler, vec3 coord, float lod)
+vec4 shadow2DLod(sampler2DShadow sampler, vec3 coord, float lod)
+vec4 shadow1DProjLod(sampler1DShadow sampler, vec4 coord, float lod)
+vec4 shadow2DProjLod(sampler2DShadow sampler, vec4 coord, float lod)
+----
+
+Same functionality as the "`*texture*`" based names above with the same signature.
 endif::GLSL[]
 
 
@@ -1809,110 +2385,169 @@ of synchronization, if atomicity or serialization is desired.
 The underlying counter is a 32-bit unsigned integer.
 The result of operations will wrap to [0, 2^32^-1].
 
-[options="header"]
-|====
-| Syntax | Description
-| uint *atomicCounterIncrement*(atomic_uint _c_)
-    a| Atomically +
---
+=== AtomicCounterIncrement
+[source,glsl]
+----
+uint atomicCounterIncrement(atomic_uint c)
+----
+
+Atomically
+
   . increments the counter for _c_, and
   . returns its value prior to the increment operation.
 
 These two steps are done atomically with respect to the atomic counter
 functions in this table.
---
-| uint *atomicCounterDecrement*(atomic_uint _c_)
-    a| Atomically +
---
+
+
+=== AtomicCounterDecrement
+[source,glsl]
+----
+uint atomicCounterDecrement(atomic_uint c)
+----
+
+Atomically
+
   . decrements the counter for _c_, and
   . returns the value resulting from the decrement operation.
 
 These two steps are done atomically with respect to the atomic counter
 functions in this table.
---
-| uint *atomicCounter*(atomic_uint _c_)
-    | Returns the counter value for _c_.
+
+=== AtomicCounter
+[source,glsl]
+----
+uint atomicCounter(atomic_uint c)
+----
+
+Returns the counter value for _c_.
+
 ifdef::GLSL[]
-| uint *atomicCounterAdd*(atomic_uint _c_, uint _data_)
-    a| Atomically +
---
+=== AtomicCounterAdd
+[source,glsl]
+----
+uint atomicCounterAdd(atomic_uint c, uint data)
+----
+
+Atomically
+
   . adds the value of _data_ to the counter for _c_, and
   . returns its value prior to the operation.
 
 These two steps are done atomically with respect to the atomic counter
 functions in this table.
---
-| uint *atomicCounterSubtract*(atomic_uint _c_, uint _data_)
-    a| Atomically +
---
+
+=== AtomicCounterSubtract
+[source,glsl]
+----
+uint atomicCounterSubtract(atomic_uint c, uint data)
+----
+
+Atomically
+
   . subtracts the value of _data_ from the counter for _c_, and
   . returns its value prior to the operation.
 
 These two steps are done atomically with respect to the atomic counter
 functions in this table.
---
-| uint *atomicCounterMin*(atomic_uint _c_, uint _data_)
-    a| Atomically +
---
+
+=== AtomicCounterMin
+[source,glsl]
+----
+uint atomicCounterMin(atomic_uint c, uint data)
+----
+
+Atomically
+
   . sets the counter for _c_ to the minimum of the value of the counter and
     the value of _data_, and
   . returns the value prior to the operation.
 
 These two steps are done atomically with respect to the atomic counter
 functions in this table.
---
-| uint *atomicCounterMax*(atomic_uint _c_, uint _data_)
-    a| Atomically +
---
+
+=== AtomicCounterMax
+[source,glsl]
+----
+uint *atomicCounterMax(atomic_uint c, uint data)
+----
+
+Atomically
+
   . sets the counter for _c_ to the maximum of the value of the counter and
     the value of _data_, and
   . returns the value prior to the operation.
 
 These two steps are done atomically with respect to the atomic counter
 functions in this table.
---
-| uint *atomicCounterAnd*(atomic_uint _c_, uint _data_)
-    a| Atomically +
---
+
+=== AtomicCounterAnd
+[source,glsl]
+----
+uint atomicCounterAnd(atomic_uint c, uint data)
+----
+
+Atomically
+
   . sets the counter for _c_ to the bitwise AND of the value of the counter
     and the value of _data_, and
   . returns the value prior to the operation.
 
 These two steps are done atomically with respect to the atomic counter
 functions in this table.
---
-| uint *atomicCounterOr*(atomic_uint _c_, uint _data_)
-    a| Atomically +
---
+
+=== AtomicCounterOr
+[source,glsl]
+----
+uint atomicCounterOr(atomic_uint c, uint data)
+----
+
+Atomically
+
   . sets the counter for _c_ to the bitwise OR of the value of the counter
     and the value of _data_, and
   . returns the value prior to the operation.
 
 These two steps are done atomically with respect to the atomic counter
 functions in this table.
---
-| uint *atomicCounterXor*(atomic_uint _c_, uint _data_)
-    a| Atomically +
---
+
+=== AtomicCounterXor
+[source,glsl]
+----
+uint atomicCounterXor(atomic_uint c, uint data)
+----
+
+Atomically
+
   . sets the counter for _c_ to the bitwise XOR of the value of the counter
     and the value of _data_, and
   . returns the value prior to the operation.
 
 These two steps are done atomically with respect to the atomic counter
 functions in this table.
---
-| uint *atomicCounterExchange*(atomic_uint _c_, uint _data_)
-    a| Atomically +
---
+
+=== AtomicCounterExchange
+[source,glsl]
+----
+uint atomicCounterExchange(atomic_uint c, uint data)
+----
+
+Atomically
+
   . sets the counter value for _c_ to the value of _data_, and
   . returns its value prior to the operation.
 
 These two steps are done atomically with respect to the atomic counter
 functions in this table.
---
-| uint *atomicCounterCompSwap*(atomic_uint _c_, uint _compare_, uint _data_)
-    a| Atomically +
---
+
+=== AtomicCounterCompSwap
+[source,glsl]
+----
+uint atomicCounterCompSwap(atomic_uint c, uint compare, uint data)
+----
+
+Atomically
+
   . compares the value of _compare_ and the counter value for _c_
   . if the values are equal, sets the counter value for _c_ to the value of
     _data_, and
@@ -1920,9 +2555,7 @@ functions in this table.
 
 These three steps are done atomically with respect to the atomic counter
 functions in this table.
---
 endif::GLSL[]
-|====
 
 
 [[atomic-memory-functions]]
@@ -1956,42 +2589,79 @@ The atomic operation will operate as required by the calling argument's
 memory qualification, not by the built-in function's formal parameter memory
 qualification.
 
-[options="header"]
-|====
-| Syntax | Description
-| uint *atomicAdd*(inout uint _mem_, uint _data_) +
-  int *atomicAdd*(inout int _mem_, int _data_)
-    | Computes a new value by adding the value of _data_ to the contents
-      _mem_.
-| uint *atomicMin*(inout uint _mem_, uint _data_) +
-  int *atomicMin*(inout int _mem_, int _data_)
-    | Computes a new value by taking the minimum of the value of _data_ and
-      the contents of _mem_.
-| uint *atomicMax*(inout uint _mem_, uint _data_) +
-  int *atomicMax*(inout int _mem_, int _data_)
-    | Computes a new value by taking the maximum of the value of _data_ and
-      the contents of _mem_.
-| uint *atomicAnd*(inout uint _mem_, uint _data_) +
-  int *atomicAnd*(inout int _mem_, int _data_)
-    | Computes a new value by performing a bit-wise AND of the value of
-      _data_ and the contents of _mem_.
-| uint *atomicOr*(inout uint _mem_, uint _data_) +
-  int *atomicOr*(inout int _mem_, int _data_)
-    | Computes a new value by performing a bit-wise OR of the value of
-      _data_ and the contents of _mem_.
-| uint *atomicXor*(inout uint _mem_, uint _data_) +
-  int *atomicXor*(inout int _mem_, int _data_)
-    | Computes a new value by performing a bit-wise EXCLUSIVE OR of the
-      value of _data_ and the contents of _mem_.
-| uint *atomicExchange*(inout uint _mem_, uint _data_) +
-  int *atomicExchange*(inout int _mem_, int _data_)
-    | Computes a new value by simply copying the value of _data_.
-| uint *atomicCompSwap*(inout uint _mem_, uint _compare_, uint _data_) +
-  int *atomicCompSwap*(inout int _mem_, int _compare_, int _data_)
-    | Compares the value of _compare_ and the contents of _mem_.
-      If the values are equal, the new value is given by _data_; otherwise,
-      it is taken from the original contents of _mem_.
-|====
+=== AtomicAdd
+[source,glsl]
+----
+int atomicAdd(inout uint mem, uint data)
+int atomicAdd(inout int_mem, int data)
+----
+
+Computes a new value by adding the value of _data_ to the contents _mem_.
+
+=== AtomicMin
+[source,glsl]
+----
+uint atomicMin(inout uint mem, uint data)
+int atomicMin(inout int mem, int data)
+----
+
+Computes a new value by taking the minimum of the value of _data_ and the contents of _mem_.
+
+=== AtomicMax
+[source,glsl]
+----
+uint atomicMax(inout uint mem, uint data)
+int atomicMax(inout int mem, int data)
+----
+
+Computes a new value by taking the maximum of the value of _data_ and the contents of _mem_.
+
+=== AtomicAnd
+[source,glsl]
+----
+uint atomicAnd(inout uint mem, uint data)
+int atomicAnd(inout int mem, int data)
+----
+
+Computes a new value by performing a bit-wise AND of the value of _data_ and the contents of _mem_.
+
+=== AtomicOr
+[source,glsl]
+----
+uint atomicOr(inout uint mem, uint data)
+int atomicOr(inout int mem, int data)
+----
+
+Computes a new value by performing a bit-wise OR of the value of _data_ and the contents of _mem_.
+
+=== AtomicXor
+[source,glsl]
+----
+uint atomicXor(inout uint mem, uint data)
+int atomicXor(inout int mem, int data)
+----
+
+Computes a new value by performing a bit-wise EXCLUSIVE OR of the value of _data_ and the contents
+of _mem_.
+
+=== AtomicExchange
+[source,glsl]
+----
+uint atomicExchange(inout uint mem, uint data)
+int atomicExchange(inout int mem, int data)
+----
+
+Computes a new value by simply copying the value of _data_.
+
+=== AtomicCompSwap
+[source,glsl]
+----
+uint atomicCompSwap(inout uint mem, uint compare, uint data)
+int atomicCompSwap(inout int mem, int compare, int data)
+----
+
+Compares the value of _compare_ and the contents of _mem_. If the values are equal, the new value
+is given by _data_; otherwise, it is taken from the original contents of _mem_.
 
 
 [[image-functions]]
@@ -2087,107 +2757,219 @@ The image operation will operate as required by the calling argument's
 memory qualification, not by the built-in function's formal parameter memory
 qualification.
 
-[options="header"]
-|====
-| Syntax | Description
-|
+=== ImageSize
+[source,glsl]
+----
 ifdef::GLSL[]
-  {highp}   int *imageSize*(readonly writeonly gimage1D _image_) +
-endif::GLSL[]
-  {highp} ivec2 *imageSize*(readonly writeonly gimage2D _image_) +
-  {highp} ivec3 *imageSize*(readonly writeonly gimage3D _image_) +
-  {highp} ivec2 *imageSize*(readonly writeonly gimageCube _image_) +
-  {highp} ivec3 *imageSize*(readonly writeonly gimageCubeArray _image_) +
-  {highp} ivec3 *imageSize*(readonly writeonly gimage2DArray _image_) +
-ifdef::GLSL[]
-  {highp} ivec2 *imageSize*(readonly writeonly gimage2DRect _image_) +
-  {highp} ivec2 *imageSize*(readonly writeonly gimage1DArray _image_) +
-  {highp} ivec2 *imageSize*(readonly writeonly gimage2DMS _image_) +
-  {highp} ivec3 *imageSize*(readonly writeonly gimage2DMSArray _image_) +
-endif::GLSL[]
-  {highp}   int *imageSize*(readonly writeonly gimageBuffer _image_)
-    | Returns the dimensions of the image bound to _image_.
-      For arrayed images, the last component of the return value will hold
-      the size of the array.
-      Cube images only return the dimensions of one face, and the number of
-      cubes in the cube map array, if arrayed. +
-      Note: The qualification *readonly writeonly* accepts a variable
-      qualified with *readonly*, *writeonly*, both, or neither.
-      It means the formal argument will be used for neither reading nor
-      writing to the underlying memory.
-ifdef::GLSL[]
-| int *imageSamples*(readonly writeonly gimage2DMS _image_) +
-  int *imageSamples*(readonly writeonly gimage2DMSArray _image_)
-    | Returns the number of samples of the image bound to _image_.
-endif::GLSL[]
-| gvec4 *imageLoad*(readonly _IMAGE_PARAMS_)
-    | Loads the texel at the coordinate _P_ from the image unit _image_ (in
-      _IMAGE_PARAMS_).
-ifdef::GLSL[]
-      For multisample loads, the sample number is given by _sample_.
-      When _image_, _P_, and _sample_
+int imageSize(readonly writeonly gimage1D image)
+ivec2 imageSize(readonly writeonly gimage2D image)
+ivec3 imageSize(readonly writeonly gimage3D image)
+ivec2 imageSize(readonly writeonly gimageCube image)
+ivec3 imageSize(readonly writeonly gimageCubeArray image)
+ivec3 imageSize(readonly writeonly gimage2DArray image)
+ivec2 imageSize(readonly writeonly gimage2DRect image)
+ivec2 imageSize(readonly writeonly gimage1DArray image)
+ivec2 imageSize(readonly writeonly gimage2DMS image)
+ivec3 imageSize(readonly writeonly gimage2DMSArray image)
+int imageSize(readonly writeonly gimageBuffer image)
 endif::GLSL[]
 ifdef::ESSL[]
-      When _image_ and _P_
+highp ivec2 imageSize(readonly writeonly gimage2D _image)
+highp ivec3 imageSize(readonly writeonly gimage3D _image)
+highp ivec2 imageSize(readonly writeonly gimageCube _image)
+highp ivec3 imageSize(readonly writeonly gimageCubeArray _image)
+highp ivec3 imageSize(readonly writeonly gimage2DArray _image)
+highp int imageSize(readonly writeonly gimageBuffer _image)
 endif::ESSL[]
-      identify a valid texel, the bits used to represent the selected texel in
-      memory are converted to a *vec4*, *ivec4*, or *uvec4* in the manner
-      described in section
-ifdef::GLSL[8.26]
-ifdef::ESSL[8.23]
-      "`Texture Image Loads and Stores`" of the
-      <<references,{apispec}>> and returned.
-| void *imageStore*(writeonly _IMAGE_PARAMS_, gvec4 _data_)
-    | Stores _data_ into the texel at the coordinate _P_ from the image
-      specified by _image_.
+----
+
+Returns the dimensions of the image bound to _image_. For arrayed images, the last component of the
+return value will hold the size of the array. Cube images only return the dimensions of one face,
+and the number of cubes in the cube map array, if arrayed.
+
+NOTE: The qualification *readonly writeonly* accepts a variable qualified with *readonly*,
+      *writeonly*, both, or neither. It means the formal argument will be used for neither reading
+      nor writing to the underlying memory.
+
 ifdef::GLSL[]
-      For multisample stores, the sample number is given by _sample_.
-      When _image_, _P_, and _sample_
+=== ImageSamples
+[source,glsl]
+----
+int imageSamples(readonly writeonly gimage2DMS image)
+int imageSamples(readonly writeonly gimage2DMSArray image)
+----
+
+Returns the number of samples of the image bound to _image_.
+endif::GLSL[]
+
+=== ImageLoad
+[source,glsl]
+----
+gvec4 imageLoad(readonly IMAGE_PARAMS)
+----
+
+Loads the texel at the coordinate _P_ from the image unit _image_ (in _IMAGE_PARAMS_).
+
+ifdef::GLSL[]
+For multisample loads, the sample number is given by _sample_. When _image_, _P_, and _sample_
 endif::GLSL[]
 ifdef::ESSL[]
-      When _image_ and _P_
+When _image_ and _P_
 endif::ESSL[]
-      identify a valid texel, the bits used to represent _data_ are converted
-      to the format of the image unit in the manner described in section
+identify a valid texel, the bits used to represent the selected texel in memory are converted to a
+*vec4*, *ivec4*, or *uvec4* in the manner described in section
 ifdef::GLSL[8.26]
 ifdef::ESSL[8.23]
-      "`Texture Image Loads and Stores`" of the <<references,{apispec}>>
-      and stored to the specified texel.
-| {highp} uint *imageAtomicAdd*(_IMAGE_PARAMS_, uint _data_) +
-  {highp} int *imageAtomicAdd*(_IMAGE_PARAMS_, int _data_)
-    | Computes a new value by adding the value of _data_ to the contents of
-      the selected texel.
-| {highp} uint *imageAtomicMin*(_IMAGE_PARAMS_, uint _data_) +
-  {highp} int *imageAtomicMin*(_IMAGE_PARAMS_, int _data_)
-    | Computes a new value by taking the minimum of the value of _data_ and
-      the contents of the selected texel.
-| {highp} uint *imageAtomicMax*(_IMAGE_PARAMS_, uint _data_) +
-  {highp} int *imageAtomicMax*(_IMAGE_PARAMS_, int _data_)
-    | Computes a new value by taking the maximum of the value _data_ and the
-      contents of the selected texel.
-| {highp} uint *imageAtomicAnd*(_IMAGE_PARAMS_, uint _data_) +
-  {highp} int *imageAtomicAnd*(_IMAGE_PARAMS_, int _data_)
-    | Computes a new value by performing a bit-wise AND of the value of
-      _data_ and the contents of the selected texel.
-| {highp} uint *imageAtomicOr*(_IMAGE_PARAMS_, uint _data_) +
-  {highp} int *imageAtomicOr*(_IMAGE_PARAMS_, int _data_)
-    | Computes a new value by performing a bit-wise OR of the value of
-      _data_ and the contents of the selected texel.
-| {highp} uint *imageAtomicXor*(_IMAGE_PARAMS_, uint _data_) +
-  {highp} int *imageAtomicXor*(_IMAGE_PARAMS_, int _data_)
-    | Computes a new value by performing a bit-wise EXCLUSIVE OR of the
-      value of _data_ and the contents of the selected texel.
-| {highp} uint *imageAtomicExchange*(_IMAGE_PARAMS_, uint _data_) +
-  {highp} int *imageAtomicExchange*(_IMAGE_PARAMS_, int _data_) +
-  {highp} float *imageAtomicExchange*(_IMAGE_PARAMS_, float _data_)
-    | Computes a new value by simply copying the value of _data_.
-| {highp} uint *imageAtomicCompSwap*(_IMAGE_PARAMS_, uint _compare_, uint _data_) +
-  {highp} int *imageAtomicCompSwap*(_IMAGE_PARAMS_, int _compare_, int _data_)
-    | Compares the value of _compare_ and the contents of the selected
-      texel.
-      If the values are equal, the new value is given by _data_; otherwise,
-      it is taken from the original value loaded from the texel.
-|====
+"`Texture Image Loads and Stores`" of the <<references,{apispec}>> and returned.
+
+=== ImageStore
+[source,glsl]
+----
+void imageStore(writeonly IMAGE_PARAMS, gvec4 data)
+----
+
+Stores _data_ into the texel at the coordinate _P_ from the image specified by _image_.
+ifdef::GLSL[]
+For multisample stores, the sample number is given by _sample_. When _image_, _P_, and _sample_
+endif::GLSL[]
+ifdef::ESSL[]
+When _image_ and _P_
+endif::ESSL[]
+identify a valid texel, the bits used to represent _data_ are converted to the format of the image
+unit in the manner described in section
+ifdef::GLSL[8.26]
+ifdef::ESSL[8.23]
+"`Texture Image Loads and Stores`" of the <<references,{apispec}>> and stored to the specified
+texel.
+
+=== ImageAtomicAdd
+[source,glsl]
+----
+ifdef::GLSL[]
+uint imageAtomicAdd(IMAGE_PARAMS, uint data)
+int imageAtomicAdd(IMAGE_PARAMS, int data)
+endif::GLSL[]
+ifdef::ESSL[]
+highp uint imageAtomicAdd(IMAGE_PARAMS, uint data)
+highp int *imageAtomicAdd(IMAGE_PARAMS, int data)
+endif::ESSL[]
+----
+
+Computes a new value by adding the value of _data_ to the contents of the selected texel.
+
+=== ImageAtomicMin
+[source,glsl]
+----
+ifdef::GLSL[]
+uint imageAtomicMin(IMAGE_PARAMS, uint data)
+int imageAtomicMin(IMAGE_PARAMS, int data)
+endif::GLSL[]
+ifdef::ESSL[]
+highp uint imageAtomicMin(IMAGE_PARAMS, uint data)
+highp int imageAtomicMin(IMAGE_PARAMS, int data)
+endif::ESSL[]
+----
+
+Computes a new value by taking the minimum of the value of _data_ and the contents of the selected
+texel.
+
+=== ImageAtomicMax
+[source,glsl]
+----
+ifdef::GLSL[]
+uint imageAtomicMax(IMAGE_PARAMS, uint data)
+int imageAtomicMax(IMAGE_PARAMS, int data)
+endif::GLSL[]
+ifdef::ESSL[]
+highp uint imageAtomicMax(IMAGE_PARAMS, uint data)
+highp int imageAtomicMax(IMAGE_PARAMS, int data)
+endif::ESSL[]
+----
+
+Computes a new value by taking the maximum of the value _data_ and the contents of the selected
+texel.
+
+=== ImageAtomicAnd
+[source,glsl]
+----
+ifdef::GLSL[]
+uint imageAtomicAnd(IMAGE_PARAMS, uint data)
+int imageAtomicAnd(IMAGE_PARAMS, int data)
+endif::GLSL[]
+ifdef::ESSL[]
+highp uint imageAtomicAnd(IMAGE_PARAMS, uint data)
+highp int imageAtomicAnd(IMAGE_PARAMS, int data)
+endif::ESSL[]
+----
+
+Computes a new value by performing a bit-wise AND of the value of _data_ and the contents of the
+selected texel.
+
+=== ImageAtomicOr
+[source,glsl]
+----
+ifdef::GLSL[]
+uint imageAtomicOr(IMAGE_PARAMS, uint data)
+int imageAtomicOr(IMAGE_PARAMS, int data)
+endif::GLSL[]
+ifdef::ESSL[]
+highp uint imageAtomicOr(IMAGE_PARAMS, uint data)
+highp int imageAtomicOr(IMAGE_PARAMS, int data)
+endif::ESSL[]
+----
+
+Computes a new value by performing a bit-wise OR of the value of _data_ and the contents of the
+selected texel.
+
+=== ImageAtomicXor
+[source,glsl]
+----
+ifdef::GLSL[]
+uint imageAtomicXor(IMAGE_PARAMS, uint data)
+int imageAtomicXor(IMAGE_PARAMS, int data)
+endif::GLSL[]
+ifdef::ESSL[]
+highp uint imageAtomicXor(IMAGE_PARAMS, uint data)
+highp int imageAtomicXor(IMAGE_PARAMS, int data)
+endif::ESSL[]
+----
+
+Computes a new value by performing a bit-wise EXCLUSIVE OR of the value of _data_ and the contents
+of the selected texel.
+
+=== ImageAtomicExchange
+[source,glsl]
+----
+ifdef::GLSL[]
+uint imageAtomicExchange(IMAGE_PARAMS, uint data)
+int imageAtomicExchange(IMAGE_PARAMS, int data)
+float imageAtomicExchange(IMAGE_PARAMS, float data)
+endif::GLSL[]
+ifdef::ESSL[]
+highp uint imageAtomicExchange(IMAGE_PARAMS, uint data)
+highp int imageAtomicExchange(IMAGE_PARAMS, int data)
+highp float imageAtomicExchange(IMAGE_PARAMS, float data)
+endif::ESSL[]
+----
+
+Computes a new value by simply copying the value of _data_.
+
+=== ImageAtomicCompSwap
+[source,glsl]
+----
+ifdef::GLSL[]
+uint imageAtomicCompSwap(IMAGE_PARAMS, uint compare, uint data)
+int imageAtomicCompSwap(IMAGE_PARAMS, int compare, int data)
+endif::GLSL[]
+ifdef::ESSL[]
+highp uint imageAtomicCompSwap(IMAGE_PARAMS, uint compare, uint data)
+highp int imageAtomicCompSwap(IMAGE_PARAMS, int compare, int data)
+endif::ESSL[]
+----
+
+Compares the value of _compare_ and the contents of the selected texel. If the values are equal,
+the new value is given by _data_; otherwise, it is taken from the original value loaded from the
+texel.
 
 
 [[geometry-shader-functions]]
@@ -2196,42 +2978,58 @@ ifdef::ESSL[8.23]
 These functions are only available in geometry shaders.
 They are described in more depth following the table.
 
-[options="header"]
-|====
-| Syntax | Description
 ifdef::GLSL[]
-| void *EmitStreamVertex*(int _stream_)
-    | Emits the current values of output variables to the current output
-      primitive on stream _stream_.
-      The argument to _stream_ must be a constant integral expression.
-      On return from this call, the values of all output variables are
-      undefined. +
-      Can only be used if multiple output streams are supported.
-| void *EndStreamPrimitive*(int _stream_)
-    | Completes the current output primitive on stream _stream_ and starts a
-      new one.
-      The argument to _stream_ must be a constant integral expression.
-      No vertex is emitted. +
-      Can only be used if multiple output streams are supported.
-endif::GLSL[]
-| void *EmitVertex*() +
-    | Emits the current values of output variables to the current output
-      primitive.
-ifdef::GLSL[]
-      When multiple output streams are supported, this is equivalent to
-      calling *EmitStreamVertex*(0). +
-endif::GLSL[]
-      On return from this call, the values of output variables are
-      undefined.
-| void *EndPrimitive*()
-    | Completes the current output primitive and starts a new one.
-ifdef::GLSL[]
-      When multiple output streams are supported, this is equivalent to
-      calling *EndStreamPrimitive*(0). +
-endif::GLSL[]
-      No vertex is emitted.
-|====
+=== EmitStreamVertex
+[source,glsl]
+----
+void EmitStreamVertex(int stream)
+----
 
+Emits the current values of output variables to the current output primitive on stream _stream_.
+The argument to _stream_ must be a constant integral expression. On return from this call, the
+values of all output variables are undefined.
+
+Can only be used if multiple output streams are supported.
+
+=== EndStreamPrimitive
+[source,glsl]
+----
+void EndStreamPrimitive(int stream)
+----
+
+Completes the current output primitive on stream _stream_ and starts a new one. The argument to
+_stream_ must be a constant integral expression. No vertex is emitted.
+
+Can only be used if multiple output streams are supported.
+endif::GLSL[]
+
+=== EmitVertex
+[source,glsl]
+----
+void EmitVertex()
+----
+
+Emits the current values of output variables to the current output primitive.
+ifdef::GLSL[]
+When multiple output streams are supported, this is equivalent to calling *EmitStreamVertex*(0).
+endif::GLSL[]
+
+On return from this call, the values of output variables are undefined.
+
+=== EndPrimitive
+[source,glsl]
+----
+void EndPrimitive()
+----
+
+Completes the current output primitive and starts a new one.
+ifdef::GLSL[]
+When multiple output streams are supported, this is equivalent to calling *EndStreamPrimitive*(0).
+endif::GLSL[]
+
+No vertex is emitted.
+
+=== Description
 ifdef::GLSL[]
 The function *EmitStreamVertex*() specifies that a vertex is completed.
 A vertex is added to the current output primitive in vertex stream _stream_
@@ -2350,52 +3148,92 @@ versus speed trade off.
 These hints have no effect on *dFdxCoarse*, *dFdyCoarse*, *dFdxFine* and
 *dFdyFine*.
 
-[options="header"]
-|====
-| Syntax | Description
-| genFType *dFdx*(genFType _p_)
-    | Returns either *dFdxFine*(_p_) or *dFdxCoarse*(_p_), based on
-      implementation choice, presumably whichever is the faster, or by whichever
-      is selected in the API through quality-versus-speed hints.
-| genFType *dFdy*(genFType _p_)
-    | Returns either *dFdyFine*(_p_) or *dFdyCoarse*(_p_), based on
-      implementation choice, presumably whichever is the faster, or by
-      whichever is selected in the API through quality-versus-speed hints.
-| genFType *dFdxFine*(genFType _p_)
-    | Returns the partial derivative of _p_ with respect to the window x
-      coordinate.
-      Will use local differencing based on the value of _p_ for the current
-      fragment and its immediate neighbor(s).
-| genFType *dFdyFine*(genFType _p_)
-    | Returns the partial derivative of _p_ with respect to the window y
-      coordinate.
-      Will use local differencing based on the value of _p_ for the current
-      fragment and its immediate neighbor(s).
-| genFType *dFdxCoarse*(genFType _p_)
-    | Returns the partial derivative of _p_ with respect to the window x
-      coordinate.
-      Will use local differencing based on the value of _p_ for the current
-      fragment's neighbors, and will possibly, but not necessarily, include
-      the value of _p_ for the current fragment.
-      That is, over a given area, the implementation can x compute
-      derivatives in fewer unique locations than would be allowed for
-      *dFdxFine*(_p_).
-| genFType *dFdyCoarse*(genFType _p_)
-    | Returns the partial derivative of _p_ with respect to the window y
-      coordinate.
-      Will use local differencing based on the value of _p_ for the current
-      fragment's neighbors, and will possibly, but not necessarily, include
-      the value of _p_ for the current fragment.
-      That is, over a given area, the implementation can compute y
-      derivatives in fewer unique locations than would be allowed for
-      *dFdyFine*(_p_).
-| genFType *fwidth*(genFType _p_)
-    | Returns *abs*(*dFdx*(_p_)) + *abs*(*dFdy*(_p_)).
-| genFType *fwidthFine*(genFType _p_)
-    | Returns *abs*(*dFdxFine*(_p_)) + *abs*(*dFdyFine*(_p_)).
-| genFType *fwidthCoarse*(genFType _p_)
-    | Returns *abs*(*dFdxCoarse*(_p_)) + *abs*(*dFdyCoarse*(_p_)).
-|====
+=== DFdx
+[source,glsl]
+----
+genFType dFdx(genFType p)
+----
+
+Returns either *dFdxFine*(_p_) or *dFdxCoarse*(_p_), based on implementation choice, presumably
+whichever is the faster, or by whichever is selected in the API through quality-versus-speed hints.
+
+=== DFdy
+[source,glsl]
+----
+genFType dFdy(genFType p)
+----
+
+Returns either *dFdyFine*(_p_) or *dFdyCoarse*(_p_), based on implementation choice, presumably
+whichever is the faster, or by whichever is selected in the API through quality-versus-speed hints.
+
+=== DFdxFine
+[source,glsl]
+----
+genFType dFdxFine(genFType p)
+----
+
+Returns the partial derivative of _p_ with respect to the window x coordinate. Will use local
+differencing based on the value of _p_ for the current fragment and its immediate neighbor(s).
+
+=== DFdyFine
+[source,glsl]
+----
+genFType dFdyFine(genFType p)
+----
+
+Returns the partial derivative of _p_ with respect to the window y coordinate. Will use local
+differencing based on the value of _p_ for the current fragment and its immediate neighbor(s).
+
+=== DFdxCoarse
+[source,glsl]
+----
+genFType dFdxCoarse(genFType p)
+----
+
+Returns the partial derivative of _p_ with respect to the window x coordinate. Will use local
+differencing based on the value of _p_ for the current fragment's neighbors, and will possibly, but
+not necessarily, include the value of _p_ for the current fragment.
+
+That is, over a given area, the implementation can x compute derivatives in fewer unique locations
+than would be allowed for *dFdxFine*(_p_).
+
+=== DFdyCoarse
+[source,glsl]
+----
+genFType dFdyCoarse(genFType p)
+----
+
+Returns the partial derivative of _p_ with respect to the window y coordinate. Will use local
+differencing based on the value of _p_ for the current fragment's neighbors, and will possibly, but
+not necessarily, include the value of _p_ for the current fragment.
+
+That is, over a given area, the implementation can compute y derivatives in fewer unique locations
+than would be allowed for *dFdyFine*(_p_).
+
+=== Fwidth
+[source,glsl]
+----
+genFType fwidth(genFType p)
+----
+
+Returns *abs*(*dFdx*(_p_)) + *abs*(*dFdy*(_p_)).
+
+=== FwidthFine
+[source,glsl]
+----
+genFType fwidthFine(genFType p)
+----
+
+Returns *abs*(*dFdxFine*(_p_)) + *abs*(*dFdyFine*(_p_)).
+
+=== FWidthCoarse
+[source,glsl]
+----
+genFType fwidthCoarse(genFType p)
+----
+
+Returns *abs*(*dFdxCoarse*(_p_)) + *abs*(*dFdyCoarse*(_p_)).
+
 endif::GLSL[]
 ifdef::ESSL[]
 An implementation may use the above or other methods to perform
@@ -2428,28 +3266,37 @@ obtained by providing GL hints (see section 19.1 "`Hints`" of the
 <<references,{apispec}>>), allowing a user to make an image quality versus
 speed trade off.
 
-[options="header"]
-|====
-| Syntax | Description
-| genFType *dFdx*(genFType _p_)
-    | Returns the derivative in x using local differencing for the input
-      argument _p_.
-| genFType *dFdy*(genFType _p_)
-    | Returns the derivative in y using local differencing for the input
-      argument _p_. +
-       +
-      These two functions are commonly used to estimate the filter width used
-      to anti-alias procedural textures. We are assuming that the expression
-      is being evaluated in parallel on a SIMD array so that at any given
-      point in time the value of the function is known at the grid points
-      represented by the SIMD array. Local differencing between SIMD array
-      elements can therefore be used to derive *dFdx*, *dFdy*, etc.
-| genFType *fwidth*(genFType _p_)
-    | Returns the sum of the absolute derivative in x and y using local
-      differencing for the input argument _p_, i.e., *abs*(*dFdx*(_p_))
-      + *abs*(*dFdy*(_p_));
+=== DFdx
+[source,glsl]
+----
+genFType dFdx(genFType p)
+----
 
-|====
+Returns the derivative in x using local differencing for the input argument _p_.
+
+=== DFdy
+[source,glsl]
+----
+genFType dFdy(genFType p)
+----
+
+Returns the derivative in y using local differencing for the input argument _p_.
+
+These two functions are commonly used to estimate the filter width used to anti-alias procedural
+textures. We are assuming that the expression is being evaluated in parallel on a SIMD array so
+that at any given point in time the value of the function is known at the grid points represented
+by the SIMD array. Local differencing between SIMD array elements can therefore be used to derive
+*dFdx*, *dFdy*, etc.
+
+=== FWidth
+[source,glsl]
+----
+genFType fwidth(genFType p)
+----
+
+Returns the sum of the absolute derivative in x and y using local differencing for the input
+argument _p_, i.e., *abs*(*dFdx*(_p_)) + *abs*(*dFdy*(_p_));
+
 endif::ESSL[]
 
 
@@ -2495,39 +3342,47 @@ If _interpolant_ is declared with the *noperspective* qualifier, the
 interpolated value will be computed without perspective correction.
 endif::GLSL[]
 
-[options="header"]
-|====
-| Syntax | Description
-| float *interpolateAtCentroid*(float _interpolant_) +
-  vec2 *interpolateAtCentroid*(vec2 _interpolant_) +
-  vec3 *interpolateAtCentroid*(vec3 _interpolant_) +
-  vec4 *interpolateAtCentroid*(vec4 _interpolant_)
-    | Returns the value of the input _interpolant_ sampled at a location
-      inside both the pixel and the primitive being processed.
-      The value obtained would be the same value assigned to the input
-      variable if declared with the *centroid* qualifier.
-| float *interpolateAtSample*(float _interpolant_, int _sample_) +
-  vec2 *interpolateAtSample*(vec2 _interpolant_, int _sample_) +
-  vec3 *interpolateAtSample*(vec3 _interpolant_, int _sample_) +
-  vec4 *interpolateAtSample*(vec4 _interpolant_, int _sample_)
-    | Returns the value of the input _interpolant_ variable at the location
-      of sample number _sample_.
-      If multisample buffers are not available, the input variable will be
-      evaluated at the center of the pixel.
-      If sample _sample_ does not exist, the position used to interpolate
-      the input variable is undefined.
-| float *interpolateAtOffset*(float _interpolant_, vec2 offset) +
-  vec2 *interpolateAtOffset*(vec2 _interpolant_, vec2 offset) +
-  vec3 *interpolateAtOffset*(vec3 _interpolant_, vec2 offset) +
-  vec4 *interpolateAtOffset*(vec4 _interpolant_, vec2 offset)
-    | Returns the value of the input _interpolant_ variable sampled at an
-      offset from the center of the pixel specified by _offset_.
-      The two floating-point components of _offset_, give the offset in
-      pixels in the _x_ and _y_ directions, respectively. +
-      An offset of (0, 0) identifies the center of the pixel.
-      The range and granularity of offsets supported by this function is
-      implementation-dependent.
-|====
+=== InterpolateAtCentroid
+[source,glsl]
+----
+float interpolateAtCentroid(float interpolant)
+vec2 interpolateAtCentroid(vec2 interpolant)
+vec3 interpolateAtCentroid(vec3 interpolant)
+vec4 interpolateAtCentroid(vec4 interpolant)
+----
+
+Returns the value of the input _interpolant_ sampled at a location inside both the pixel and the
+primitive being processed. The value obtained would be the same value assigned to the input
+variable if declared with the *centroid* qualifier.
+
+=== InterpolateAtSample
+[source,glsl]
+----
+float interpolateAtSample(float interpolant, int sample)
+vec2 interpolateAtSample(vec2 interpolant, int sample)
+vec3 interpolateAtSample(vec3 interpolant, int sample)
+vec4 interpolateAtSample(vec4 interpolant, int sample)
+----
+
+Returns the value of the input _interpolant_ variable at the location of sample number _sample_.
+If multisample buffers are not available, the input variable will be evaluated at the center of the
+pixel. If sample _sample_ does not exist, the position used to interpolate the input variable is undefined.
+
+=== InterpolateAtOffset
+[source,glsl]
+----
+float interpolateAtOffset(float interpolant, vec2 offset)
+vec2 interpolateAtOffset(vec2 interpolant, vec2 offset)
+vec3 interpolateAtOffset(vec3 interpolant, vec2 offset)
+vec4 interpolateAtOffset(vec4 interpolant, vec2 offset)
+----
+
+Returns the value of the input _interpolant_ variable sampled at an offset from the center of the
+pixel specified by _offset_. The two floating-point components of _offset_, give the offset in
+pixels in the _x_ and _y_ directions, respectively.
+
+An offset of (0, 0) identifies the center of the pixel. The range and granularity of offsets
+supported by this function is implementation-dependent.
 
 
 ifdef::GLSL[]
@@ -2543,14 +3398,38 @@ not declared and may not be used.
 As in previous releases, the noise functions are not semantically considered to
 be compile-time constant expressions.
 
-[options="header"]
-|====
-| Syntax (deprecated)         | Description (deprecated)
-| float *noise1*(genFType _x_) | Returns a 1D noise value based on the input value _x_.
-| vec2 *noise2*(genFType _x_)  | Returns a 2D noise value based on the input value _x_.
-| vec3 *noise3*(genFType _x_)  | Returns a 3D noise value based on the input value _x_.
-| vec4 *noise4*(genFType _x_)  | Returns a 4D noise value based on the input value _x_.
-|====
+=== Noise1
+[source,glsl]
+----
+float noise1(genFType x)
+----
+
+Returns a 1D noise value based on the input value _x_.
+
+=== Noise2
+[source,glsl]
+----
+vec2 noise2(genFType x)
+----
+
+Returns a 2D noise value based on the input value _x_.
+
+=== Noise3
+[source,glsl]
+----
+vec3 noise3(genFType x)
+----
+
+Returns a 3D noise value based on the input value _x_.
+
+=== Noise4
+[source,glsl]
+----
+vec4 noise4(genFType x)
+----
+
+Returns a 4D noise value based on the input value _x_.
+---
 endif::GLSL[]
 
 
@@ -2564,16 +3443,15 @@ invocations used to process a patch (in the case of tessellation control
 shaders) or a workgroup (in the case of compute shaders), which are
 otherwise executed with an undefined relative order.
 
-[options="header"]
-|====
-| Syntax | Description
-| void *barrier*()
-    | For any given static instance of *barrier*(), all tessellation control
-      shader invocations for a single input patch must enter it before any
-      will be allowed to continue beyond it, or all compute shader
-      invocations for a single workgroup must enter it before any will
-      continue beyond it.
-|====
+=== Barrier
+[source,glsl]
+----
+void barrier()
+----
+
+For any given static instance of *barrier*(), all tessellation control shader invocations for a
+single input patch must enter it before any will be allowed to continue beyond it, or all compute
+shader invocations for a single workgroup must enter it before any will continue beyond it.
 
 The function *barrier*() provides a partially defined order of execution
 between shader invocations.
@@ -2628,32 +3506,61 @@ also undefined.
 The following built-in functions can be used to control the ordering of
 reads and writes:
 
-[options="header"]
-|====
-| Syntax | Description
-| void *memoryBarrier*()
-    | Control the ordering of memory transactions issued by a single shader
-      invocation.
-| void *memoryBarrierAtomicCounter*()
-    | Control the ordering of accesses to atomic-counter variables issued by
-      a single shader invocation.
-| void *memoryBarrierBuffer*()
-    | Control the ordering of memory transactions to buffer variables issued
-      within a single shader invocation.
-| void *memoryBarrierShared*()
-    | Control the ordering of memory transactions to shared variables issued
-      within a single shader invocation, as viewed by other invocations in
-      the same workgroup. +
-      Only available in compute shaders.
-| void *memoryBarrierImage*()
-    | Control the ordering of memory transactions to images issued within a
-      single shader invocation.
-| void *groupMemoryBarrier*()
-    | Control the ordering of all memory transactions issued within a single
-      shader invocation, as viewed by other invocations in the same workgroup. +
-      Only available in compute shaders.
-|====
+=== MemoryBarrier
+[source,glsl]
+----
+void memoryBarrier()
+----
 
+Control the ordering of memory transactions issued by a single shader invocation.
+
+=== MemoryBarrierAtomicCounter
+[source,glsl]
+----
+void memoryBarrierAtomicCounter()
+----
+
+Control the ordering of accesses to atomic-counter variables issued by a single shader invocation.
+
+=== MemoryBarrierBuffer
+[source,glsl]
+----
+void memoryBarrierBuffer()
+----
+
+Control the ordering of memory transactions to buffer variables issued within a single shader invocation.
+
+=== MemoryBarrierShared
+[source,glsl]
+----
+void memoryBarrierShared()
+----
+
+Control the ordering of memory transactions to shared variables issued within a single shader
+invocation, as viewed by other invocations in the same workgroup.
+
+Only available in compute shaders.
+
+=== MemoryBarrierImage
+[source,glsl]
+----
+void memoryBarrierImage()
+----
+
+Control the ordering of memory transactions to images issued within a single shader invocation.
+
+=== GroupMemoryBarrier
+[source,glsl]
+----
+void groupMemoryBarrier()
+----
+
+Control the ordering of all memory transactions issued within a single shader invocation, as viewed
+by other invocations in the same workgroup.
+
+Only available in compute shaders.
+
+=== Description
 The memory barrier built-in functions can be used to order reads and writes
 to variables stored in memory accessible to other shader invocations.
 When called, these functions will wait for the completion of all reads and
@@ -2711,14 +3618,15 @@ a placeholder for either nothing, `i`, or `u`, indicating either a floating-poin
 signed integer, or unsigned integer, and these must match between argument type
 and return type.
 
-[options="header"]
-|====
-| Syntax | Description
-| gvec4 *subpassLoad*(gsubpassInput subpass) +
-  gvec4 *subpassLoad*(gsubpassInputMS subpass, int sample)
-    | Read from a subpass input, from the implicit location _(x, y, layer)_
-      of the current fragment coordinate.
-|====
+=== SubpassLoad
+[source,glsl]
+----
+gvec4 subpassLoad(gsubpassInput subpass)
+gvec4 subpassLoad(gsubpassInputMS subpass, int sample)
+----
+
+Read from a subpass input, from the implicit location _(x, y, layer)_ of the current fragment
+coordinate.
 
 ifdef::GLSL[]
 [[shader-invocation-group-functions]]
@@ -2732,20 +3640,31 @@ Shader algorithms on such implementations may benefit from being able to
 evaluate a composite of Boolean values over all active invocations in a
 group.
 
-[options="header"]
-|====
-| Syntax | Description
-| bool *anyInvocation*(bool _value_)
-    | Returns *true* if and only if _value_ is *true* for at least one
-      active invocation in the group.
-| bool *allInvocations*(bool _value_)
-    | Returns *true* if and only if _value_ is *true* for all active
-      invocations in the group.
-| bool *allInvocationsEqual*(bool _value_)
-    | Returns *true* if _value_ is the same for all active invocations in
-      the group.
-|====
+=== AnyInvocation
+[source,glsl]
+----
+bool anyInvocation(bool value)
+----
 
+Returns *true* if and only if _value_ is *true* for at least one active invocation in the group.
+
+=== AllInvocations
+[source,glsl]
+----
+bool allInvocations(bool value)
+----
+
+Returns *true* if and only if _value_ is *true* for all active invocations in the group.
+
+=== AllInvocationsEqual
+[source,glsl]
+----
+bool allInvocationsEqual(bool value)
+----
+
+Returns *true* if _value_ is the same for all active invocations in the group.
+
+=== Description
 For all of these functions, the same result is returned to all active
 invocations in the group.
 
