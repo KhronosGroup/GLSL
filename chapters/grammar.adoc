@@ -666,7 +666,7 @@ _switch_statement_ : ::
     _RIGHT_BRACE_
 
 _switch_statement_list_ : ::
-    /* _nothing_ */ +
+    /* _empty_ */ +
     _statement_list_
 
 _case_label_ : ::
@@ -685,8 +685,8 @@ _for_init_statement_ : ::
     _declaration_statement_
 
 _conditionopt_ : ::
-    _condition_ +
-    /* _empty_ */
+    /* _empty_ */ +
+    _condition_
 
 _for_rest_statement_ : ::
     _conditionopt_ _SEMICOLON_ +
