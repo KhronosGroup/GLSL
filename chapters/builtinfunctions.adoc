@@ -1455,7 +1455,7 @@ endif::GLSL[]
       See *textureProj*, *textureLod*, and *textureOffset*.
 |
 ifdef::GLSL[]
-  gvec4 *textureGrad*(gsampler1D _sampler_, _float _P_, float _dPdx_, float _dPdy_) +
+  gvec4 *textureGrad*(gsampler1D _sampler_, float _P_, float _dPdx_, float _dPdy_) +
 endif::GLSL[]
   gvec4 *textureGrad*(gsampler2D _sampler_, vec2 _P_, vec2 _dPdx_, vec2 _dPdy_) +
   gvec4 *textureGrad*(gsampler3D _sampler_, vec3 _P_, vec3 _dPdx_, vec3 _dPdy_) +
