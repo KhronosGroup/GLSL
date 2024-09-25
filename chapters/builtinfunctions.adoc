@@ -349,7 +349,7 @@ endif::GLSL[]
   genIType *min*(genIType _x_, int _y_) +
   genUType *min*(genUType _x_, genUType _y_) +
   genUType *min*(genUType _x_, uint _y_)
-    | Returns _y_ if _y_ < _x;_ otherwise it returns _x_.
+    | Returns _y_ if _y_ < _x;_ otherwise it returns _x_. Which operand is the result is undefined if one of the operands is a NaN.
 | genFType *max*(genFType _x_, genFType _y_) +
   genFType *max*(genFType _x_, float _y_) +
 ifdef::GLSL[]
@@ -360,7 +360,7 @@ endif::GLSL[]
   genIType *max*(genIType _x_, int _y_) +
   genUType *max*(genUType _x_, genUType _y_) +
   genUType *max*(genUType _x_, uint _y_)
-    | Returns _y_ if _x_ < _y;_ otherwise it returns _x_.
+    | Returns _y_ if _x_ < _y;_ otherwise it returns _x_. Which operand is the result is undefined if one of the operands is a NaN.
 | genFType *clamp*(genFType _x_, genFType _minVal_, genFType _maxVal_) +
   genFType *clamp*(genFType _x_, float _minVal_, float _maxVal_) +
 ifdef::GLSL[]
