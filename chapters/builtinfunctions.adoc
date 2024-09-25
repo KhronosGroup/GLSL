@@ -988,7 +988,7 @@ Such properties are taken into account as the texture is accessed via the
 built-in functions defined below.
 
 Texture data can be stored by the GL as single-precision floating-point,
-unsigned normalized integer, unsigned integer or signed integer data.
+normalized integer, unsigned integer or signed integer data.
 This is determined by the type of the internal format of the texture.
 
 Texture lookup functions are provided that can return their result as
