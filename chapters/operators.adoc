@@ -882,7 +882,7 @@ endif::ESSL[]
     To do component-wise relational comparisons on vectors, use the built-in
     functions *lessThan*, *lessThanEqual*, *greaterThan*, and
     *greaterThanEqual.*
-  * The equality operators *equal* (*==*), and not equal (*!=*) operate on
+  * The equality operators equal (*==*), and not equal (*!=*) operate on
 ifdef::GLSL[]
     all types except opaque types, aggregates that contain opaque types,
     subroutine uniforms, and aggregates that contain subroutine uniforms.
