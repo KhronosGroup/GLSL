@@ -21,7 +21,7 @@ and output variables.
 The built-in vertex shader variables are intrinsically declared as follows:
 
 ifdef::GLSL[]
-[source,c++]
+[source,glsl]
 ----
 in int gl_VertexID;       // only present when not targeting Vulkan
 in int gl_InstanceID;     // only present when not targeting Vulkan
@@ -40,7 +40,7 @@ out gl_PerVertex {
 ----
 endif::GLSL[]
 ifdef::ESSL[]
-[source,c++]
+[source,glsl]
 ----
 in highp int gl_VertexID;      // only present when not targeting Vulkan
 in highp int gl_InstanceID;    // only present when not targeting Vulkan
@@ -181,7 +181,7 @@ In the tessellation control shader, built-in variables are intrinsically
 declared as:
 
 ifdef::GLSL[]
-[source,c++]
+[source,glsl]
 ----
 in gl_PerVertex {
     vec4 gl_Position;
@@ -206,7 +206,7 @@ patch out float gl_TessLevelInner[2];
 ----
 endif::GLSL[]
 ifdef::ESSL[]
-[source,c++]
+[source,glsl]
 ----
 in gl_PerVertex {
     highp vec4 gl_Position;
@@ -290,7 +290,7 @@ In the tessellation evaluation shader, built-in variables are intrinsically
 declared as:
 
 ifdef::GLSL[]
-[source,c++]
+[source,glsl]
 ----
 in gl_PerVertex {
     vec4 gl_Position;
@@ -314,7 +314,7 @@ out gl_PerVertex {
 ----
 endif::GLSL[]
 ifdef::ESSL[]
-[source,c++]
+[source,glsl]
 ----
 in gl_PerVertex {
     highp vec4 gl_Position;
@@ -354,7 +354,7 @@ position of the vertex being processed by the shader relative to the
 primitive being tessellated.
 Its values will obey the properties
 
-[source,c++]
+[source,glsl]
 ----
 gl_TessCoord.x == 1.0 - (1.0 - gl_TessCoord.x) // two operations performed
 gl_TessCoord.y == 1.0 - (1.0 - gl_TessCoord.y) // two operations performed
@@ -396,7 +396,7 @@ endif::ESSL[]
 In the geometry shader, built-in variables are intrinsically declared as:
 
 ifdef::GLSL[]
-[source,c++]
+[source,glsl]
 ----
 in gl_PerVertex {
     vec4 gl_Position;
@@ -421,7 +421,7 @@ out int gl_ViewportIndex;
 ----
 endif::GLSL[]
 ifdef::ESSL[]
-[source,c++]
+[source,glsl]
 ----
 in gl_PerVertex {
     highp vec4 gl_Position;
@@ -571,7 +571,7 @@ The built-in special variables that are accessible from a fragment shader
 are intrinsically declared as follows:
 
 ifdef::GLSL[]
-[source,c++]
+[source,glsl]
 ----
 in vec4 gl_FragCoord;
 in bool gl_FrontFacing;
@@ -591,7 +591,7 @@ out int gl_SampleMask[];
 ----
 endif::GLSL[]
 ifdef::ESSL[]
-[source,c++]
+[source,glsl]
 ----
 in highp vec4 gl_FragCoord;
 in bool gl_FrontFacing;
@@ -788,7 +788,7 @@ endif::GLSL[]
 
 In the compute shader, built-in variables are declared as follows:
 
-[source,c++]
+[source,glsl]
 ----
 // workgroup dimensions
 in uvec3 gl_NumWorkGroups;
@@ -847,7 +847,7 @@ This value uniquely identifies this invocation from all other invocations
 across all workgroups initiated by the current _DispatchCompute_ call.
 This is computed as:
 
-[source,c++]
+[source,glsl]
 ----
 gl_GlobalInvocationID =
     gl_WorkGroupID * gl_WorkGroupSize + gl_LocalInvocationID;
@@ -858,7 +858,7 @@ variable that contains the one-dimensional representation of the
 _gl_LocalInvocationID_.
 This is computed as:
 
-[source,c++]
+[source,glsl]
 ----
 gl_LocalInvocationIndex =
     gl_LocalInvocationID.z * gl_WorkGroupSize.x * gl_WorkGroupSize.y +
@@ -889,7 +889,7 @@ Otherwise, behavior is undefined.
 The following members are added to the output _gl_PerVertex_ block in these
 languages:
 
-[source,c++]
+[source,glsl]
 ----
 out gl_PerVertex { // part of the gl_PerVertex block described in 7.1
     // in addition to other gl_PerVertex members...
@@ -917,7 +917,7 @@ _gl_PerVertex_ block can be redeclared in a shader to explicitly include
 these additional members.
 For example:
 
-[source,c++]
+[source,glsl]
 ----
 out gl_PerVertex {
     vec4 gl_Position;    // will use gl_Position
@@ -953,7 +953,7 @@ resources.
 The redeclaration of _gl_TexCoord_ can also be done at global scope as, for
 example:
 
-[source,c++]
+[source,glsl]
 ----
 in vec4 gl_TexCoord[3];
 out vec4 gl_TexCoord[4];
@@ -970,7 +970,7 @@ In the tessellation control, evaluation, and geometry shaders, the outputs
 of the previous stage described above are also available in the input
 _gl_PerVertex_ block in these languages.
 
-[source,c++]
+[source,glsl]
 ----
 in gl_PerVertex { // part of the gl_PerVertex block described in 7.1
     // in addition to other gl_PerVertex members...
@@ -994,7 +994,7 @@ It is a compile-time error to not include the built-in instance name or to
 change its name.
 For example,
 
-[source,c++]
+[source,glsl]
 ----
 in gl_PerVertex {
     vec4 gl_ClipVertex;
@@ -1011,7 +1011,7 @@ described for the output block _gl_TexCoord[]_ redeclaration.
 The following fragment input block is also available in a fragment shader
 when using the compatibility profile:
 
-[source,c++]
+[source,glsl]
 ----
 in gl_PerFragment {
     in float gl_FogFragCoord;
@@ -1056,7 +1056,7 @@ redeclaration.
 The following fragment output variables are available in a fragment shader
 when using the compatibility profile:
 
-[source,c++]
+[source,glsl]
 ----
 out vec4 gl_FragColor;
 out vec4 gl_FragData[gl_MaxDrawBuffers];
@@ -1099,7 +1099,7 @@ The following predeclared input names can be used from within a vertex
 shader to access the current values of {apiname} state when using the
 compatibility profile.
 
-[source,c++]
+[source,glsl]
 ----
 in vec4 gl_Color;
 in vec4 gl_SecondaryColor;
@@ -1125,7 +1125,7 @@ The following built-in constants are declared in all shaders.
 The actual values used are implementation-dependent, but must be at least
 the value shown.
 
-[source,c++]
+[source,glsl]
 ----
 //
 // Implementation-dependent constants. The example values below
@@ -1135,7 +1135,7 @@ the value shown.
 ----
 
 ifdef::GLSL[]
-[source,c++]
+[source,glsl]
 ----
 const int gl_MaxVertexAttribs = 16;
 const int gl_MaxVertexUniformVectors = 256;
@@ -1224,7 +1224,7 @@ const highp int gl_MaxInputAttachments = 1;  // only present when targeting Vulk
 endif::GLSL[]
 
 ifdef::ESSL[]
-[source,c++]
+[source,glsl]
 ----
 const mediump int gl_MaxVertexAttribs = 16;
 const mediump int gl_MaxVertexUniformVectors = 256;
@@ -1306,7 +1306,7 @@ _gl_MaxVaryingComponents_ instead.
 [[compatibility-profile-built-in-constants]]
 === Compatibility Profile Built-In Constants
 
-[source,c++]
+[source,glsl]
 ----
 const int gl_MaxTextureUnits = 2;
 const int gl_MaxTextureCoords = 8;
@@ -1324,7 +1324,7 @@ Otherwise, as an aid to accessing {apiname} processing state, the following
 uniform variables are built into the {slname}.
 
 ifdef::GLSL[]
-[source,c++]
+[source,glsl]
 ----
 //
 // Depth range in window coordinates,
@@ -1343,7 +1343,7 @@ uniform int gl_NumSamples;
 ----
 endif::GLSL[]
 ifdef::ESSL[]
-[source,c++]
+[source,glsl]
 ----
 //
 // Depth range in window coordinates,
@@ -1372,7 +1372,7 @@ These variables are present only in the compatibility profile.
 They are not available to compute shaders, but are available to all other
 shaders.
 
-[source,c++]
+[source,glsl]
 ----
 //
 // compatibility profile only
@@ -1529,7 +1529,7 @@ This is necessary to establish the interface between multiple programs.
 ifdef::GLSL[]
 For example:
 
-[source,c++]
+[source,glsl]
 ----
 out gl_PerVertex {
     vec4 gl_Position;   // will use gl_Position
@@ -1547,7 +1547,7 @@ qualifiers, and the layout qualifiers *xfb_offset*, *xfb_buffer*, and
 It can also add an array size for unsized arrays.
 For example:
 
-[source,c++]
+[source,glsl]
 ----
 out layout(xfb_buffer = 1, xfb_stride = 16) gl_PerVertex {
     vec4 gl_Position;
@@ -1562,7 +1562,7 @@ interface.
 
 For example:
 
-[source,c++]
+[source,glsl]
 ----
 out gl_PerVertex {
     highp vec4 gl_Position; // will use gl_Position

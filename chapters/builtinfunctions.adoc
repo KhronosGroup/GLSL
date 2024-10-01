@@ -96,7 +96,7 @@ For the texture sampling and image load functions, the
 precision of the return type matches the precision of the
 image or texture-combined sampler type:
 
-[source,c++]
+[source,glsl]
 ----
 uniform lowp sampler2D texSampler;
 highp vec2 coord;
@@ -421,7 +421,7 @@ endif::GLSL[]
       a smooth transition.
       This is equivalent to:
 --
-[source,c++]
+[source,glsl]
 ----
 genFType t;
 t = clamp ((x - edge0) / (edge1 - edge0), 0, 1);
@@ -1107,7 +1107,7 @@ fractional part of the computed and clamped level-of-detail.
 
 The algorithm used is given by the following pseudo-code:
 
-[source,c++]
+[source,glsl]
 ----
 float ComputeAccessedLod(float computedLod)
 {
@@ -1687,7 +1687,7 @@ ifdef::GLSL[]
 endif::GLSL[]
    a| Returns the value +
 --
-[source,c++]
+[source,glsl]
 ----
 vec4(Sample_i0_j1(P, base).comp,
      Sample_i1_j1(P, base).comp,
