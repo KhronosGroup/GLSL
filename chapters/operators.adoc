@@ -98,7 +98,7 @@ Converting between scalar types is done as the following prototypes
 indicate:
 
 ifdef::GLSL[]
-[source,c++]
+[source,glsl]
 ----
 int(uint)     // converts an unsigned integer to a signed integer
 int(bool)     // converts a Boolean value to an int
@@ -123,7 +123,7 @@ double(float) // converts a float value to a double
 ----
 endif::GLSL[]
 ifdef::ESSL[]
-[source,c++]
+[source,glsl]
 ----
 int(uint)     // converts an unsigned integer to a signed integer
 int(bool)     // converts a Boolean value to an int
@@ -211,7 +211,7 @@ the scalar construction rules (above) are used to convert the parameters.
 
 Some useful vector constructors are as follows:
 
-[source,c++]
+[source,glsl]
 ----
 vec3(float)          // initializes each component of the vec3 with the float
 vec4(ivec4)          // makes a vec4 with component-wise conversion
@@ -230,7 +230,7 @@ vec4(vec2, vec2)
 
 Some examples of these are:
 
-[source,c++]
+[source,glsl]
 ----
 vec4 color = vec4(0.0, 1.0, 0.0, 1.0);
 vec4 rgba = vec4(1.0);      // sets each component to 1.0
@@ -239,7 +239,7 @@ vec3 rgb = vec3(color);     // drop the 4th component
 
 To initialize the diagonal of a matrix with all other elements set to zero:
 
-[source,c++]
+[source,glsl]
 ----
 mat2(float)
 mat3(float)
@@ -252,7 +252,7 @@ That is, _result[i][j]_ is set to the _float_ argument for all latexmath:[i
 To initialize a matrix by specifying vectors or scalars, the components are
 assigned to the matrix elements in column-major order.
 
-[source,c++]
+[source,glsl]
 ----
 mat2(vec2, vec2);                 // one column per argument
 mat3(vec3, vec3, vec3);           // one column per argument
@@ -285,7 +285,7 @@ vectors and scalars, as long as enough components are present to initialize
 the matrix.
 To construct a matrix from a matrix:
 
-[source,c++]
+[source,glsl]
 ----
 mat3x3(mat4x4); // takes the upper-left 3x3 of the mat4x4
 mat2x3(mat4x2); // takes the upper-left 2x2 of the mat4x4, last row is 0,0
@@ -301,7 +301,7 @@ Once a structure is defined, and its type is given a name, a constructor is
 available with the same name to construct instances of that structure.
 For example:
 
-[source,c++]
+[source,glsl]
 ----
 struct light {
     float intensity;
@@ -330,7 +330,7 @@ Array types can also be used as constructor names, which can then be used in
 expressions or initializers.
 For example,
 
-[source,c++]
+[source,glsl]
 ----
 const float c[3] = float[3](5.0, 7.2, 1.1);
 const float d[3] = float[](5.0, 7.2, 1.1);
@@ -360,7 +360,7 @@ endif::GLSL[]
 Arrays of arrays are similarly constructed, and the size for any dimension
 is optional:
 
-[source,c++]
+[source,glsl]
 ----
 vec4 b[2] = ...;
 vec4[3][2](b, b, b);    // constructor
@@ -379,7 +379,7 @@ that is a constructor of the same type, and consuming a texture and a
 *sampler* or *samplerShadow*.
 For example:
 
-[source,c++]
+[source,glsl]
 ----
     layout(...) uniform sampler s;   // handle to filtering information
     layout(...) uniform texture2D t; // handle to a texture
@@ -391,7 +391,7 @@ For example:
 The result of a texture-combined sampler constructor cannot be assigned to a
 variable:
 
-[source,c++]
+[source,glsl]
 ----
     ... sampler2D sConstruct = sampler2D(t, s);  // ERROR
 ----
@@ -400,7 +400,7 @@ Texture-combined sampler constructors can only be consumed by a function paramet
 
 Texture-combined sampler constructors of arrays are illegal:
 
-[source,c++]
+[source,glsl]
 ----
     layout(...) uniform texture2D tArray[6];
     ...
@@ -465,7 +465,7 @@ Accessing components beyond those declared for the type is
 {compiletimeerror} so, for example:
 
 ifdef::GLSL[]
-[source,c++]
+[source,glsl]
 ----
 vec2 pos;
 float height;
@@ -476,7 +476,7 @@ height.y    // is illegal
 ----
 endif::GLSL[]
 ifdef::ESSL[]
-[source,c++]
+[source,glsl]
 ----
 vec2 pos;
 pos.x       // is legal
@@ -487,7 +487,7 @@ endif::ESSL[]
 The component selection syntax allows multiple components to be selected by
 appending their names (from the same name set) after the period (*.*).
 
-[source,c++]
+[source,glsl]
 ----
 vec4 v4;
 v4.rgba;    // is a vec4 and the same as just using v4,
@@ -499,7 +499,7 @@ v4.xgba;    // is illegal - the component names do not come from the same set
 
 No more than 4 components can be selected.
 
-[source,c++]
+[source,glsl]
 ----
 vec4 v4;
 v4.xyzwxy;      // is illegal since it has 6 components
@@ -509,7 +509,7 @@ components
 
 The order of the components can be different to swizzle them, or replicated:
 
-[source,c++]
+[source,glsl]
 ----
 vec4 pos = vec4(1.0, 2.0, 3.0, 4.0);
 vec4 swiz = pos.wzyx;   // swiz = (4.0, 3.0, 2.0, 1.0)
@@ -524,7 +524,7 @@ ifdef::ESSL[vector r-value.]
 The component group notation can occur on the left hand side of an
 expression.
 
-[source,c++]
+[source,glsl]
 ----
 vec4 pos = vec4(1.0, 2.0, 3.0, 4.0);
 pos.xw = vec2(5.0, 6.0);        // pos = (5.0, 2.0, 3.0, 6.0)
@@ -541,7 +541,7 @@ Array subscripting syntax can also be applied to vectors (but not to
 scalars) to provide numeric indexing.
 So in
 
-[source,c++]
+[source,glsl]
 ----
 vec4 pos;
 ----
@@ -567,7 +567,7 @@ The *length*() method may be applied to vectors (but not scalars).
 The result is the number of components in the vector.
 For example,
 
-[source,c++]
+[source,glsl]
 ----
 vec3 v;
 const int L = v.length();
@@ -591,7 +591,7 @@ A second subscript would then operate on the resulting vector, as defined
 earlier for vectors.
 Hence, two subscripts select a column and then a row.
 
-[source,c++]
+[source,glsl]
 ----
 mat4 m;
 m[1] = vec4(2.0);   // sets the second column to all 2.0
@@ -609,7 +609,7 @@ The *length*() method may be applied to matrices.
 The result is the number of columns of the matrix.
 For example,
 
-[source,c++]
+[source,glsl]
 ----
 mat3x4 v;
 const int L = v.length();
@@ -655,7 +655,7 @@ only if all the elements are element-wise equal.
 Array elements are accessed using the array subscript operator (*[ ]*).
 An example of accessing an array element is
 
-[source,c++]
+[source,glsl]
 ----
 diffuseColor += lightIntensity[3] * NdotL;
 ----
@@ -670,7 +670,7 @@ than 0 or greater than or equal to the size the array was declared with.
 Arrays can also be accessed with the method operator (*.*) and the *length*
 method to query the size of the array:
 
-[source,c++]
+[source,glsl]
 ----
 lightIntensity.length() // return the size of the array
 ----
@@ -1001,7 +1001,7 @@ independently on each component of the vector or matrix, in a component-wise
 fashion.
 For example,
 
-[source,c++]
+[source,glsl]
 ----
 vec3 v, u;
 float f;
@@ -1010,7 +1010,7 @@ v = u + f;
 
 will be equivalent to
 
-[source,c++]
+[source,glsl]
 ----
 v.x = u.x + f;
 v.y = u.y + f;
@@ -1019,7 +1019,7 @@ v.z = u.z + f;
 
 And
 
-[source,c++]
+[source,glsl]
 ----
 vec3 v, u, w;
 w = v + u;
@@ -1027,7 +1027,7 @@ w = v + u;
 
 will be equivalent to
 
-[source,c++]
+[source,glsl]
 ----
 w.x = v.x + u.x;
 w.y = v.y + u.y;
@@ -1041,7 +1041,7 @@ and matrix multiplied by matrix.
 These do not operate component-wise, but rather perform the correct linear
 algebraic multiply.
 
-[source,c++]
+[source,glsl]
 ----
 vec3 v, u;
 mat3 m;
@@ -1050,7 +1050,7 @@ u = v * m;
 
 is equivalent to
 
-[source,c++]
+[source,glsl]
 ----
 u.x = dot(v, m[0]); // m[0] is the left column of m
 u.y = dot(v, m[1]); // dot(a,b) is the inner (dot) product of a and b
@@ -1059,14 +1059,14 @@ u.z = dot(v, m[2]);
 
 And
 
-[source,c++]
+[source,glsl]
 ----
 u = m * v;
 ----
 
 is equivalent to
 
-[source,c++]
+[source,glsl]
 ----
 u.x = m[0].x * v.x + m[1].x * v.y + m[2].x * v.z;
 u.y = m[0].y * v.x + m[1].y * v.y + m[2].y * v.z;
@@ -1075,7 +1075,7 @@ u.z = m[0].z * v.x + m[1].z * v.y + m[2].z * v.z;
 
 And
 
-[source,c++]
+[source,glsl]
 ----
 mat3 m, n, r;
 r = m * n;
@@ -1083,7 +1083,7 @@ r = m * n;
 
 is equivalent to
 
-[source,c++]
+[source,glsl]
 ----
 r[0].x = m[0].x * n[0].x + m[1].x * n[0].y + m[2].x * n[0].z;
 r[1].x = m[0].x * n[1].x + m[1].x * n[1].y + m[2].x * n[1].z;

@@ -96,7 +96,7 @@ For the texture sampling and image load functions, the
 precision of the return type matches the precision of the
 image or texture-combined sampler type:
 
-[source,c++]
+[source,glsl]
 ----
 uniform lowp sampler2D texSampler;
 highp vec2 coord;
@@ -421,7 +421,7 @@ endif::GLSL[]
       a smooth transition.
       This is equivalent to:
 --
-[source,c++]
+[source,glsl]
 ----
 genFType t;
 t = clamp ((x - edge0) / (edge1 - edge0), 0, 1);
@@ -639,114 +639,130 @@ endif::GLSL[]
 
 These operate on vectors as vectors, not component-wise.
 
-[options="header"]
-|====
-| Syntax | Description
+=== Length
+[source,glsl]
+----
 ifdef::GLSL[]
-| float *length*(genFType _x_) +
-  double *length*(genDType _x_)
+float length(genFType x)
+double length(genDType x)
 endif::GLSL[]
 ifdef::ESSL[]
-| float *length*(genFType _x_)
+float length(genFType x)
 endif::ESSL[]
-   a| Returns the length of vector _x_, i.e.,
-      [eq]#sqrt( x~0~^2^ + x~1~^2^ + ... )#.
+----
+
+Returns the length of vector _x_, i.e., [eq]#sqrt( x~0~^2^ + x~1~^2^ + ... )#.
+
+=== Distance
+[source,glsl]
+----
 ifdef::GLSL[]
-| float *distance*(genFType _p0_, genFType _p1_) +
-  double *distance*(genDType _p0_, genDType _p1_)
+float distance(genFType p0, genFType p1)
+double distance(genDType p0, genDType p1)
 endif::GLSL[]
 ifdef::ESSL[]
-| float *distance*(genFType _p0_, genFType _p1_)
+float distance(genFType p0, genFType p1)
 endif::ESSL[]
-    | Returns the distance between _p0_ and _p1_, i.e.,
-      *length*(_p0_ - _p1_)
+----
+
+Returns the distance between _p0_ and _p1_, i.e., *length*(_p0_ - _p1_)
+
+=== Dot
+[source,glsl]
+----
+float dot(genFType x, genFType y)
 ifdef::GLSL[]
-| float *dot*(genFType _x_, genFType _y_) +
-  double *dot*(genDType _x_, genDType _y_)
+double dot(genDType x, genDType y)
 endif::GLSL[]
-ifdef::ESSL[]
-| float *dot*(genFType _x_, genFType _y_)
-endif::ESSL[]
-    | Returns the dot product of _x_ and _y_, i.e.,
-      [eq]#x~0~ {cdot} y~0~ + x~1~ {cdot} y~1~ + ...#
+----
+
+Returns the dot product of _x_ and _y_, i.e., [eq]#x~0~ {cdot} y~0~ + x~1~ {cdot} y~1~ + ...#
+
+=== Cross
+[source,glsl]
+----
+vec3 cross(vec3 x, vec3 y)
 ifdef::GLSL[]
-| vec3 *cross*(vec3 _x_, vec3 _y_) +
-  dvec3 *cross*(dvec3 _x_, dvec3 _y_)
+dvec3 cross(dvec3 x, dvec3 y)
 endif::GLSL[]
-ifdef::ESSL[]
-| vec3 *cross*(vec3 _x_, vec3 _y_)
-endif::ESSL[]
-   a| Returns the cross product of _x_ and _y_, i.e.,
+----
+
+Returns the cross product of _x_ and _y_, i.e.,
       [eq]#(x~1~ {cdot} y~2~ - y~1~ {cdot} x~2~,
             x~2~ {cdot} y~0~ - y~2~ {cdot} x~0~,
             x~0~ {cdot} y~1~ - y~0~ {cdot} x~1~)#.
-ifdef::GLSL[]
-| genFType *normalize*(genFType _x_) +
-  genDType *normalize*(genDType _x_)
-endif::GLSL[]
-ifdef::ESSL[]
-| genFType *normalize*(genFType _x_)
-endif::ESSL[]
-    | Returns a vector in the same direction as _x_ but with a length of 1,
-      i.e. _x_ / *length*(x).
-ifdef::GLSL[]
-| compatibility profile only +
-  vec4 *ftransform*()
-   a| Available only when using the compatibility profile.
-      For core {apiname}, use *invariant*. +
-      For vertex shaders only.
-      This function will ensure that the incoming vertex value will be
-      transformed in a way that produces exactly the same result as would be
-      produced by {apiname}'s fixed functionality transform.
-      It is intended to be used to compute _gl_Position_, e.g.
---
-{empty}:: _gl_Position_ = *ftransform*()
 
-This function should be used, for example, when an application is rendering
-the same geometry in separate passes, and one pass uses the fixed
-functionality path to render and another pass uses programmable shaders.
---
-endif::GLSL[]
-| genFType *faceforward*(genFType _N_, genFType _I_, genFType _Nref_) +
+=== Normalize
+[source,glsl]
+----
+genFType normalize(genFType x)
 ifdef::GLSL[]
-  genDType *faceforward*(genDType _N_, genDType _I_, genDType _Nref_)
+genDType normalize(genDType x)
 endif::GLSL[]
-    | If *dot*(_Nref_, _I_) < 0 return _N_, otherwise return -_N_.
+----
+
+Returns a vector in the same direction as _x_ but with a length of 1, i.e. _x_ / *length*(x).
+
 ifdef::GLSL[]
-| genFType *reflect*(genFType _I_, genFType _N_) +
-  genDType *reflect*(genDType _I_, genDType _N_)
+=== FTransform
+Compatibility profile only
+
+[source,glsl]
+----
+vec4 ftransform()
+----
+
+Available only when using the compatibility profile. For core {apiname}, use *invariant*.
+
+For vertex shaders only. This function will ensure that the incoming vertex value will be
+transformed in a way that produces exactly the same result as would be produced by {apiname}'s
+fixed functionality transform. It is intended to be used to compute _gl_Position_, e.g.
+
+[source,glsl]
+----
+gl_Position = ftransform()
+----
+
+This function should be used, for example, when an application is rendering the same geometry in
+separate passes, and one pass uses the fixed functionality path to render and another pass uses
+programmable shaders.
 endif::GLSL[]
-ifdef::ESSL[]
-| genFType *reflect*(genFType _I_, genFType _N_)
-endif::ESSL[]
-    | For the incident vector _I_ and surface orientation _N_, returns the
-      reflection direction: [eq]#I - 2 {cdot} *dot*(N, I) {cdot} N#.
-      _N_ must already be normalized in order to achieve the desired result.
-| genFType *refract*(genFType _I_, genFType _N_, float _eta_) +
+
+=== Face Forward
+[source,glsl]
+----
+genFType faceforward(genFType N, genFType I, genFType Nref)
 ifdef::GLSL[]
-  genDType *refract*(genDType _I_, genDType _N_, double _eta_)
+genDType faceforward(genDType N, genDType I, genDType Nref)
 endif::GLSL[]
-   a| For the incident vector _I_ and surface normal _N_, and the ratio of
-      indices of refraction _eta_, return the refraction vector.
-      The result is computed by the <<refraction-equation,refraction
-      equation>> shown below.
+----
 
-      The input parameters for the incident vector _I_ and the surface
-      normal _N_ must already be normalized to get the desired results.
-|====
+If *dot*(_Nref_, _I_) < 0 return _N_, otherwise return -_N_.
 
+=== Reflect
+[source,glsl]
+----
+genFType reflect(genFType I, genFType N)
+ifdef::GLSL[]
+genDType reflect(genDType I, genDType N)
+endif::GLSL[]
+----
 
-[[refraction-equation]]
-=== Refraction Equation
+For the incident vector _I_ and surface orientation _N_, returns the reflection direction:
+[eq]#I - 2 {cdot} *dot*(N, I) {cdot} N#. _N_ must already be normalized in order to achieve
+the desired result.
 
-ifdef::editing-notes[]
-[NOTE]
-.editing-note
-====
-(Jon) Moved to new section from *refract* table entry above because
-asciidoctor-mathematical doesn't support math blocks in table cells yet.
-====
-endif::editing-notes[]
+=== Refract
+[source,glsl]
+----
+genFType refract(genFType I, genFType N, float eta)
+ifdef::GLSL[]
+genDType refract(genDType I, genDType N, double eta)
+endif::GLSL[]
+----
+
+For the incident vector _I_ and surface normal _N_, and the ratio of indices of refraction
+_eta_, return the refraction vector. The result is computed by the refraction equation shown below.
 
 [latexmath]
 ++++
@@ -763,6 +779,9 @@ result &=
   \end{cases}
 \end{aligned}
 ++++
+
+The input parameters for the incident vector _I_ and the surface normal _N_ must already be
+normalized to get the desired results.
 
 
 [[matrix-functions]]
@@ -1107,7 +1126,7 @@ fractional part of the computed and clamped level-of-detail.
 
 The algorithm used is given by the following pseudo-code:
 
-[source,c++]
+[source,glsl]
 ----
 float ComputeAccessedLod(float computedLod)
 {
@@ -1687,7 +1706,7 @@ ifdef::GLSL[]
 endif::GLSL[]
    a| Returns the value +
 --
-[source,c++]
+[source,glsl]
 ----
 vec4(Sample_i0_j1(P, base).comp,
      Sample_i1_j1(P, base).comp,

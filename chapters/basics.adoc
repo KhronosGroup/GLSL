@@ -125,7 +125,7 @@ That is, a single token could be formed by the concatenation by taking the
 characters at the end of one line concatenating them with the characters at
 the beginning of the next line.
 
-[source,c++]
+[source,glsl]
 ----
 float f\
 oo;
@@ -143,7 +143,7 @@ Shaders must declare the version of the language they are written to.
 The version is specified in the first line of a shader by a character
 string:
 
-[source,c++]
+[source,glsl]
 ----
 #version number es
 ----
@@ -358,7 +358,7 @@ endif::ESSL[]
 
 The *defined* operator can be used in either of the following ways:
 
-[source,c++]
+[source,glsl]
 ----
 defined identifier
 defined ( identifier )
@@ -415,7 +415,7 @@ If an implementation does not recognize the tokens following *#pragma*, then
 it will ignore that pragma.
 The following pragmas are defined as part of the language.
 
-[source,c++]
+[source,glsl]
 ----
 #pragma STDGL
 ----
@@ -424,7 +424,7 @@ The *STDGL* pragma is used to reserve pragmas for use by future revisions of
 this language.
 No implementation may use a pragma whose first token is *STDGL*.
 
-[source,c++]
+[source,glsl]
 ----
 #pragma optimize(on)
 #pragma optimize(off)
@@ -436,7 +436,7 @@ It can only be used outside function definitions.
 By default, optimization is turned on for all shaders.
 The debug pragma
 
-[source,c++]
+[source,glsl]
 ----
 #pragma debug(on)
 #pragma debug(off)
@@ -451,7 +451,7 @@ ifdef::GLSL[]
 Shaders should declare the version of the language they are written to.
 The language version a shader is written to is specified by
 
-[source,c++]
+[source,glsl]
 ----
 #version number profile_opt
 ----
@@ -476,7 +476,7 @@ If the optional _profile_ argument is provided, it must be the name of an
 {apiname} profile.
 Currently, there are three choices:
 
-[source,c++]
+[source,glsl]
 ----
 core
 compatibility
@@ -513,7 +513,7 @@ There is a built-in macro definition for each profile the implementation
 supports.
 All implementations provide the following macro:
 
-[source,c++]
+[source,glsl]
 ----
 #define GL_core_profile 1
 ----
@@ -521,14 +521,14 @@ All implementations provide the following macro:
 Implementations providing the *compatibility* profile provide the following
 macro:
 
-[source,c++]
+[source,glsl]
 ----
 #define GL_compatibility_profile 1
 ----
 
 Implementations providing the *es* profile provide the following macro:
 
-[source,c++]
+[source,glsl]
 ----
 #define GL_es_profile 1
 ----
@@ -549,7 +549,7 @@ Any extended behavior must first be enabled.
 Directives to control the behavior of the compiler with respect to
 extensions are declared with the *#extension* directive
 
-[source,c++]
+[source,glsl]
 ----
 #extension extension_name : behavior
 #extension all : behavior
@@ -602,7 +602,7 @@ previously issued *extension* directives, but only for the _behaviors_
 
 The initial state of the compiler is as if the directive
 
-[source,c++]
+[source,glsl]
 ----
 #extension all : disable
 ----
@@ -627,7 +627,7 @@ The macro is always defined in an implementation that supports the
 extension.
 This allows the following construct to be used:
 
-[source,c++]
+[source,glsl]
 ----
 #ifdef OES_extension_name
     #extension OES_extension_name : enable
@@ -640,7 +640,7 @@ endif::ESSL[]
 
 *#line* must have, after macro substitution, one of the following forms:
 
-[source,c++]
+[source,glsl]
 ----
 #line line
 #line line source-string-number
@@ -669,7 +669,7 @@ ifdef::GLSL[]
 When shaders are compiled for {apiname} SPIR-V, the following predefined
 macro is available:
 
-[source,c++]
+[source,glsl]
 ----
 #define GL_SPIRV 100
 ----
@@ -677,7 +677,7 @@ endif::GLSL[]
 
 When targeting Vulkan, the following predefined macro is available:
 
-[source,c++]
+[source,glsl]
 ----
 #define VULKAN 100
 ----
@@ -713,7 +713,7 @@ occurs before comments are processed.
 That is, a single-line comment ending in the line-continuation character
 (*+\+*) includes the next line in the comment.
 
-[source,c++]
+[source,glsl]
 ----
 // a single-line comment containing the next line \
 a = b; // this is still in the first comment
@@ -993,7 +993,7 @@ loop, then control flow reconverges to be uniform.
 
 For example:
 
-[source,c++]
+[source,glsl]
 ----
 main()
 {
