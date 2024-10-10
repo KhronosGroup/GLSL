@@ -349,7 +349,7 @@ endif::GLSL[]
   genIType *min*(genIType _x_, int _y_) +
   genUType *min*(genUType _x_, genUType _y_) +
   genUType *min*(genUType _x_, uint _y_)
-    | Returns _y_ if _y_ < _x;_ otherwise it returns _x_.
+    | Returns _y_ if _y_ < _x;_ otherwise it returns _x_. Which operand is the result is undefined if one of the operands is a NaN.
 | genFType *max*(genFType _x_, genFType _y_) +
   genFType *max*(genFType _x_, float _y_) +
 ifdef::GLSL[]
@@ -360,7 +360,7 @@ endif::GLSL[]
   genIType *max*(genIType _x_, int _y_) +
   genUType *max*(genUType _x_, genUType _y_) +
   genUType *max*(genUType _x_, uint _y_)
-    | Returns _y_ if _x_ < _y;_ otherwise it returns _x_.
+    | Returns _y_ if _x_ < _y;_ otherwise it returns _x_. Which operand is the result is undefined if one of the operands is a NaN.
 | genFType *clamp*(genFType _x_, genFType _minVal_, genFType _maxVal_) +
   genFType *clamp*(genFType _x_, float _minVal_, float _maxVal_) +
 ifdef::GLSL[]
@@ -988,7 +988,7 @@ Such properties are taken into account as the texture is accessed via the
 built-in functions defined below.
 
 Texture data can be stored by the GL as single-precision floating-point,
-unsigned normalized integer, unsigned integer or signed integer data.
+normalized integer, unsigned integer or signed integer data.
 This is determined by the type of the internal format of the texture.
 
 Texture lookup functions are provided that can return their result as
@@ -1455,7 +1455,7 @@ endif::GLSL[]
       See *textureProj*, *textureLod*, and *textureOffset*.
 |
 ifdef::GLSL[]
-  gvec4 *textureGrad*(gsampler1D _sampler_, _float _P_, float _dPdx_, float _dPdy_) +
+  gvec4 *textureGrad*(gsampler1D _sampler_, float _P_, float _dPdx_, float _dPdy_) +
 endif::GLSL[]
   gvec4 *textureGrad*(gsampler2D _sampler_, vec2 _P_, vec2 _dPdx_, vec2 _dPdy_) +
   gvec4 *textureGrad*(gsampler3D _sampler_, vec3 _P_, vec3 _dPdx_, vec3 _dPdy_) +
