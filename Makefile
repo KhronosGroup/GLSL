@@ -68,7 +68,7 @@ endif
 ATTRIBOPTS   = -a revdate="$(SPECDATE)" \
 	       -a revremark="$(SPECREMARK)" \
 	       -a stem=latexmath \
-	       -a config=$(ROOTDIR)/config \
+	       -a config=$(CONFIGS) \
 	       -a chapters=$(SPECDIR)/chapters \
 	       -a images=$(IMAGEPATH) \
 
@@ -83,16 +83,23 @@ SPECFILES    = $(wildcard $(SPECDIR)/chapters/[A-Za-z]*.adoc)
 ADOCPDF      = asciidoctor-pdf
 
 # These macros are unused in the GLSL spec and are just here as examples
-ADOCEXTS     = -r $(CURDIR)/config/vulkan-macros.rb
+ADOCEXTS     = -r $(CONFIGS)/vulkan-macros.rb
 ADOCOPTS     = -d book $(ATTRIBOPTS) $(NOTEOPTS) $(VERBOSE) $(ADOCEXTS)
 
 # This uses KaTeX for latexmath: blocks in HTML output instead of MathJax
-ADOCHTMLEXTS = -r $(CURDIR)/config/katex_replace.rb
-ADOCHTMLOPTS = $(ADOCHTMLEXTS) -a katexpath=../katex
+ADOCHTMLEXTS = -r $(CONFIGS)/katex_replace.rb \
+	       -r $(CONFIGS)/rouge-extend-css.rb
+ADOCHTMLOPTS = $(ADOCHTMLEXTS) -a katexpath=../katex \
+	       -a stylesheet=khronos.css \
+	       -a stylesdir=$(CONFIGS)
 
-ADOCPDFEXTS  = -r $(ADOCPDF) -r asciidoctor-mathematical
+# PDF target-specific Asciidoctor extensions and options
+ADOCPDFEXTS  = -r $(ADOCPDF) -r asciidoctor-mathematical \
+	       -r $(CONFIGS)/asciidoctor-mathematical-ext.rb
 ADOCPDFOPTS  = $(ADOCPDFEXTS) -a mathematical-format=svg \
-	       -a imagesoutdir=$(PDFMATHDIR)
+	       -a imagesoutdir=$(PDFMATHDIR) \
+	       -a pdf-fontsdir=$(CONFIGS)/fonts,GEM_FONTS_DIR \
+	       -a pdf-stylesdir=$(CONFIGS)/themes -a pdf-style=pdf
 
 .PHONY: directories
 

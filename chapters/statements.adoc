@@ -74,7 +74,7 @@ As indicated by the grammar above, a valid shader is a sequence of global
 declarations and function definitions.
 A function is declared as the following example shows:
 
-[source,c++]
+[source,glsl]
 ----
 // prototype
 returnType functionName (type0 arg0, type1 arg1, ..., typen argn);
@@ -82,7 +82,7 @@ returnType functionName (type0 arg0, type1 arg1, ..., typen argn);
 
 and a function is defined like
 
-[source,c++]
+[source,glsl]
 ----
 // definition
 returnType functionName (type0 arg0, type1 arg1, ..., typen argn)
@@ -94,7 +94,7 @@ returnType functionName (type0 arg0, type1 arg1, ..., typen argn)
 
 where _returnType_ must be present and cannot be void, or:
 
-[source,c++]
+[source,glsl]
 ----
 void functionName (type0 arg0, type1 arg1, ..., typen argn)
 {
@@ -141,7 +141,7 @@ All functions must be either declared with a prototype or defined with a
 body before they are called.
 For example:
 
-[source,c++]
+[source,glsl]
 ----
 float myfunc (float f,      // f is an input parameter
               out float g); // g is an output parameter
@@ -152,7 +152,7 @@ A *void* function can only use *return* without a return argument, even if
 the return argument has *void* type.
 Return statements only accept values:
 
-[source,c++]
+[source,glsl]
 ----
 void func1() { }
 void func2() { return func1(); } // illegal return statement
@@ -181,7 +181,7 @@ endif::ESSL[]
 For example,
 
 ifdef::GLSL[]
-[source,c++]
+[source,glsl]
 ----
 vec4 f(in vec4 x, out vec4 y);       // (A)
 vec4 f(in vec4 x, out uvec4 y);      // (B) okay, different argument type
@@ -192,7 +192,7 @@ vec4 f(const in vec4 x, out vec4 y); // error, only qualifier differs
 ----
 endif::GLSL[]
 ifdef::ESSL[]
-[source,c++]
+[source,glsl]
 ----
 vec4 f(in vec4 x, out vec4 y);
 vec4 f(in vec4 x, out uvec4 y);      // allowed, different argument type
@@ -206,7 +206,7 @@ ifdef::ESSL[]
 Calling the first two functions above with the following argument types
 yields
 
-[source,c++]
+[source,glsl]
 ----
 f(vec4, vec4)   // exact match of vec4 f(in vec4 x, out vec4 y)
 f(vec4, uvec4)  // exact match of vec4 f(in vec4 x, out uvec4 y)
@@ -266,7 +266,7 @@ For the example function prototypes (A), (B), and (C) above, the following
 examples show how the rules apply to different sets of calling argument
 types:
 
-[source,c++]
+[source,glsl]
 ----
 f(vec4, vec4)   // exact match of vec4 f(in vec4 x, out vec4 y)
 f(vec4, uvec4)  // exact match of vec4 f(in vec4 x, out uvec4 y)
@@ -306,7 +306,7 @@ endif::ESSL[]
 This function takes no arguments, returns no value, and must be declared as
 type *void*:
 
-[source,c++]
+[source,glsl]
 ----
 void main()
 {
@@ -461,7 +461,7 @@ Subroutine functionality is not available when generating SPIR-V.
 Subroutine types are declared using a statement similar to a function
 declaration, with the *subroutine* keyword, as follows:
 
-[source,c++]
+[source,glsl]
 ----
 subroutine returnType subroutineTypeName(type0 arg0, type1 arg1,
                                          ..., typen argn);
@@ -473,7 +473,7 @@ Functions are associated with subroutine types of matching declarations by
 defining the function with the *subroutine* keyword and a list of subroutine
 types the function matches:
 
-[source,c++]
+[source,glsl]
 ----
 subroutine(subroutineTypeName0, ..., subroutineTypeNameN)
 returnType functionName(type0 arg0, type1 arg1, ..., typen argn)
@@ -497,7 +497,7 @@ Subroutine type variables are required to be _subroutine uniforms_, and are
 declared with a specific subroutine type in a subroutine uniform variable
 declaration:
 
-[source,c++]
+[source,glsl]
 ----
 subroutine uniform subroutineTypeName subroutineVarName;
 ----
@@ -608,7 +608,7 @@ compound statements within their corresponding *switch*.
 
 For, while, and do loops are allowed as follows:
 
-[source,c++]
+[source,glsl]
 ----
 for (init-expression; condition-expression; loop-expression)
     sub-statement
@@ -648,7 +648,7 @@ ifdef::ESSL[]
 For both *for* and *while* loops, the sub-statement does not introduce a new
 scope for variable names, so the following has a redeclaration error:
 
-[source,c++]
+[source,glsl]
 ----
 for (int i = 0; i < 10; i++) +
 {
@@ -721,7 +721,7 @@ derivatives are undefined when this control flow is non-uniform (meaning
 different fragments within the primitive take different control paths).
 It would typically be used within a conditional statement, for example:
 
-[source,c++]
+[source,glsl]
 ----
 if (intensity < 0.0)
     discard;
