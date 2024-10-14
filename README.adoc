@@ -89,3 +89,4 @@ that do not live in the Khronos registries for OpenGL or OpenGL ES.
 - link:{repo}/ext/GLSL_EXT_spirv_intrinsics.txt[GLSL_EXT_spirv_intrinsics]
 - link:{repo}/ext/GL_EXT_control_flow_attributes2.txt[GL_EXT_control_flow_attributes2]
 - link:{repo}/ext/GL_EXT_shader_atomic_int64.txt[GL_EXT_shader_atomic_int64]
+- link:{repo}/qcom/GLSL_QCOM_image_processing2.txt[GL_QCOM_image_processing2]
