@@ -388,7 +388,7 @@ Other errors are reported at compile time or link time as indicated.
 Code that is "`dead`" must still be error checked.
 For example:
 
-[source,c++]
+[source,glsl]
 ----
 if (false)     // changing false to true cannot uncover additional errors
     statement; // statement must be error checked regardless
