@@ -57,6 +57,7 @@ endif::ESSL[]
 :imagewidth: 800
 :fullimagewidth: width="800"
 :source-highlighter: rouge
+:rouge-style: github
 :attribute-missing: warn
 
 // Various special / math symbols. This is easier to edit with than Unicode.
