@@ -93,3 +93,4 @@ that do not live in the Khronos registries for OpenGL or OpenGL ES.
 - link:{repo}/qcom/GLSL_QCOM_image_processing2.txt[GL_QCOM_image_processing2]
 - link:{repo}/khr/GL_KHR_shader_subgroup_rotate.txt[GL_KHR_shader_subgroup_rotate]
 - link:{repo}/arm/GL_ARM_cooperative_matrix_layouts.txt[GL_ARM_cooperative_matrix_layouts]
+- link:{repo}/ext/GL_EXT_texture_offset_non_const.txt[GL_EXT_texture_offset_non_const]

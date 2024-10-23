@@ -1,0 +1,84 @@
+Name
+
+    EXT_texture_offset_non_const
+
+Name Strings
+
+    GL_EXT_texture_offset_non_const
+
+Contact
+
+    Ricardo Garcia (rgarcia 'at' igalia.com), Igalia.
+
+Contributors
+
+    Ricardo Garcia, Igalia
+    Graeme Leese, Broadcom
+    Alexey Knyazev, independent contributor
+
+Notice
+
+    Copyright (c) 2021-2024 The Khronos Group Inc. Copyright terms at
+        http://www.khronos.org/registry/speccopyright.html
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date: 2024/10/23
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 1.30
+    (#version 130) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.00
+    (#version 300) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification version 4.60, dated July 23, 2017.
+
+Overview
+
+    This extension removes the requirement that offset arguments to the
+    texture*Offset functions must be constant.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_texture_offset_non_const : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added:
+
+      #define GL_EXT_texture_offset_non_const    1
+
+
+Modifications to Chapter 8 of the OpenGL Shading Language Specification
+(Built-in Functions)
+
+    Change to section 8.9.2, Texel Lookup Functions
+
+    In the table row corresponding to the textureOffset functions, remove the
+    sentence "The offset value must be a constant expression." from the
+    Description column.
+    
+Issues
+
+    (1) Are textureGatherOffsets functions, which also need constant offsets,
+    affected by this extension?
+
+    RESOLVED: No, they are out of scope.
+
+Revision History
+
+    Rev.  Date          Author          Changes
+    ----  -----------   --------        ----------------------------------------
+     1    2024/10/23    Ricardo Garcia  Initial revision.
+
