@@ -94,3 +94,4 @@ that do not live in the Khronos registries for OpenGL or OpenGL ES.
 - link:{repo}/khr/GL_KHR_shader_subgroup_rotate.txt[GL_KHR_shader_subgroup_rotate]
 - link:{repo}/arm/GL_ARM_cooperative_matrix_layouts.txt[GL_ARM_cooperative_matrix_layouts]
 - link:{repo}/ext/GL_EXT_texture_offset_non_const.txt[GL_EXT_texture_offset_non_const]
+- link:{repo}/nv/GLSL_NV_cooperative_matrix2.txt[GL_NV_cooperative_matrix2]
