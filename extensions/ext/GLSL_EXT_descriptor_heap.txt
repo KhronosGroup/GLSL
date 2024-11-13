@@ -118,6 +118,7 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
         If the declaration is an array, indexing into the array will index
         into the heap using the stride specified in the API.
         Such array declarations may be unsized.
+        All such arrays alias onto the same heap.
 
     Modify Section 4.4.6, Opaque Uniform Layout Qualifiers
 
@@ -132,6 +133,7 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
         If the declaration is an array, indexing into the array will index
         into the heap using the stride specified in the API.
         Such array declarations may be unsized.
+        All such arrays alias onto the same heap.
 
         
 Interactions with GL_KHR_ray_query and GL_KHR_ray_tracing
