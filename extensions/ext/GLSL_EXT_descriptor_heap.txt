@@ -145,7 +145,10 @@ Examples
     The following code illustrates a number of heap declarations and how they
     could be used:
     
+        // Sampler array aliased to the sampler heap
         uniform sampler heapSampler[];
+        
+        // Different image arrays aliased to the image heap
         uniform texture2D heapTexture2D[];
         uniform texture3D heapTexture3D[];
 
