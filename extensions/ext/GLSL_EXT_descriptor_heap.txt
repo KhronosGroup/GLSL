@@ -100,7 +100,7 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
     
         Any uniform or shader storage block, texture, image, sampler, or
         accelerationStructure declaration without set and binding qualifiers
-        may eb deckared without an explicit size. In this case, the effective
+        may be declared without an explicit size. In this case, the effective
         array size is inferred at run-time from the size of the data store
         backing each descriptor heap. Such run-time-sized arrays may be
         indexed with general integer expressions. However, it is a
