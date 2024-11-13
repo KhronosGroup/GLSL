@@ -152,14 +152,13 @@ Examples
         uniform texture2D heapTexture2D[];
         uniform texture3D heapTexture3D[];
 
+        // Different buffer arrays aliased to the buffer heap
         buffer StorageBufferA {
             vec4 a;
         } heapStorageBufferA[];
-
         buffer StorageBufferB {
             vec4 b;
         } heapStorageBufferB[];
-
         uniform UniformBuffer {
             vec4 colorOffset;
         } heapUniformBuffer[];
