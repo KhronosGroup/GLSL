@@ -1218,8 +1218,7 @@ ifdef::GLSL[]
       Available in all shader stages.
 | int *textureSamples*(gsampler2DMS _sampler_) +
   int *textureSamples*(gsampler2DMSArray _sampler_)
-    | Returns the number of samples of the texture or textures bound to
-      _sampler_.
+    | Returns the number of samples of the texture bound to _sampler_.
 endif::GLSL[]
 |====
 
@@ -2097,7 +2096,7 @@ ifdef::GLSL[]
   {highp} ivec3 *imageSize*(readonly writeonly gimage2DMSArray _image_) +
 endif::GLSL[]
   {highp}   int *imageSize*(readonly writeonly gimageBuffer _image_)
-    | Returns the dimensions of the image or images bound to _image_.
+    | Returns the dimensions of the image bound to _image_.
       For arrayed images, the last component of the return value will hold
       the size of the array.
       Cube images only return the dimensions of one face, and the number of
@@ -2109,7 +2108,7 @@ endif::GLSL[]
 ifdef::GLSL[]
 | int *imageSamples*(readonly writeonly gimage2DMS _image_) +
   int *imageSamples*(readonly writeonly gimage2DMSArray _image_)
-    | Returns the number of samples of the image or images bound to _image_.
+    | Returns the number of samples of the image bound to _image_.
 endif::GLSL[]
 | gvec4 *imageLoad*(readonly _IMAGE_PARAMS_)
     | Loads the texel at the coordinate _P_ from the image unit _image_ (in
