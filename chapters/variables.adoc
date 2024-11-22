@@ -2788,7 +2788,7 @@ It is a compile-time error if it does not include one of the storage qualifiers
 It may optionally include <<layout-qualifiers,layout qualifiers>>, the
 <<storage-qualifiers,auxiliary storage qualifier>> *patch*, and the
 <<the-precise-qualifier,precise qualifier>>.
-*buffer* blocks may additionally include <<memory qualifiers>>.
+*buffer* blocks may additionally include <<memory-qualifiers>>.
 It is a compile-time error to include any other qualifiers.
 
 _member-list_ declares the variables that are to be grouped into the block.
