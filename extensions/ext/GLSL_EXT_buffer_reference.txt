@@ -128,7 +128,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
       define a forward declaration to the reference type, so it can be used
       in other block declarations or in its own block declaration. A forward
       declaration is made by omitting the member list and instance name.
-      All layout qualifiers, except "buffer_reference", are ignored during
+      All layout qualifiers except "buffer_reference" are ignored during
       forward declaration.
 
       If any access through a buffer reference value uses an address that is
