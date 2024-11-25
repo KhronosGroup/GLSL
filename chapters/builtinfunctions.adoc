@@ -130,59 +130,140 @@ If the divisor of a ratio is 0, then results will be undefined.
 These all operate component-wise.
 The description is per component.
 
-[options="header"]
-|====
-| Syntax | Description
-| genFType *radians*(genFType _degrees_)
-    | Converts _degrees_ to radians, i.e.,
-      [eq]#({pi} / 180) {cdot} degrees#.
-| genFType *degrees*(genFType _radians_)
-    | Converts _radians_ to degrees, i.e.,
-      [eq]#(180 / {pi}) {cdot} radians#.
-| genFType *sin*(genFType _angle_)
-    | The standard trigonometric sine function.
-| genFType *cos*(genFType _angle_)
-    | The standard trigonometric cosine function.
-| genFType *tan*(genFType _angle_)
-    | The standard trigonometric tangent.
-| genFType *asin*(genFType _x_)
-    | Arc sine.
-      Returns an angle whose sine is _x_.
-      The range of values returned by this function is
-      [eq]#[-{pi} / 2, {pi} / 2]#.
-      Results are undefined if [eq]#{vert}x{vert} > 1#.
-| genFType *acos*(genFType _x_)
-    | Arc cosine.
-      Returns an angle whose cosine is _x_.
-      The range of values returned by this function is [eq]#[0,{pi}]#.
-      Results are undefined if [eq]#{vert}x{vert} > 1#.
-| genFType *atan*(genFType _y_, genFType _x_)
-    | Arc tangent.
-      Returns an angle whose tangent is [eq]#y / x#.
-      The signs of _x_ and _y_ are used to determine what quadrant the angle
-      is in.
-      The range of values returned by this function is [eq]#[-{pi}, {pi}]#.
-      Results are undefined if _x_ and _y_ are both 0.
-| genFType *atan*(genFType _y_over_x_)
-    | Arc tangent.
-      Returns an angle whose tangent is _y_over_x_.
-      The range of values returned by this function is
-      [eq]#[-{pi} / 2, {pi} / 2]#.
-| genFType *sinh*(genFType _x_)
-    | Returns the hyperbolic sine function [eq]#(e^x^ - e^-x^) / 2#.
-| genFType *cosh*(genFType _x_)
-    | Returns the hyperbolic cosine function [eq]#(e^x^ + e^-x^) / 2#.
-| genFType *tanh*(genFType _x_)
-    | Returns the hyperbolic tangent function [eq]#sinh(x) / cosh(x)#.
-| genFType *asinh*(genFType _x_)
-    | Arc hyperbolic sine; returns the inverse of *sinh*.
-| genFType *acosh*(genFType _x_)
-    | Arc hyperbolic cosine; returns the non-negative inverse of *cosh*.
-      Results are undefined if [eq]#x < 1#.
-| genFType *atanh*(genFType _x_)
-    | Arc hyperbolic tangent; returns the inverse of *tanh*.
-      Results are undefined if [eq]#{vert}x{vert} {geq} 1#.
-|====
+=== Radians
+[source,glsl]
+----
+genFType radians(genFType degrees)
+----
+
+Converts _degrees_ to radians, i.e., [eq]#({pi} / 180) {cdot} degrees#.
+
+=== Degrees
+[source,glsl]
+----
+genFType degrees(genFType radians)
+----
+
+Converts _radians_ to degrees, i.e., [eq]#(180 / {pi}) {cdot} radians#.
+
+=== Sin
+[source,glsl]
+----
+genFType sin(genFType angle)
+----
+
+The standard trigonometric sine function.
+
+=== Cos
+[source,glsl]
+----
+genFType cos(genFType angle)
+----
+
+The standard trigonometric cosine function.
+
+=== Tan
+[source,glsl]
+----
+genFType tan(genFType angle)
+----
+
+The standard trigonometric tangent.
+
+=== Asin
+[source,glsl]
+----
+genFType asin(genFType x)
+----
+
+Arc sine. Returns an angle whose sine is _x_.
+
+The range of values returned by this function is [eq]#[-{pi} / 2, {pi} / 2]#.
+Results are undefined if [eq]#{vert}x{vert} > 1#.
+
+=== Acos
+[source,glsl]
+----
+genFType acos(genFType x)
+----
+
+Arc cosine. Returns an angle whose cosine is _x_.
+
+The range of values returned by this function is [eq]#[0,{pi}]#.
+Results are undefined if [eq]#{vert}x{vert} > 1#.
+
+=== Atan
+[source,glsl]
+----
+genFType atan(genFType y, genFType x)
+----
+
+Arc tangent. Returns an angle whose tangent is [eq]#y / x#.
+
+The signs of _x_ and _y_ are used to determine what quadrant the angle is in.
+The range of values returned by this function is [eq]#[-{pi}, {pi}]#.
+Results are undefined if _x_ and _y_ are both 0.
+
+[source,glsl]
+----
+genFType atan(genFType y_over_x)
+----
+
+Arc tangent. Returns an angle whose tangent is _y_over_x_.
+
+The range of values returned by this function is [eq]#[-{pi} / 2, {pi} / 2]#.
+
+=== Sinh
+[source,glsl]
+----
+genFType sinh(genFType x)
+----
+
+Returns the hyperbolic sine function [eq]#(e^x^ - e^-x^) / 2#.
+
+=== Cosh
+[source,glsl]
+----
+genFType cosh(genFType x)
+----
+
+Returns the hyperbolic cosine function [eq]#(e^x^ + e^-x^) / 2#.
+
+=== Tanh
+[source,glsl]
+----
+genFType tanh(genFType x)
+----
+
+Returns the hyperbolic tangent function [eq]#sinh(x) / cosh(x)#.
+
+=== Asinh
+[source,glsl]
+----
+genFType asinh(genFType x)
+----
+
+Arc hyperbolic sine; returns the inverse of *sinh*.
+
+=== Acosh
+[source,glsl]
+----
+genFType acosh(genFType x)
+----
+
+Arc hyperbolic cosine. Returns the non-negative inverse of *cosh*.
+
+Results are undefined if [eq]#x < 1#.
+
+=== Atanh
+[source,glsl]
+----
+genFType atanh(genFType x)
+----
+
+Arc hyperbolic tangent. Returns the inverse of *tanh*.
+
+Results are undefined if [eq]#{vert}x{vert} {geq} 1#.
 
 
 [[exponential-functions]]
@@ -191,34 +272,76 @@ The description is per component.
 These all operate component-wise.
 The description is per component.
 
-[options="header"]
-|====
-| Syntax | Description
-| genFType *pow*(genFType _x_, genFType _y_)
-    | Returns _x_ raised to the _y_ power, i.e., [eq]#x^y^#.
-      Results are undefined if [eq]#x < 0#.
-      Results are undefined if [eq]#x = 0# and [eq]#y {leq} 0#.
-| genFType *exp*(genFType _x_)
-    | Returns the natural exponentiation of _x_, i.e., [eq]#e^x^#.
-| genFType *log*(genFType _x_)
-    | Returns the natural logarithm of _x_, i.e., returns the value _y_
-      which satisfies the equation [eq]#x = e^y^#.
-      Results are undefined if [eq]#x {leq} 0#.
-| genFType *exp2*(genFType _x_)
-    | Returns 2 raised to the _x_ power, i.e., [eq]#2^x^#.
-| genFType *log2*(genFType _x_)
-    | Returns the base 2 logarithm of _x_, i.e., returns the value _y_ which
-      satisfies the equation [eq]#x = 2^y^#.
-      Results are undefined if [eq]#x {leq} 0#.
-| genFType *sqrt*(genFType _x_) +
-  genDType *sqrt*(genDType _x_)
-    | Returns [eq]#sqrt(x)#.
-      Results are undefined if [eq]#x < 0#.
-| genFType *inversesqrt*(genFType _x_) +
-  genDType *inversesqrt*(genDType _x_)
-    | Returns [eq]#1 / sqrt(x)#.
-      Results are undefined if [eq]#x {leq} 0#.
-|====
+=== Pow
+[source,glsl]
+----
+genFType pow(genFType x, genFType y)
+----
+
+Returns _x_ raised to the _y_ power, i.e., [eq]#x^y^#.
+
+Results are undefined if [eq]#x < 0#.
+Results are undefined if [eq]#x = 0# and [eq]#y {leq} 0#.
+
+=== Exp
+[source,glsl]
+----
+genFType exp(genFType x)
+----
+
+Returns the natural exponentiation of _x_, i.e., [eq]#e^x^#.
+
+=== Log
+[source,glsl]
+----
+genFType log(genFType x)
+----
+
+Returns the natural logarithm of _x_, i.e., returns the value _y_
+which satisfies the equation [eq]#x = e^y^#.
+
+Results are undefined if [eq]#x {leq} 0#.
+
+=== Exp2
+[source,glsl]
+----
+genFType exp2(genFType x)
+----
+
+Returns 2 raised to the _x_ power, i.e., [eq]#2^x^#.
+
+=== Log2
+[source,glsl]
+----
+genFType log2(genFType x)
+----
+
+Returns the base 2 logarithm of _x_, i.e., returns the value _y_ which
+satisfies the equation [eq]#x = 2^y^#.
+
+Results are undefined if [eq]#x {leq} 0#.
+
+=== Sqrt
+[source,glsl]
+----
+genFType sqrt(genFType x)
+genDType sqrt(genDType x)
+----
+
+Returns [eq]#sqrt(x)#.
+
+Results are undefined if [eq]#x < 0#.
+
+=== Inverse Sqrt
+[source,glsl]
+----
+genFType inversesqrt(genFType x)
+genDType inversesqrt(genDType x)
+----
+
+Returns [eq]#1 / sqrt(x)#.
+
+Results are undefined if [eq]#x {leq} 0#.
 
 
 [[common-functions]]
@@ -227,199 +350,300 @@ The description is per component.
 These all operate component-wise.
 The description is per component.
 
-[options="header"]
-|====
-| Syntax | Description
-| genFType *abs*(genFType _x_) +
+=== Abs
+[source,glsl]
+----
+genFType abs(genFType x)
 ifdef::GLSL[]
-  genIType *abs*(genIType _x_) +
-  genDType *abs*(genDType _x_)
+genIType abs(genIType x)
+genDType abs(genDType x)
 endif::GLSL[]
 ifdef::ESSL[]
-  genIType *abs*(genIType _x_)
+genIType abs(genIType x)
 endif::ESSL[]
-    | Returns _x_ if [eq]#x {geq} 0#; otherwise it returns -_x_.
-| genFType *sign*(genFType _x_) +
-ifdef::GLSL[]
-  genIType *sign*(genIType _x_) +
-  genDType *sign*(genDType _x_)
-endif::GLSL[]
-ifdef::ESSL[]
-  genIType *sign*(genIType _x_)
-endif::ESSL[]
-    | Returns 1.0 if _x_ > 0, 0.0 if _x_ = 0, or -1.0 if _x_ < 0.
-ifdef::GLSL[]
-| genFType *floor*(genFType _x_) +
-  genDType *floor*(genDType _x_)
-endif::GLSL[]
-ifdef::ESSL[]
-| genFType *floor*(genFType _x_)
-endif::ESSL[]
-    | Returns a value equal to the nearest integer that is less than or
-      equal to _x_.
-ifdef::GLSL[]
-| genFType *trunc*(genFType _x_) +
-  genDType *trunc*(genDType _x_)
-endif::GLSL[]
-ifdef::ESSL[]
-| genFType *trunc*(genFType _x_)
-endif::ESSL[]
-    | Returns a value equal to the nearest integer to _x_ whose absolute
-      value is not larger than the absolute value of _x_.
-ifdef::GLSL[]
-| genFType *round*(genFType _x_) +
-  genDType *round*(genDType _x_)
-endif::GLSL[]
-ifdef::ESSL[]
-| genFType *round*(genFType _x_)
-endif::ESSL[]
-    | Returns a value equal to the nearest integer to _x_.
-      The fraction 0.5 will round in a direction chosen by the
-      implementation, presumably the direction that is fastest.
-      This includes the possibility that *round*(_x_) returns the same value
-      as *roundEven*(_x_) for all values of _x_.
-ifdef::GLSL[]
-| genFType *roundEven*(genFType _x_) +
-  genDType *roundEven*(genDType _x_)
-endif::GLSL[]
-ifdef::ESSL[]
-| genFType *roundEven*(genFType _x_)
-endif::ESSL[]
-    | Returns a value equal to the nearest integer to _x_.
-      A fractional part of 0.5 will round toward the nearest even integer.
-      (Both 3.5 and 4.5 for x will return 4.0.)
-ifdef::GLSL[]
-| genFType *ceil*(genFType _x_) +
-  genDType *ceil*(genDType _x_)
-endif::GLSL[]
-ifdef::ESSL[]
-| genFType *ceil*(genFType _x_)
-endif::ESSL[]
-    | Returns a value equal to the nearest integer that is greater than or
-      equal to _x_.
-ifdef::GLSL[]
-| genFType *fract*(genFType _x_) +
-  genDType *fract*(genDType _x_) +
-endif::GLSL[]
-ifdef::ESSL[]
-| genFType *fract*(genFType _x_)
-endif::ESSL[]
-    | Returns _x_ - *floor*(_x_).
-| genFType *mod*(genFType _x_, float _y_) +
-ifdef::GLSL[]
-  genFType *mod*(genFType _x_, genFType _y_) +
-  genDType *mod*(genDType _x_, double _y_) +
-  genDType *mod*(genDType _x_, genDType _y_) +
-endif::GLSL[]
-ifdef::ESSL[]
-  genFType *mod*(genFType _x_, genFType _y_)
-endif::ESSL[]
-    | Modulus.
-      Returns [eq]#x - y {cdot} *floor*(x / y)#.
+----
 
-      Note that implementations may use a cheap approximation to the remainder,
-      and the error can be large due to the discontinuity in *floor*. This can
-      produce mathematically unexpected results in some cases, such as
-      *mod*(_x_,_x_) computing _x_ rather than 0, and can also cause the result
-      to have a different sign than the infinitely precise result.
+Returns _x_ if [eq]#x {geq} 0#; otherwise it returns -_x_.
+
+=== Sign
+[source,glsl]
+----
+genFType sign(genFType x)
 ifdef::GLSL[]
-| genFType *modf*(genFType _x_, out genFType _i_) +
-  genDType *modf*(genDType _x_, out genDType _i_)
+genIType sign(genIType x)
+genDType sign(genDType x)
 endif::GLSL[]
 ifdef::ESSL[]
-| genFType *modf*(genFType _x_, out genFType _i_) +
+genIType sign(genIType x)
 endif::ESSL[]
-   | Returns the fractional part of _x_ and sets _i_ to the integer part (as
-      a whole number floating-point value).
-      Both the return value and the output parameter will have the same sign
-      as _x_.
+----
+
+Returns 1.0 if _x_ > 0, 0.0 if _x_ = 0, or -1.0 if _x_ < 0.
+
+=== Floor
+[source,glsl]
+----
+ifdef::GLSL[]
+genFType floor(genFType x)
+genDType floor(genDType x)
+endif::GLSL[]
+ifdef::ESSL[]
+genFType floor(genFType x)
+endif::ESSL[]
+----
+
+Returns a value equal to the nearest integer that is less than or equal to _x_.
+
+=== Trunc
+[source,glsl]
+----
+ifdef::GLSL[]
+genFType trunc(genFType x)
+genDType trunc(genDType x)
+endif::GLSL[]
+ifdef::ESSL[]
+genFType trunc(genFType x)
+endif::ESSL[]
+----
+
+Returns a value equal to the nearest integer to _x_ whose absolute
+value is not larger than the absolute value of _x_.
+
+=== Round
+[source,glsl]
+----
+ifdef::GLSL[]
+genFType round(genFType x)
+genDType round(genDType x)
+endif::GLSL[]
+ifdef::ESSL[]
+genFType round(genFType x)
+endif::ESSL[]
+----
+
+Returns a value equal to the nearest integer to _x_.
+
+The fraction 0.5 will round in a direction chosen by the
+implementation, presumably the direction that is fastest.
+This includes the possibility that *round*(_x_) returns the same value
+as *roundEven*(_x_) for all values of _x_.
+
+=== Round Even
+[source,glsl]
+----
+ifdef::GLSL[]
+genFType roundEven(genFType x)
+genDType roundEven(genDType x)
+endif::GLSL[]
+ifdef::ESSL[]
+genFType roundEven(genFType x)
+endif::ESSL[]
+----
+
+Returns a value equal to the nearest integer to _x_.
+
+A fractional part of 0.5 will round toward the nearest even integer.
+(Both 3.5 and 4.5 for x will return 4.0.)
+
+=== Ceil
+[source,glsl]
+----
+ifdef::GLSL[]
+genFType ceil(genFType x)
+genDType ceil(genDType x)
+endif::GLSL[]
+ifdef::ESSL[]
+genFType ceil(genFType x)
+endif::ESSL[]
+----
+
+Returns a value equal to the nearest integer that is greater than or equal to _x_.
+
+=== Fract
+[source,glsl]
+----
+ifdef::GLSL[]
+genFType fract(genFType x)
+genDType fract(genDType x)
+endif::GLSL[]
+ifdef::ESSL[]
+genFType fract(genFType x)
+endif::ESSL[]
+----
+
+Returns _x_ - *floor*(_x_).
+
+=== Mod
+[source,glsl]
+----
+genFType mod(genFType x, float y)
+ifdef::GLSL[]
+genFType mod(genFType x, genFType y)
+genDType mod(genDType x, double y)
+genDType mod(genDType x, genDType y)
+endif::GLSL[]
+ifdef::ESSL[]
+genFType mod(genFType x, genFType y)
+endif::ESSL[]
+----
+
+Modulus. Returns [eq]#x - y {cdot} *floor*(x / y)#.
+
+Note that implementations may use a cheap approximation to the remainder,
+and the error can be large due to the discontinuity in *floor*. This can
+produce mathematically unexpected results in some cases, such as
+*mod*(_x_,_x_) computing _x_ rather than 0, and can also cause the result
+to have a different sign than the infinitely precise result.
+
+=== Modf
+[source,glsl]
+----
+ifdef::GLSL[]
+genFType modf(genFType x, out genFType i)
+genDType modf(genDType x, out genDType i)
+endif::GLSL[]
+ifdef::ESSL[]
+genFType modf(genFType x, out genFType i)
+endif::ESSL[]
+----
+
+Returns the fractional part of _x_ and sets _i_ to the integer part (as
+a whole number floating-point value).
+
+Both the return value and the output parameter will have the same sign as _x_.
 ifdef::ESSL[]
       If _x_ has the value +/- Inf, the return value should be NaN and must
       be either NaN or 0.0.
       For *highp* non-constant expressions, the value returned must be
       consistent.
 endif::ESSL[]
-| genFType *min*(genFType _x_, genFType _y_) +
-  genFType *min*(genFType _x_, float _y_) +
+
+=== Min
+[source,glsl]
+----
+genFType min(genFType x, genFType y)
+genFType min(genFType x, float y)
 ifdef::GLSL[]
-  genDType *min*(genDType _x_, genDType _y_) +
-  genDType *min*(genDType _x_, double _y_) +
+genDType min(genDType x, genDType y)
+genDType min(genDType x, double y)
 endif::GLSL[]
-  genIType *min*(genIType _x_, genIType _y_) +
-  genIType *min*(genIType _x_, int _y_) +
-  genUType *min*(genUType _x_, genUType _y_) +
-  genUType *min*(genUType _x_, uint _y_)
-    | Returns _y_ if _y_ < _x;_ otherwise it returns _x_. Which operand is the result is undefined if one of the operands is a NaN.
-| genFType *max*(genFType _x_, genFType _y_) +
-  genFType *max*(genFType _x_, float _y_) +
+genIType min(genIType x, genIType y)
+genIType min(genIType x, int y)
+genUType min(genUType x, genUType y)
+genUType min(genUType x, uint y)
+----
+
+Returns _y_ if _y_ < _x;_ otherwise it returns _x_.
+
+Which operand is the result is undefined if one of the operands is a NaN.
+
+=== Max
+[source,glsl]
+----
+genFType max(genFType x, genFType y)
+genFType max(genFType x, float y)
 ifdef::GLSL[]
-  genDType *max*(genDType _x_, genDType _y_) +
-  genDType *max*(genDType _x_, double _y_) +
+genDType max(genDType x, genDType y)
+genDType max(genDType x, double y)
 endif::GLSL[]
-  genIType *max*(genIType _x_, genIType _y_) +
-  genIType *max*(genIType _x_, int _y_) +
-  genUType *max*(genUType _x_, genUType _y_) +
-  genUType *max*(genUType _x_, uint _y_)
-    | Returns _y_ if _x_ < _y;_ otherwise it returns _x_. Which operand is the result is undefined if one of the operands is a NaN.
-| genFType *clamp*(genFType _x_, genFType _minVal_, genFType _maxVal_) +
-  genFType *clamp*(genFType _x_, float _minVal_, float _maxVal_) +
+genIType max(genIType x, genIType y)
+genIType max(genIType x, int y)
+genUType max(genUType x, genUType y)
+genUType max(genUType x, uint y)
+----
+
+Returns _y_ if _x_ < _y;_ otherwise it returns _x_.
+
+Which operand is the result is undefined if one of the operands is a NaN.
+
+=== Clamp
+[source,glsl]
+----
+genFType clamp(genFType x, genFType _minVal_, genFType maxVal)
+genFType clamp(genFType x, float _minVal_, float maxVal)
 ifdef::GLSL[]
-  genDType *clamp*(genDType _x_, genDType _minVal_, genDType _maxVal_) +
-  genDType *clamp*(genDType _x_, double _minVal_, double _maxVal_) +
+genDType clamp(genDType x, genDType minVal, genDType maxVal)
+genDType clamp(genDType x, double minVal, double maxVal)
 endif::GLSL[]
-  genIType *clamp*(genIType _x_, genIType _minVal_, genIType _maxVal_) +
-  genIType *clamp*(genIType _x_, int _minVal_, int _maxVal_) +
-  genUType *clamp*(genUType _x_, genUType _minVal_, genUType _maxVal_) +
-  genUType *clamp*(genUType _x_, uint _minVal_, uint _maxVal_)
-    | Returns *min*(*max*(_x_, _minVal_), _maxVal_).
-      Results are undefined if _minVal_ > _maxVal_.
-| genFType *mix*(genFType _x_, genFType _y_, genFType _a_) +
-  genFType *mix*(genFType _x_, genFType _y_, float _a_) +
+genIType clamp(genIType x, genIType minVal, genIType maxVal)
+genIType clamp(genIType x, int minVal, int maxVal)
+genUType clamp(genUType x, genUType minVal, genUType maxVal)
+genUType clamp(genUType x, uint minVal, uint maxVal)
+----
+
+Returns *min*(*max*(_x_, _minVal_), _maxVal_).
+
+Results are undefined if _minVal_ > _maxVal_.
+
+=== Mix
+[source,glsl]
+----
+genFType mix(genFType x, genFType y, genFType a)
+genFType mix(genFType x, genFType y, float a)
 ifdef::GLSL[]
-  genDType *mix*(genDType _x_, genDType _y_, genDType _a_) +
-  genDType *mix*(genDType _x_, genDType _y_, double _a_) +
+genDType mix(genDType x, genDType y, genDType a)
+genDType mix(genDType x, genDType y, double a)
 endif::GLSL[]
-    | Returns the linear blend of _x_ and _y_, i.e.,
-      [eq]#x {cdot} (1 - a) + y {cdot} a#.
-| genFType *mix*(genFType _x_, genFType _y_,  genBType _a_) +
+----
+
+Returns the linear blend of _x_ and _y_, i.e., [eq]#x {cdot} (1 - a) + y {cdot} a#.
+
+[source,glsl]
+----
+genFType mix(genFType x, genFType y, genBType a)
 ifdef::GLSL[]
-  genDType *mix*(genDType _x_, genDType _y_, genBType _a_) +
+genDType mix(genDType x, genDType y, genBType a)
 endif::GLSL[]
-  genIType *mix*(genIType _x_, genIType _y_, genBType _a_) +
-  genUType *mix*(genUType _x_, genUType _y_, genBType _a_) +
-  genBType *mix*(genBType _x_, genBType _y_, genBType _a_)
-    | Selects which vector each returned component comes from.
-      For a component of _a_ that is *false*, the corresponding component of
-      _x_ is returned.
-      For a component of _a_ that is *true*, the corresponding component of
-      _y_ is returned.
-      Components of _x_ and _y_ that are not selected are allowed to be
-      invalid floating-point values and will have no effect on the results.
-      Thus, this provides different functionality than, for example, +
-      genFType *mix*(genFType _x_, genFType _y_, genFType(_a_)) +
-      where _a_ is a Boolean vector.
-| genFType *step*(genFType _edge_, genFType _x_) +
+genIType mix(genIType x, genIType y, genBType a)
+genUType mix(genUType x, genUType y, genBType a)
+genBType mix(genBType x, genBType y, genBType a)
+----
+
+Selects which vector each returned component comes from.
+
+For a component of _a_ that is *false*, the corresponding component of _x_ is returned.
+
+For a component of _a_ that is *true*, the corresponding component of _y_ is returned.
+
+Components of _x_ and _y_ that are not selected are allowed to be
+invalid floating-point values and will have no effect on the results.
+Thus, this provides different functionality than, for example, +
+genFType *mix*(genFType _x_, genFType _y_, genFType(_a_)) +
+where _a_ is a Boolean vector.
+
+=== Step
+[source,glsl]
+----
+genFType step(genFType edge, genFType x)
 ifdef::GLSL[]
-  genFType *step*(float _edge_, genFType _x_) +
-  genDType *step*(genDType _edge_, genDType _x_) +
-  genDType *step*(double _edge_, genDType _x_)
+genFType step(float edge, genFType x)
+genDType step(genDType edge, genDType x)
+genDType step(double edge, genDType x)
 endif::GLSL[]
 ifdef::ESSL[]
-  genFType *step*(float _edge_, genFType _x_)
+genFType step(float edge, genFType x)
 endif::ESSL[]
-    | Returns 0.0 if _x_ < _edge;_ otherwise it returns 1.0.
-| genFType *smoothstep*(genFType _edge0_, genFType _edge1_, genFType _x_) +
-  genFType *smoothstep*(float _edge0_, float _edge1_, genFType _x_) +
+----
+
+Returns 0.0 if _x_ < _edge;_ otherwise it returns 1.0.
+
+=== Smoothstep
+[source,glsl]
+----
+genFType smoothstep(genFType edge0, genFType edge1, genFType x)
+genFType smoothstep(float edge0, float edge1, genFType x)
 ifdef::GLSL[]
-  genDType *smoothstep*(genDType _edge0_, genDType _edge1_, genDType _x_) +
-  genDType *smoothstep*(double _edge0_, double _edge1_, genDType _x_) +
+genDType smoothstep(genDType edge0, genDType edge1, genDType x)
+genDType smoothstep(double edge0, double edge1, genDType x)
 endif::GLSL[]
-   a| Returns 0.0 if [eq]#x {leq} edge0# and 1.0 if [eq]#x {geq} edge1#, and
-      performs smooth Hermite interpolation between 0 and 1 when [eq]#edge0
-      < x < edge1#.
-      This is useful in cases where you would want a threshold function with
-      a smooth transition.
-      This is equivalent to:
+----
+
+Returns 0.0 if [eq]#x {leq} edge0# and 1.0 if [eq]#x {geq} edge1#, and
+performs smooth Hermite interpolation between 0 and 1 when [eq]#edge0 < x < edge1#.
+
+This is useful in cases where you would want a threshold function with a smooth transition.
+
+This is equivalent to:
 --
 [source,glsl]
 ----
@@ -428,37 +652,60 @@ t = clamp ((x - edge0) / (edge1 - edge0), 0, 1);
 return t * t * (3 - 2 * t);
 ----
 
-(And similarly for doubles.) Results are undefined if [eq]#edge0 {geq}
-edge1#.
+(And similarly for doubles.) Results are undefined if [eq]#edge0 {geq} edge1#.
 --
+
+=== Is NaN
+[source,glsl]
+----
 ifdef::GLSL[]
-| genBType *isnan*(genFType _x_) +
-  genBType *isnan*(genDType _x_)
+genBType isnan(genFType x)
+genBType isnan(genDType x)
 endif::GLSL[]
 ifdef::ESSL[]
-| genBType *isnan*(genFType _x_)
+genBType isnan(genFType x)
 endif::ESSL[]
-    | Returns *true* if _x_ holds a NaN.
-      Returns *false* otherwise.
-      Always returns *false* if NaNs are not implemented.
+----
+
+Returns *true* if _x_ holds a NaN. Returns *false* otherwise.
+
+Always returns *false* if NaNs are not implemented.
+
+=== Is Inf
+[source,glsl]
+----
 ifdef::GLSL[]
-| genBType *isinf*(genFType _x_) +
-  genBType *isinf*(genDType _x_)
+genBType isinf(genFType x)
+genBType isinf(genDType x)
 endif::GLSL[]
 ifdef::ESSL[]
-| genBType *isinf*(genFType _x_)
+genBType isinf(genFType x)
 endif::ESSL[]
-    | Returns *true* if _x_ holds a positive infinity or negative infinity.
-      Returns *false* otherwise.
-| genIType *floatBitsToInt*(highp genFType _value_) +
-  genUType *floatBitsToUint*(highp genFType _value_)
-    | Returns a signed or unsigned integer value representing the encoding
-      of a floating-point value.
-      The *float* value's bit-level representation is preserved.
-| genFType *intBitsToFloat*(highp genIType _value_) +
-  genFType *uintBitsToFloat*(highp genUType _value_)
-    | Returns a floating-point value corresponding to a signed or unsigned
-      integer encoding of a floating-point value.
+----
+
+Returns *true* if _x_ holds a positive infinity or negative infinity. Returns *false* otherwise.
+
+=== Float bits to Int
+[source,glsl]
+----
+genIType floatBitsToInt(highp genFType value)
+genUType floatBitsToUint(highp genFType value)
+----
+
+Returns a signed or unsigned integer value representing the encoding of a floating-point value.
+
+The *float* value's bit-level representation is preserved.
+
+=== Int bits to Float
+[source,glsl]
+----
+genFType intBitsToFloat(highp genIType value)
+genFType uintBitsToFloat(highp genUType value)
+----
+
+Returns a floating-point value corresponding to a signed or unsigned integer encoding of a
+floating-point value.
+
 ifdef::GLSL[]
       If a NaN is passed in, it will not signal, and the resulting value is
       unspecified.
@@ -470,13 +717,20 @@ ifdef::ESSL[]
 endif::ESSL[]
       If a subnormal number is passed in, the result might be flushed to 0.
       Otherwise, the bit-level representation is preserved.
-| genFType *fma*(genFType _a_, genFType _b_, genFType _c_) +
+
+=== Fma
+[source,glsl]
+----
+genFType fma(genFType a, genFType b, genFType c)
 ifdef::GLSL[]
-  genDType *fma*(genDType _a_, genDType _b_, genDType _c_)
+genDType fma(genDType a, genDType b, genDType c)
 endif::GLSL[]
-   a| Computes and returns `a * b + c`.
-      In uses where the return value is eventually consumed by a variable
-      declared as *precise*:
+----
+
+Computes and returns `a * b + c`.
+
+In uses where the return value is eventually consumed by a variable declared as *precise*:
+
 --
   * *fma*() is considered a single operation, whereas the expression `a * b
     + c` consumed by a variable declared *precise* is considered two
@@ -491,40 +745,53 @@ Otherwise, in the absence of *precise* consumption, there are no special
 constraints on the number of operations or difference in precision between
 *fma*() and the expression `a * b + c`.
 --
-| genFType *frexp*(highp genFType _x_, out highp genIType _exp_)
+
+=== Frexp
+[source,glsl]
+----
+genFType frexp(highp genFType x, out highp genIType exp)
 ifdef::GLSL[]
-  genDType *frexp*(genDType _x_, out genIType _exp_) +
+genDType frexp(genDType x, out genIType exp)
 endif::GLSL[]
-    | Splits _x_ into a floating-point significand in the range
-      [eq]#[0.5,1.0]#, and an integral exponent of two, such that
+----
 
-      [eq]#x = significand {cdot} 2^exponent^#
+Splits _x_ into a floating-point significand in the range
+[eq]#[0.5,1.0]#, and an integral exponent of two, such that
 
-      The significand is returned by the function and the exponent is
-      returned in the parameter _exp_.
-      For a floating-point value of zero, the significand and exponent are
-      both zero.
+[eq]#x = significand {cdot} 2^exponent^#
 
-      If an implementation supports signed zero, an input value of minus
-      zero should return a significand of minus zero.
-      For a floating-point value that is an infinity or is not a number, the
-      results are undefined.
+The significand is returned by the function and the exponent is
+returned in the parameter _exp_.
 
-      If the input _x_ is a vector, this operation is performed in a
-      component-wise manner; the value returned by the function and the
-      value written to _exp_ are vectors with the same number of components
-      as _x_.
-| genFType *ldexp*(highp genFType _x_, highp genIType _exp_) +
+For a floating-point value of zero, the significand and exponent are
+both zero.
+
+If an implementation supports signed zero, an input value of minus
+zero should return a significand of minus zero.
+
+For a floating-point value that is an infinity or is not a number, the
+results are undefined.
+
+If the input _x_ is a vector, this operation is performed in a
+component-wise manner; the value returned by the function and the
+value written to _exp_ are vectors with the same number of components as _x_.
+
+=== Ldexp
+[source,glsl]
+----
+genFType ldexp(highp genFType x, highp genIType exp)
 ifdef::GLSL[]
-  genDType *ldexp*(genDType _x_, genIType _exp_)
+genDType ldexp(genDType x, genIType exp)
 endif::GLSL[]
-    | Builds a floating-point number from _x_ and the corresponding integral
-      exponent of two in _exp_, returning:
+----
 
-      [eq]#significand {cdot} 2^exponent^#
+Builds a floating-point number from _x_ and the corresponding integral
+exponent of two in _exp_, returning:
 
-      If this product is too large to be represented in the floating-point
-      type, the result is undefined.
+[eq]#significand {cdot} 2^exponent^#
+
+If this product is too large to be represented in the floating-point
+type, the result is undefined.
 
 ifdef::GLSL[]
       If _exp_ is greater than +128 (single-precision) or +1024
@@ -543,7 +810,6 @@ endif::ESSL[]
       If the input _x_ is a vector, this operation is performed in a
       component-wise manner; the value passed in _exp_ and returned by the
       function are vectors with the same number of components as _x_.
-|====
 
 
 [[floating-point-pack-and-unpack-functions]]
@@ -552,86 +818,147 @@ endif::ESSL[]
 These functions do not operate component-wise, rather, as described in each
 case.
 
-[options="header"]
-|====
-| Syntax | Description
-| highp uint *packUnorm2x16*(vec2 _v_) +
-  highp uint *packSnorm2x16*(vec2 _v_) +
-  {highp} uint *packUnorm4x8*(vec4 _v_) +
-  {highp} uint *packSnorm4x8*(vec4 _v_)
-    | First, converts each component of the normalized floating-point value
-      _v_ into 16-bit (*2x16*) or 8-bit (*4x8*) integer values.
-      Then, the results are packed into the returned 32-bit unsigned
-      integer.
-
-      The conversion for component _c_ of _v_ to fixed point is done as
-      follows:
-
-      *packUnorm2x16*: *round*(*clamp*(_c_, 0, +1) * 65535.0) +
-      *packSnorm2x16:* *round*(*clamp*(_c_, -1, +1) * 32767.0) +
-      *packUnorm4x8*: *round*(*clamp*(_c_, 0, +1) * 255.0) +
-      *packSnorm4x8*: *round*(*clamp*(_c_, -1, +1) * 127.0)
-
-      The first component of the vector will be written to the least
-      significant bits of the output; the last component will be written to
-      the most significant bits.
-| {highp} vec2 *unpackUnorm2x16*(highp uint _p_) +
-  {highp} vec2 *unpackSnorm2x16*(highp uint _p_) +
-  {mediump} vec4 *unpackUnorm4x8*(highp uint _p_) +
-  {mediump} vec4 *unpackSnorm4x8*(highp uint _p_)
-    | First, unpacks a single 32-bit unsigned integer _p_ into a pair of
-      16-bit unsigned integers, a pair of 16-bit signed integers, four 8-bit
-      unsigned integers, or four 8-bit signed integers, respectively.
-      Then, each component is converted to a normalized floating-point value
-      to generate the returned two- or four-component vector.
-
-      The conversion for unpacked fixed-point value _f_ to floating-point is
-      done as follows:
-
-      *unpackUnorm2x16*: _f_ / 65535.0 +
-      *unpackSnorm2x16*: *clamp*(_f_ / 32767.0, -1, +1) +
-      *unpackUnorm4x8*: _f_ / 255.0 +
-      *unpackSnorm4x8*: *clamp*(_f_ / 127.0, -1, +1)
-
-      The first component of the returned vector will be extracted from the
-      least significant bits of the input; the last component will be
-      extracted from the most significant bits.
-| {highp} uint *packHalf2x16*({mediump} vec2 _v_)
-    | Returns an unsigned integer obtained by converting the components of a
-      two-component floating-point vector to the 16-bit floating-point
-      representation of the <<references, API>>, and
-      then packing these two 16-bit integers into a 32-bit unsigned integer.
-
-      The first vector component specifies the 16 least-significant bits of
-      the result; the second component specifies the 16 most-significant
-      bits.
-| {mediump} vec2 *unpackHalf2x16*({highp} uint _v_)
-    | Returns a two-component floating-point vector with components obtained
-      by unpacking a 32-bit unsigned integer into a pair of 16-bit values,
-      interpreting those values as 16-bit floating-point numbers according
-      to the <<references, API>>, and converting them to
-      32-bit floating-point values.
-
-      The first component of the vector is obtained from the 16
-      least-significant bits of _v_; the second component is obtained from
-      the 16 most-significant bits of _v_.
+=== Pack Unorm
+[source,glsl]
+----
+highp uint packUnorm2x16(vec2 v)
+highp uint packSnorm2x16(vec2 v)
 ifdef::GLSL[]
-| double *packDouble2x32*(uvec2 _v_) +
-    | Returns a double-precision value obtained by packing the components of
-      _v_ into a 64-bit value.
-      If an IEEE 754 Inf or NaN is created, it will not signal, and the
-      resulting floating-point value is unspecified.
-      Otherwise, the bit-level representation of _v_ is preserved.
-      The first vector component specifies the 32 least significant bits;
-      the second component specifies the 32 most significant bits.
-| uvec2 *unpackDouble2x32*(double _v_)
-    | Returns a two-component unsigned integer vector representation of _v_.
-      The bit-level representation of _v_ is preserved.
-      The first component of the vector contains the 32 least significant
-      bits of the double; the second component consists of the 32 most
-      significant bits.
+uint packUnorm4x8(vec4 v)
+uint packSnorm4x8(vec4 v)
 endif::GLSL[]
-|====
+ifdef::ESSL[]
+highp uint packUnorm4x8(vec4 v)
+highp uint packSnorm4x8(vec4 v)
+endif::ESSL[]
+----
+
+First, converts each component of the normalized floating-point value
+_v_ into 16-bit (*2x16*) or 8-bit (*4x8*) integer values.
+
+Then, the results are packed into the returned 32-bit unsigned
+integer.
+
+The conversion for component _c_ of _v_ to fixed point is done as
+follows:
+
+*packUnorm2x16*: *round*(*clamp*(_c_, 0, +1) * 65535.0) +
+*packSnorm2x16:* *round*(*clamp*(_c_, -1, +1) * 32767.0) +
+*packUnorm4x8*: *round*(*clamp*(_c_, 0, +1) * 255.0) +
+*packSnorm4x8*: *round*(*clamp*(_c_, -1, +1) * 127.0)
+
+The first component of the vector will be written to the least
+significant bits of the output; the last component will be written to
+the most significant bits.
+
+=== Unpack Unorm
+[source,glsl]
+----
+ifdef::GLSL[]
+vec2 unpackUnorm2x16(highp uint p)
+vec2 unpackSnorm2x16(highp uint p)
+vec4 unpackUnorm4x8(highp uint p)
+vec4 unpackSnorm4x8(highp uint p)
+endif::GLSL[]
+ifdef::ESSL[]
+highp vec2 unpackUnorm2x16(highp uint p)
+highp vec2 unpackSnorm2x16(highp uint p)
+mediump vec4 unpackUnorm4x8(highp uint p)
+mediump vec4 unpackSnorm4x8(highp uint p)
+endif::ESSL[]
+----
+
+First, unpacks a single 32-bit unsigned integer _p_ into a pair of
+16-bit unsigned integers, a pair of 16-bit signed integers, four 8-bit
+unsigned integers, or four 8-bit signed integers, respectively.
+
+Then, each component is converted to a normalized floating-point value
+to generate the returned two- or four-component vector.
+
+The conversion for unpacked fixed-point value _f_ to floating-point is
+done as follows:
+
+*unpackUnorm2x16*: _f_ / 65535.0 +
+*unpackSnorm2x16*: *clamp*(_f_ / 32767.0, -1, +1) +
+*unpackUnorm4x8*: _f_ / 255.0 +
+*unpackSnorm4x8*: *clamp*(_f_ / 127.0, -1, +1)
+
+The first component of the returned vector will be extracted from the
+least significant bits of the input; the last component will be
+extracted from the most significant bits.
+
+=== Pack Half 2x16
+[source,glsl]
+----
+ifdef::GLSL[]
+uint packHalf2x16(vec2 v)
+endif::GLSL[]
+ifdef::ESSL[]
+highp uint packHalf2x16(mediump vec2 v)
+endif::ESSL[]
+----
+
+Returns an unsigned integer obtained by converting the components of a
+two-component floating-point vector to the 16-bit floating-point
+representation of the <<references, API>>, and
+then packing these two 16-bit integers into a 32-bit unsigned integer.
+
+The first vector component specifies the 16 least-significant bits of
+the result; the second component specifies the 16 most-significant
+bits.
+
+=== Unpack Half 2x16
+[source,glsl]
+----
+ifdef::GLSL[]
+vec2 unpackHalf2x16(uint v)
+endif::GLSL[]
+ifdef::ESSL[]
+mediump vec2 unpackHalf2x16(highp uint v)
+endif::ESSL[]
+----
+
+Returns a two-component floating-point vector with components obtained
+by unpacking a 32-bit unsigned integer into a pair of 16-bit values,
+interpreting those values as 16-bit floating-point numbers according
+to the <<references, API>>, and converting them to
+32-bit floating-point values.
+
+The first component of the vector is obtained from the 16
+least-significant bits of _v_; the second component is obtained from
+the 16 most-significant bits of _v_.
+
+ifdef::GLSL[]
+=== Pack Double 2x32
+[source,glsl]
+----
+double packDouble2x32(uvec2 v)
+----
+
+Returns a double-precision value obtained by packing the components of
+_v_ into a 64-bit value.
+
+If an IEEE 754 Inf or NaN is created, it will not signal, and the
+resulting floating-point value is unspecified.
+
+Otherwise, the bit-level representation of _v_ is preserved.
+The first vector component specifies the 32 least significant bits;
+the second component specifies the 32 most significant bits.
+
+=== Unpack Double 2x32
+[source,glsl]
+----
+uvec2 unpackDouble2x32(double v)
+----
+
+Returns a two-component unsigned integer vector representation of _v_.
+
+The bit-level representation of _v_ is preserved.
+
+The first component of the vector contains the 32 least significant
+bits of the double; the second component consists of the 32 most
+significant bits.
+endif::GLSL[]
 
 
 [[geometric-functions]]
@@ -639,114 +966,130 @@ endif::GLSL[]
 
 These operate on vectors as vectors, not component-wise.
 
-[options="header"]
-|====
-| Syntax | Description
+=== Length
+[source,glsl]
+----
 ifdef::GLSL[]
-| float *length*(genFType _x_) +
-  double *length*(genDType _x_)
+float length(genFType x)
+double length(genDType x)
 endif::GLSL[]
 ifdef::ESSL[]
-| float *length*(genFType _x_)
+float length(genFType x)
 endif::ESSL[]
-   a| Returns the length of vector _x_, i.e.,
-      [eq]#sqrt( x~0~^2^ + x~1~^2^ + ... )#.
+----
+
+Returns the length of vector _x_, i.e., [eq]#sqrt( x~0~^2^ + x~1~^2^ + ... )#.
+
+=== Distance
+[source,glsl]
+----
 ifdef::GLSL[]
-| float *distance*(genFType _p0_, genFType _p1_) +
-  double *distance*(genDType _p0_, genDType _p1_)
+float distance(genFType p0, genFType p1)
+double distance(genDType p0, genDType p1)
 endif::GLSL[]
 ifdef::ESSL[]
-| float *distance*(genFType _p0_, genFType _p1_)
+float distance(genFType p0, genFType p1)
 endif::ESSL[]
-    | Returns the distance between _p0_ and _p1_, i.e.,
-      *length*(_p0_ - _p1_)
+----
+
+Returns the distance between _p0_ and _p1_, i.e., *length*(_p0_ - _p1_)
+
+=== Dot
+[source,glsl]
+----
+float dot(genFType x, genFType y)
 ifdef::GLSL[]
-| float *dot*(genFType _x_, genFType _y_) +
-  double *dot*(genDType _x_, genDType _y_)
+double dot(genDType x, genDType y)
 endif::GLSL[]
-ifdef::ESSL[]
-| float *dot*(genFType _x_, genFType _y_)
-endif::ESSL[]
-    | Returns the dot product of _x_ and _y_, i.e.,
-      [eq]#x~0~ {cdot} y~0~ + x~1~ {cdot} y~1~ + ...#
+----
+
+Returns the dot product of _x_ and _y_, i.e., [eq]#x~0~ {cdot} y~0~ + x~1~ {cdot} y~1~ + ...#
+
+=== Cross
+[source,glsl]
+----
+vec3 cross(vec3 x, vec3 y)
 ifdef::GLSL[]
-| vec3 *cross*(vec3 _x_, vec3 _y_) +
-  dvec3 *cross*(dvec3 _x_, dvec3 _y_)
+dvec3 cross(dvec3 x, dvec3 y)
 endif::GLSL[]
-ifdef::ESSL[]
-| vec3 *cross*(vec3 _x_, vec3 _y_)
-endif::ESSL[]
-   a| Returns the cross product of _x_ and _y_, i.e.,
+----
+
+Returns the cross product of _x_ and _y_, i.e.,
       [eq]#(x~1~ {cdot} y~2~ - y~1~ {cdot} x~2~,
             x~2~ {cdot} y~0~ - y~2~ {cdot} x~0~,
             x~0~ {cdot} y~1~ - y~0~ {cdot} x~1~)#.
-ifdef::GLSL[]
-| genFType *normalize*(genFType _x_) +
-  genDType *normalize*(genDType _x_)
-endif::GLSL[]
-ifdef::ESSL[]
-| genFType *normalize*(genFType _x_)
-endif::ESSL[]
-    | Returns a vector in the same direction as _x_ but with a length of 1,
-      i.e. _x_ / *length*(x).
-ifdef::GLSL[]
-| compatibility profile only +
-  vec4 *ftransform*()
-   a| Available only when using the compatibility profile.
-      For core {apiname}, use *invariant*. +
-      For vertex shaders only.
-      This function will ensure that the incoming vertex value will be
-      transformed in a way that produces exactly the same result as would be
-      produced by {apiname}'s fixed functionality transform.
-      It is intended to be used to compute _gl_Position_, e.g.
---
-{empty}:: _gl_Position_ = *ftransform*()
 
-This function should be used, for example, when an application is rendering
-the same geometry in separate passes, and one pass uses the fixed
-functionality path to render and another pass uses programmable shaders.
---
-endif::GLSL[]
-| genFType *faceforward*(genFType _N_, genFType _I_, genFType _Nref_) +
+=== Normalize
+[source,glsl]
+----
+genFType normalize(genFType x)
 ifdef::GLSL[]
-  genDType *faceforward*(genDType _N_, genDType _I_, genDType _Nref_)
+genDType normalize(genDType x)
 endif::GLSL[]
-    | If *dot*(_Nref_, _I_) < 0 return _N_, otherwise return -_N_.
+----
+
+Returns a vector in the same direction as _x_ but with a length of 1, i.e. _x_ / *length*(x).
+
 ifdef::GLSL[]
-| genFType *reflect*(genFType _I_, genFType _N_) +
-  genDType *reflect*(genDType _I_, genDType _N_)
+=== FTransform
+Compatibility profile only
+
+[source,glsl]
+----
+vec4 ftransform()
+----
+
+Available only when using the compatibility profile. For core {apiname}, use *invariant*.
+
+For vertex shaders only. This function will ensure that the incoming vertex value will be
+transformed in a way that produces exactly the same result as would be produced by {apiname}'s
+fixed functionality transform. It is intended to be used to compute _gl_Position_, e.g.
+
+[source,glsl]
+----
+gl_Position = ftransform()
+----
+
+This function should be used, for example, when an application is rendering the same geometry in
+separate passes, and one pass uses the fixed functionality path to render and another pass uses
+programmable shaders.
 endif::GLSL[]
-ifdef::ESSL[]
-| genFType *reflect*(genFType _I_, genFType _N_)
-endif::ESSL[]
-    | For the incident vector _I_ and surface orientation _N_, returns the
-      reflection direction: [eq]#I - 2 {cdot} *dot*(N, I) {cdot} N#.
-      _N_ must already be normalized in order to achieve the desired result.
-| genFType *refract*(genFType _I_, genFType _N_, float _eta_) +
+
+=== Face Forward
+[source,glsl]
+----
+genFType faceforward(genFType N, genFType I, genFType Nref)
 ifdef::GLSL[]
-  genDType *refract*(genDType _I_, genDType _N_, double _eta_)
+genDType faceforward(genDType N, genDType I, genDType Nref)
 endif::GLSL[]
-   a| For the incident vector _I_ and surface normal _N_, and the ratio of
-      indices of refraction _eta_, return the refraction vector.
-      The result is computed by the <<refraction-equation,refraction
-      equation>> shown below.
+----
 
-      The input parameters for the incident vector _I_ and the surface
-      normal _N_ must already be normalized to get the desired results.
-|====
+If *dot*(_Nref_, _I_) < 0 return _N_, otherwise return -_N_.
 
+=== Reflect
+[source,glsl]
+----
+genFType reflect(genFType I, genFType N)
+ifdef::GLSL[]
+genDType reflect(genDType I, genDType N)
+endif::GLSL[]
+----
 
-[[refraction-equation]]
-=== Refraction Equation
+For the incident vector _I_ and surface orientation _N_, returns the reflection direction:
+[eq]#I - 2 {cdot} *dot*(N, I) {cdot} N#. _N_ must already be normalized in order to achieve
+the desired result.
 
-ifdef::editing-notes[]
-[NOTE]
-.editing-note
-====
-(Jon) Moved to new section from *refract* table entry above because
-asciidoctor-mathematical doesn't support math blocks in table cells yet.
-====
-endif::editing-notes[]
+=== Refract
+[source,glsl]
+----
+genFType refract(genFType I, genFType N, float eta)
+ifdef::GLSL[]
+genDType refract(genDType I, genDType N, double eta)
+endif::GLSL[]
+----
+
+For the incident vector _I_ and surface normal _N_, and the ratio of indices of refraction
+_eta_, return the refraction vector. The result is computed by the refraction equation shown below.
 
 [latexmath]
 ++++
@@ -763,6 +1106,9 @@ result &=
   \end{cases}
 \end{aligned}
 ++++
+
+The input parameters for the incident vector _I_ and the surface normal _N_ must already be
+normalized to get the desired results.
 
 
 [[matrix-functions]]
