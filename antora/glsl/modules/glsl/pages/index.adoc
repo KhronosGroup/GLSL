@@ -3,13 +3,14 @@
 
 = OpenGL Shading Language Documentation
 
+include::{config}/headerattribs.adoc[]
+
 include::{config}/attribs.adoc[]
+
 
 == About
 
-This site includes the OpenGL Shading Language
-{SPECREVISION} API specification {APITITLE}, generated on {SPECDATE}
-{SPECREMARK}.
+This site includes the {slname}, Version {revnumber} specification.
 
 
 == Navigation
