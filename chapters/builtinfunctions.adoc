@@ -71,7 +71,7 @@ This qualification cannot be set explicitly and may be different from the
 precision qualification of the result.
 
 ifdef::GLSL[]
-Note: In general, as has been noted, precision qualification is ignored
+NOTE: In general, as has been noted, precision qualification is ignored
 unless targeting Vulkan.
 endif::GLSL[]
 
@@ -1120,52 +1120,80 @@ values are single precision, and a double-precision floating-point version,
 where all arguments and return values are double precision.
 Only the single-precision floating-point version is shown.
 
-[options="header"]
-|====
-| Syntax | Description
-| mat *matrixCompMult*(mat _x_, mat _y_)
-    | Multiply matrix _x_ by matrix _y_ component-wise, i.e., result[i][j]
-      is the scalar product of _x_[i][j] and _y_[i][j]. +
+=== MatrixCompMult
+[source,glsl]
+----
+mat matrixCompMult(mat x, mat y)
+----
 
-      Note: to get linear algebraic matrix multiplication, use the multiply
-      operator (***).
-| mat2 *outerProduct*(vec2 _c_, vec2 _r_) +
-  mat3 *outerProduct*(vec3 _c_, vec3 _r_) +
-  mat4 *outerProduct*(vec4 _c_, vec4 _r_) +
-  mat2x3 *outerProduct*(vec3 _c_, vec2 _r_) +
-  mat3x2 *outerProduct*(vec2 _c_, vec3 _r_) +
-  mat2x4 *outerProduct*(vec4 _c_, vec2 _r_) +
-  mat4x2 *outerProduct*(vec2 _c_, vec4 _r_) +
-  mat3x4 *outerProduct*(vec4 _c_, vec3 _r_) +
-  mat4x3 *outerProduct*(vec3 _c_, vec4 _r_)
-    | Treats the first parameter _c_ as a column vector (matrix with one
-      column) and the second parameter _r_ as a row vector (matrix with one
-      row) and does a linear algebraic matrix multiply _c_ * _r_, yielding a
-      matrix whose number of rows is the number of components in _c_ and
-      whose number of columns is the number of components in _r_.
-| mat2 *transpose*(mat2 _m_) +
-  mat3 *transpose*(mat3 _m_) +
-  mat4 *transpose*(mat4 _m_) +
-  mat2x3 *transpose*(mat3x2 _m_) +
-  mat3x2 *transpose*(mat2x3 _m_) +
-  mat2x4 *transpose*(mat4x2 _m_) +
-  mat4x2 *transpose*(mat2x4 _m_) +
-  mat3x4 *transpose*(mat4x3 _m_) +
-  mat4x3 *transpose*(mat3x4 _m_)
-    | Returns a matrix that is the transpose of _m_.
-      The input matrix _m_ is not modified.
-| float *determinant*(mat2 _m_) +
-  float *determinant*(mat3 _m_) +
-  float *determinant*(mat4 _m_)
-    | Returns the determinant of _m_.
-| mat2 *inverse*(mat2 _m_) +
-  mat3 *inverse*(mat3 _m_) +
-  mat4 *inverse*(mat4 _m_)
-    | Returns a matrix that is the inverse of _m_.
-      The input matrix _m_ is not modified.
-      The values in the returned matrix are undefined if _m_ is singular or
-      poorly-conditioned (nearly singular).
-|====
+Multiply matrix _x_ by matrix _y_ component-wise, i.e., result[i][j]
+is the scalar product of _x_[i][j] and _y_[i][j]. +
+
+NOTE: To get linear algebraic matrix multiplication, use the multiply operator (***).
+
+=== OuterProduct
+[source,glsl]
+----
+mat2 outerProduct(vec2 c, vec2 r)
+mat3 outerProduct(vec3 c, vec3 r)
+mat4 outerProduct(vec4 c, vec4 r)
+mat2x3 outerProduct(vec3 c, vec2 r)
+mat3x2 outerProduct(vec2 c, vec3 r)
+mat2x4 outerProduct(vec4 c, vec2 r)
+mat4x2 outerProduct(vec2 c, vec4 r)
+mat3x4 outerProduct(vec4 c, vec3 r)
+mat4x3 outerProduct(vec3 c, vec4 r)
+----
+
+Treats the first parameter _c_ as a column vector (matrix with one
+column) and the second parameter _r_ as a row vector (matrix with one
+row) and does a linear algebraic matrix multiply _c_ * _r_, yielding a
+matrix whose number of rows is the number of components in _c_ and
+whose number of columns is the number of components in _r_.
+
+=== Transpose
+[source,glsl]
+----
+mat2 transpose(mat2 m)
+mat3 transpose(mat3 m)
+mat4 transpose(mat4 m)
+mat2x3 transpose(mat3x2 m)
+
+mat3x2 transpose(mat2x3 m)
+mat2x4 transpose(mat4x2 m)
+mat4x2 transpose(mat2x4 m)
+mat3x4 transpose(mat4x3 m)
+mat4x3 transpose(mat3x4 m)
+----
+
+Returns a matrix that is the transpose of _m_.
+
+The input matrix _m_ is not modified.
+
+=== Determinant
+[source,glsl]
+----
+float determinant(mat2 m)
+float determinant(mat3 m)
+float determinant(mat4 m)
+----
+
+Returns the determinant of _m_.
+
+=== Inverse
+[source,glsl]
+----
+mat2 inverse(mat2 m)
+mat3 inverse(mat3 m)
+mat4 inverse(mat4 m)
+----
+
+Returns a matrix that is the inverse of _m_.
+
+The input matrix _m_ is not modified.
+
+The values in the returned matrix are undefined if _m_ is singular or
+poorly-conditioned (nearly singular).
 
 
 [[vector-relational-functions]]
@@ -1193,42 +1221,92 @@ endif::ESSL[]
 In all cases, the sizes of all the input and return vectors for any
 particular call must match.
 
-[options="header"]
-|====
-| Syntax | Description
-| bvec *lessThan*(vec x, vec y) +
-  bvec *lessThan*(ivec x, ivec y) +
-  bvec *lessThan*(uvec x, uvec y)
-    | Returns the component-wise compare of [eq]#x < y#.
-| bvec *lessThanEqual*(vec x, vec y) +
-  bvec *lessThanEqual*(ivec x, ivec y) +
-  bvec *lessThanEqual*(uvec x, uvec y)
-    | Returns the component-wise compare of [eq]#x {leq} y#.
-| bvec *greaterThan*(vec x, vec y) +
-  bvec *greaterThan*(ivec x, ivec y) +
-  bvec *greaterThan*(uvec x, uvec y)
-    | Returns the component-wise compare of [eq]#x > y#.
-| bvec *greaterThanEqual*(vec x, vec y) +
-  bvec *greaterThanEqual*(ivec x, ivec y) +
-  bvec *greaterThanEqual*(uvec x, uvec y)
-    | Returns the component-wise compare of [eq]#x {geq} y#.
-| bvec *equal*(vec x, vec y) +
-  bvec *equal*(ivec x, ivec y) +
-  bvec *equal*(uvec x, uvec y) +
-  bvec *equal*(bvec x, bvec y)
-    | Returns the component-wise compare of [eq]#x == y#.
-| bvec *notEqual*(vec x, vec y) +
-  bvec *notEqual*(ivec x, ivec y) +
-  bvec *notEqual*(uvec x, uvec y) +
-  bvec *notEqual*(bvec x, bvec y)
-    | Returns the component-wise compare of [eq]#x {neq} y#.
-| bool *any*(bvec x)
-    | Returns *true* if any component of _x_ is *true*.
-| bool *all*(bvec x)
-    | Returns *true* only if all components of _x_ are *true*.
-| bvec *not*(bvec x)
-    | Returns the component-wise logical complement of _x_.
-|====
+=== LessThan
+[source,glsl]
+----
+bvec lessThan(vec x, vec y)
+bvec lessThan(ivec x, ivec y)
+bvec lessThan(uvec x, uvec y)
+----
+
+Returns the component-wise compare of [eq]#x < y#.
+
+=== LessThanEqual
+[source,glsl]
+----
+bvec lessThanEqual(vec x, vec y)
+bvec lessThanEqual(ivec x, ivec y)
+bvec lessThanEqual(uvec x, uvec y)
+----
+
+Returns the component-wise compare of [eq]#x {leq} y#.
+
+=== GreaterThan
+[source,glsl]
+----
+bvec greaterThan(vec x, vec y)
+bvec greaterThan(ivec x, ivec y)
+bvec greaterThan(uvec x, uvec y)
+----
+
+Returns the component-wise compare of [eq]#x > y#.
+
+=== GreaterThanEqual
+[source,glsl]
+----
+bvec greaterThanEqual(vec x, vec y)
+bvec greaterThanEqual(ivec x, ivec y)
+bvec greaterThanEqual(uvec x, uvec y)
+----
+
+Returns the component-wise compare of [eq]#x {geq} y#.
+
+=== Equal
+[source,glsl]
+----
+bvec equal(vec x, vec y)
+bvec equal(ivec x, ivec y)
+bvec equal(uvec x, uvec y)
+bvec equal(bvec x, bvec y)
+----
+
+Returns the component-wise compare of [eq]#x == y#.
+
+=== NotEqual
+[source,glsl]
+----
+bvec notEqual(vec x, vec y)
+bvec notEqual(ivec x, ivec y)
+bvec notEqual(uvec x, uvec y)
+bvec notEqual(bvec x, bvec y)
+----
+
+Returns the component-wise compare of [eq]#x {neq} y#.
+
+=== Any
+[source,glsl]
+----
+bool any(bvec x)
+----
+
+Returns *true* if any component of _x_ is *true*.
+
+=== All
+[source,glsl]
+----
+bool all(bvec x)
+----
+
+Returns *true* only if all components of _x_ are *true*.
+
+=== Not
+[source,glsl]
+----
+bvec not(bvec x)
+----
+
+Returns the component-wise logical complement of _x_.
+
 
 
 [[integer-functions]]
@@ -1242,80 +1320,147 @@ The lowest-order bit is bit 0.
 "`Bit number`" will always refer to counting up from the lowest-order bit as
 bit 0.
 
-[options="header"]
-|====
-| Syntax | Description
-| genUType *uaddCarry*(highp genUType _x_, highp genUType _y_, out lowp genUType _carry_)
-    | Adds 32-bit unsigned integers _x_ and _y_, returning the sum modulo
-      2^32^.
-      The value _carry_ is set to zero if the sum was less than 2^32^, or
-      one otherwise.
-| genUType *usubBorrow*(highp genUType _x_, highp genUType _y_, out lowp genUType _borrow_)
-    | Subtracts the 32-bit unsigned integer _y_ from _x_, returning the
-      difference if non-negative, or 2^32^ plus the difference otherwise.
-      The value _borrow_ is set to zero if [eq]#x {geq} y#, or one
-      otherwise.
-| void *umulExtended*(highp genUType _x_, highp genUType _y_, out highp genUType _msb_, out highp genUType _lsb_) +
-  void *imulExtended*(highp genIType _x_, highp genIType _y_, out highp genIType _msb_, out highp genIType _lsb_)
-    | Multiplies 32-bit unsigned or signed integers _x_ and _y_, producing a
-      64-bit result.
-      The 32 least-significant bits are returned in _lsb_.
-      The 32 most-significant bits are returned in _msb_.
-| genIType *bitfieldExtract*(genIType _value_, int _offset_, int _bits_) +
-  genUType *bitfieldExtract*(genUType _value_, int _offset_, int _bits_)
-    | Extracts bits [eq]#[offset, offset + bits - 1]# from _value_,
-      returning them in the least significant bits of the result. +
+=== UAddCarry
+[source,glsl]
+----
+genUType uaddCarry(highp genUType x, highp genUType y, out lowp genUType carry)
+----
 
-      For unsigned data types, the most significant bits of the result will
-      be set to zero.
-      For signed data types, the most significant bits will be set to the
-      value of bit [eq]#offset + bits - 1#. +
+Adds 32-bit unsigned integers _x_ and _y_, returning the sum modulo 2^32^.
 
-      If _bits_ is zero, the result will be zero.
-      The result will be undefined if _offset_ or _bits_ is negative, or if
-      the sum of _offset_ and _bits_ is greater than the number of bits used
-      to store the operand.
-      Note that for vector versions of *bitfieldExtract*(), a single pair of
-      _offset_ and _bits_ values is shared for all components.
-| genIType *bitfieldInsert*(genIType _base_, genIType _insert_, int _offset_, int _bits_) +
-  genUType *bitfieldInsert*(genUType _base_, genUType _insert_, int _offset_, int _bits_)
-    | Inserts the _bits_ least significant bits of _insert_ into _base_.
+The value _carry_ is set to zero if the sum was less than 2^32^, or one otherwise.
 
-      The result will have bits [eq]#[offset, offset + bits - 1]# taken from
-      bits [eq]#[0, bits - 1]# of _insert_, and all other bits taken
-      directly from the corresponding bits of _base_.
-      If _bits_ is zero, the result will simply be _base_.
-      The result will be undefined if _offset_ or _bits_ is negative, or if
-      the sum of _offset_ and _bits_ is greater than the number of bits used
-      to store the operand. +
-      Note that for vector versions of *bitfieldInsert*(), a single pair of
-      _offset_ and _bits_ values is shared for all components.
-| genIType *bitfieldReverse*(highp genIType _value_) +
-  genUType *bitfieldReverse*(highp genUType _value_)
-    | Reverses the bits of _value_.
-      The bit numbered _n_ of the result will be taken from bit [eq]#(bits -
-      1) - n# of _value_, where _bits_ is the total number of bits used to
-      represent _value_.
-| {lowp} genIType *bitCount*(genIType _value_) +
-  {lowp} genIType *bitCount*(genUType _value_)
-    | Returns the number of one bits in the binary representation of
-      _value_.
-| {lowp} genIType *findLSB*(genIType _value_) +
-  {lowp} genIType *findLSB*(genUType _value_)
-    | Returns the bit number of the least significant one bit in the binary
-      representation of _value_.
-      If _value_ is zero, -1 will be returned.
-| {lowp} genIType *findMSB*(highp genIType _value_) +
-  {lowp} genIType *findMSB*(highp genUType _value_)
-    | Returns the bit number of the most significant bit in the binary
-      representation of _value_.
+=== USubBorrow
+[source,glsl]
+----
+genUType usubBorrow(highp genUType x, highp genUType y, out lowp genUType borrow)
+----
 
-      For positive integers, the result will be the bit number of the most
-      significant one bit.
-      For negative integers, the result will be the bit number of the most
-      significant zero bit.
-      For a _value_ of zero or negative one, -1 will be returned.
-|====
+Subtracts the 32-bit unsigned integer _y_ from _x_, returning the difference if non-negative, or
+2^32^ plus the difference otherwise.
+
+The value _borrow_ is set to zero if [eq]#x {geq} y#, or one otherwise.
+
+=== UMulExtended
+[source,glsl]
+----
+void umulExtended(highp genUType x,
+                  highp genUType y,
+                  out highp genUType msb,
+                  out highp genUType lsb)
+void imulExtended(highp genIType x,
+                  highp genIType y,
+                  out highp genIType msb,
+                  out highp genIType lsb)
+----
+
+Multiplies 32-bit unsigned or signed integers _x_ and _y_, producing a 64-bit result.
+
+ * The 32 least-significant bits are returned in _lsb_.
+ * The 32 most-significant bits are returned in _msb_.
+
+=== BitfieldExtract
+[source,glsl]
+----
+genIType bitfieldExtract(genIType value, int offset, int bits)
+genUType bitfieldExtract(genUType value, int offset, int bits)
+----
+
+Extracts bits [eq]#[offset, offset + bits - 1]# from _value_, returning them in the least
+significant bits of the result.
+
+For unsigned data types, the most significant bits of the result will be set to zero.
+For signed data types, the most significant bits will be set to the value of bit
+[eq]#offset + bits - 1#.
+
+If _bits_ is zero, the result will be zero. The result will be undefined if _offset_ or _bits_ is
+negative, or if the sum of _offset_ and _bits_ is greater than the number of bits used to store the
+operand.
+
+Note that for vector versions of *bitfieldExtract*(), a single pair of _offset_ and _bits_ values
+is shared for all components.
+
+=== BitfieldInsert
+[source,glsl]
+----
+genIType bitfieldInsert(genIType base, genIType insert, int offset, int bits)
+genUType bitfieldInsert(genUType base, genUType insert, int offset, int bits)
+----
+
+Inserts the _bits_ least significant bits of _insert_ into _base_.
+
+The result will have bits [eq]#[offset, offset + bits - 1]# taken from bits [eq]#[0, bits - 1]# of
+_insert_, and all other bits taken directly from the corresponding bits of _base_.
+If _bits_ is zero, the result will simply be _base_. The result will be undefined if _offset_ or
+_bits_ is negative, or if the sum of _offset_ and _bits_ is greater than the number of bits used
+to store the operand.
+
+Note that for vector versions of *bitfieldInsert*(), a single pair of _offset_ and _bits_ values is
+shared for all components.
+
+=== BitfieldReverse
+[source,glsl]
+----
+genIType bitfieldReverse(highp genIType value)
+genUType bitfieldReverse(highp genUType value)
+----
+
+Reverses the bits of _value_.
+
+The bit numbered _n_ of the result will be taken from bit [eq]#(bits -1) - n# of _value_, where
+_bits_ is the total number of bits used to represent _value_.
+
+=== BitCount
+[source,glsl]
+----
+ifdef::GLSL[]
+genIType bitCount(genIType value)
+genIType bitCount(genUType value)
+endif::GLSL[]
+ifdef::ESSL[]
+lowp genIType bitCount(genIType value)
+lowp genIType bitCount(genUType value)
+endif::ESSL[]
+----
+
+Returns the number of one bits in the binary representation of _value_.
+
+=== FindLSB
+[source,glsl]
+----
+ifdef::GLSL[]
+genIType findLSB(genIType value)
+genIType findLSB(genUType value)
+endif::GLSL[]
+ifdef::ESSL[]
+lowp genIType findLSB(genIType value)
+lowp genIType findLSB(genUType value)
+endif::ESSL[]
+----
+
+Returns the bit number of the least significant one bit in the binary representation of _value_.
+
+If _value_ is zero, -1 will be returned.
+
+=== FindMSB
+[source,glsl]
+----
+ifdef::GLSL[]
+genIType findMSB(highp genIType value)
+genIType findMSB(highp genUType value)
+endif::GLSL[]
+ifdef::ESSL[]
+lowp genIType findMSB(highp genIType value)
+lowp genIType findMSB(highp genUType value)
+endif::ESSL[]
+
+----
+
+Returns the bit number of the most significant bit in the binary representation of _value_.
+
+For positive integers, the result will be the bit number of the most significant one bit.
+For negative integers, the result will be the bit number of the most significant zero bit.
+For a _value_ of zero or negative one, -1 will be returned.
 
 
 [[texture-functions]]
@@ -2447,7 +2592,7 @@ endif::GLSL[]
       the size of the array.
       Cube images only return the dimensions of one face, and the number of
       cubes in the cube map array, if arrayed. +
-      Note: The qualification *readonly writeonly* accepts a variable
+      NOTE: The qualification *readonly writeonly* accepts a variable
       qualified with *readonly*, *writeonly*, both, or neither.
       It means the formal argument will be used for neither reading nor
       writing to the underlying memory.
