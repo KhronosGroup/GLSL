@@ -1,0 +1,779 @@
+Name
+
+    NV_cooperative_matrix2
+
+Name Strings
+
+    GL_NV_cooperative_matrix2
+
+Contact
+
+    Jeff Bolz, NVIDIA (jbolz 'at' nvidia.com)
+
+Contributors
+
+    Karthik Vaidyanathan, NVIDIA
+
+Status
+
+    Complete
+
+Version
+
+    Last Modified: October 21, 2024
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.50
+    (#version 450) and higher.
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+
+    This extension depends on GL_KHR_cooperative_matrix.
+
+Overview
+
+    This extension adds several new features building on the cooperative matrix
+    types added in GL_KHR_cooperative_matrix. The goal is to add and accelerate
+    features beyond just simple GEMM kernels, including adding support for type/use
+    conversions, reductions, per-element operations, and tensor addressing, and
+    also to improve usability and out-of-the-box performance by adding support
+    for more flexible matrix sizes, and workgroup scope matrices with
+    compiler-managed staging through shared memory.
+
+Mapping to SPIR-V
+-----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+      tensorLayoutNV -> OpTypeTensorLayoutNV
+      createTensorLayoutNV -> OpCreateTensorLayoutNV
+      setTensorLayoutDimensionNV -> OpTensorLayoutSetDimensionNV
+      setTensorLayoutStrideNV -> OpTensorLayoutSetStrideNV
+      sliceTensorLayoutNV -> OpTensorLayoutSliceNV
+      setTensorLayoutClampValueNV -> OpTensorLayoutSetClampValueNV
+      setTensorLayoutBlockSizeNV -> OpTensorLayoutSetBlockSizeNV
+
+      tensorViewNV -> OpTypeTensorViewNV
+      createTensorViewNV -> OpCreateTensorViewNV
+      setTensorViewDimensionsNV -> OpTensorViewSetDimensionNV
+      setTensorViewStrideNV -> OpTensorViewSetStrideNV
+      setTensorViewClipNV -> OpTensorViewSetClipNV
+
+      coopMatLoadTensorNV -> OpCooperativeMatrixLoadTensorNV
+      coopMatStoreTensorNV -> OpCooperativeMatrixStoreTensorNV
+
+      coopMatReduceNV -> OpCooperativeMatrixReduceNV
+      coopmat constructor changing component type or Use -> OpCooperativeMatrixConvertNV
+      coopMatPerElementNV -> OpCooperativeMatrixPerElementOpNV
+      coopMatTransposeNV -> OpCooperativeMatrixTransposeNV
+
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_NV_cooperative_matrix2 : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+      #define GL_NV_cooperative_matrix2 1
+
+    Update Section 5.4.X, Cooperative Matrix Type Constructors
+
+    Cooperative matrices can be constructed from another cooperative matrix
+    type with the same scope, number of rows, and number of columns, and where
+    the use of the source value is gl_MatrixUseAccumulator and the use of the
+    result type is gl_MatrixUseA or gl_MatrixUseB. This performs a
+    component-wise type conversion to initialize the new cooperative matrix.
+
+Add a new Section 4.1.X, Tensor Layout Types
+
+    Tensor layout and tensor view types are representations of the mapping
+    between matrix coordinates and tensor memory layout. They each have a
+    number of dimensions in the range [1,5], with dimension 0 being the
+    outermost dimension and the last dimension being the innermost. These types
+    have the following logical state:
+
+        struct tensorLayoutNV<uint32_t Dim,
+                              ClampMode Mode = gl_CooperativeMatrixClampModeUndefinedNV>
+        {
+          static constexpr uint32_t LDim = Dim;
+          static constexpr ClampMode clampMode = Mode;
+
+          uint32_t blockSize[LDim];
+          uint32_t layoutDimension[LDim];
+          uint32_t stride[LDim];
+          int32_t offset[LDim];
+          uint32_t span[LDim];
+          uint32_t clampValue;
+        };
+
+        struct tensorViewNV<uint Dim, bool hasDimensions, uint32_t p0, ..., uint32_t p<Dim-1>>
+        {
+          static constexpr uint32_t VDim = Dim;
+          static constexpr bool hasDim = hasDimensions;
+          static constexpr uint32_t permutation[VDim] = {p0, ..., p<Dim-1>};
+
+          uint32_t viewDimension[VDim];
+          uint32_t viewStride[VDim];
+          uint32_t clipRowOffset, clipRowSpan, clipColOffset, clipColSpan;
+        };
+
+    A tensor layout represents the layout of values in memory (number of
+    dimensions and size), along with a region being accessed (offset and span).
+
+    ---------------------------------------------------------------------------
+    |                           layoutDimension1                              |
+    |                                                                         |
+    |                                                                         |
+    |                                                                         |
+    |                                                                         |
+    |                                                                         |
+    |                                                                         |
+    |                                                                         |
+    |                        span1                                            |
+    |                  -----------------                                      |
+    |                  |               |                                      |
+    |                  |               |                                      |
+    |                  |     slice     | span0                                |
+    |                  |               |                      layoutDimension0|
+    |                  |               |                                      |
+    |      offset1     |               |                                      |
+    | ---------------> -----------------                                      |
+    |                                                                         |
+    |                  ^                                                      |
+    |                  |                                                      |
+    |                  |                                                      |
+    |                  | offset0                                              |
+    |                  |                                                      |
+    |                  |                                                      |
+    |                  |                                                      |
+    |                  |                                                      |
+    ---------------------------------------------------------------------------
+    Figure: A 2D tensor layout, and a slice selecting a region within it.
+
+    A tensor view allows reinterpreting the dimensions of the region being
+    accessed, including changing the number of dimensions, reordering the
+    dimensions as they are loaded or stored, and clipping the region of the
+    matrix that is loaded or stored. Often the span will have the
+    same number of elements as the matrix, but in some more advanced uses
+    that may not be the case.
+
+    Loads and stores can either use just a tensor layout, or a tensor layout and
+    tensor view. The addressing starts by treating the matrix itself as a 2D
+    "view" and mapping the (row,col) coordinate to a 1D index. If there is only a
+    tensor layout parameter, then that 1D index is mapped to an N-D coordinate
+    within the slice. If there is both a tensor layout and a tensor view, then
+    the 1D index is first mapped to a coordinate within the view, the
+    coordinate components can be permuted, and then is converted back to a 1D
+    index which is then run through the tensor layout addressing calculation.
+
+    The tensor view dimensions and stride can be used to do more complex
+    addressing calculations. If the tensor view type has "hasDimensions" false,
+    then the dimensions of the tensor layout span are used instead.
+
+    The tensor view "clip" region restricts which elements of the matrix are
+    loaded or stored, and also affects the shape of the implicit 2D "view".
+
+    Unlike some other ML APIs, tensor layouts and views only describe
+    addressing calculations and never involve making copies of tensors. For
+    this reason, the functionality is slightly more limited (e.g. there's no
+    way to slice, then permute, then slice again).
+
+    See Section 8.X, Cooperative Matrix Functions for more details on the
+    addressing calculations. While these calculations may look expensive in
+    their full generality, certain calculations can be skipped when they're
+    not needed, and the common cases should be quite efficient.
+
+    Tensor layouts are created by calling:
+
+        tensorLayoutNV<Dim, Mode> createTensorLayoutNV(uint32_t Dim,
+                                                       uint32_t Mode = gl_CooperativeMatrixClampModeUndefined);
+
+    The layoutDimension, stride, span, and offset elements are initialized to
+    zero. The blockSize elements are initialized to one. clampValue is
+    initialized to zero. ClampMode can take the following values:
+
+        const int gl_CooperativeMatrixClampModeUndefinedNV         = 0;
+        const int gl_CooperativeMatrixClampModeConstantNV          = 1;
+        const int gl_CooperativeMatrixClampModeClampToEdgeNV       = 2;
+        const int gl_CooperativeMatrixClampModeRepeatNV            = 3;
+        const int gl_CooperativeMatrixClampModeMirrorRepeatNV      = 4;
+
+    If clampMode is Undefined, then out of bounds accesses have undefined
+    behavior. If clampMode is Constant, then out of bounds loads return
+    the bit pattern in the LSBs of _value_ and out of bounds stores are
+    dropped. If clampMode is ClampToEdge, Repeat, or MirrorRepeat, out of
+    bounds coordinates are clamped, repeated or reflected as described in
+    Section 8.X, Cooperative Matrix Functions.
+
+    The layout's block size can be set by calling
+
+        tensorLayoutNV<N, ...> setTensorLayoutBlockSizeNV(tensorLayoutNV<N, ...> t, uint32_t blockSize0, ..., uint32_t blockSize<N-1>);
+
+    The returned tensorLayoutNV is initialized to a copy of _t_. The blockSize
+    elements are set to the blockSize parameters. The blockSize should be set
+    before the dimensions, because it affects the implicit stride calculation.
+    When the blockSize is not 1, the strides are considered to be in blocks
+    rather than in elements.
+
+    The layout's dimensions and span can be initialized by calling:
+
+        tensorLayoutNV<N, ...> setTensorLayoutDimensionNV(tensorLayoutNV<N, ...> t, uint32_t dim0, ..., uint32_t dim<N-1>);
+
+    The returned tensorLayoutNV is initialized to a copy of _t_. The
+    layoutDimension and span elements are set to the dimension parameters,
+    in order. offset elements are set to zero. stride[i] is set as follows:
+
+        uint32_t s = 1;
+        for (int32_t i = N-1; i >= 0; --i) {
+            stride[i] = s;
+            s *= ceiling(dimensions[i] / blockSize[i]);
+        }
+
+    The layout's stride can be set by calling:
+
+        tensorLayoutNV<N, ...> setTensorLayoutStrideNV(tensorLayoutNV<N, ...> t, uint32_t s0, ..., uint32_t s<N-1>);
+
+    The returned tensorLayoutNV is initialized to a copy of _t_. The
+    stride elements are set to the _s_ parameters, in order. s<i> must be
+    at least s<i+1>*ceiling(dim<i+1> / t.blockSize[i+1]).
+
+    The offset and span members can be updated by slicing the tensor layout
+    by calling:
+
+        tensorLayoutNV<N, ...> sliceTensorLayoutNV(tensorLayoutNV<N, ...> t, int32_t offset0, uint32_t span0, ..., int32_t offset<N-1>, uint32_t span<N-1>);
+
+    The returned tensorLayoutNV is initialized to a copy of _t_. The offset
+    elements have the offset parameters added to them, and the span elements
+    are set to the span parameters.
+
+    The clamp value of a tensor layout can be set by calling:
+
+        tensorLayoutNV<...> setTensorLayoutClampValueNV(tensorLayoutNV<...> t, uint32_t value);
+
+    The returned tensorLayoutNV is initialized to a copy of _t_, and clampValue
+    is set to _value_.
+
+    Tensor views are created by calling:
+
+        tensorViewNV<Dim, hasDimensions, p0, ..., p<Dim-1>> createTensorViewNV(uint32_t Dim,
+                                                                               bool hasDimensions = false,
+                                                                               uint32_t p0 = 0,
+                                                                               ...,
+                                                                               uint32_t p<Dim-1> = Dim-1);
+
+    The viewDimension and viewStride elements are initialized to zero. The clip values
+    are initialized to offsets of 0, spans of 0xFFFFFFFF.
+
+    The view's dimensions can be initialized by calling:
+
+        tensorViewNV<N> setTensorViewDimensionsNV(tensorViewNV<N> v, uint32_t dim0, ..., uint32_t dim<N-1>);
+
+    The returned tensorViewNV is initialized to a copy of _v_. The viewDimension
+    elements are initialized to the dimension parameters. viewStride[i] is set
+    to the product of dim<i+1> to dim<N-1> (and viewStride[N-1] is set to 1).
+
+    The view's stride can be set by calling:
+
+        tensorViewNV<N, ...> setTensorViewStrideNV(tensorViewNV<N, ...> v, uint32_t s0, ..., uint32_t s<N-1>);
+
+    The returned tensorViewNV is initialized to a copy of _v_. The
+    viewStride elements are set to the _s_ parameters, in order.
+
+    The clip values can be updated by calling:
+
+        tensorViewNV<N> setTensorViewClipNV(tensorViewNV<N> v, uint clipRowOffset, uint clipRowSpan, uint clipColOffset, uint clipColSpan);
+
+    The returned tensorViewNV is initialized to a copy of _v_. The clip elements
+    are set to the corresponding parameters.
+
+    Tensor layouts and views are used in cooperative matrix load and store
+    functions to determine address calculations and clamping, as described
+    in Section 8.X, Cooperative Matrix Functions.
+
+Modify Section 5.9, Expressions
+
+    Conversions are allowed between cooperative matrix types assuming the
+    scope, row size, column size, and use are the same, or the use of the
+    source is gl_MatrixUseAccumulator and the use of the result type is
+    gl_MatrixUseA or gl_MatrixUseB.
+
+Modify Section 8.X, Cooperative Matrix Functions
+
+    Add the following to the list of cooperative matrix load and store
+    functions:
+
+      void coopMatLoadTensorNV(inout coopmat m, volatile coherent T[] buf, uint elementOffset, tensorLayoutNV layout);
+      void coopMatLoadTensorNV(inout coopmat m, volatile coherent T[] buf, uint elementOffset, tensorLayoutNV layout, tensorViewNV view);
+      void coopMatLoadTensorNV(inout coopmat m, volatile coherent T[] buf, uint elementOffset, tensorLayoutNV layout, T2 decodeFunc);
+      void coopMatLoadTensorNV(inout coopmat m, volatile coherent T[] buf, uint elementOffset, tensorLayoutNV layout, tensorViewNV view, T2 decodeFunc);
+
+        Description: Load a cooperative matrix from buf.
+
+      void coopMatStoreTensorNV(coopmat m, volatile coherent out T[] buf, uint elementOffset, tensorLayoutNV layout);
+      void coopMatStoreTensorNV(coopmat m, volatile coherent out T[] buf, uint elementOffset, tensorLayoutNV layout, tensorViewNV view);
+
+        Description: Store a cooperative matrix to buf.
+
+    where T can be any type and T2 is a decode function type as described below.
+
+    For load and store functions with no _view_ parameter, an element index
+    is computed according to the matrixCoordToTensorElement function for each
+    (row,col) of the matrix _m_, where _m_ has M rows and N columns:
+
+        constexpr uint32_t MAX_DIM = 5;
+        using Coord = array<uint32_t, MAX_DIM>;
+
+        uint32_t matrixCoordToLinear(tensorLayoutNV t, uint32_t row, uint32_t col, uint32_t N)
+        {
+            uint32_t index = row * N + col;
+            return index;
+        }
+
+        Coord linearToSpanCoord(tensorLayoutNV t, uint32_t index)
+        {
+            Coord spanCoord {};
+            for (int32_t dim = t.LDim-1; dim >= 0; --dim) {
+                spanCoord[dim] = index % t.span[dim];
+                index /= t.span[dim];
+            }
+            return spanCoord;
+        }
+
+        auto spanCoordToTensorCoord(tensorLayoutNV t, Coord spanCoord)
+        {
+            Coord blockCoord {};
+            Coord coordInBlock {};
+
+            for (uint32_t dim = 0; dim <= t.LDim-1; ++dim) {
+                int32_t c = spanCoord[dim] + t.offset[dim];
+
+                if (c < 0 || c >= t.layoutDimension[dim]) {
+
+                    ClampMode clampMode = t.clampMode;
+                    // For stores, other than Undefined, everything is treated as "discard"
+                    if (operation is a store && clampMode != Undefined) {
+                        clampMode = Constant;
+                    }
+
+                    // remainders are computed as defined in OpSMod
+                    switch (clampMode) {
+                    case Undefined:
+                        undefined behavior;
+                    case Constant:
+                        For load, set result value to t.clampValue;
+                        For store, discard the store;
+                        terminate index calculation;
+                    case ClampToEdge:
+                        c = min(max(c, 0), t.layoutDimension[dim]-1);
+                        break;
+                    case Repeat:
+                        c = c % t.layoutDimension[dim];
+                        break;
+                    case MirrorRepeat:
+                        c = c % (2*t.layoutDimension[dim]-2);
+                        c = (c >= dim) ? (2*dim-2-c) : c;
+                        break;
+                    }
+                }
+
+                coordInBlock[dim] = c % t.blockSize[dim];
+                blockCoord[dim] = c / t.blockSize[dim];
+            }
+
+            return tuple(blockCoord, coordInBlock);
+        }
+
+        uint32_t tensorCoordToLinear(tensorLayoutNV t, Coord blockCoord)
+        {
+            uint32_t index = 0;
+
+            for (uint32_t dim = 0; dim <= t.LDim-1; ++dim) {
+                index += blockCoord[dim] * t.stride[dim];
+            }
+            return index;
+        }
+
+        // map (row,col) -> linear index in span -> span coordinate -> tensor coordinate -> linear index in tensor
+        uint32_t matrixCoordToTensorElement(tensorLayoutNV t, uint32_t row, uint32_t col, uint32_t N)
+        {
+            uint32_t index = matrixCoordToLinear(t, row, col, N);
+
+            Coord spanCoord = linearToSpanCoord(t, index);
+
+            Coord blockCoord;
+            Coord coordInBlock;
+
+            tie(blockCoord, coordInBlock) = spanCoordToTensorCoord(t, spanCoord);
+
+            index = tensorCoordToLinear(t, blockCoord);
+
+            return index;
+        }
+
+    This index is then multiplied by the size of the component type of _m_ and
+    treated as a byte offset from &buf[elementOffset]. The matrix element is
+    loaded from or stored to this location. If the Load function has a decode
+    function parameter, then the blockCoord and coordInBlock arrays are passed
+    to it as parameters.
+
+    _elementOffset_ multiplied by the size of T must be a multiple of 16B. But
+    the elements selected by the tensor layout and view need not be so aligned.
+
+    For load and store functions with a _view_ parameter, an element index
+    is computed according to the matrixCoordToTensorElementWithView function
+    for each (row,col) of the matrix _m_, where _m_ has M rows and N columns:
+
+        uint32_t matrixCoordToLinear(tensorLayoutNV t, tensorViewNV v, uint32_t row, uint32_t col, uint32_t N)
+        {
+            if (row < v.clipRowOffset ||
+                row >= v.clipRowOffset + v.clipRowSpan ||
+                col < v.clipColOffset ||
+                col >= v.clipColOffset + v.clipColSpan) {
+
+                Load or store is skipped. For load, the matrix element is unmodified.
+                terminate index calculation;
+            }
+            row -= v.clipRowOffset;
+            col -= v.clipColOffset;
+            uint32_t width = min(N, v.clipColSpan);
+            uint32_t index = row * width + col;
+            return index;
+        }
+
+        Coord linearToViewCoord(tensorLayoutNV t, tensorViewNV v, uint32_t index)
+        {
+            auto &dimensions = v.hasDimensions ? v.viewDimension : t.span;
+
+            Coord viewCoord {};
+
+            for (int32_t dim = v.VDim-1; dim >= 0; --dim) {
+                uint32_t i = v.permutation[dim];
+
+                viewCoord[i] = index % dimensions[i];
+                index /= dimensions[i];
+            }
+
+            return viewCoord;
+        }
+
+        uint32_t viewCoordToLinear(tensorLayoutNV t, tensorViewNV v, Coord viewCoord)
+        {
+            Coord stride {};
+            if (v.hasDimensions) {
+                stride = v.viewStride;
+            } else {
+                // set stride to match t.span
+                stride[v.VDim-1] = 1;
+                for (int32_t dim = v.VDim-2; dim >= 0; --dim) {
+                    stride[dim] = stride[dim+1] * t.span[dim+1];
+                }
+            }
+
+            uint32_t index = 0;
+            for (int32_t dim = v.VDim-1; dim >= 0; --dim) {
+                index += viewCoord[dim] * stride[dim];
+            }
+
+            return index;
+        }
+
+        // map (row,col) -> linear index in view -> view coordinate -> linear index in span -> span coordinate -> tensor coordinate -> linear index in tensor
+        uint32_t matrixCoordToTensorElementWithView(tensorLayoutNV t, uint32_t row, uint32_t col, uint32_t N)
+        {
+            uint32_t index = matrixCoordToLinear(t, v, row, col, N);
+
+            Coord viewCoord = linearToViewCoord(t, v, index);
+
+            index = viewCoordToLinear(t, v, viewCoord);
+
+            Coord spanCoord = linearToSpanCoord(t, index);
+
+            Coord blockCoord;
+            Coord coordInBlock;
+
+            tie(blockCoord, coordInBlock) = spanCoordToTensorCoord(t, spanCoord);
+
+            index = tensorCoordToLinear(t, blockCoord);
+
+            return index;
+        }
+
+    The final result is then multiplied by the size of the component type of
+    _m_ and treated as a byte offset from &buf[elementOffset]. The matrix
+    element is loaded from or stored to this location.
+
+    For Load functions with a _decodeFunc_ parameter, rather than loading a
+    value, the _decodeFunc_ is invoked for each matrix element at least once.
+    _decodeFunc_ must be a function whose return type matches the component
+    type of _result_. The first parameter must be a buffer_reference type,
+    and the parameter is filled with a pointer computed by multiplying the index
+    returned by matrixCoordToTensorElement(WithView) by the size of the struct the buffer_reference
+    points to. The second and third parameters must each be an array of
+    uint32_t whose dimension matches the tensor dimension. The second parameter
+    is filled with the blockCoord, and the third parameter with the
+    coordInBlock, for the matrix element being decoded. All parameters types
+    must be qualified as 'const in'. The return value is stored in the
+    corresponding element of _result_. _buf_ must point to buffer memory
+    (either an SSBO or buffer_reference).
+
+    In any function used as a _decodeFunc_ parameter, and any function
+    called directly or indirectly by those functions, tangled instructions
+    (as defined in the SPIR-V spec) are not allowed.
+
+    Elements of a matrix can have a reduction operation applied by calling:
+
+      void coopMatReduceNV(out coopmat result, coopmat m, int reduceMask, T combineOp);
+
+      Description: Reduce the values in each row, column, 2x2, or entire matrix
+      by applying the combineOp function to combine values of the elements. The
+      result matrix has the reduced values in all the corresonding elements of
+      the matrix. _m_ must have a floating-point component type.
+
+      _m_ and _result_ must each have use of gl_MatrixUseAccumulator.
+
+      If reduceMask includes gl_CooperativeMatrixReduce2x2, it must not include
+      gl_CooperativeMatrixReduceRow or gl_CooperativeMatrixReduceColumn.
+
+      If reduceMask includes gl_CooperativeMatrixReduce2x2, the dimensions of
+      _result_ must be half the dimensions of _m_.
+
+      If reduceMask equals gl_CooperativeMatrixReduceRow, then elements of each
+      row are combined and the resulting value is assigned to all elements of the
+      corresponding row of the result, and _result_ must have the same number of
+      rows as _m_.
+
+      If reduceMask equals gl_CooperativeMatrixReduceColumn, then elements of each
+      column are combined and the resulting value is assigned to all elements of
+      the corresponding column of the result, and _result_ must have the same number
+      of columns as _m_.
+
+      If reduceMask equals gl_CooperativeMatrixReduceRowAndColumn, all elements
+      are combined and the resulting value is assign to all elements of the result,
+      and _result_ can have any number of rows and columns.
+
+      _combineOp_ must be the identifier of a function. It must have two
+      parameters, each qualified as 'const in', with the same type as the
+      component type of _m_. It will be called on implementation-dependent
+      elements of _m_ or combinations thereof, to compute the combination of
+      all elements in the row, column, 2x2, or entire matrix.
+
+    gl_CooperativeMatrixReduce* are constant integer values which can be used for
+    the reduceMask parameter in the load/store functions.
+
+      const int gl_CooperativeMatrixReduceRowNV = 0x1;
+      const int gl_CooperativeMatrixReduceColumnNV = 0x2;
+      const int gl_CooperativeMatrixReduceRowAndColumnNV = 0x3;
+      const int gl_CooperativeMatrixReduce2x2NV = 0x4;
+
+    Note that sum-reductions can be efficiently performed on UseA and UseB
+    matrices by multiplying by a matrix filled with the value one.
+
+    An operation can be performed on each element of a matrix by calling:
+
+      void coopMatPerElementNV(out coopmat result, coopmat m, T elemOp, ...);
+
+    _elemOp_ must be the identifier of a user-defined function. All parameter
+    types must be qualified as 'const in'. The first two parameters of elemOp
+    must be uint32_t values which are passed the row and column number of the
+    element being operated on. The third parameter must have type matching the
+    component type of _m_, and is passed the value of the element being
+    operated on. The number of additional parameters and their types must match
+    the signature of _elemOp_, with any additional cooperative matrix
+    parameters having component type that matches the type of the corresponding
+    formal parameter. Any additional cooperative matrix parameters must be the
+    same type as _m_, and the corresponding element of that parameter is passed
+    to the function. _result_ must be the same type as _m_, and the return type
+    of _elemOp_ must mmatch the component type of _result_.
+
+    coopMatPerElementNV treats the cooperative matrices as composite types, and
+    invokes _elemOp_ at least once per element of the composite, with the
+    return values of the function forming the corresponding elements of the
+    return value of coopMatPerElementNV. The calls to _elemOp_
+    are considered to be unordered against each other.
+
+    In any function used as an _elemOp_ parameter, and any function
+    called directly or indirectly by those functions, tangled instructions
+    (as defined in the SPIR-V spec) are not allowed.
+
+    A gl_MatrixUseAccumulator matrix can be transposed to a gl_MatrixUseB
+    matrix by calling:
+
+      void coopMatTransposeNV(out coopmat result, coopmat m);
+
+    _m_ must have use of gl_MatrixUseAccumulator, _result_ must have use of
+    gl_MatrixUseB. _m_ and _result_ must have the same scope and component
+    type, and the number of rows of _m_ must match the number of columns of
+    _result_ and the number of columns of _m_ must match the number of rows of
+    _result_. _result_ is filled with the transpose of the _m_.
+
+Modify Section 9, Shading Language Grammar for Core Profile
+
+Add to tokens list:
+
+    TENSORLAYOUTNV
+    TENSORVIEWNV
+    FUNCTION
+
+Add to type_specifier_nonarray:
+
+    TENSORLAYOUTNV
+    TENSORVIEWNV
+    FUNCTION
+
+Examples
+
+    Load from row-major matrix:
+
+        // Replaces coopmatLoad(mat, input.buf, elementoffset + row*NumCols + col, NumCols, gl_CooperativeMatrixLayoutRowMajor);
+
+        coopmat<float16_t, gl_ScopeWorkgroup, M, N, gl_MatrixUseA> mat;
+
+        tensorLayoutNV<2> t = createTensorLayoutNV(2);
+        t = setTensorLayoutDimensions(t, NumRows, NumCols);
+        t = sliceTensorLayoutNV(t, row, M, col, N);
+
+        coopMatLoadTensorNV(mat, input.buf, elementoffset, t);
+
+
+    Load from col-major matrix:
+
+        // Replaces coopmatLoad(mat, input.buf, elementoffset + col*NumRows + row, NumRows, gl_CooperativeMatrixLayoutColumnMajor);
+
+        coopmat<float16_t, gl_ScopeWorkgroup, M, N, gl_MatrixUseB> mat;
+
+        tensorLayoutNV<2> t = createTensorLayoutNV(2);
+        // columns are the outermost dimension
+        t = setTensorLayoutDimensions(t, NumCols, NumRows);
+
+        t = sliceTensorLayoutNV(t, col, N, row, M);
+
+        // Create a view matching the tensor's dimensions, permuting
+        // dimensions 0 <-> 1 to swap row/col indices and to match the matrix
+        // layout
+        coopMatLoadTensorNV(mat, input.buf, elementoffset, t, createTensorViewNV(2, false, 1, 0));
+
+
+    Load an 8x8 patch, where each element of the patch has 32 channels
+
+        coopmat<float16_t, gl_ScopeWorkgroup, 8*8, 32, gl_MatrixUseA> mat;
+
+        // HWC layout
+        tensorLayoutNV<3> t = createTensorLayoutNV(3);
+        t = setTensorLayoutDimensions(t, NumRows, NumCols, 32);
+        // Slice an 8x8 32 channel region
+        t = sliceTensorLayoutNV(t, row, 8, col, 8, 0, 32);
+
+        coopMatLoadTensorNV(mat, input.buf, elementoffset, t);
+
+
+    Perform 2x2 space_to_depth transform while loading from memory:
+
+        coopmat<float16_t, gl_ScopeWorkgroup, H/2*W/2, 4*NumCh, gl_MatrixUseAccumulator> mat;
+
+        // Memory layout is HWC
+        tensorLayoutNV<3> t = createTensorLayoutNV(3);
+        t = setTensorLayoutDimensions(t, H, W, NumCh);
+        // No slicing, we're loading the whole matrix
+
+        // View of tensor is H/2 x 2 x W/2 x 2 x NumCh, and is permuted to
+        // H/2 x W/2 x 2 x 2 x NumCh during the load
+        tensorViewNV<5, true, 0, 2, 1, 3, 4> v = createTensorViewNV(5, true, 0, 2, 1, 3, 4);
+        v = setTensorViewDimensionsNV(v, H/2, 2, W/2, 2, NumCh);
+
+        coopMatLoadTensorNV(mat, input.buf, elementoffset, t, v);
+
+Issues
+
+    (1) Alignment rules?
+
+    RESOLVED: The base of the tensor (buf/elementOffset) passed into
+    coopMatLoadTensorNV or coopMatStoreTensorNV must be 16B aligned.
+    The offset/span don't have any alignment requirements. The compiler
+    can detect greater alignment for those when it's available.
+
+    (2) Should we replace _element_ with _byteOffset_ in the new load/store
+    functions?
+
+    RESOLVED: While byte offsets are often desirable, leaving this as element
+    offset to match GL_KHR_cooperative_matrix.
+
+    (3) What matrix dimensions are supported?
+
+    RESOLVED: The API extension should provide a mechanism to query supported
+    matrix sizes.
+
+    (4) How can we support loading from matrices encoded using block-based
+    quantization?
+
+    RESOLVED:
+
+    Treat addressing calculations similarly to block-compressed
+    textures, i.e. "element size" is the size of the block, and strides are
+    implicitly shrunken by the block dimensions.
+
+        // Assume the tensor in memory is logically NumRows x NumCols, and each
+        // block stores information for a block of size BlockRows x BlockCols
+        // in a struct of type S.
+        // We want to load M x N elements while converting to float16_t.
+
+        coopmat<float16_t, gl_ScopeWorkgroup, M, N, gl_MatrixUseA> mat;
+
+        tensorLayoutNV<2> t = createTensorLayoutNV(2);
+        t = setTensorLayoutBlockSize(t, BlockRows, BlockCols);
+        t = setTensorLayoutDimensions(t, NumRows, NumCols);
+        // setTensorLayoutDimensions implicitly sets strides to
+        // stride[LDim-1] = 1
+        // stride[LDim-2] = ceiling(dimensions[LDim-1] / blockSize[LDim-1]) * stride[LDim-1];
+        // stride[LDim-3] = ceiling(dimensions[LDim-2] / blockSize[LDim-2]) * stride[LDim-2];
+        // ...
+        t = sliceTensorLayoutNV(t, row, M, col, N);
+
+        float16_t myDecodeFunc(/*buffer reference type pointing to S*/ Sref s, uint32_t blockCoord[2], uint32_t coordInBlock[2]);
+
+        coopMatLoadTensorNV(mat, input.buf, elementoffset, t, myDecodeFunc);
+
+    Tensor layout coordinate and stride calculations work in block
+    coordinates:
+
+        uint32_t coordInBlock[t.LDim] {};
+        index = 0;
+        for (uint32_t dim = 0; dim <= t.LDim-1; ++dim) {
+            int32_t c = coord[dim] + t.offset[dim];
+
+            // bounds checking logic (not shown)
+
+            /*--- block coordinate calculation code ---*/
+            coordInBlock[dim] = c % t.blockSize[dim];
+            c /= t.blockSize[dim];
+            /*--- end block coordinate calculation code ---*/
+
+            index += c * t.stride[dim];
+        }
+
+    The index, rather than being multiplied by the size of the matrix
+    component type, is multiplied by the size of the structure that is the
+    pointee type of the first function parameter in the decode function passed
+    to Load. The blockCoord and coordInBlock values are also passed to
+    the decode function. The decode function is called for each matrix
+    element, with a reference to memory containing the block data and
+    the block-relative coordinates passed in. The return type must match
+    the component type of the matrix, and the return value is stored in
+    the corresponding element of the matrix.
+
+    Lacking a way to express pointers to shared memory, this is limited
+    to buffer and buffer_reference inputs.
+
+Revision History
+
+Revision 1
+
+- Initial revision.
