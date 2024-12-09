@@ -6,8 +6,6 @@
 // This corresponds to ../core.adoc - each top-level chapter is referenced
 // below in the same order
 
-:test: 0
-ifeval::["{test}"=="0"]
 * xref:chapters/preamble.adoc[]
 * xref:chapters/introduction.adoc[]
 * xref:chapters/overview.adoc[]
@@ -27,8 +25,3 @@ endif::ESSL[]
 * xref:chapters/acknowledgements.adoc[]
 * xref:chapters/references.adoc[]
 * xref:chapters/spirvmappings.adoc[]
-endif::[]
-
-ifeval::["{test}"=="1"]
-* xref:chapters/introduction.adoc[]
-endif::[]
