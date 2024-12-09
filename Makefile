@@ -163,7 +163,7 @@ setup_antora: setup_spec_antora
 # Generate Antora spec module content by rewriting spec sources
 # Individual files must be specified last
 
-ANTORA_SPECMODULE = antora/glsl/modules/glsl
+ANTORA_SPECMODULE = antora/modules/ROOT
 
 # The list of files can be long enough to exceed system limits on
 # arguments lists, so instead of passing them on the command line they
@@ -201,11 +201,11 @@ clean: clean_antora
 # also checked in.
 CLEAN_ANTORA_PATHS = \
 	$(ANTORA_FILELIST) \
-	antora/glsl/modules/glsl/images \
-	antora/glsl/modules/glsl/pages/appendices \
-	antora/glsl/modules/glsl/pages/chapters \
-	antora/glsl/modules/glsl/pages/partials \
-	antora/glsl/modules/glsl/partials
+	$(ANTORA_SPECMODULE)/images \
+	$(ANTORA_SPECMODULE)/pages/appendices \
+	$(ANTORA_SPECMODULE)/pages/chapters \
+	$(ANTORA_SPECMODULE)/pages/partials \
+	$(ANTORA_SPECMODULE)/partials
 
 clean_antora:
 	$(QUIET)$(RMRF) $(CLEAN_ANTORA_PATHS)

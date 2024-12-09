@@ -17,4 +17,4 @@ asciidoc:
     imageopts: ''
     refprefix: ''
 nav:
-- modules/glsl/nav.adoc
+- modules/ROOT/nav.adoc
