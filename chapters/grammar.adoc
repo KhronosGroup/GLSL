@@ -584,12 +584,14 @@ _type_specifier_ : ::
     _type_specifier_nonarray_ +
     _type_specifier_nonarray_ _array_specifier_
 
+[[array_specifier]]
 _array_specifier_ : ::
     _LEFT_BRACKET_ _RIGHT_BRACKET_ +
     _LEFT_BRACKET_ _conditional_expression_ _RIGHT_BRACKET_ +
     _array_specifier_ _LEFT_BRACKET_ _RIGHT_BRACKET_ +
     _array_specifier_ _LEFT_BRACKET_ _conditional_expression_ _RIGHT_BRACKET_
 
+[[type_specifier_nonarray]]
 _type_specifier_nonarray_ : ::
     _VOID_ +
     _FLOAT_ +
