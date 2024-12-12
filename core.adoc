@@ -1,0 +1,123 @@
+// Copyright 2008-2024 The Khronos Group Inc.
+// SPDX-License-Identifier: CC-BY-4.0
+
+// {GLSL} or {ESSL} must be set in the invoking command line to generate
+// the corresponding specification
+//
+// {apiname} - API name, OpenGL or OpenGL ES
+// {apispec} - API specification name
+// {apiversion} - API version number (major.minor)
+// {slname} - shading language name
+// {version} - shading language __VERSION__ string (majorminor)
+// {minor} - shading language version number (major.minor)
+// {revision} - shading language revision number
+// {revnumber} - full major.minor.revision number
+// {authors} - shading language spec authors (for title page)
+
+ifdef::GLSL[]
+:apiname: OpenGL
+:apiversion: 4.6
+:slabbrev: GLSL
+:version: 460
+:minor: 4.60
+:authors: Graeme Leese, Broadcom (Editor) ; John Kessenich (Author) ; Dave Baldwin and Randi Rost (Version 1.1 Authors)
+:compiletimeerror: a compile-time error
+:highp:
+:mediump:
+:lowp:
+endif::GLSL[]
+
+ifdef::ESSL[]
+:apiname: OpenGL ES
+:apiversion: 3.2
+:slabbrev: GLSL ES
+:version: 320
+:minor: 3.20
+:authors: Graeme Leese, Broadcom (Editor) ; Robert J. Simpson, Qualcomm ; John Kessenich ; Dave Baldwin and Randi Rost (Version 1.1 Authors)
+:compiletimeerror: an error
+:highp: highp
+:mediump: mediump
+:lowp: lowp
+endif::ESSL[]
+
+:apispec: {apiname} Specification
+:slname: {apiname} Shading Language
+:revision: 9
+:revnumber: {minor}.{revision}
+:regtitle: pass:q,r[^®^]
+
+= The {apiname}{regtitle} Shading Language, Version {revnumber}
+{authors}
+:data-uri:
+:icons: font
+:toc2:
+:toclevels: 2
+:max-width: 100
+:numbered:
+:imagewidth: 800
+:fullimagewidth: width="800"
+:source-highlighter: rouge
+:rouge-style: github
+:attribute-missing: warn
+
+// Various special / math symbols. This is easier to edit with than Unicode.
+include::{config}/attribs.adoc[]
+
+// Table of contents is inserted here
+toc::[]
+
+:leveloffset: 1
+
+<<<<
+
+// Preamble "chapter"
+
+include::{chapters}/preamble.adoc[]
+
+// Actual chapters
+
+// Introduction
+include::{chapters}/introduction.adoc[]
+
+// Overview of Shading
+include::{chapters}/overview.adoc[]
+
+// Basics
+include::{chapters}/basics.adoc[]
+
+// Variables and Types
+include::{chapters}/variables.adoc[]
+
+// Operators and Expressions
+include::{chapters}/operators.adoc[]
+
+// Statements and Structure
+include::{chapters}/statements.adoc[]
+
+// Built-In Variables
+include::{chapters}/builtins.adoc[]
+
+// Build-In Functions
+include::{chapters}/builtinfunctions.adoc[]
+
+ifdef::ESSL[]
+// Shader Interface Matching
+include::{chapters}/interfacematching.adoc[]
+endif::ESSL[]
+
+// Shading Language Grammar
+include::{chapters}/grammar.adoc[]
+
+ifdef::ESSL[]
+// Counting of Inputs and Outputs
+include::{chapters}/iocounting.adoc[]
+endif::ESSL[]
+
+// Acknowledgements
+include::{chapters}/acknowledgements.adoc[]
+
+// Normative References
+include::{chapters}/references.adoc[]
+
+// Non-Normative SPIR-V Mappings
+include::{chapters}/spirvmappings.adoc[]

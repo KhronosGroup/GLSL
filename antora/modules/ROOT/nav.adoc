@@ -1,0 +1,27 @@
+// Copyright 2022-2024 The Khronos Group Inc.
+// SPDX-License-Identifier: CC-BY-4.0
+
+// Navigation page for GLSL spec in Antora
+
+// This corresponds to ../core.adoc - each top-level chapter is referenced
+// below in the same order
+
+* xref:chapters/preamble.adoc[]
+* xref:chapters/introduction.adoc[]
+* xref:chapters/overview.adoc[]
+* xref:chapters/basics.adoc[]
+* xref:chapters/variables.adoc[]
+* xref:chapters/operators.adoc[]
+* xref:chapters/statements.adoc[]
+* xref:chapters/builtins.adoc[]
+* xref:chapters/builtinfunctions.adoc[]
+ifdef::ESSL[]
+* xref:chapters/interfacematching.adoc[]
+endif::ESSL[]
+* xref:chapters/grammar.adoc[]
+ifdef::ESSL[]
+* xref:chapters/iocounting.adoc[]
+endif::ESSL[]
+* xref:chapters/acknowledgements.adoc[]
+* xref:chapters/references.adoc[]
+* xref:chapters/spirvmappings.adoc[]

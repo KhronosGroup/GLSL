@@ -1,0 +1,178 @@
+// Copyright 2008-2024 The Khronos Group Inc.
+// SPDX-License-Identifier: CC-BY-4.0
+
+ifdef::ESSL[]
+[[shader-interface-matching]]
+= Shader Interface Matching
+
+As described in chapter 7 of the <<references,{apispec}>>, shaders may be
+linked together to form a _program object_ before being bound to the
+pipeline or may be linked and bound individually as _separable program
+objects_.
+
+[NOTE]
+.Note
+====
+These were previously known as separate shader objects (SSOs) but the
+mechanism has been extended to support future versions of the specification
+that have more than two shader stages.
+It allows a subset of the shaders to be linked together.
+====
+
+Within a _program object_ or a _separable program object_, qualifiers for
+matching variables must themselves match according to the rules specified in
+this section.
+There are also matching rules for qualifiers of matching variables between
+separable program objects but only for variables across an input/output
+boundary between shader stages.
+For other shader interface variables such as uniforms, each program object
+or separable program object has its own name space and so the same name can
+refer to multiple independent variables.
+Consequently, there are no matching rules for qualifiers in these cases.
+
+
+[[input-output-matching-by-name-in-linked-programs]]
+== Input Output Matching by Name in Linked Programs
+
+When linking shaders, the type of declared vertex outputs and fragment
+inputs with the same name must match, otherwise the link command will fail.
+Only those fragment inputs statically used (i.e. read) in the fragment
+shader must be declared as outputs in the vertex shader; declaring
+superfluous vertex shader outputs is permissible.
+
+The following table summarizes the rules for matching shader outputs to
+shader inputs in consecutive stages when shaders are linked together.
+
+// This is very tricky to specify with multiple column and row spans
+
+[%autowidth,cols="5"]
+|====
+2.2+| Treatment of Mismatched Input Variables
+                               3+| Consuming Shader (input variables)
+                                 | No Declaration | Declared but no Static Use | Declared and Static Use
+ .3+| Generating Shader (output variables)
+    | No Declaration             | Allowed        | Allowed                    | error
+    | Declares; no static Use    | Allowed        | Allowed                    | Allowed (values are undefined)
+    | Declares and static Use    | Allowed        | Allowed                    | Allowed (values are potentially undefined)
+|====
+
+See "`<<static-use,Static Use>>`" for the definition of _static use_.
+
+The precision of a vertex output does not need to match the precision of the
+corresponding fragment input.
+The minimum precision at which vertex outputs are interpolated is the
+minimum of the vertex output precision and the fragment input precision,
+with the exception that for *highp*, implementations do not have to support
+full IEEE 754 precision.
+
+The precision of values exported to a transform feedback buffer is the
+precision of the outputs of the vertex shader.
+However, they are converted to *highp* format before being written.
+
+
+[[matching-of-qualifiers]]
+== Matching of Qualifiers
+
+The following tables summarize the requirements for matching of qualifiers.
+It applies whenever there are two or more matching variables in a shader
+interface.
+
+Notes:
+
+  . _Yes_ means the qualifiers must match.
+  . _No_ means the qualifiers do not need to match.
+  . _Consistent_ means qualifiers may be missing from a subset of
+    declarations but they cannot conflict
+  . If there are conflicting qualifiers, only the last of these is
+    significant.
+  . Matching is based only on the resulting qualification, not on the
+    presence or otherwise of qualifiers.
+  . The rules apply to all declared variables, irrespective of whether they
+    are statically used, with the exception of inputs and outputs when
+    shaders are linked (see
+    "`<<input-output-matching-by-name-in-linked-programs, Input Output
+    Matching by Name in Linked Programs>>`").
+  . Errors are generated for any conflicts.
+
+
+[[linked-shaders]]
+=== Linked Shaders
+
+[options="header"]
+|====
+| Qualifier Class | Qualifier         | *in*/*out* | Default Uniforms | *uniform* Block | *buffer* Block
+| Storage^1^
+                  | *in* +
+                    *out* +
+                    *uniform*         | N/A    | N/A        | N/A | N/A
+.2+| Auxiliary
+                  | *centroid* +
+                    *sample*          | No     | N/A        | N/A | N/A
+                  | *patch*           | Yes    | N/A        | N/A | N/A
+.5+| Layout
+                  | *location*        | Yes^2^ | Consistent | N/A | N/A
+                  | Block layout^3,4^ | N/A    | N/A        | Yes | Yes
+                  | *binding*         | N/A    | Consistent | Yes | Yes
+                  | *offset*          | N/A    | Yes        | N/A | N/A
+                  | format            | N/A    | Yes        | N/A | N/A
+| Interpolation
+                  | *smooth* +
+                    *flat*            | Yes    | N/A        | N/A | N/A
+| Precision
+                  | *lowp* +
+                    *mediump* +
+                    *highp*           | No     | Yes        | No  | No
+| Variance
+                  | *invariant* +
+                    *precise*         | No     | N/A        | N/A | N/A
+| Memory
+                  | all               | N/A    | Yes        | Yes | Yes
+|====
+
+1::
+    Storage qualifiers determine _when_ variables match rather than being
+    _required_ to match for matching variables.
+    Note also that each shader interface has a separate name space so for
+    example, it is possible to use the same name for a vertex output and
+    fragment uniform.
+2::
+    If present, the *location* qualifier determines the matching of inputs
+    and outputs.
+    See section 7.4.1 "`Shader interface Matching`" of the
+    <<references,{apispec}>> for details.]
+3::
+    The *row_major* and *column_major* layout qualifiers do not need to
+    match when applied to non-matrix types.
+4::
+    In cases where a layout qualifier overrides a previous layout qualifier
+    or a default, only the resulting qualification must match.
+
+
+[[separable-programs]]
+=== Separable Programs
+
+[options="header"]
+|====
+| Qualifier Class | Qualifier     | *in*/*out*
+| Storage         | *in* +
+                    *out* +
+                    *uniform*     | N/A
+.2+| Auxiliary    | *centroid* +
+                    *sample*      | No
+                  | *patch*       | Yes
+.5+| Layout       | *location*    | Yes
+                  | Block layout  | N/A
+                  | *binding*     | N/A
+                  | *offset*      | N/A
+                  | format        | N/A
+| Interpolation   | *smooth* +
+                    *flat*        | Yes
+| Precision       | *lowp* +
+                    *mediump* +
+                    *highp*       | Yes
+| Variance        | *invariant* +
+                    *precise*     | No
+| Memory          | all           | N/A
+
+|====
+endif::ESSL[]

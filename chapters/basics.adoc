@@ -1,0 +1,1072 @@
+// Copyright 2008-2024 The Khronos Group Inc.
+// SPDX-License-Identifier: CC-BY-4.0
+
+[[basics]]
+= Basics
+
+
+[[character-set]]
+ifdef::GLSL[]
+== Character Set and Phases of Compilation
+endif::GLSL[]
+ifdef::ESSL[]
+== Character Set
+endif::ESSL[]
+
+The source character set used for the {slname} is Unicode in the UTF-8
+encoding scheme.
+ifdef::ESSL[]
+Invalid UTF-8 characters are ignored.
+During pre-processing, the following applies:
+
+  * A byte with the value zero is always interpreted as the end of the
+    string
+  * Backslash ('\'), is used to indicate line continuation when immediately
+    preceding a new-line.
+  * White space consists of one or more of the following characters: the
+    space character, horizontal tab, vertical tab, form feed,
+    carriage-return, line-feed.
+  * The number sign (*#*) is used for preprocessor directives
+  * Macro names are restricted to:
+  ** The letters *a-z*, *A-Z*, and the underscore (*_*).
+  ** The numbers *0-9*, except for the first character of a macro name.
+endif::ESSL[]
+
+After preprocessing, only the following characters are allowed in the
+resulting stream of {slabbrev} tokens:
+
+  * The letters *a-z*, *A-Z*, and the underscore (*_*).
+  * The numbers *0-9*.
+  * The symbols period (*.*), plus (*+*), dash (*-*), slash (*/*), asterisk
+    (***), percent (*%*), angled brackets (*<* and *>*), square brackets
+    (*[* and *]*), parentheses (*(* and *)*), braces (*{* and *}*), caret
+    (*^*), vertical bar (*|*), ampersand (*&*), tilde (*~*), equals (*=*),
+    exclamation point (*!*), colon (*:*), semicolon (*;*), comma (*,*), and
+    question mark (*?*).
+
+ifdef::GLSL[]
+A compile-time error will be given if any other character is used in a {slabbrev}
+token.
+endif::GLSL[]
+
+There are no digraphs or trigraphs.
+There are no escape sequences or other uses of the backslash beyond use as
+the line-continuation character.
+
+Lines are relevant for compiler diagnostic messages and the preprocessor.
+They are terminated by carriage-return or line-feed.
+If both are used together, it will count as only a single line termination.
+For the remainder of this document, any of these combinations is simply
+referred to as a new-line.
+Lines may be of arbitrary length.
+
+In general, the language's use of this character set is case sensitive.
+
+There are no character or string data types, so no quoting characters are
+included.
+
+There is no end-of-file character.
+
+ifdef::GLSL[]
+More formally, compilation happens as if the following logical phases were
+executed in order:
+
+  . Source strings are concatenated to form a single input.
+    All provided new-lines are retained.
+  . Line numbering is noted, based on all present new-lines, and does not
+    change when new-lines are later eliminated.
+  . Wherever a backslash ('\') occurs immediately before a new-line, both
+    are eliminated.
+    (Note no white space is substituted, allowing a single token to span a
+    new-line.) Any newly formed backslash followed by a new-line is not
+    eliminated; only those pairs originally occurring after phase 1 are
+    eliminated.
+  . All comments are replaced with a single space.
+    (Note that '//' style comments end before their terminating new-lines
+    and white space is generally relevant to preprocessing.)
+  . Preprocessing is done, resulting in a sequence of {slabbrev} tokens, formed
+    from the character set stated above.
+  . {slabbrev} processing is done on the sequence of {slabbrev} tokens.
+
+Details that fully define source strings, comments, line numbering, new-line
+elimination, and preprocessing are all discussed in upcoming sections.
+Sections beyond those describe {slabbrev} processing.
+endif::GLSL[]
+
+
+[[source-strings]]
+== Source Strings
+
+The source for a single shader is an array of strings of characters from the
+character set.
+A single shader is made from the concatenation of these strings.
+Each string can contain multiple lines, separated by new-lines.
+No new-lines need be present in a string; a single line can be formed from
+multiple strings.
+No new-lines or other characters are inserted by the implementation when it
+concatenates the strings to form a single shader.
+ifdef::GLSL[]
+Multiple shaders can be linked together to form a single program.
+endif::GLSL[]
+
+Diagnostic messages returned from compiling a shader must identify both the
+line number within a string and which source string the message applies to.
+Source strings are counted sequentially with the first string being string
+0.
+Line numbers are one more than the number of new-lines that have been
+processed, including counting the new-lines that will be removed by the
+line-continuation character (*+\+*).
+
+Lines separated by the line-continuation character preceding a new-line are
+concatenated together before either comment processing or preprocessing.
+This means that no white space is substituted for the line-continuation
+character.
+That is, a single token could be formed by the concatenation by taking the
+characters at the end of one line concatenating them with the characters at
+the beginning of the next line.
+
+[source,glsl]
+----
+float f\
+oo;
+// forms a single line equivalent to "float foo;"
+// (assuming '\' is the last character before the new-line and "oo" are
+// the first two characters of the next line)
+----
+
+
+ifdef::ESSL[]
+[[version-declaration]]
+== Version Declaration
+
+Shaders must declare the version of the language they are written to.
+The version is specified in the first line of a shader by a character
+string:
+
+[source,glsl]
+----
+#version number es
+----
+
+where _number_ must be a version of the language, following the same
+convention as +__VERSION__+ above.
+The directive "`*#version {version} es*`" is required in any shader that
+uses version {minor} of the language.
+Any _number_ representing a version of the language a compiler does not
+support will cause an error to be generated.
+Version 1.00 of the language does not require shaders to include this
+directive, and shaders that do not include a *#version* directive will be
+treated as targeting version 1.00.
+
+Shaders declaring version {minor} of the shading language cannot be
+linked with shaders declaring a previous version.
+
+The *#version* directive must be present in the first line of a shader and
+must be followed by a newline.
+It may contain optional white-space as specified below but no other
+characters are allowed.
+The directive is only permitted in the first line of a shader.
+
+Processing of the #version directive occurs before all other preprocessing,
+including line concatenation and comment processing.
+
+[role="bnf"]
+--
+_version-declaration_ : ::
+    _whitespace~opt~_ POUND _whitespace~opt~_ VERSION _whitespace_ _number_
+    _whitespace_ ES _whitespace~opt~_
+--
+
+Tokens:
+
+{empty}:: POUND *#* +
+          VERSION *version* +
+          ES *es*
+endif::ESSL[]
+
+
+[[preprocessor]]
+== Preprocessor
+
+There is a preprocessor that processes the source strings as part of the
+compilation process.
+Except as noted below, it behaves as the C++ standard preprocessor (see
+"`<<references,Normative References>>`").
+
+The complete list of preprocessor directives is as follows.
+
+{empty}:: # +
+          #define +
+          #undef +
+
+{empty}:: #if +
+          #ifdef +
+          #ifndef +
+          #else +
+          #elif +
+          #endif +
+
+{empty}:: #error +
+          #pragma +
+
+{empty}:: #extension +
+ifdef::GLSL[]
+          #version +
+endif::GLSL[]
+
+{empty}:: #line
+
+The following
+ifdef::GLSL[operators are]
+ifdef::ESSL[operator is]
+also available:
+
+{empty}:: defined +
+ifdef::GLSL[]
+          ##
+endif::GLSL[]
+
+ifdef::ESSL[]
+Note that the version directive is not considered to be a preprocessor
+directive and so is not listed here.
+endif::ESSL[]
+
+Each number sign (*#*) can be preceded in its line only by spaces or
+horizontal tabs.
+It may also be followed by spaces and horizontal tabs, preceding the
+directive.
+Each directive is terminated by a new-line.
+Preprocessing does not change the number or relative location of new-lines
+in a source string.
+ifdef::GLSL[]
+Preprocessing takes places after new-lines have been removed by the
+line-continuation character.
+endif::GLSL[]
+
+The number sign (*#*) on a line by itself is ignored.
+Any directive not listed above will cause {compiletimeerror}.
+
+*#define* and *#undef* functionality are defined as is standard for C++
+preprocessors for macro definitions both with and without macro parameters.
+
+The following predefined macros are available:
+
+{empty}:: +__LINE__+ +
+          +__FILE__+ +
+          +__VERSION__+ +
+ifdef::ESSL[]
+          +GL_ES+
+endif::ESSL[]
+
+ifdef::editing-notes[]
+[NOTE]
+.editing-note
+====
+(Jon) How to italicize the double-underscore markup?
+====
+endif::editing-notes[]
+
++__LINE__+ will substitute a decimal integer constant that is one more than
+the number of preceding new-lines in the current source string.
+
++__FILE__+ will substitute a decimal integer constant that says which source
+string number is currently being processed.
+
++__VERSION__+ will substitute a decimal integer reflecting the version
+number of the {slname}.
+The version of the shading language described in this document will have
++__VERSION__+ substitute the decimal integer {version}.
+
+ifdef::ESSL[]
++GL_ES+ will be defined and set to 1.
+This is not true for the non-ES OpenGL Shading Language, so it can be used
+to do a compile time test to determine if a shader is compiling as an
+GLSL ES shader.
+endif::ESSL[]
+
+By convention, all macro names containing two consecutive underscores (+__+)
+are reserved for use by underlying software layers.
+Defining
+ifdef::GLSL[or undefining]
+such a name in a shader does not itself result in an error, but may
+result in unintended behaviors that stem from having multiple definitions of
+the same name.
+All macro names prefixed with "`GL_`" ("`GL`" followed by a single
+underscore) are also reserved, and defining
+ifdef::GLSL[or undefining]
+such a name results in a compile-time error.
+
+ifdef::ESSL[]
+It is an error to undefine or to redefine a built-in (pre-defined) macro
+name.
+endif::ESSL[]
+
+Implementations must support macro-name lengths of up to 1024 characters.
+ifdef::GLSL[]
+Implementations are allowed to generate an error for a macro name of length
+greater than 1024 characters, but are also allowed to support lengths
+greater than 1024.
+endif::GLSL[]
+ifdef::ESSL[It is an error to declare a name with a length greater than this.]
+
+*#if*, *#ifdef*, *#ifndef*, *#else*, *#elif*, and *#endif* are defined to
+operate as is standard for C++ preprocessors except for the following:
+
+  * Expressions following *#if* and *#elif* are
+ifdef::GLSL[]
+    further restricted to
+    expressions operating on literal integer constants, plus identifiers
+    consumed by the *defined* operator.
+endif::GLSL[]
+ifdef::ESSL[]
+    restricted to _pp-constant-expressions_ as defined below.
+  * Undefined identifiers not consumed by the *defined* operator do not
+    default to '0'.
+    Use of such identifiers causes an error.
+endif::ESSL[]
+  * Character constants are not supported.
+
+ifdef::GLSL[]
+The operators available are as follows.
+endif::GLSL[]
+ifdef::ESSL[]
+As in C++, a macro name defined with an empty replacement list does not
+default to '0' when used in a preprocessor expression.
+
+A _pp-constant-expression_ is an integral expression, evaluated at
+compile-time during preprocessing and formed from literal integer constants
+and the following operators:
+endif::ESSL[]
+
+[options="header"]
+|====
+| Precedence  | Operator class         | Operators  | Associativity
+| 1 (highest) | parenthetical grouping | ( )        | NA
+| 2           | unary                  | defined +
+                                         + - ~ !    | Right to Left
+| 3           | multiplicative         | * / %      | Left to Right
+| 4           | additive               | + -        | Left to Right
+| 5           | bit-wise shift         | << >>      | Left to Right
+| 6           | relational             | < > \<= >= | Left to Right
+| 7           | equality               | == !=      | Left to Right
+| 8           | bit-wise and           | &          | Left to Right
+| 9           | bit-wise exclusive or  | ^          | Left to Right
+| 10          | bit-wise inclusive or  | \|         | Left to Right
+| 11          | logical and            | &&         | Left to Right
+| 12 (lowest) | logical inclusive or   | \|\|       | Left to Right
+|====
+
+The *defined* operator can be used in either of the following ways:
+
+[source,glsl]
+----
+defined identifier
+defined ( identifier )
+----
+
+ifdef::GLSL[]
+Two tokens in a macro can be concatenated into one token using the token
+pasting (*\##*) operator, as is standard for C++ preprocessors.
+The result must be a valid single token, which will then be subject to macro
+expansion.
+That is, macro expansion happens only after token pasting.
+There are no other number sign based operators (e.g. no *#* or *#@*), nor is
+there a *sizeof* operator.
+
+The semantics of applying operators to integer literals in the preprocessor
+match those standard in the C++ preprocessor, not those in the {slname}.
+
+Preprocessor expressions will be evaluated according to the behavior of the
+host processor, not the processor targeted by the shader.
+endif::GLSL[]
+ifdef::ESSL[]
+There are no number sign based operators (e.g. no *#* or *#@*), no *##*
+operator, nor is there a *sizeof* operator.
+
+The semantics of applying operators in the preprocessor match those standard
+in the C++ preprocessor with the following exceptions:
+
+  * The 2^nd^ operand in a logical and ('&&') operation is evaluated if and
+    only if the 1^st^ operand evaluates to non-zero.
+  * The 2^nd^ operand in a logical or ('||') operation is evaluated if and
+    only if the 1^st^ operand evaluates to zero.
+  * There is no boolean type and no boolean literals.
+    A _true_ or _false_ result is returned as integer _one_ or _zero_
+    respectively.
+    Wherever a boolean operand is expected, any non-zero integer is
+    interpreted as _true_ and a zero integer as _false_.
+
+If an operand is not evaluated, the presence of undefined identifiers in the
+operand will not cause an error.
+endif::ESSL[]
+
+*#error* will cause the implementation to put a compile-time diagnostic message
+into the shader object's information log (see section 7.12 "`Shader, Program
+and Program Pipeline Queries`" of the <<references,{apispec}>> for how to
+access a shader object's information log).
+The message will be the tokens following the *#error* directive, up to the
+first new-line.
+The implementation must treat the presence of a *#error* directive as a
+compile-time error.
+
+*#pragma* allows implementation-dependent compiler control.
+Tokens following *#pragma* are not subject to preprocessor macro expansion.
+If an implementation does not recognize the tokens following *#pragma*, then
+it will ignore that pragma.
+The following pragmas are defined as part of the language.
+
+[source,glsl]
+----
+#pragma STDGL
+----
+
+The *STDGL* pragma is used to reserve pragmas for use by future revisions of
+this language.
+No implementation may use a pragma whose first token is *STDGL*.
+
+[source,glsl]
+----
+#pragma optimize(on)
+#pragma optimize(off)
+----
+
+can be used to turn off optimizations as an aid in developing and debugging
+shaders.
+It can only be used outside function definitions.
+By default, optimization is turned on for all shaders.
+The debug pragma
+
+[source,glsl]
+----
+#pragma debug(on)
+#pragma debug(off)
+----
+
+can be used to enable compiling and annotating a shader with debug
+information, so that it can be used with a debugger.
+It can only be used outside function definitions.
+By default, debug is turned off.
+
+ifdef::GLSL[]
+Shaders should declare the version of the language they are written to.
+The language version a shader is written to is specified by
+
+[source,glsl]
+----
+#version number profile_opt
+----
+
+where _number_ must be a version of the language, following the same
+convention as +__VERSION__+ above.
+The directive "`*#version {version}*`" is required in any shader that
+uses version {minor} of the language.
+Any _number_ representing a version of the language a compiler does not
+support will cause a compile-time error to be generated.
+Version 1.10 of the language does not require shaders to include this
+directive, and shaders that do not include a *#version* directive will be
+treated as targeting version 1.10.
+Shaders that specify *#version* 100 will be treated as targeting version
+1.00 of the OpenGL ES Shading Language.
+Shaders that specify *#version* 300 will be treated as targeting version
+3.00 of the OpenGL ES Shading Language.
+Shaders that specify *#version* 310 will be treated as targeting version
+3.10 of the OpenGL ES Shading Language.
+
+If the optional _profile_ argument is provided, it must be the name of an
+{apiname} profile.
+Currently, there are three choices:
+
+[source,glsl]
+----
+core
+compatibility
+es
+----
+
+A _profile_ argument can only be used with version 150 or greater.
+If no profile argument is provided and the version is 150 or greater, the
+default is *core*.
+If version 300 or 310 is specified, the profile argument is not optional and
+must be *es*, or a compile-time error results.
+The Language Specification for the *es* profile is specified in The OpenGL
+ES Shading Language specification.
+
+Shaders for the *core* or *compatibility* profiles that declare different
+versions can be linked together.
+However, *es* profile shaders cannot be linked with non-*es* profile shaders
+or with *es* profile shaders of a different version, or a link-time error
+will result.
+When linking shaders of versions allowed by these rules, remaining link-time
+errors will be given as per the linking rules in the {slabbrev} version
+corresponding to the version of the context the shaders are linked under.
+Shader compile-time errors must still be given strictly based on the version
+declared (or defaulted to) within each shader.
+
+Unless otherwise specified, this specification is documenting the core
+profile, and everything specified for the core profile is also available in
+the compatibility profile.
+Features specified as belonging specifically to the compatibility profile
+are not available in the core profile.
+Compatibility-profile features are not available when generating SPIR-V.
+
+There is a built-in macro definition for each profile the implementation
+supports.
+All implementations provide the following macro:
+
+[source,glsl]
+----
+#define GL_core_profile 1
+----
+
+Implementations providing the *compatibility* profile provide the following
+macro:
+
+[source,glsl]
+----
+#define GL_compatibility_profile 1
+----
+
+Implementations providing the *es* profile provide the following macro:
+
+[source,glsl]
+----
+#define GL_es_profile 1
+----
+
+The *#version* directive must occur in a shader before anything else, except
+for comments and white space.
+endif::GLSL[]
+ifdef::ESSL[]
+The scope as well as the effect of the optimize and debug pragmas is
+implementation-dependent except that their use must not generate an error.
+Incorrect use of predefined pragmas does not cause an error.
+endif::ESSL[]
+
+By default, compilers of this language must issue compile-time syntactic,
+semantic, and grammatical errors for shaders that do not conform to this
+specification.
+Any extended behavior must first be enabled.
+Directives to control the behavior of the compiler with respect to
+extensions are declared with the *#extension* directive
+
+[source,glsl]
+----
+#extension extension_name : behavior
+#extension all : behavior
+----
+
+where _extension_name_ is the name of an extension.
+Extension names are not documented in this specification.
+The token *all* means the behavior applies to all extensions supported by
+the compiler.
+The _behavior_ can be one of the following:
+
+[options="header"]
+|====
+| Behavior  | Effect
+| *require* | Behave as specified by the extension _extension_name_. +
+              Give a compile-time error on the *#extension* if the extension
+              _extension_name_ is not supported, or if *all* is specified.
+| *enable*  | Behave as specified by the extension _extension_name_. +
+              Warn on the *#extension* if the extension _extension_name_ is
+              not supported. +
+              Give {compiletimeerror} on the *#extension* if *all* is
+              specified.
+| *warn*    | Behave as specified by the extension _extension_name_,
+              except issue warnings on any detectable use of that extension,
+              unless such use is supported by other enabled or required
+              extensions. +
+              If *all* is specified, then warn on all detectable uses of any
+              extension used. +
+              Warn on the *#extension* if the extension _extension_name_ is
+              not supported.
+| *disable* | Behave (including issuing errors and warnings) as if the
+              extension _extension_name_ is not part of the language
+              definition. +
+              If *all* is specified, then behavior must revert back to that
+              of the non-extended core version of the language being
+              compiled to. +
+              Warn on the *#extension* if the extension _extension_name_ is
+              not supported.
+|====
+
+The *extension* directive is a simple, low-level mechanism to set the
+behavior for each extension.
+It does not define policies such as which combinations are appropriate,
+those must be defined elsewhere.
+Order of directives matters in setting the behavior for each extension:
+Directives that occur later override those seen earlier.
+The *all* variant sets the behavior for all extensions, overriding all
+previously issued *extension* directives, but only for the _behaviors_
+*warn* and *disable*.
+
+The initial state of the compiler is as if the directive
+
+[source,glsl]
+----
+#extension all : disable
+----
+
+was issued, telling the compiler that all error and warning reporting must
+be done according to this specification, ignoring any extensions.
+
+Each extension can define its allowed granularity of scope.
+If nothing is said, the granularity is a shader (that is, a single
+compilation unit), and the extension directives must occur before any
+non-preprocessor tokens.
+If necessary, the linker can enforce granularities larger than a single
+compilation unit, in which case each involved shader will have to contain
+the necessary extension directive.
+
+Macro expansion is not done on lines containing *#extension* and *#version*
+directives.
+
+ifdef::ESSL[]
+For each extension there is an associated macro.
+The macro is always defined in an implementation that supports the
+extension.
+This allows the following construct to be used:
+
+[source,glsl]
+----
+#ifdef OES_extension_name
+    #extension OES_extension_name : enable
+    // code that requires the extension
+#else
+    // alternative code
+#endif
+----
+endif::ESSL[]
+
+*#line* must have, after macro substitution, one of the following forms:
+
+[source,glsl]
+----
+#line line
+#line line source-string-number
+----
+
+where _line_ and _source-string-number_ are
+ifdef::GLSL[constant integer expressions.]
+ifdef::ESSL[_pp-constant-expressions_.]
+If these constant expressions are not integer literals then behavior is undefined.
+After processing this directive (including its new-line), the implementation
+will behave as if it is compiling at line number _line_ and source string
+number _source-string-number_.
+Subsequent source strings will be numbered sequentially, until another
+*#line* directive overrides that numbering.
+
+[NOTE]
+.Note
+====
+Some implementations have allowed constant expressions in #line directives and
+some have not. Even where expressions are supported the grammar is ambiguous and so
+results are implementation dependent. For example,
++ #line +2 +2               // Line number set to 4, or file to 2 and line to 2
+====
+
+ifdef::GLSL[]
+When shaders are compiled for {apiname} SPIR-V, the following predefined
+macro is available:
+
+[source,glsl]
+----
+#define GL_SPIRV 100
+----
+endif::GLSL[]
+
+When targeting Vulkan, the following predefined macro is available:
+
+[source,glsl]
+----
+#define VULKAN 100
+----
+
+ifdef::ESSL[]
+If during macro expansion a preprocessor directive is encountered, the
+results are undefined; the compiler may or may not report an error in such
+cases.
+endif::ESSL[]
+
+
+[[comments]]
+== Comments
+
+Comments are delimited by *+/*+* and *+*/+*, or by *//* and a new-line.
++//+ style comments include the initial +//+ marker and continue up to, but
+not including, the terminating newline.
++/*...*/+ comments include both the start and end marker.
+The begin comment delimiters (+/*+ or +//+) are not recognized as comment
+delimiters inside of a comment, hence comments cannot be nested.
+ifdef::ESSL[]
+Comments are treated syntactically as a single space.
+endif::ESSL[]
+
+ifdef::GLSL[]
+Inside comments, any byte values may be used, except a byte whose value is
+0.
+No errors will be given for the content of comments and no validation on the
+content of comments need be done.
+
+Removal of new-lines by the line-continuation character (*+\+*) logically
+occurs before comments are processed.
+That is, a single-line comment ending in the line-continuation character
+(*+\+*) includes the next line in the comment.
+
+[source,glsl]
+----
+// a single-line comment containing the next line \
+a = b; // this is still in the first comment
+----
+endif::GLSL[]
+
+
+[[tokens]]
+== Tokens
+
+The language, after preprocessing, is a sequence of tokens.
+A token can be
+
+[role="bnf"]
+--
+_token_ : ::
+    _keyword_ +
+    _identifier_ +
+    _integer-constant_ +
+    _floating-constant_ +
+    _operator_ +
+    *;* *{* *}*
+--
+
+
+[[keywords]]
+== Keywords
+
+The following are the keywords in the language and (after
+preprocessing) can only be used as described in this specification,
+or {compiletimeerror} results:
+
+{empty}:: *const* *uniform* *buffer* *shared*
+ifdef::GLSL[*attribute* *varying*]
+{empty}:: *coherent* *volatile* *restrict* *readonly* *writeonly*
+{empty}:: *atomic_uint*
+{empty}:: *layout*
+{empty}:: *centroid* *flat* *smooth*
+ifdef::GLSL[*noperspective*]
+{empty}:: *patch* *sample*
+{empty}:: *invariant* *precise*
+{empty}:: *break* *continue* *do* *for* *while* *switch* *case* *default*
+{empty}:: *if* *else*
+ifdef::GLSL[]
+{empty}:: *subroutine*
+endif::GLSL[]
+{empty}:: *in* *out* *inout*
+{empty}:: *int* *void* *bool* *true* *false* *float*
+ifdef::GLSL[*double*]
+{empty}:: *discard* *return*
+{empty}:: *vec2* *vec3* *vec4* *ivec2* *ivec3* *ivec4* *bvec2* *bvec3* *bvec4*
+{empty}:: *uint* *uvec2* *uvec3* *uvec4*
+ifdef::GLSL[]
+{empty}:: *dvec2* *dvec3* *dvec4*
+endif::GLSL[]
+{empty}:: *mat2* *mat3* *mat4*
+{empty}:: *mat2x2* *mat2x3* *mat2x4*
+{empty}:: *mat3x2* *mat3x3* *mat3x4*
+{empty}:: *mat4x2* *mat4x3* *mat4x4*
+ifdef::GLSL[]
+{empty}:: *dmat2* *dmat3* *dmat4*
+{empty}:: *dmat2x2* *dmat2x3* *dmat2x4*
+{empty}:: *dmat3x2* *dmat3x3* *dmat3x4*
+{empty}:: *dmat4x2* *dmat4x3* *dmat4x4*
+endif::GLSL[]
+{empty}:: *lowp* *mediump* *highp* *precision*
+ifdef::GLSL[]
+{empty}:: *sampler1D* *sampler1DShadow* *sampler1DArray* *sampler1DArrayShadow*
+{empty}:: *isampler1D* *isampler1DArray* *usampler1D* *usampler1DArray*
+endif::GLSL[]
+{empty}:: *sampler2D* *sampler2DShadow* *sampler2DArray* *sampler2DArrayShadow*
+{empty}:: *isampler2D* *isampler2DArray* *usampler2D* *usampler2DArray*
+ifdef::GLSL[]
+{empty}:: *sampler2DRect* *sampler2DRectShadow* *isampler2DRect* *usampler2DRect*
+endif::GLSL[]
+{empty}:: *sampler2DMS* *isampler2DMS* *usampler2DMS*
+{empty}:: *sampler2DMSArray* *isampler2DMSArray* *usampler2DMSArray*
+{empty}:: *sampler3D* *isampler3D* *usampler3D*
+{empty}:: *samplerCube* *samplerCubeShadow* *isamplerCube* *usamplerCube*
+{empty}:: *samplerCubeArray* *samplerCubeArrayShadow*
+{empty}:: *isamplerCubeArray* *usamplerCubeArray*
+{empty}:: *samplerBuffer* *isamplerBuffer* *usamplerBuffer*
+ifdef::GLSL[]
+{empty}:: *image1D* *iimage1D* *uimage1D*
+{empty}:: *image1DArray* *iimage1DArray* *uimage1DArray*
+endif::GLSL[]
+{empty}:: *image2D* *iimage2D* *uimage2D*
+{empty}:: *image2DArray* *iimage2DArray* *uimage2DArray*
+ifdef::GLSL[]
+{empty}:: *image2DRect* *iimage2DRect* *uimage2DRect*
+{empty}:: *image2DMS* *iimage2DMS* *uimage2DMS*
+{empty}:: *image2DMSArray* *iimage2DMSArray* *uimage2DMSArray*
+endif::GLSL[]
+{empty}:: *image3D* *iimage3D* *uimage3D*
+{empty}:: *imageCube* *iimageCube* *uimageCube*
+{empty}:: *imageCubeArray* *iimageCubeArray* *uimageCubeArray*
+{empty}:: *imageBuffer* *iimageBuffer* *uimageBuffer*
+{empty}:: *struct*
+
+In addition, when targeting Vulkan, the following keywords also exist:
+
+ifdef::GLSL[]
+{empty}:: *texture1D* *texture1DArray*
+{empty}:: *itexture1D* *itexture1DArray* *utexture1D* *utexture1DArray*
+endif::GLSL[]
+{empty}:: *texture2D* *texture2DArray*
+{empty}:: *itexture2D* *itexture2DArray* *utexture2D* *utexture2DArray*
+ifdef::GLSL[]
+{empty}:: *texture2DRect* *itexture2DRect* *utexture2DRect*
+endif::GLSL[]
+{empty}:: *texture2DMS* *itexture2DMS* *utexture2DMS*
+{empty}:: *texture2DMSArray* *itexture2DMSArray* *utexture2DMSArray*
+{empty}:: *texture3D* *itexture3D* *utexture3D*
+{empty}:: *textureCube* *itextureCube* *utextureCube*
+{empty}:: *textureCubeArray* *itextureCubeArray* *utextureCubeArray*
+{empty}:: *textureBuffer* *itextureBuffer* *utextureBuffer*
+{empty}:: *sampler* *samplerShadow*
+{empty}:: *subpassInput* *isubpassInput* *usubpassInput*
+{empty}:: *subpassInputMS* *isubpassInputMS* *usubpassInputMS*
+
+The following are the keywords reserved for future use.
+Using them will result in {compiletimeerror}:
+
+ifdef::ESSL[]
+{empty}:: *attribute* *varying*
+{empty}:: *noperspective*
+{empty}:: *subroutine*
+endif::ESSL[]
+{empty}:: *common* *partition* *active*
+{empty}:: *asm*
+{empty}:: *class* *union* *enum* *typedef* *template* *this*
+{empty}:: *resource*
+{empty}:: *goto*
+{empty}:: *inline* *noinline* *public* *static* *extern* *external* *interface*
+{empty}:: *long* *short* *half* *fixed* *unsigned* *superp*
+ifdef::ESSL[*double*]
+{empty}:: *input* *output*
+{empty}:: *hvec2* *hvec3* *hvec4* *fvec2* *fvec3* *fvec4*
+ifdef::ESSL[]
+{empty}:: *dvec2* *dvec3* *dvec4*
+{empty}:: *dmat2* *dmat3* *dmat4*
+{empty}:: *dmat2x2* *dmat2x3* *dmat2x4*
+{empty}:: *dmat3x2* *dmat3x3* *dmat3x4*
+{empty}:: *dmat4x2* *dmat4x3* *dmat4x4*
+endif::ESSL[]
+{empty}:: *filter*
+{empty}:: *sizeof* *cast*
+{empty}:: *namespace* *using*
+ifdef::ESSL[]
+{empty}:: *sampler1D* *sampler1DShadow* *sampler1DArray* *sampler1DArrayShadow*
+{empty}:: *isampler1D* *isampler1DArray* *usampler1D* *usampler1DArray*
+{empty}:: *sampler2DRect* *sampler2DRectShadow* *isampler2DRect* *usampler2DRect*
+endif::ESSL[]
+{empty}:: *sampler3DRect*
+ifdef::ESSL[]
+{empty}:: *image1D* *iimage1D* *uimage1D*
+{empty}:: *image1DArray* *iimage1DArray* *uimage1DArray*
+{empty}:: *image2DRect* *iimage2DRect* *uimage2DRect*
+{empty}:: *image2DMS* *iimage2DMS* *uimage2DMS*
+{empty}:: *image2DMSArray* *iimage2DMSArray* *uimage2DMSArray*
+endif::ESSL[]
+
+In addition, all identifiers containing two consecutive underscores (+__+)
+are reserved for use by underlying software layers.
+Defining such a name in a shader does not itself result in an error, but may
+result in unintended behaviors that stem from having multiple definitions of
+the same name.
+
+
+[[identifiers]]
+== Identifiers
+
+Identifiers are used for variable names, function names, structure names,
+and field selectors (field selectors select components of
+`<<vector-components,vectors>>` and `<<matrix-components,matrices>>`,
+similarly to structure members).
+Identifiers have the form:
+
+[role="bnf"]
+--
+_identifier_ : ::
+    _nondigit_ +
+    _identifier_ _nondigit_ +
+    _identifier_ _digit_
+
+_nondigit_ : one of ::
+    *_* *a b c d e f g h i j k l m n o p q r s t u v w x y z* +
+    *A B C D E F G H I J K L M N O P Q R S T U V W X Y Z*
+
+_digit_ : one of ::
+    *0 1 2 3 4 5 6 7 8 9*
+--
+
+Identifiers starting with "`gl_`" are reserved, and
+in general, may not be declared in a shader;
+this results in {compiletimeerror}.
+However, as noted in the specification, there are some cases where
+previously declared variables can be redeclared, and predeclared "`gl_`"
+names are allowed to be redeclared in a shader only for these specific
+purposes.
+
+Implementations must support identifier lengths of up to 1024 characters.
+ifdef::GLSL[]
+Implementations are allowed to generate an error for an identifier of length
+greater than 1024 characters, but are also allowed to support lengths
+greater than 1024.
+endif::GLSL[]
+ifdef::ESSL[]
+It is an error if the length exceeds this value.
+endif::ESSL[]
+
+
+[[definitions]]
+== Definitions
+
+Some language rules described below depend on the following definitions.
+
+
+[[static-use]]
+=== Static Use
+
+A shader contains a _static use_ of a variable _x_ if, after preprocessing,
+the shader contains a statement that would access any part of _x_,
+whether or not flow of control will cause that statement to be executed.
+Such a variable is referred to as being _statically used_. If the access is a
+write then _x_ is further said to be _statically assigned_.
+
+
+[[dynamically-uniform-expressions-and-uniform-control-flow]]
+=== Dynamically Uniform Expressions and Uniform Control Flow
+
+Some operations require an expression to be _dynamically uniform_, or that
+it be located in _uniform control flow_.
+These requirements are defined by the following set of definitions.
+
+An _invocation_ is a single execution of _main()_ for a particular stage,
+operating only on the amount of data explicitly exposed within that stage's
+shaders.
+(Any implicit operation on additional instances of data would comprise
+additional invocations.) For example, in compute execution models, a single
+invocation operates only on a single work item, or, in a vertex execution
+model, a single invocation operates only on a single vertex.
+
+An _invocation group_ is the complete set of invocations collectively
+processing a particular compute workgroup or graphical operation, where the
+scope of a "graphical operation" is implementation-dependent, but at least
+as large as a single triangle or patch, and at most as large as a single
+rendering command, as defined by the client API.
+
+Within a single invocation, a single shader statement can be executed
+multiple times, giving multiple _dynamic instances_ of that instruction.
+This can happen when the instruction is executed in a loop, or in a function
+called from multiple call sites, or combinations of multiple of these.
+Different loop iterations and different dynamic function-call-site chains
+yield different dynamic instances of such an instruction.
+Dynamic instances are distinguished by their control-flow path within an
+invocation, not by which invocation executed it.
+That is, different invocations of _main()_ execute the same dynamic
+instances of an instruction when they follow the same control-flow path.
+
+An expression is _dynamically uniform_ for a dynamic instance consuming it
+when its value is the same for all invocations (in the invocation group)
+that execute that dynamic instance.
+
+_Uniform control flow_ (or converged control flow) occurs when all
+invocations in the invocation group execute the same control-flow path (and
+hence the same sequence of dynamic instances of instructions).
+Uniform control flow is the initial state at the entry into _main()_, and
+lasts until a conditional branch takes different control paths for different
+invocations (non-uniform or divergent control flow).
+Such divergence can reconverge, with all the invocations once again
+executing the same control-flow path, and this re-establishes the existence
+of uniform control flow.
+If control flow is uniform upon entry into a selection or loop, and all
+invocations in the invocation group subsequently leave that selection or
+loop, then control flow reconverges to be uniform.
+
+For example:
+
+[source,glsl]
+----
+main()
+{
+    float a = ...; // this is uniform control flow
+    if (a < b) {   // this expression is true for some fragments, not all
+        ...;       // non-uniform control flow
+    } else {
+        ...;       // non-uniform control flow
+    }
+    ...;           // uniform control flow again
+}
+----
+
+Other examples of non-uniform control flow can occur within loops where some
+invocations execute iterations that others do not, after conditional breaks,
+continues, early returns, and after fragment discards, when the condition is
+true for some fragments but not others.
+
+Note that constant expressions are trivially dynamically uniform.
+It follows that typical loop counters based on these are also dynamically
+uniform.
+
+
+ifdef::ESSL[]
+[[logical-phases-of-compilation]]
+== Logical Phases of Compilation
+
+The compilation units for the shader processors are processed separately
+before optionally being linked together in the final stage of compilation.
+The logical phases of compilation are:
+
+  . Source strings are input as byte sequences.
+    The value 'zero' is interpreted as a terminator.
+  . Source strings are concatenated to form a single input.
+    Zero bytes are discarded but all other values are retained.
+  . Each string is interpreted according to the UTF-8 standard, with the
+    exception that all invalid byte sequences are retained in their original
+    form for subsequent processing.
+  . Each {carriage-return, line-feed} and {line-feed, carriage return}
+    sequence is replaced by a single newline.
+    All remaining carriage-return and line-feed characters are then each
+    replaced by a newline.
+  . Line numbering for each character, which is equal to the number of
+    preceding newlines plus one, is noted.
+    Note this can only be subsequently changed by the #line directive and is
+    not affected by the removal of newlines in phase 6 of compilation.
+  . Wherever a backslash ('\') occurs immediately before a newline, both are
+    deleted.
+    Note that no whitespace is substituted, thereby allowing a single
+    preprocessing token to span a newline.
+    This operation is not recursive; any new {backslash newline} sequences
+    generated are not removed.
+  . All comments are replaced with a single space.
+    All (non-zero) characters and invalid UTF-8 byte sequences are allowed
+    within comments.
+    '//' style comments include the initial '//' marker and continue up to,
+    but not including, the terminating newline.
+    '/*...*/' comments include both the start and end marker.
+  . The source string is converted into a sequence of preprocessing tokens.
+    These tokens include preprocessing numbers, identifiers and
+    preprocessing operations.
+    The line number associated with each token is copied from the line
+    number of the first character of the token.
+  . The preprocessor is run.
+    Directives are executed and macro expansion is performed.
+  . White space and newlines are discarded.
+  . Preprocessing tokens are converted into tokens.
+  . The syntax is analyzed according to the {slabbrev} grammar.
+  . The result is checked according to the semantic rules of the language.
+  . Optionally, the shaders are linked together to form one or more programs
+    or separable programs.
+    When a pair of shaders from consecutive stages are linked into the same
+    program, any outputs and corresponding inputs not used in both shaders
+    may be discarded.
+  . The binary is generated.
+endif::ESSL[]

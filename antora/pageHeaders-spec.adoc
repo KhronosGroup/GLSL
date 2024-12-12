@@ -1,0 +1,7 @@
+// Copyright 2022-2024 The Khronos Group Inc.
+// SPDX-License-Identifier: CC-BY-4.0
+
+// Boilerplate to include in spec pages.
+include::{config}/headerattribs.adoc[]
+
+include::{config}/attribs.adoc[]

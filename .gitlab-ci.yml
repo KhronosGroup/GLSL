@@ -1,0 +1,32 @@
+# Copyright 2018-2024 The Khronos Group Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+# Gitlab CI file for GLSL spec generation
+
+# All stages use the same Docker image, so there are no prerequisites
+# We now refer to the container by its SHA instead of the name, to prevent
+# caching problems when updating the image.
+# image: khronosgroup/docker-images:asciidoctor-spec
+image: khronosgroup/docker-images@sha256:42123ba13792c4e809d037b69152c2230ad97fbf43b677338075ab9c928ab6ed
+
+# Verify repository license compliance
+license-check:
+  stage: build
+  before_script:
+    # Nothing, all prerequisites are in the Docker image
+  script:
+    - reuse lint
+  allow_failure: false
+
+# Build the specification outputs
+spec-generate:
+  stage: build
+  before_script:
+    # Nothing, all prerequisites are in the Docker image
+  script:
+    - make html pdf
+  artifacts:
+    when: always
+    paths:
+      - out/
+    expire_in: 1 week
