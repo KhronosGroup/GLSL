@@ -210,12 +210,22 @@ The description is per component.
     | Returns the base 2 logarithm of _x_, i.e., returns the value _y_ which
       satisfies the equation [eq]#x = 2^y^#.
       Results are undefined if [eq]#x {leq} 0#.
+ifdef::GLSL[]
 | genFType *sqrt*(genFType _x_) +
   genDType *sqrt*(genDType _x_)
+endif::GLSL[]
+ifdef::ESSL[]
+| genFType *sqrt*(genFType _x_)
+endif::ESSL[]
     | Returns [eq]#sqrt(x)#.
       Results are undefined if [eq]#x < 0#.
+ifdef::GLSL[]
 | genFType *inversesqrt*(genFType _x_) +
   genDType *inversesqrt*(genDType _x_)
+endif::GLSL[]
+ifdef::ESSL[]
+| genFType *inversesqrt*(genFType _x_)
+endif::ESSL[]
     | Returns [eq]#1 / sqrt(x)#.
       Results are undefined if [eq]#x {leq} 0#.
 |====
