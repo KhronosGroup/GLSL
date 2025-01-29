@@ -8,11 +8,13 @@ Name Strings
 
 Contact
 
-    Karen Webb, Umbral Software Ltd (karen.webb 'at' umbralsoftware.co.uk)
+    Karen Webb, Umbral Software Ltd (karen.webb 'at' umbralsoftware.co.uk)  
+    Justin Ead, Collins Aerospace (justin.ead2 'at' collins.com)
 
 Contributors
 
     Karen Webb, Umbral Software Ltd (karen.webb 'at' umbralsoftware.co.uk)
+    Justin Ead, Collins Aerospace (justin.ead2 'at' collins.com)
 
 Status
 
