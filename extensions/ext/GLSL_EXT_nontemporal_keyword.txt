@@ -51,7 +51,7 @@ Overview
     nontemporal buffer access -> Nontemporal Memory Operand
     nontemporal image access -> Nontemporal Image Operand
 
-    The Nontemporal Image Operand required SPIR-V 1.6 or higher.
+    The Nontemporal Image Operand requires SPIR-V 1.6 or higher.
 
 Modifications to the OpenGL Shading Language Specification, Version 4.60
 
