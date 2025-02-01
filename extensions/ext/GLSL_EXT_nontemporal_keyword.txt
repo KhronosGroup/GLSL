@@ -97,20 +97,14 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
       and nontemporal may be used in the declaration of buffer variables
       (i.e., members of shader storage blocks).
 
-    Replace the paragraph beginning "When calling user-defined functions,
-    opaque-type variables qualified with coherent, volatile, readonly, or
-    writeonly" with the following:
+    Replace the sentence beginning "When calling user-defined functions,
+    opaque-type variables qualified with coherent, volatile, readonly,
+    writeonly may not be passed to functions whose formal parameters lack such
+    qualifiers." with the following:
 
       When calling user-defined functions, opaque-type variables qualified with
       coherent, volatile, readonly, writeonly or nontemporal may not be passed
-      to functions whose formal parameters lack such qualifiers. (See
-      “Function Definitions” for more detail on function calling.) It is legal
-      to have any additional memory qualifiers on a formal parameter, but only
-      restrict or nontemporal can be taken away from an opaque-type calling
-      argument, by a formal parameter that lacks the restrict or nontemporal
-      qualifier respectively. For non-opaque argument types, where the values
-      operated on by the called function are copied-in/copied-out,
-      memory qualifiers are not required to match.
+      to functions whose formal parameters lack such qualifiers.
 
     Modify Section 8.11. Memory Qualifiers
     
@@ -148,15 +142,21 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     
       NONTEMPORAL
     
-    after the line WRITEONLY
+    after the line "WRITEONLY"
 
 Issues
 
     (1) Should implicit removal of the keyword during function call
         be allowed (as-per the `restrict` keyword) or forbidden (as-per
         the `volatile` and `coherent` keywords)?
+      
+        Feedback recieved was that behaving like `volatile` would be more
+        appropriate.
 
 Revision History
 
     Revision 1
     - Initial revision.
+    Revision 2
+    - Behaviour of `nontemporal` being passed to a function declared without it
+      is now an error.
