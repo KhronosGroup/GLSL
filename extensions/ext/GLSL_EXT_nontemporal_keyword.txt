@@ -93,7 +93,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     readonly, and writeonly may be used in the declaration of buffer variables
     (i.e., members of shader storage blocks)." with:
 
-      The memory qualifiers coherent, volatile, restrict, readonly, writeonly
+      The memory qualifiers coherent, volatile, restrict, readonly, writeonly,
       and nontemporal may be used in the declaration of buffer variables
       (i.e., members of shader storage blocks).
 
@@ -103,7 +103,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     qualifiers." with the following:
 
       When calling user-defined functions, opaque-type variables qualified with
-      coherent, volatile, readonly, writeonly or nontemporal may not be passed
+      coherent, volatile, readonly, writeonly, and nontemporal may not be passed
       to functions whose formal parameters lack such qualifiers.  
 
     Modify Section 8.11. Memory Qualifiers
@@ -114,7 +114,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     the following:
     
       All the built-in functions in this section accept arguments with
-      combinations of nontemporal, restrict, coherent, and volatile memory
+      combinations of restrict, coherent, volatile, and nontemporal memory
       qualification, despite not having them listed in the prototypes.
 
     Modify Section 8.12. Image Functions
@@ -125,7 +125,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     the following:
     
       All the built-in functions in this section accept arguments with
-      combinations of nontemporal, restrict, coherent, and volatile memory
+      combinations of restrict, coherent, volatile, and nontemporal memory
       qualification, despite not having them listed in the prototypes.
 
     Modify Section 9. Shading Language Grammar
