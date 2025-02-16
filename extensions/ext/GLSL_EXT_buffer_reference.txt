@@ -18,8 +18,8 @@ Status
 
 Version
 
-    Last Modified Date:         October 25, 2024
-    Revision:                   3
+    Last Modified Date:         February 16, 2025
+    Revision:                   4
 
 Number
 
@@ -47,7 +47,7 @@ Overview
     a "buffer_reference" layout, which lets them act as reference type names
     and be used to declare references within another block declaration, or as
     variables.
-    
+
     A corresponding API extension provides functionality to retrieve the
     address value for a given buffer, and also defines the size and alignment
     of the reference types.
@@ -87,7 +87,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
       It is a compile-time error to use the *length* method on an unsized
       array member of a shader storage block type declared with the
       buffer_reference layout.
-      
+
     Modify section 4.3.2 (Constant Qualifier)
 
     Change the first paragraph to clarify that the constant qualifier is
@@ -178,6 +178,14 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
        buffer_reference          X                                   X                            buffer
     buffer_reference_align       X                                   X                            buffer
 
+    Modify section 4.4.1 (Input Layout Qualifiers):
+
+    "buffer_reference" are not allowed along with input storage qualifiers.
+
+    Modify section 4.4.2 (Output Layout Qualifiers):
+
+    "buffer_reference" are not allowed along with output storage qualifiers.
+
     Modify section 4.4.5 (Uniform and Shader Storage Block Layout Qualifiers):
 
     Add "buffer_reference" and "buffer_reference_align = integer-constant-expression"
@@ -251,3 +259,6 @@ Revision History
         operators are supported.
     Revision 3
       - Clarify forward declaration ignore layout qualifiers
+    Revision 4
+      - Clarify that buffer references are not allowed to be used with input
+        or output storage qualifiers.
