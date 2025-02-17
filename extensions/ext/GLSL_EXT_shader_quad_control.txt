@@ -157,22 +157,22 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
     Syntax:
 
-        bool quadAll(bool value);
+        bool subgroupQuadAll(bool value);
 
     Only usable if the extensions GL_KHR_shader_subgroup_vote and
     GL_EXT_shader_quad_control are enabled.
 
-    The function quadAll() returns true if for all active invocations in the
+    The function subgroupQuadAll() returns true if for all active invocations in the
     quad <value> evaluates to true.
 
     Syntax:
 
-        bool quadAny(bool value);
+        bool subgroupQuadAny(bool value);
 
     Only usable if the extensions GL_KHR_shader_subgroup_vote and
     GL_EXT_shader_quad_control are enabled.
 
-    The function quadAny() returns true if for any active invocation in the
+    The function subgroupQuadAny() returns true if for any active invocation in the
     quad its <value> evaluates to true.
 
 Revision History
