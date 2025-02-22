@@ -37,6 +37,8 @@ Dependencies
     Specification, version 4.60.8, dated August 14, 2023 and the
     SPIR-V Specification, version 1.6, revision 4.
 
+    This extension requires use of the Vulkan Memory Model.
+
 Overview
 
     This extension adds the nontemporal keyword for memory and image operands.
