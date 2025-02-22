@@ -98,12 +98,12 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
       (i.e., members of shader storage blocks).
 
     Replace the sentence beginning "When calling user-defined functions,
-    opaque-type variables qualified with coherent, volatile, readonly,
+    opaque-type variables qualified with coherent, volatile, readonly, or
     writeonly may not be passed to functions whose formal parameters lack such
     qualifiers." with the following:
 
       When calling user-defined functions, opaque-type variables qualified with
-      coherent, volatile, readonly, writeonly, and nontemporal may not be passed
+      coherent, volatile, readonly, writeonly, or nontemporal may not be passed
       to functions whose formal parameters lack such qualifiers.  
 
     Modify Section 8.11. Memory Qualifiers
