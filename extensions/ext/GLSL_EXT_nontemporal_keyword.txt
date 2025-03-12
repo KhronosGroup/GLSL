@@ -1,0 +1,164 @@
+Name
+
+    EXT_nontemporal_keyword
+
+Name Strings
+
+    GL_EXT_nontemporal_keyword
+
+Contact
+
+    Karen Webb, Umbral Software Ltd (karen.webb 'at' umbralsoftware.co.uk)  
+    Justin Ead, Collins Aerospace (justin.ead2 'at' collins.com)
+
+Contributors
+
+    Karen Webb, Umbral Software Ltd (karen.webb 'at' umbralsoftware.co.uk)
+    Justin Ead, Collins Aerospace (justin.ead2 'at' collins.com)
+
+Status
+
+    In-Progress.
+
+Version
+
+    Last Modified:      Jan 29 2025
+    Revision:           1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.60
+    (#version 460) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification, version 4.60.8, dated August 14, 2023 and the
+    SPIR-V Specification, version 1.6, revision 4.
+
+    This extension requires use of the Vulkan Memory Model.
+
+Overview
+
+    This extension adds the nontemporal keyword for memory and image operands.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs.
+
+    nontemporal buffer access -> Nontemporal Memory Operand
+    nontemporal image access -> Nontemporal Image Operand
+
+    The Nontemporal Image Operand requires SPIR-V 1.6 or higher.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following lines in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_nontemporal_keyword : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+      #define GL_EXT_nontemporal_keyword            1
+
+    Modify Section 3.6. Keywords
+
+    Replace the line "coherent volatile restrict readonly writeonly"
+    with "coherent volatile restrict readonly writeonly nontemporal"
+
+    Modify Section 4.10. Memory Qualifiers
+
+    Add a new row to the table with the following information:
+
+      Qualifier   Meaning
+      ---------   -------
+      nontemporal memory variable whose value is not expected to be read
+                  again in the near future, and should not be cached
+
+    After the paragraph beginning "Memory accesses to image variables
+    declared using the restrict qualifier may be compiled..." add the
+    following paragraph:
+
+      Memory accesses to image variables declared using the `nontemporal`
+      qualifier may be compiled to assume their value will not be needed
+      again in the near future. This allows the compiler to avoid bringing
+      that data unnecessarily into cache.
+
+    Replace the sentence "The memory qualifiers coherent, volatile, restrict,
+    readonly, and writeonly may be used in the declaration of buffer variables
+    (i.e., members of shader storage blocks)." with:
+
+      The memory qualifiers coherent, volatile, restrict, readonly, writeonly,
+      and nontemporal may be used in the declaration of buffer variables
+      (i.e., members of shader storage blocks).
+
+    Replace the sentence beginning "When calling user-defined functions,
+    opaque-type variables qualified with coherent, volatile, readonly, or
+    writeonly may not be passed to functions whose formal parameters lack such
+    qualifiers." with the following:
+
+      When calling user-defined functions, opaque-type variables qualified with
+      coherent, volatile, readonly, writeonly, or nontemporal may not be passed
+      to functions whose formal parameters lack such qualifiers.  
+
+    Modify Section 8.11. Memory Qualifiers
+    
+    Replace the sentance "All the built-in functions in this section accept
+    arguments with combinations of restrict, coherent, and volatile memory
+    qualification, despite not having them listed in the prototypes." with
+    the following:
+    
+      All the built-in functions in this section accept arguments with
+      combinations of restrict, coherent, volatile, and nontemporal memory
+      qualification, despite not having them listed in the prototypes.
+
+    Modify Section 8.12. Image Functions
+    
+    Replace the sentance "All the built-in functions in this section accept
+    arguments with combinations of restrict, coherent, and volatile memory
+    qualification, despite not having them listed in the prototypes." with
+    the following:
+    
+      All the built-in functions in this section accept arguments with
+      combinations of restrict, coherent, volatile, and nontemporal memory
+      qualification, despite not having them listed in the prototypes.
+
+    Modify Section 9. Shading Language Grammar
+
+    Replace the line "CENTROID IN OUT INOUT UNIFORM PATCH SAMPLE BUFFER SHARED
+    COHERENT VOLATILE RESTRICT READONLY WRITEONLY NOPERSPECTIVE FLAT SMOOTH
+    LAYOUT" with the following:
+
+      CENTROID IN OUT INOUT UNIFORM PATCH SAMPLE BUFFER SHARED COHERENT
+      VOLATILE RESTRICT READONLY WRITEONLY NONTEMPORAL NOPERSPECTIVE FLAT
+      SMOOTH LAYOUT
+
+    In the definition of `storage_qualifier` add the following line:
+    
+      NONTEMPORAL
+    
+    after the line "WRITEONLY"
+
+Issues
+
+    (1) Should implicit removal of the keyword during function call
+        be allowed (as-per the `restrict` keyword) or forbidden (as-per
+        the `volatile` and `coherent` keywords)?
+      
+        Feedback recieved was that behaving like `volatile` would be more
+        appropriate.
+
+Revision History
+
+    Revision 1
+    - Initial revision.
+    Revision 2
+    - Behaviour of `nontemporal` being passed to a function declared without it
+      is now an error.
