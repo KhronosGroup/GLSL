@@ -1,0 +1,167 @@
+Name
+
+    EXT_bfloat16
+
+Name Strings
+
+    GL_EXT_bfloat16
+
+Contact
+
+    Jeff Bolz, NVIDIA (jbolz 'at' nvidia.com)
+
+Contributors
+
+Status
+
+    Complete.
+
+Version
+
+    Last Modified:      February 25, 2025
+    Revision:           1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.50
+    (#version 450) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification, version 4.60.8, dated August 14, 2023.
+
+    This extension interacts with GL_KHR_cooperative_matrix.
+
+Overview
+
+    This extension introduces a new floating point type known as "bfloat16" or
+    "e8m7". This type is primarily intended for machine learning usage and only
+    a few operations are supported, including loading from and storing to memory,
+    conversion to/from other types, and optionally cooperative matrix and/or
+    dot product support.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+      bfloat16_t                -> OpTypeFloat 16 FPEncodingBFloat16KHR
+      dot                       -> OpDot
+      bfloat16BitsToIntEXT,
+      bfloat16BitsToUintEXT,
+      intBitsToBFloat16EXT,
+      uintBitsToBFloat16EXT     -> OpBitcast
+
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following lines in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_bfloat16 : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+    GL_EXT_bfloat16 must be enabled to use the bfloat16_t types.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+      #define GL_EXT_bfloat16                     1
+
+    Modify Section 3.6, Keywords
+
+    (add to list of keywords)
+
+      bfloat16_t bf16vec2 bf16vec3 bf16vec4
+
+    Modify Section 4.1, Basic Types
+
+    Add entries to the table of Transparent Types:
+
+      bfloat16_t a floating-point scalar with a leading sign bit, 8 exponent bits, and 7 mantissa bits
+      bf16vec2 a two-component bfloat16_t vector
+      bf16vec3 a three-component bfloat16_t vector
+      bf16vec4 a four-component bfloat16_t vector
+
+    bfloat types must not be used in input or output storage classes.
+
+    Modify Section 4.1.10, Implicit Conversions
+
+    Add the following implicit conversions:
+
+    Type of expression              Can be implicitly converted to
+
+    bfloat16_t                      float32_t, float64_t
+
+    (and all corresponding vector promotions)
+
+    Modify Section 4.1.X, Cooperative Matrix Types, from GL_KHR_cooperative_matrix
+
+    The component type of a cooperative matrix can be bfloat16_t.
+
+    Modify Section 4.11, Specialization-Constant Qualifier
+
+    The constant_id qualifier can be applied to bfloat16_t variables.
+
+    Modify Section 5.4.1, Conversion and Scalar Constructors
+
+    Add constructors for bfloat16_t to convert to and from every other floating
+    point and integer type, and all corresponding vector constructors.
+    There are no conversion to or from boolean types.
+
+    Modify Section 5.9, Expressions
+
+    Arithmetic operators are not supported on bfloat16_t, or vectors of that
+    type, or cooperative matrices of that type.
+
+    Modify Chapter 8, Built-In Functions
+
+    Add "genBFType" as an alias for bfloat16_t, bf16vec2, bf16vec3, bf16vec4.
+
+    Add a bfloat16 overload for 'dot':
+
+        bloat16_t dot(genBFType x, genBFType y);
+
+    Add bitcast functions:
+
+        genI16Type bfloat16BitsToIntEXT(genBFType value);
+        genU16Type bfloat16BitsToUintEXT(genBFType value);
+        genBFType intBitsToBFloat16EXT(genI16Type value);
+        genBFType uintBitsToBFloat16EXT(genU16Type value);
+
+    Modify Section 8.X, Cooperative Matrix Functions
+
+    Add overloads for cooperative matrix load and store functions:
+
+        void coopMatLoad(out coopmat m, volatile coherent bfloat16_t[] buf, uint element, uint stride, int matrixLayout);
+        void coopMatLoad(out coopmat m, volatile coherent bf16vec2[] buf, uint element, uint stride, int matrixLayout);
+        void coopMatLoad(out coopmat m, volatile coherent bf16vec4[] buf, uint element, uint stride, int matrixLayout);
+
+        void coopMatStore(coopmat m, volatile coherent out bfloat16_t[] buf, uint element, uint stride, int matrixLayout);
+        void coopMatStore(coopmat m, volatile coherent out bf16vec2[] buf, uint element, uint stride, int matrixLayout);
+        void coopMatStore(coopmat m, volatile coherent out bf16vec4[] buf, uint element, uint stride, int matrixLayout);
+
+    Modify Chapter 9, Shading Language Grammar for Core Profile
+
+    (Add to token list)
+
+        BFLOAT16_T BF16VEC2 BF16VEC3 BF16VEC4
+
+    (Add to type_specifier_non_array)
+
+        BFLOAT16_T BF16VEC2 BF16VEC3 BF16VEC4
+
+Issues
+
+    (1) Why no conversions to/from boolean types?
+
+    RESOLVED: glslang uses OpFUnordNotEqual to convert float->bool, and this is
+    not supported for the new types.
+
+Revision History
+
+    Revision 1
+    - Internal revisions.
