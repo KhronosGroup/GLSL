@@ -101,3 +101,4 @@ that do not live in the Khronos registries for OpenGL or OpenGL ES.
 - link:{repo}/nv/GLSL_NV_cluster_acceleration_structure.txt[GL_NV_cluster_acceleration_structure]
 - link:{repo}/nv/GLSL_NV_linear_swept_spheres.txt[GL_NV_linear_swept_spheres]
 - link:{repo}/ext/GLSL_EXT_nontemporal_keyword.txt[GL_EXT_nontemporal_keyword]
+- link:{repo}/ext/GL_EXT_shader_realtime_clock.txt[GL_EXT_shader_realtime_clock]
