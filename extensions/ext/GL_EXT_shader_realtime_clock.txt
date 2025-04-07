@@ -16,6 +16,7 @@ Contributors
     Daniel Rakos, AMD
     Timothy Lottes, AMD
     Graham Sellers, AMD
+    Ashley Smith, Collabora
 
 Status
 
@@ -23,8 +24,8 @@ Status
 
 Version
 
-    Last Modified Date: 10/29/2019
-    Revision: 2
+    Last Modified Date: 2025/04/07
+    Revision: 3
 
 Number
 
@@ -39,6 +40,8 @@ Dependencies
     GL_ARB_shader_clock extension.
 
     This extension interacts with GL_ARB_gpu_shader_int64.
+
+    This extension requires OpenGL 4.4 or OpenGL ES 3.1.
 
 Overview
 
@@ -83,7 +86,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.50
 Additions to Chapter 8 of the OpenGL Shading Language Specification
 (Built-in Functions)
 
-    Add New Section 8.19, "Timing Functions"
+    Add New Section 8.18, "Timing Functions"
 
     Syntax:
 
@@ -121,7 +124,8 @@ Issues
 
 Revision History
 
-    Rev  Date        Author    Changes
-    ---  ----------  --------  ---------------------------------------------
-      1  10/02/2018  ahagan    Initial revision based on ARB_shader_clock.
-      2  10/29/2019  dgkoch    Add mapping to SPIR-V section, mark complete.
+    Rev  Date        Author          Changes
+    ---  ----------  --------        ---------------------------------------------
+      1  10/02/2018  ahagan          Initial revision based on ARB_shader_clock.
+      2  10/29/2019  dgkoch          Add mapping to SPIR-V section, mark complete.
+      3  07/04/2025  ashleysmithcol  Add modifications for ESSL.
