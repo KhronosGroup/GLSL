@@ -1,0 +1,326 @@
+Name
+
+    QCOM_tile_shading
+
+Name Strings
+
+    GL_QCOM_tile_shading
+
+Contact
+
+    Wooyoung Kim, Qualcomm Technologies, Inc. (wooykim 'at' qti.qualcomm.com)
+
+Contributors
+
+    Jeff Leger, Qualcomm
+    Rithwik Kollipara, Qualcomm
+    Ruihao Zhang, Qualcomm
+    Matthew Smith, Qualcomm
+    Wooyoung Kim, Qualcomm
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date: 2025-04-15
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.60
+    (#version 460) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    version 4.60.8, dated Aug 12, 2023.
+
+    This extension interacts with revision 43 of the GL_KHR_vulkan_glsl
+    extension, dated October 25, 2017.
+
+Overview
+
+    This extension adds support for tile shading functionality in GLSL.
+
+    Most mobile GPUs utilize tile-based deferred rendering (TBDR) combined with 
+    high-bandwidth "tile memory" to optimize for power and performance. 
+    In a TBDR architecture, color and depth buffer attachments are partitioned
+    into a grid of small regions called "tiles" and the tile rendering passes
+    render into the tiles allocated in specialized high-bandwidth on-die memory
+    called "tile memory".  The TBDR architecture creates an opportunity to express
+    operations that execute per-tile, while the framebuffer content is still cached
+    in the tile memory. 
+
+    The extension describes new GLSL language features that allow shader writers to take
+    advantage of the functionality that the Vulkan QCOM tile shading extension offers.
+    In addition, it adds new input layout qualifiers for compute shaders to facilitate
+    area-based dispatch that proportionally maps compute threads to pixels in a tile 
+    and to determine the optimal split between workgroup sizes and workgroup counts.
+
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60.8
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_QCOM_tile_shading : <behavior>
+
+    where <behavior> is as specified in Section 3.3.
+
+    A new preprocessor #define is added: 
+
+      #define GL_QCOM_tile_shading 1
+
+
+    Modify Section 4.4, Layout Qualifiers (p. 65)
+
+    (add to the Layout Qualifier table, pp. 66-69)
+
+                                              Qualifier  Individual             Block     Allowed
+    Layout Qualifier                            Only      Variable      Block   Member   Interfaces
+    ----------------------------------------  ---------  -------------  -----  --------  -----------
+    non_coherent_attachment_readQCOM             X          -            -        -      fragment in
+                                                                                         (Vulkan only)
+
+    tile_attachmentQCOM                          X          X            X        -      fragment/compute
+                                                                                         uniform (Vulkan only)
+
+    shading_rate_xQCOM =                         X                                       compute in
+    shading_rate_yQCOM =                                                                 (Vulkan only)
+    shading_rate_zQCOM =
+
+
+    Modify the Fragment Shader Inputs subsection under 4.4.1 Input Layout Qualifiers (p. 76)
+
+    Fragment shaders allow the following layout qualifier of in only (not with variable declarations):
+
+    layout-qualifier-id:
+        early_fragment_tests
+        non_coherent_attachment_readQCOM
+
+    The early_fragment_tests qualifier is used to request that fragment tests be
+    performed before fragment shader execution, as described in section 15.2.4
+    "Early Fragment Tests" of the OpenGL Specification.
+
+
+    (add to the end of the Fragment Shader Inputs subsection).
+
+    The non_coherent_attachment_readQCOM qualifier requests that tile image attachment
+    reads ignore rasterization order for color/depth/stencil/input attachments.
+
+    For example, 
+     layout( non_coherent_attachment_readQCOM ) in;
+
+    Only one fragment shader (compilation unit) need declare this, though more
+    than one can. If at least one declares the non_coherent_attachment_readQCOM
+    qualifier, then the non-coherent attachment read is enabled.
+
+    See the Vulkan API documentation for details on rasterization order.
+
+
+    Modify the Compute Shader Inputs subsection under 4.4.1 Input Layout Qualifiers (p. 78)
+
+    There are no layout location qualifiers for compute shader inputs.
+
+    Layout qualifier identifiers for compute shader inputs are the workgroup size qualifiers:
+
+    layout-qualifier-id :
+        local_size_x = layout-qualifier-value
+        local_size_y = layout-qualifier-value
+        local_size_z = layout-qualifier-value
+        shading_rate_xQCOM = layout-qualifier-value
+        shading_rate_yQCOM = layout-qualifier-value
+        shading_rate_zQCOM = layout-qualifier-value
+
+
+    (insert the following three paragraphs before the sentence starting with "If multiple
+    compute shaders attached to a single program object" in the Compute Shader Inputs subsection).
+
+    The shading_rate_xQCOM, shading_rate_yQCOM, and shading_rate_zQCOM qualifiers are used
+    to declare a desired shading rate within a compute shader in the first, second,
+    and third dimension, respectively. If a shader does not specify a rate for one
+    of the dimensions, that dimension will have a rate of 1.
+    
+    The shading_rate_xQCOM and shading_rate_yQCOM qualifiers are required to be a power of 2.
+    If any of the shading rate values is greater than the maximum value supported by the 
+    implementation for that dimension, a run-time validation failure will result.
+
+    If present, the qualifiers will override the local_size_x/local_size_y/local_size_z
+    layout qualifiers and the implementation will compute the workgroup sizes.  This implies 
+    that uses of local_size_id_x/local_size_id_y/local_size_id_z layout qualifiers are ignored.
+
+
+    If multiple compute shaders attached to a single program object declare a fixed workgroup size,
+    the declarations must be identical; otherwise a link-time error results.  
+
+    Furthermore, if a program object contains any compute shaders, at least one must contain an input
+    layout qualifier specifying a fixed workgroup size for the program, or a link-time error will occur.
+
+
+
+    For example,
+      layout(shading_rate_xQCOM = 2) in;
+      layout(shading_rate_xQCOM = 2, shading_rate_yQCOM = 4) in;
+      layout(shading_rate_xQCOM = 2, shading_rate_yQCOM = 2, shading_rate_zQCOM = 2) in;
+
+
+    Modify Section 4.4.5 Uniform and Shader Storage Block Layout Qualifiers (p. 88)
+
+    (add to the layout qualifier id list, p. 88)
+
+    layout-qualifier-id:
+      ...
+      align = layout-qualifier-value
+      tile_attachmentQCOM
+
+
+    Add a subsection to Section 4.4, Layout Qualifiers (p. 97)
+
+    4.4.X Tile Shading Layout Qualifiers
+
+    Tile image attachments are only available when targeting Vulkan.
+
+    The layout qualifiers for declaration of tile image attachment variables are:
+
+    layout-qualifier-id:
+        set      = layout-qualifier-value
+        binding  = layout-qualifier-value
+        tile_attachmentQCOM
+
+    Tile image attachment variables are declared with the 2D image/texture/sampler types.
+    They must be declared with the set and binding layout qualifiers and with the
+    tile_attachmentQCOM layout qualifier.  Otherwise, a compile-time error results.
+
+    For example:
+
+     layout( set = 0, binding = 0, tile_attachmentQCOM, rgba32f ) uniform highp image2D color0;
+
+    See the Vulkan API documentation for details on mapping from tile image
+    attachment variables to color/depth/stencil/input attachments.
+
+
+    Modify Section 7.1.5 Fragment Shader Special Variables to Chapter 7 Built-in Variables (p. 145)
+
+    (add the followings after 'gl_HelperInvocation')
+
+    in uvec2 gl_TileOffsetQCOM
+    in uvec3 gl_TileDimensionQCOM
+    in uvec2 gl_TileApronSizeQCOM
+
+    (add to the end of Section 7.1.5. Fragment Shader Special Variables)
+
+    The input variable gl_TileOffsetQCOM is filled with the framebuffer
+    coordinates of the top-left texel of the current tile.
+
+    The input variable gl_TileDimensionQCOM represents the tile dimension in pixels (x and y)
+    as well as the number of layers (z).  The gl_TileDimensionQCOM will report the same tile
+    dimensions for all tiles in a rendering pass, including "edge tiles" that may only be
+    partially rendered because the tile boundaries extend beyond the edges of the framebuffer
+    or the Vulkan API "renderArea".
+
+    The input variable gl_TileApronSizeQCOM represents the widths of an apron (in X and Y directions).
+
+    
+    Modify Section 7.1.6 Compute Shader Special Variables to Chapter 7, Built-in Variables (p. 148)
+
+    (add the followings after 'gl_LocalInvocationIndex')
+
+    in uvec2 gl_TileOffsetQCOM
+    in uvec3 gl_TileDimensionQCOM
+    in uvec2 gl_TileApronSizeQCOM
+
+    (add to the end of Section 7.1.6. Compute Shader Special Variables)
+
+    The input variable gl_TileOffsetQCOM is filled with the framebuffer
+    coordinates of the top-left texel of the current tile.
+
+    The input variable gl_TileDimensionQCOM represents the tile dimension in pixels (x and y)
+    as well as the number of layers (z).  The gl_TileDimensionQCOM will report the same tile
+    dimensions for all tiles in a rendering pass, including "edge tiles" that may only be
+    partially rendered because the tile boundaries extend beyond the edges of the framebuffer
+    or the Vulkan API "renderArea".
+
+    The input variable gl_TileApronSizeQCOM represents the widths of an apron (in X and Y directions). 
+
+
+    (modify the paragraph)
+
+    It is a compile-time error to use gl_WorkGroupSize in a shader that does not declare a fixed
+    workgroup size, or before that shader has declared a fixed workgroup size, using local_size_x,
+    local_size_y, and local_size_z. 
+
+    to
+
+    It is a compile-time error to use gl_WorkGroupSize in a shader that does not declare a fixed
+    workgroup size, or before that shader has declared a fixed workgroup size, using local_size_x,
+    local_size_y, and local_size_z or shading_rate_xQCOM, shading_rate_yQCOM, and shading_rate_zQCOM.
+
+
+    Add Section 12.2.X to Chapter 12, Non-Normative SPIR-V Mappings (p. 226)
+
+    12.2.X Mapping of tile image attachment variables and layout qualifiers
+
+    Fragment shaders can read and compute shaders can read/write values at the
+    framebuffer location through tile image attachment variables.
+
+    Tile image attachment variables are declared with the 2D image/texture/sampler types
+    and with the tile_attachmentQCOM layout qualifier.  In addition, they may be further
+    qualified with the set/binding/non_coherent_attachment_readQCOM layout qualifiers.
+
+    For example,
+
+        layout(set = s, binding = b, tile_attachmentQCOM, rgba32f) uniform highp image2D input0;
+
+    maps to the following SPIR-V:
+
+        %1 = OpExtInstImport "GLSL.std.460"
+                ...
+                  OpName %input0 "input0"
+                  OpDecorate %input0 DescriptorSet s
+                  OpDecorate %input0 Binding b
+                ...
+         %float = OpTypeFloat 32
+            %37 = OpTypeImage %float 2D 0 0 0 2 Rgba32f
+    %_ptr_TileAttachmentQCOM_37 = OpTypePointer TileAttachmentQCOM %37
+        %input0 = OpVariable %_ptr_TileAttachmentQCOM_37 TileAttachmentQCOM
+                ...
+
+
+    The layout qualifier non_coherent_attachment_readQCOM to request that tile image
+    attachment reads ignore the rasterization order is mapped to the SPIR-V execution
+    mode NonCoherentTileAttachmentReadQCOM.
+
+    For example,
+
+        layout (non_coherent_attachment_readQCOM) in;
+
+    maps to the following SPIR-V:
+
+        OpExecutionMode %main NonCoherentTileAttachmentReadQCOM
+
+
+    The layout qualifiers shading_rate_xQCOM, shading_rate_yQCOM, and
+    shading_rate_zQCOM are mapped to the SPIR-V execution mode TileShadingRateQCOM.
+
+    For example,
+
+        layout (shading_rate_xQCOM = 2, shading_rate_yQCOM = 2, shading_rate_zQCOM = 1) in;
+
+    maps to the following SPIR-V:
+
+        OpExecutionMode %main TileShadingRateQCOM 2 2 1
+
+
+Issues
+
+    None
+
+Revision History
+
+    Rev.  Date          Author           Changes
+    ----  -----------   ------           -------------------------------------------
+     1    2025-04-15    Ruihao Zhang/    Initial revision
+                        Wooyoung Kim
