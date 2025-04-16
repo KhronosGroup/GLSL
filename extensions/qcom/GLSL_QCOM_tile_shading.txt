@@ -45,19 +45,19 @@ Overview
 
     This extension adds support for tile shading functionality in GLSL.
 
-    Most mobile GPUs utilize tile-based deferred rendering (TBDR) combined with 
-    high-bandwidth "tile memory" to optimize for power and performance. 
+    Most mobile GPUs utilize tile-based deferred rendering (TBDR) combined with
+    high-bandwidth "tile memory" to optimize for power and performance.
     In a TBDR architecture, color and depth buffer attachments are partitioned
     into a grid of small regions called "tiles" and the tile rendering passes
     render into the tiles allocated in specialized high-bandwidth on-die memory
     called "tile memory".  The TBDR architecture creates an opportunity to express
     operations that execute per-tile, while the framebuffer content is still cached
-    in the tile memory. 
+    in the tile memory.
 
     The extension describes new GLSL language features that allow shader writers to take
     advantage of the functionality that the Vulkan QCOM tile shading extension offers.
     In addition, it adds new input layout qualifiers for compute shaders to facilitate
-    area-based dispatch that proportionally maps compute threads to pixels in a tile 
+    area-based dispatch that proportionally maps compute threads to pixels in a tile
     and to determine the optimal split between workgroup sizes and workgroup counts.
 
 
