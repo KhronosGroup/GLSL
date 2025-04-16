@@ -95,7 +95,7 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60.8
 
     Modify the Fragment Shader Inputs subsection under 4.4.1 Input Layout Qualifiers (p. 76)
 
-    Fragment shaders allow the following layout qualifier of in only (not with variable declarations):
+    Fragment shaders allow the following layout qualifier on in only (not with variable declarations):
 
     layout-qualifier-id:
         early_fragment_tests
@@ -234,16 +234,8 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60.8
 
     (add to the end of Section 7.1.6. Compute Shader Special Variables)
 
-    The input variable gl_TileOffsetQCOM is filled with the framebuffer
-    coordinates of the top-left texel of the current tile.
-
-    The input variable gl_TileDimensionQCOM represents the tile dimension in pixels (x and y)
-    as well as the number of layers (z).  The gl_TileDimensionQCOM will report the same tile
-    dimensions for all tiles in a rendering pass, including "edge tiles" that may only be
-    partially rendered because the tile boundaries extend beyond the edges of the framebuffer
-    or the Vulkan API "renderArea".
-
-    The input variable gl_TileApronSizeQCOM represents the widths of an apron (in X and Y directions). 
+    The input variables gl_TileOffsetQCOM, gl_TileDimensionQCOM, and gl_TileApronSizeQCOM 
+    are defined in the same fashion as the corresponding input variables in the fragment shader.
 
 
     (modify the paragraph)
