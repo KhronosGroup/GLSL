@@ -56,9 +56,10 @@ Overview
 
     The extension describes new GLSL language features that allow shader writers to take
     advantage of the functionality that the Vulkan QCOM tile shading extension offers.
-    In addition, it adds new input layout qualifiers for compute shaders to facilitate
-    area-based dispatch that proportionally maps compute threads to pixels in a tile
-    and to determine the optimal split between workgroup sizes and workgroup counts.
+    It adds new input layout qualifiers for compute shaders to facilitate
+    area-based dispatch that proportionally map compute threads to pixels in a tile,
+    allowing the implementation to determine the optimal split between workgroup sizes and
+    workgroup counts.
 
 
 Modifications to the OpenGL Shading Language Specification, Version 4.60.8
@@ -144,17 +145,20 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60.8
     and third dimension, respectively. If a shader does not specify a rate for one
     of the dimensions, that dimension will have a rate of 1.
     
-    The shading_rate_xQCOM and shading_rate_yQCOM qualifiers are required to be a power of 2.
-    If any of the shading rate values is greater than the maximum value supported by the 
-    implementation for that dimension, a run-time validation failure will result.
+    The shading_rate_xQCOM and shading_rate_yQCOM qualifiers are required to be a power of 2,
+    otherwise a compile-time error resutls.  If any of the shading rate values is greater than
+    the maximum value supported by the implementation for that dimension, a run-time validation
+    failure will result.
 
     If present, the qualifiers will override the local_size_x/local_size_y/local_size_z
-    layout qualifiers and the implementation will compute the workgroup sizes.  This implies 
-    that uses of local_size_id_x/local_size_id_y/local_size_id_z layout qualifiers are ignored.
-
+    layout qualifiers (and any of local_size_id_x/local_size_id_y/local_size_id_z)   
+    and the implementation will compute the workgroup sizes and counts.
+    The total number of threads in each dimension will be the number of pixels in the tile
+    divided by the appropriate shading_rate, but these will be distributed between workgroups
+    in an implementation-defined manner.
 
     If multiple compute shaders attached to a single program object declare a fixed workgroup size,
-    the declarations must be identical; otherwise a link-time error results.  
+    the declarations must be identical; otherwise a link-time error results.
 
     Furthermore, if a program object contains any compute shaders, at least one must contain an input
     layout qualifier specifying a fixed workgroup size for the program, or a link-time error will occur.
