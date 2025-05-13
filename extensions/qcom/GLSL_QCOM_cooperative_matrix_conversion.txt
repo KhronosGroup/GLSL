@@ -1,0 +1,296 @@
+Name
+
+    QCOM_cooperative_matrix_conversion
+
+Name Strings
+
+    GL_QCOM_cooperative_matrix_conversion
+
+Contact
+
+    Wooyoung Kim, Qualcomm (wooykim 'at' qti.qualcomm.com)
+
+Contributors
+
+    Alex Bourd,         Qualcomm (abourd  'at' qti.qualcomm.com)
+    Elina Kamenetskaya, Qualcomm (elinak  'at' qti.qualcomm.com)
+    Ruihao Zhang,       Qualcomm (ruihaoz 'at' qti.qualcomm.com)
+    Wooyoung Kim,       Qualcomm (wooykim 'at' qti.qualcomm.com)
+
+Status
+
+    Final
+
+Version
+
+    Last Modified Date: 2025-06-27
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.60
+    (#version 460) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    version 4.60.8, dated Aug 12, 2023 with the GL_KHR_cooperative_matrix
+    extension applied.
+
+    This extension interacts with revision 43 of the GL_KHR_vulkan_glsl
+    extension, dated October 25, 2017.
+
+    This extension requires
+        GL_EXT_shader_explicit_arithmetic_types,
+        GL_KHR_memory_scope_semantics, and
+        GL_KHR_cooperative_matrix.
+
+Overview
+
+    The baseline Cooperative Matrix extension achieves great performance
+    boost for simple matrix multiplication operations when data is loaded
+    to and from memory. However, most use cases which leverage matrix
+    multiplication hardware, such as Convolution and Large Language Models,
+    require additional manipulation of input and output data which the opaque
+    cooperative matrix objects do not support directly.
+
+    To perform invocation-level operations on a cooperative matrix object,
+    users need to convert the object from the subgroup to invocation scope.
+    With the baseline Cooperative Matrix extension, this conversion requires
+    copying the matrix into shared memory and then reading it back into registers
+    using a non-opaque invocation-scoped operation. The reverse flow is needed
+    to construct a matrix object from values held in individual invocations’
+    registers. This extension allows hardware vendors to create optimized
+    data conversion implementations between the invocation and subgroup scope.
+
+    Specifically, this extension builds on GL_KHR_cooperative_matrix and adds
+    support for the following conversions:
+
+    1. conversion between compatible one-dimensional arrays
+
+    2. (cooperative) construction of a cooperative matrix using one-dimensional
+       arrays from invocations in a subgroup
+
+    3. concurrent extraction of rows or columns of a cooperative matrix into
+       a set of invocations in a subgroup
+
+    And, it also adds a set of built-in helper functions to extract a
+    sub-array from a source array.
+
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60.8
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_QCOM_cooperative_matrix_conversion : <behavior>
+
+    where <behavior> is as specified in Section 3.3.
+
+    A new preprocessor #define is added:
+
+      #define GL_QCOM_cooperative_matrix_conversion 1
+
+
+    At the end of 8.X, Cooperative Matrix Functions, add the following conversion functions.
+
+        void bitcastQCOM(SrcTy srcArr[SrcLen], DstTy dstArr[DstLen]);
+
+      where
+        srcArr is an array variable with SrcTy as the element type and SrcLen as the length,
+        dstArr is an array variable with DstTy as the element type and DstLen as the length,
+        SrcTy and DstTy are one of int32_t, uint32_t, float32_t, and float16_t,
+        sizeof(SrcTy) * SrcLen == sizeof(DstTy) * DstLen
+
+      The function bit-casts the source array to the destination array.
+
+      The following lists types that are compatible with each other for the conversion
+      for certain size values. The sizes are in bytes.
+
+        size == 256: uint32_t[64], int32_t[64], float32_t[64]
+        size == 128: uint32_t[32], int32_t[32], float32_t[32], float16_t[64]
+        size == 64 : uint32_t[16], int32_t[16], float32_t[16], float16_t[32]
+        size == 32 : uint32_t[ 8], int32_t[ 8], float32_t[ 8], float16_t[16]
+
+
+    At the end of 8.X, Cooperative Matrix Functions, add the following subarray extraction functions.
+
+        void extractSubArrayQCOM(EltTy srcArr[SrcLen], int start_index, EltTy dstArr[DstLen]);
+
+      EltTy must be one of uint32_t, int32_t, float32_t and float16_t.
+
+      start_index must be non-negative, otherwise behavior is undefined.
+      (start_index + DstLen) must be no greater than SrcLen, otherwise behavior is undefined.
+
+      The function copies the DstLen values from srcArr starting from start_index
+      to dstArr.  Equivalently, it is translated to
+
+      for (i in [0, DstLen) ) dstArr[i] = srcArr[start_index + i];
+
+
+    At the end of 8.X, Cooperative Matrix Functions, add the following cooperative conversion functions.
+
+      The vectorToCoopmatQCOM function is used to construct a cooperative matrix cooperatively
+      using arrays from invocations in a subgroup.
+
+        void vectorToCoopmatQCOM(SrcEltTy vec[SrcVecLen], coopmat<DstEltTy, gl_ScopeSubgroup, NumRows, NumCols, CoopMatUse> cm);
+
+
+      CoopMatUse is one of gl_MatrixUseA, gl_MatrixUseB, and gl_MatrixUseAccumulator.
+
+      When CoopMatUse is gl_MatrixUseA,
+
+        DstEltTy must be one of float32_t, float16_t, uint8_t, and int8_t.
+
+        SrcEltTy must be either DstEltTy or uint32_t.
+
+        SrcVecLen must be if SrcEltTy is uint32_t, or NumCols if SrcEltTy == DstEltTy.
+
+        NumRows must be a constant expression no greater than gl_SubgroupSize or a specialization constant expression.
+
+        NumCols must be 8, 16, 32, and 32 for float32_t, float16_t, int8_t, and uint8_t,
+        respectively, or it must be a specialization constant.
+
+        The function constructs a cooperative matrix cooperatively in such a way that 'vec'
+        from the i-th invocation (i.e., invocation with gl_SubgroupInvocationID == i) goes
+        to the i-th row of the resulting matrix.
+
+        When NumRows is smaller than gl_SubgroupSize, the source arrays from invocations
+        [NumRows .. gl_SubgroupSize) are ignored. For example, given gl_SubgroupSize
+        == 64, if NumRows == 32, the source arrays from invocations [32 .. 64) are ignored,
+        and if NumRows == 16, those from invocations [16 .. 64) are ignored.
+
+      When CoopMatUse is gl_MatrixUseB,
+
+        DstEltTy must be one of float32_t, float16_t, uint8_t, and int8_t.
+
+        SrcEltTy must be either DstEltTy or uint32_t.
+
+        SrcVecLen must be 8 if SrcEltTy is uint32_t, or NumRows if SrcEltTy == DstEltTy.
+
+        NumRows must be 8, 16, 32, and 32 for float32_t, float16_t, int8_t, and uint8_t,
+        respectively, or it must be a specialization constant.
+
+        NumCols must be a constant expression no greater than gl_SubgroupSize or a specialization constant expression.
+
+        The function constructs a cooperative matrix cooperatively in such a way that 'vec'
+        from the i-th invocation (i.e., invocation with gl_SubgroupInvocationID == i) goes
+        to the i-th column of the resulting matrix.
+
+        When NumCols is smaller than gl_SubgroupSize, the source arrays from invocations
+        [NumCols .. gl_SubgroupSize) are ignored. For example, given gl_SubgroupSize
+        == 64, if NumCols == 32, the source arrays from invocations [32 .. 64) are ignored,
+        and if NumCols == 16, those from invocations [16 .. 64) are ignored.
+
+
+      When CoopMatUse is gl_MatrixUseAccumulator,
+
+        DstEltTy must be one of uint32_t, int32_t, float32_t, float16_t.
+
+        SrcEltTy must be either DstEltTy or uint32_t.
+
+        SrcVecLen must be either NumCols/2, if SrcEltTy is uint32_t and DstEltTy is float16_t, or NumCols for all other cases.
+
+        NumRows must be a constant expression no greater than gl_SubgroupSize or a specialization constant expression.
+
+        NumCols must be one of gl_SubgroupSize, gl_SubgroupSize/2, or gl_SubgroupSize/4,
+        or a specialization constant.
+
+        The function constructs a cooperative matrix cooperatively in such a way that 'vec'
+        from the i-th invocation (i.e., invocation with gl_SubgroupInvocationID == i) goes
+        to the i-th row of the resulting matrix.
+
+        When NumRows is smaller than gl_SubgroupSize, the source arrays from invocations
+        [NumRows .. gl_SubgroupSize) are ignored. For example, given gl_SubgroupSize
+        == 64, if NumRows == 32, the source arrays from invocations [32 .. 64) are ignored,
+        and if NumRows == 16, those from invocations [16 .. 64) are ignored.
+
+    At the end of 8.X, Cooperative Matrix Functions, add the following cooperative conversion functions.
+
+      The coopmatToVectorQCOM function is used to concurrently extract rows or columns of
+      a cooperative matrix into the invocations in a subgroup.
+
+        void coopmatToVectorQCOM(coopmat<SrcEltTy, gl_ScopeSubgroup, NumRows, NumCols, CoopMatUse> cm, DstEltTy vec[DstVecLen]);
+
+
+      CoopMatUse is one of gl_MatrixUseA, gl_MatrixUseB, and gl_MatrixUseAccumulator.
+
+      When CoopMatUse is gl_MatrixUseA,
+
+        SrcEltTy must be one of float32_t, float16_t, uint8_t, and int8_t.
+
+        DstEltTy must be either SrcEltTy or uint32_t.
+
+        DstVecLen must be 8 if DstEltTy is uint32_t, and NumCols if SrcEltTy == DstEltTy.
+
+        NumRows must be a constant expression no greater than gl_SubgroupSize or a specialization constant expression.
+
+        NumCols must be 8, 16, 32, and 32 when SrcEltTy is float32_t, float16_t,
+        uint8_t, and int8_t, respectively, or it must be a specialization constant.
+
+        The function stores the i-th row of the cooperative matrix into 'vec' of
+        the invocation with gl_SubgroupInvocationID == i if i is less
+        than NumRows. For those with gl_SubgroupInvocationID that is
+        greater than or equal to NumRows, the return value is undefined.
+
+
+      When CoopMatUse is gl_MatrixUseB,
+
+        SrcEltTy must be one of float32_t, float16_t, uint8_t, and int8_t.
+
+        DstEltTy must be either SrcEltTy or uint32_t.
+
+        DstVecLen must be 8 if DstEltTy is uint32_t, and NumRows if SrcEltTy == DstEltTy.
+
+        NumRows must be 8, 16, 32, and 32 when SrcEltTy is float32_t, float16_t,
+        uint8_t, and int8_t, respectively, or, it must be a specialization constant.
+
+        NumCols must be a constant expression no greater than gl_SubgroupSize or a specialization constant expression.
+
+        The function stores the i-th column of the cooperative matrix into 'vec' of
+        the invocation with gl_SubgroupInvocationID == i if i is less
+        than NumCols. For those with gl_SubgroupInvocationID that is
+        greater than or equal to NumCols, the return value is undefined.
+
+
+      When CoopMatUse is gl_MatrixUseAccumulator,
+
+        SrcEltTy must be one of uint32_t, int32_t, float32_t, and float16_t.
+
+        DstEltTy must be either SrcEltTy or uint32_t.
+
+        DstVecLen must be one of 64, 32, 16 and 8.
+        DstVecLen must be either NumCols/2, if SrcEltTy is float16_t and DstEltTy is uint32_t, or NumCols for all other cases.
+
+        NumRows must be a constant expression no greater than gl_SubgroupSize or a specialization constant expression.
+
+        NumCols must be one of gl_SubgroupSize, gl_SubgroupSize/2, or gl_SubgroupSize/4,
+        or a specialization constant.
+
+        The function stores the i-th row of the cooperative matrix into 'vec' of
+        the invocation with gl_SubgroupInvocationID == i if i is less
+        than NumRows. For those with gl_SubgroupInvocationID that is
+        greater than or equal to NumRows, the return value is undefined.
+
+
+    Add Section 12.2.X to Chapter 12, Non-Normative SPIR-V Mappings
+
+    12.2.X Mapping of the cooperative matrix conversion built-ins
+
+      bitcastQCOM()         -> OpBitCastArrayQCOM
+      extractSubArrayQCOM() -> OpExtractSubArrayQCOM
+      vectorToCoopmatQCOM() -> OpCompositeConstructCoopMatQCOM
+      coopmatToVectorQCOM() -> OpCompositeExtractCoopMatQCOM
+
+
+Issues
+
+    None
+
+Revision History
+
+    Rev.  Date          Author           Changes
+    ----  -----------   ------           -------------------------------------------
+     1    2025-06-27    Wooyoung Kim     Initial revision
+
