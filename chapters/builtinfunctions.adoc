@@ -2592,8 +2592,8 @@ qualification.
 === AtomicAdd
 [source,glsl]
 ----
-int atomicAdd(inout uint mem, uint data)
-int atomicAdd(inout int_mem, int data)
+uint atomicAdd(inout uint mem, uint data)
+int atomicAdd(inout int mem, int data)
 ----
 
 Computes a new value by adding the value of _data_ to the contents _mem_.
@@ -3429,7 +3429,6 @@ vec4 noise4(genFType x)
 ----
 
 Returns a 4D noise value based on the input value _x_.
----
 endif::GLSL[]
 
 
