@@ -175,20 +175,20 @@ Examples
     could be used:
     
         // Sampler array aliased to the sampler heap
-        uniform sampler heapSampler[];
+        layout(descriptor_heap) uniform sampler heapSampler[];
         
         // Different image arrays aliased to the image heap
-        uniform texture2D heapTexture2D[];
-        uniform texture3D heapTexture3D[];
+        layout(descriptor_heap) uniform texture2D heapTexture2D[];
+        layout(descriptor_heap) uniform texture3D heapTexture3D[];
 
         // Different buffer arrays aliased to the buffer heap
-        buffer StorageBufferA {
+        layout(descriptor_heap) buffer StorageBufferA {
             vec4 a;
         } heapStorageBufferA[];
-        buffer StorageBufferB {
+        layout(descriptor_heap) buffer StorageBufferB {
             vec4 b;
         } heapStorageBufferB[];
-        uniform UniformBuffer {
+        layout(descriptor_heap) uniform UniformBuffer {
             vec4 colorOffset;
         } heapUniformBuffer[];
 
