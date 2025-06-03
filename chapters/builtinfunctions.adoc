@@ -563,8 +563,8 @@ Which operand is the result is undefined if one of the operands is a NaN.
 === Clamp
 [source,glsl]
 ----
-genFType clamp(genFType x, genFType _minVal_, genFType maxVal)
-genFType clamp(genFType x, float _minVal_, float maxVal)
+genFType clamp(genFType x, genFType minVal, genFType maxVal)
+genFType clamp(genFType x, float minVal, float maxVal)
 ifdef::GLSL[]
 genDType clamp(genDType x, genDType minVal, genDType maxVal)
 genDType clamp(genDType x, double minVal, double maxVal)
@@ -1650,8 +1650,8 @@ ivec2 textureSize(gsampler1DArray sampler, int lod)
 ivec2 textureSize(sampler1DArrayShadow sampler, int lod)
 ivec3 textureSize(gsampler2DArray sampler, int lod)
 ivec3 textureSize(sampler2DArrayShadow sampler, int lod)
-ivec2 textureSize(gsamler2DRet _samler)
-ivec2 textureSize(sampler2DectShadw _samler)
+ivec2 textureSize(gsamler2DRect sampler)
+ivec2 textureSize(sampler2DRectShadow sampler)
 int textureSize(gsamplerBuffer sampler)
 ivec2 textureSize(gsampler2DMS sampler)
 ivec3 textureSize(gsampler2DMSArray sampler)
@@ -1756,9 +1756,9 @@ endif::GLSL[]
 ifdef::GLSL[]
 gvec4 texture(gsampler1D sampler, float P [, float bias])
 endif::GLSL[]
-gvec4 texture(gsampler2D sampler, vec2 P [, float _bias])
-gvec4 texture(gsampler3D sampler, vec3 P [, float _bias])
-gvec4 texture(gsamplerCube sampler, vec3 P [, float _bias])
+gvec4 texture(gsampler2D sampler, vec2 P [, float bias])
+gvec4 texture(gsampler3D sampler, vec3 P [, float bias])
+gvec4 texture(gsamplerCube sampler, vec3 P [, float bias])
 ifdef::GLSL[]
 float texture(sampler1DShadow sampler, vec3 P [, float bias])
 endif::GLSL[]
@@ -1957,7 +1957,7 @@ gvec4 textureLodOffset(gsampler3D sampler, vec3 P, float lod, ivec3 offset)
 ifdef::GLSL[]
 float textureLodOffset(sampler1DShadow sampler, vec3 P, float lod, int offset)
 endif::GLSL[]
-float textureLodOffset(sampler2DShadow sampler,  vec3 P, float lod, ivec2 offset)
+float textureLodOffset(sampler2DShadow sampler, vec3 P, float lod, ivec2 offset)
 ifdef::GLSL[]
 gvec4 textureLodOffset(gsampler1DArray sampler, vec2 P, float lod, int offset)
 endif::GLSL[]
@@ -2012,9 +2012,9 @@ Do an offset projective texture lookup with explicit level-of-detail. See *textu
 ifdef::GLSL[]
 gvec4 textureGrad(gsampler1D sampler, float P, float dPdx, float dPdy)
 endif::GLSL[]
-gvec4 textureGrad*(gsampler2D sampler, vec2 P, vec2 dPdx, vec2 dPdy)
-gvec4 textureGrad*(gsampler3D sampler, vec3 P, vec3 dPdx, vec3 dPdy)
-gvec4 textureGrad*(gsamplerCube sampler, vec3 P, vec3 dPdx, vec3 dPdy)
+gvec4 textureGrad(gsampler2D sampler, vec2 P, vec2 dPdx, vec2 dPdy)
+gvec4 textureGrad(gsampler3D sampler, vec3 P, vec3 dPdx, vec3 dPdy)
+gvec4 textureGrad(gsamplerCube sampler, vec3 P, vec3 dPdx, vec3 dPdy)
 ifdef::GLSL[]
 gvec4 textureGrad(gsampler2DRect sampler, vec2 P, vec2 dPdx, vec2 dPdy)
 float textureGrad(sampler2DRectShadow sampler, vec3 P, vec2 dPdx, vec2 dPdy)
@@ -2113,7 +2113,7 @@ endif::GLSL[]
 float textureGradOffset(sampler2DShadow sampler, vec3 P, vec2 dPdx, vec2 dPdy, ivec2 offset)
 gvec4 textureGradOffset(gsampler2DArray sampler, vec3 P, vec2 dPdx, vec2 dPdy, ivec2 offset)
 ifdef::GLSL[]
-gvtextureGradOffset(gsampler1DArray sampler, vec2 P, float dPdx, float dPdy, int offset)
+gvec4 textureGradOffset(gsampler1DArray sampler, vec2 P, float dPdx, float dPdy, int offset)
 float textureGradOffset(sampler1DArrayShadow sampler, vec3 P, float dPdx, float dPdy, int offset)
 endif::GLSL[]
 float textureGradOffset(sampler2DArrayShadow sampler, vec4 P, vec2 dPdx, vec2 dPdy, ivec2 offset)
@@ -2267,7 +2267,7 @@ gvec4 textureGatherOffset(gsampler2DArray sampler, vec3 P, ivec2 offset [, int c
 vec4 textureGatherOffset(sampler2DShadow sampler, vec2 P, float refZ, ivec2 offset)
 vec4 textureGatherOffset(sampler2DArrayShadow sampler, vec3 P, float refZ, ivec2 offset)
 ifdef::GLSL[]
-gvec4 textureGatherOffset(gsampler2DRect sampler, vec2 P, ivec2 offset [, int comp_])
+gvec4 textureGatherOffset(gsampler2DRect sampler, vec2 P, ivec2 offset [, int comp])
 vec4 textureGatherOffset(sampler2DRectShadow sampler, vec2 P, float refZ, ivec2 offset)
 endif::GLSL[]
 ----
@@ -2281,7 +2281,7 @@ MIN_PROGRAM_TEXTURE_GATHER_OFFSET and MAX_PROGRAM_TEXTURE_GATHER_OFFSET, respect
 [source,glsl]
 ----
 gvec4 textureGatherOffsets(gsampler2D sampler, vec2 P, ivec2 offsets[4] [, int comp])
-gvec4 textureGatherOffsets(gsampler2DArray sampler, vec3 P, ivec2 offsets[4] [, int comp_])
+gvec4 textureGatherOffsets(gsampler2DArray sampler, vec3 P, ivec2 offsets[4] [, int comp])
 vec4 textureGatherOffsets(sampler2DShadow sampler, vec2 P, float refZ, ivec2 offsets[4])
 vec4 textureGatherOffsets(sampler2DArrayShadow sampler, vec3 P, float refZ, ivec2 offsets[4])
 ifdef::GLSL[]
@@ -2469,7 +2469,7 @@ functions in this table.
 === AtomicCounterMax
 [source,glsl]
 ----
-uint *atomicCounterMax(atomic_uint c, uint data)
+uint atomicCounterMax(atomic_uint c, uint data)
 ----
 
 Atomically
@@ -2851,7 +2851,7 @@ int imageAtomicAdd(IMAGE_PARAMS, int data)
 endif::GLSL[]
 ifdef::ESSL[]
 highp uint imageAtomicAdd(IMAGE_PARAMS, uint data)
-highp int *imageAtomicAdd(IMAGE_PARAMS, int data)
+highp int imageAtomicAdd(IMAGE_PARAMS, int data)
 endif::ESSL[]
 ----
 
@@ -3226,7 +3226,7 @@ genFType fwidthFine(genFType p)
 
 Returns *abs*(*dFdxFine*(_p_)) + *abs*(*dFdyFine*(_p_)).
 
-=== FWidthCoarse
+=== FwidthCoarse
 [source,glsl]
 ----
 genFType fwidthCoarse(genFType p)
@@ -3288,7 +3288,7 @@ that at any given point in time the value of the function is known at the grid p
 by the SIMD array. Local differencing between SIMD array elements can therefore be used to derive
 *dFdx*, *dFdy*, etc.
 
-=== FWidth
+=== Fwidth
 [source,glsl]
 ----
 genFType fwidth(genFType p)
