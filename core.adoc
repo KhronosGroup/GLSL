@@ -22,9 +22,6 @@ ifdef::GLSL[]
 :minor: 4.60
 :authors: Graeme Leese, Broadcom (Editor) ; John Kessenich (Author) ; Dave Baldwin and Randi Rost (Version 1.1 Authors)
 :compiletimeerror: a compile-time error
-:highp:
-:mediump:
-:lowp:
 endif::GLSL[]
 
 ifdef::ESSL[]
@@ -35,9 +32,6 @@ ifdef::ESSL[]
 :minor: 3.20
 :authors: Graeme Leese, Broadcom (Editor) ; Robert J. Simpson, Qualcomm ; John Kessenich ; Dave Baldwin and Randi Rost (Version 1.1 Authors)
 :compiletimeerror: an error
-:highp: highp
-:mediump: mediump
-:lowp: lowp
 endif::ESSL[]
 
 :apispec: {apiname} Specification
