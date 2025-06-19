@@ -3628,7 +3628,6 @@ Implementations of the {slname} may optionally group multiple shader
 invocations for a single shader stage into a single SIMD invocation group,
 where invocations are assigned to groups in an undefined,
 implementation-dependent manner.
-
 Shader algorithms on such implementations may benefit from being able to
 evaluate a composite of Boolean values over all active invocations in a
 group.
