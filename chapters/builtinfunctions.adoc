@@ -2976,60 +2976,7 @@ texel.
 == Geometry Shader Functions
 
 These functions are only available in geometry shaders.
-They are described in more depth following the table.
 
-ifdef::GLSL[]
-=== EmitStreamVertex
-[source,glsl]
-----
-void EmitStreamVertex(int stream)
-----
-
-Emits the current values of output variables to the current output primitive on stream _stream_.
-The argument to _stream_ must be a constant integral expression. On return from this call, the
-values of all output variables are undefined.
-
-Can only be used if multiple output streams are supported.
-
-=== EndStreamPrimitive
-[source,glsl]
-----
-void EndStreamPrimitive(int stream)
-----
-
-Completes the current output primitive on stream _stream_ and starts a new one. The argument to
-_stream_ must be a constant integral expression. No vertex is emitted.
-
-Can only be used if multiple output streams are supported.
-endif::GLSL[]
-
-=== EmitVertex
-[source,glsl]
-----
-void EmitVertex()
-----
-
-Emits the current values of output variables to the current output primitive.
-ifdef::GLSL[]
-When multiple output streams are supported, this is equivalent to calling *EmitStreamVertex*(0).
-endif::GLSL[]
-
-On return from this call, the values of output variables are undefined.
-
-=== EndPrimitive
-[source,glsl]
-----
-void EndPrimitive()
-----
-
-Completes the current output primitive and starts a new one.
-ifdef::GLSL[]
-When multiple output streams are supported, this is equivalent to calling *EndStreamPrimitive*(0).
-endif::GLSL[]
-
-No vertex is emitted.
-
-=== Description
 ifdef::GLSL[]
 The function *EmitStreamVertex*() specifies that a vertex is completed.
 A vertex is added to the current output primitive in vertex stream _stream_
@@ -3085,6 +3032,56 @@ It is not necessary to call *EndPrimitive*() if the geometry shader writes
 only a single primitive.
 endif::ESSL[]
 
+ifdef::GLSL[]
+=== EmitStreamVertex
+[source,glsl]
+----
+void EmitStreamVertex(int stream)
+----
+
+Emits the current values of output variables to the current output primitive on stream _stream_.
+The argument to _stream_ must be a constant integral expression. On return from this call, the
+values of all output variables are undefined.
+
+Can only be used if multiple output streams are supported.
+
+=== EndStreamPrimitive
+[source,glsl]
+----
+void EndStreamPrimitive(int stream)
+----
+
+Completes the current output primitive on stream _stream_ and starts a new one. The argument to
+_stream_ must be a constant integral expression. No vertex is emitted.
+
+Can only be used if multiple output streams are supported.
+endif::GLSL[]
+
+=== EmitVertex
+[source,glsl]
+----
+void EmitVertex()
+----
+
+Emits the current values of output variables to the current output primitive.
+ifdef::GLSL[]
+When multiple output streams are supported, this is equivalent to calling *EmitStreamVertex*(0).
+endif::GLSL[]
+
+On return from this call, the values of output variables are undefined.
+
+=== EndPrimitive
+[source,glsl]
+----
+void EndPrimitive()
+----
+
+Completes the current output primitive and starts a new one.
+ifdef::GLSL[]
+When multiple output streams are supported, this is equivalent to calling *EndStreamPrimitive*(0).
+endif::GLSL[]
+
+No vertex is emitted.
 
 [[fragment-processing-functions]]
 == Fragment Processing Functions
@@ -3502,8 +3499,53 @@ Additionally, the order of accesses to multiple memory addresses performed
 by a single shader invocation, as observed by other shader invocations, is
 also undefined.
 
-The following built-in functions can be used to control the ordering of
-reads and writes:
+The memory barrier built-in functions can be used to order reads and writes
+to variables stored in memory accessible to other shader invocations.
+When called, these functions will wait for the completion of all reads and
+writes previously performed by the caller that access selected variable
+types, and then return with no other effect.
+
+The built-in functions *memoryBarrierAtomicCounter*(),
+*memoryBarrierBuffer*(), *memoryBarrierImage*(), and *memoryBarrierShared*()
+wait for the completion of accesses to atomic counter, buffer, image, and
+shared variables, respectively.
+The built-in functions *memoryBarrier*() and *groupMemoryBarrier*() wait for
+the completion of accesses to all of the above variable types.
+The functions *memoryBarrierShared*() and *groupMemoryBarrier*() are
+available only in compute shaders; the other functions are available in all
+shader types.
+
+When these functions return, the effects of any memory stores performed
+using coherent variables prior to the call will be visible to any
+future^1^ coherent access to the same memory performed by any other shader
+invocation. In particular, the values written this way in one shader stage are
+guaranteed to be visible to coherent memory accesses performed by shader
+invocations in subsequent stages when those invocations were triggered by
+the execution of the original shader invocation (e.g. fragment shader
+invocations for a primitive resulting from a particular geometry
+shader invocation).
+
+1::
+    An access is only a _future_ access if a _happens-before_ relation can
+    be established between the store and the load.
+
+Additionally, memory barrier functions order stores performed by the calling
+invocation, as observed by other shader invocations.
+Without memory barriers, if one shader invocation performs two stores to
+coherent variables, a second shader invocation might see the values written
+by the second store prior to seeing those written by the first.
+However, if the first shader invocation calls a memory barrier function
+between the two stores, selected other shader invocations will never see the
+results of the second store before seeing those of the first.
+When using the functions *groupMemoryBarrier*() or *memoryBarrierShared*(),
+this ordering guarantee applies only to other shader invocations in the same
+compute shader workgroup; all other memory barrier functions provide the
+guarantee to all other shader invocations.
+No memory barrier is required to guarantee the order of memory stores as
+observed by the invocation performing the stores; an invocation reading from
+a variable that it previously wrote will always see the most recently
+written value unless another shader invocation also wrote to the same
+memory.
 
 === MemoryBarrier
 [source,glsl]
@@ -3559,55 +3601,6 @@ by other invocations in the same workgroup.
 
 Only available in compute shaders.
 
-=== Description
-The memory barrier built-in functions can be used to order reads and writes
-to variables stored in memory accessible to other shader invocations.
-When called, these functions will wait for the completion of all reads and
-writes previously performed by the caller that access selected variable
-types, and then return with no other effect.
-The built-in functions *memoryBarrierAtomicCounter*(),
-*memoryBarrierBuffer*(), *memoryBarrierImage*(), and *memoryBarrierShared*()
-wait for the completion of accesses to atomic counter, buffer, image, and
-shared variables, respectively.
-The built-in functions *memoryBarrier*() and *groupMemoryBarrier*() wait for
-the completion of accesses to all of the above variable types.
-The functions *memoryBarrierShared*() and *groupMemoryBarrier*() are
-available only in compute shaders; the other functions are available in all
-shader types.
-
-When these functions return, the effects of any memory stores performed
-using coherent variables prior to the call will be visible to any
-future^1^ coherent access to the same memory performed by any other shader
-invocation.
-In particular, the values written this way in one shader stage are
-guaranteed to be visible to coherent memory accesses performed by shader
-invocations in subsequent stages when those invocations were triggered by
-the execution of the original shader invocation (e.g. fragment shader
-invocations for a primitive resulting from a particular geometry
-shader invocation).
-
-1::
-    An access is only a _future_ access if a _happens-before_ relation can
-    be established between the store and the load.
-
-Additionally, memory barrier functions order stores performed by the calling
-invocation, as observed by other shader invocations.
-Without memory barriers, if one shader invocation performs two stores to
-coherent variables, a second shader invocation might see the values written
-by the second store prior to seeing those written by the first.
-However, if the first shader invocation calls a memory barrier function
-between the two stores, selected other shader invocations will never see the
-results of the second store before seeing those of the first.
-When using the functions *groupMemoryBarrier*() or *memoryBarrierShared*(),
-this ordering guarantee applies only to other shader invocations in the same
-compute shader workgroup; all other memory barrier functions provide the
-guarantee to all other shader invocations.
-No memory barrier is required to guarantee the order of memory stores as
-observed by the invocation performing the stores; an invocation reading from
-a variable that it previously wrote will always see the most recently
-written value unless another shader invocation also wrote to the same
-memory.
-
 == Subpass-Input Functions
 
 Subpass-input functions are only available when targeting a Vulkan fragment stage.
@@ -3639,6 +3632,35 @@ Shader algorithms on such implementations may benefit from being able to
 evaluate a composite of Boolean values over all active invocations in a
 group.
 
+For all of these functions, the same result is returned to all active
+invocations in the group.
+
+These functions may be called within conditionally executed code.
+In groups where some invocations do not execute the function call, the value
+returned by the function is not affected by any invocation not calling the
+function, even when value is well-defined for that invocation.
+
+Because these functions depend on the values of _value_ in an undefined
+group of invocations, the value returned by these functions is largely
+undefined. However, *anyInvocation*() is guaranteed to return *true* if _value_
+is *true*, and *allInvocations*() is guaranteed to return *false* if _value_ is
+*false*.
+
+Because implementations are not required to combine invocations into groups,
+simply returning _value_ for *anyInvocation*() and *allInvocations*() and
+returning true for *allInvocationsEqual*() is a legal implementation of
+these functions.
+
+For fragment shaders, invocations in a SIMD invocation group may include
+invocations corresponding to pixels that are covered by a primitive being
+rasterized, as well as invocations corresponding to neighboring pixels not
+covered by the primitive.
+_Helper invocations_ (see "`<<built-in-language-variables, Built-In Language
+Variables>>`") may be created and the value of _value_ for such
+helper-invocation pixels may affect the value returned by *anyInvocation*(),
+*allInvocations*(), and *allInvocationsEqual*().
+endif::GLSL[]
+
 === AnyInvocation
 [source,glsl]
 ----
@@ -3662,34 +3684,3 @@ bool allInvocationsEqual(bool value)
 ----
 
 Returns *true* if _value_ is the same for all active invocations in the group.
-
-=== Description
-For all of these functions, the same result is returned to all active
-invocations in the group.
-
-These functions may be called within conditionally executed code.
-In groups where some invocations do not execute the function call, the value
-returned by the function is not affected by any invocation not calling the
-function, even when value is well-defined for that invocation.
-
-Because these functions depend on the values of _value_ in an undefined
-group of invocations, the value returned by these functions is largely
-undefined.
-However, *anyInvocation*() is guaranteed to return *true* if _value_ is
-*true*, and *allInvocations*() is guaranteed to return *false* if _value_ is
-*false*.
-
-Because implementations are not required to combine invocations into groups,
-simply returning _value_ for *anyInvocation*() and *allInvocations*() and
-returning true for *allInvocationsEqual*() is a legal implementation of
-these functions.
-
-For fragment shaders, invocations in a SIMD invocation group may include
-invocations corresponding to pixels that are covered by a primitive being
-rasterized, as well as invocations corresponding to neighboring pixels not
-covered by the primitive.
-_Helper invocations_ (see "`<<built-in-language-variables, Built-In Language
-Variables>>`") may be created and the value of _value_ for such
-helper-invocation pixels may affect the value returned by *anyInvocation*(),
-*allInvocations*(), and *allInvocationsEqual*().
-endif::GLSL[]
