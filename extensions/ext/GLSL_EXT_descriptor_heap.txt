@@ -141,10 +141,12 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
         When targeting Vulkan, it is a compile-time or link-time error to use
         the same binding and set numbers more than one uniform block, for
         more than one buffer block decorated with `readonly`, or for more
-        than one buffer block not decorated with `readonly`.
+        than one buffer block not decorated with `readonly`, in the same
+        shader stage.
         When targeting OpenGL, it is a compile-time or link-time error
-        to use the same binding number for any two declarations, with the
-        exception of two atomic counters with different `offset` values.
+        to use the same binding number for any two declarations in the same
+        shader stage, with the exception of two atomic counters with
+        different `offset` values.
         
     Add to the end of the section:
     
@@ -171,22 +173,18 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
     
         descriptor_heap
         descriptor_stride = `layout-qualifier-value`
-
-    Remove the following sentence:
-    
-        It is a compile-time or link-time error to use the same binding
-        number for more than one atomic counter, unless the offset for the
-        atomic counters sharing the same binding are all different.
         
     Add the following sentences:
 
         When targeting Vulkan, it is a compile-time or link-time error to use
-        the same binding and set numbers more than one uniform block, for
-        more than one buffer block decorated with `readonly`, or for more
-        than one buffer block not decorated with `readonly`.
+        the same binding and set numbers for more than one `sampler`,
+        `samplerShadow`, or `*sampler*` declaration, for more than one
+        `*texture*` or `*sampler*` declaration, or for more than one
+        `*image*` declaration, in the same shader stage.
         When targeting OpenGL, it is a compile-time or link-time error
-        to use the same binding number for any two declarations, with the
-        exception of two atomic counters with different `offset` values.
+        to use the same binding number for any two declarations in the same
+        shader stage, with the exception of two atomic counters with
+        different `offset` values.
 
     Add to the end of the section:
     
