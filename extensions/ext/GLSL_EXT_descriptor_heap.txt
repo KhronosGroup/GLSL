@@ -135,19 +135,7 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
         It is a compile-time or link-time error to use the same binding
         number for more than one uniform block or for more than one buffer
         block.
-        
-    Add the following sentences:
 
-        When targeting Vulkan, it is a compile-time or link-time error to use
-        the same binding and set numbers more than one uniform block, for
-        more than one buffer block decorated with `readonly`, or for more
-        than one buffer block not decorated with `readonly`, in the same
-        shader stage.
-        When targeting OpenGL, it is a compile-time or link-time error
-        to use the same binding number for any two declarations in the same
-        shader stage, with the exception of two atomic counters with
-        different `offset` values.
-        
     Add to the end of the section:
     
         When targeting Vulkan, any uniform or shader storage block declared
