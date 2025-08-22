@@ -1,0 +1,274 @@
+Name
+
+    EXT_structured_descriptor_heap
+
+Name Strings
+
+    GL_EXT_structured_descriptor_heap
+
+Contact
+
+    Tobias Hector (tobias.hector 'at' amd.com), AMD
+
+Notice
+
+    Copyright (c) 2025 The Khronos Group Inc. Copyright terms at
+        http://www.khronos.org/registry/speccopyright.html
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date: 2025-09-17
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.20
+    (#version 420) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    This extension is written against revision 8 of the OpenGL Shading Language
+    version 4.60, dated August 14, 2023.
+    
+    This extension is written against version 1 of GLSL_EXT_descriptor_heap.
+    
+    This extension interacts with GLSL_EXT_buffer_reference and
+    GLSL_EXT_buffer_reference2.
+    
+    This extension interacts with GL_KHR_ray_tracing and GL_KHR_ray_query.
+
+Overview
+
+    This extension document modifies the shader interface to allow declaring
+    new `resourceheap` and `samplerheap` blocks that enable applications to
+    pull structured data and descriptors from Vulkan resource and sampler
+    heaps.
+    
+    For example, the following code is now valid:
+    
+    ```glsl
+    resourceheap {
+        texture2D myTexture;
+        uint myInteger;
+        buffer {
+            uint data;
+        } myBuffer;
+        uniform {
+            uint data;
+        } myUniformBuffer;
+    } myResourceHeapView[];    
+    ```
+    
+    Such code for each element of `myResourceHeapView` will read each member
+    at an appropriately aligned offset in the resource heap.
+    Layout of plain-old-data is always performed as if `scalar` layout were
+    used.
+
+    Mapping to SPIR-V
+    -----------------
+
+    The structure is laid out in the same way as any other structure would
+    be, with the exception that resource variables are laid out using the
+    `OffsetIdEXT` decoration based on the result of `OpConstantSizeOfEXT` for
+    various descriptor types, as their sizes are not known until client API
+    compilation.
+    
+    For example, the above declaration would map to the following SPIR-V:
+    
+    ```spir-v
+    // Heap type decorations
+                          OpMemberDecorateIdEXT %heap_t OffsetIdEXT %heap_offset_0 0
+                          OpMemberDecorateIdEXT %heap_t OffsetIdEXT %heap_offset_1 1
+                          OpMemberDecorateIdEXT %heap_t OffsetIdEXT %heap_offset_2 2
+                          OpMemberDecorateIdEXT %heap_t OffsetIdEXT %heap_offset_3 3
+                          OpDecorateIdEXT %heap_array_t ArrayStrideIdEXT %heap_size_aligned
+    
+    // Heap types
+    %float_t            = OpTypeFloat 32
+    %texture_t          = OpTypeImage %float_t 2D 0 0 0 1 Unknown
+    %uint_t             = OpTypeInt 32 0
+    %storage_buffer_t   = OpTypeBufferEXT StorageBuffer
+    %uniform_buffer_t   = OpTypeBufferEXT Uniform
+    %heap_t             = OpTypeStruct %texture_t %uint_t %storage_buffer_t %uniform_buffer_t
+    %buffer_data_t      = OpTypeStruct %uint_t
+    %heap_array_t       = OpTypeRuntimeArray %heap_t
+    
+    // Heap member sizes
+    %texture_size       = OpConstantSizeOfEXT %texture_t
+    %uint_size          = OpConstant 4
+    %buffer_size        = OpConstantSizeOfEXT %storage_buffer_t
+    
+    // Heap member offsets
+    %heap_offset_0      = OpConstant %uint_t 0
+    %heap_offset_1      = OpSpecConstantOp OpIAdd %uint_t %heap_offset_0 %texture_size
+    %heap_offset_2      = OpSpecConstantOp OpIAdd %uint_t %heap_offset_1 %uint_size
+    %heap_offset_3      = OpSpecConstantOp OpIAdd %uint_t %heap_offset_2 %buffer_size
+    
+    // Total heap size
+    %heap_size          = OpSpecConstantOp OpIAdd %uint_t %heap_offset_3 %buffer_size
+    
+    // Calculate the required heap alignment
+    %texture_is_bigger  = OpSpecConstantOp OpUGreaterThan %boolean_t %texture_size %buffer_size
+    %resource_size      = OpSpecConstantOp OpSelect %uint_t %texture_is_bigger %texture_size %buffer_size
+    %resource_is_bigger = OpSpecConstantOp OpUGreaterThan %boolean_t %resource_size %uint_size
+    %heap_alignment     = OpSpecConstantOp OpSelect %uint_t %resource_is_bigger %resource_size %uint_size
+    
+    // Calculate the aligned size of the heap structure
+    %heap_count         = OpSpecConstantOp OpUDiv %uint_t %heap_size %heap_alignment
+    %heap_modulo        = OpSpecConstantOp OpUMod %uint_t %heap_size %heap_alignment
+    %heap_modulo_count  = OpSpecConstantOp OpUDiv %uint_t %heap_modulo %heap_modulo
+    %heap_aligned_count = OpSpecConstantOp OpIAdd %uint_t %heap_count %heap_modulo_count
+    %heap_size_aligned  = OpSpecConstantOp OpIMul %uint_t %heap_aligned_count %heap_alignment
+    ```
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_structured_descriptor_heap : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    A new preprocessor #define is added:
+
+      #define GL_EXT_structured_descriptor_heap                1
+
+
+Additions to Chapter 4 of the OpenGL Shading Language Specification
+(Variables and Types)
+
+    Modify Section 4.1.9, Arrays
+    
+    Replace:
+    
+        Except for the last declared member of a shader storage block (see
+        section “Interface Blocks”) or a descriptor heap declaration (without
+        set and binding qualifiers), the size of an array must be declared
+        (explicitly sized) before it is indexed with anything other than a
+        constant integral expression.
+    
+    With:
+    
+        Except for the last declared member of a shader storage block (see
+        section “Interface Blocks”), a resource or sampler heap block, or a
+        descriptor heap declaration (without set and binding qualifiers), the
+        size of an array must be declared (explicitly sized) before it is
+        indexed with anything other than a constant integral expression.
+
+    Add:
+    
+        Any resourceheap or samplerheap block may be declared without an
+        explicit size.
+        In this case, the effective array size is inferred at run-time from
+        the size of the data store backing the heap.
+        Such run-time-sized arrays may be indexed with general integer
+        expressions.
+        However, it is a compile-time error to pass them as an argument to a
+        function or index them with a negative constant expression.
+
+    Modify Section 4.3, Storage Qualifiers
+    
+    Add to the table of storage qualifiers:
+    
+    |===
+    | Storage Qualifier | Meaning
+    | resourceheap      | Value is stored in a resource heap.
+                          Values do not change across the primitive being
+                          processed.
+                          Forms linkage between a shader, API, and the
+                          application.
+    | samplerheap       | Value is stored in a sampler heap.
+                          Values do not change across the primitive being
+                          processed.
+                          Forms linkage between a shader, API, and the
+                          application.
+    |===
+    
+    Add a new section 4.3.10, Heap Variables
+    
+    The `resourceheap` and `samplerheap` qualifiers are used to declare
+    global interface blocks whose values are stored in the data store of a
+    resource or sampler heap, respectively, bound through the API.
+    Heap variables are read-only, with the underlying storage shared among
+    all active shader invocations.
+    Arrays of blocks, including unsized arrays, are allowed.
+    
+    `resourceheap` blocks may contain plain-old-data variables, buffer and
+    uniform blocks, image*, texture*, and accelerationStructure*
+    declarations, and buffer references.
+    Structures or arrays containing these types are also allowed.
+    These types may not be nested inside buffer or uniform blocks.
+    All `resourceheap` blocks are aliases of one another.
+    
+    `samplerheap` blocks may contain plain-old-data variables and sampler*
+    declarations.
+    Structures or arrays containing these types are also allowed.
+    All `samplerheap` blocks are aliases of one another.
+    
+    
+    Modify Section 4.4, Layout Qualifiers
+    
+    Add to the table of layout qualifiers:
+    
+    | Layout              | Qualifier | Individual | Block | Block  | Allowed      |
+    | Qualifier           | Only      | Variable   |       | Member | Interfaces   |
+    |------------------------------------------------------------------------------|
+    | descriptor_stride = |           |            |   X   |        | resourceheap |
+    |                     |           |            |       |        | /samplerheap |
+    |------------------------------------------------------------------------------|
+        
+Interactions with GL_KHR_ray_query and GL_KHR_ray_tracing
+
+    If both GL_KHR_ray_query and GL_KHR_ray_tracing are not supported,
+    acceleration structures cannot be specified as heap variables.
+
+    When supported, acceleration structures can be declared in a
+    `resourceheap` block as follows:
+    
+    ```glsl
+    resourceheap {
+        accelerationStructureKHR myAccelerationStructure;
+    } myResourceHeapView[];    
+    ```
+
+Interactions with GLSL_EXT_buffer_reference
+
+    If GLSL_EXT_buffer_reference is not supported, buffer references cannot
+    be specified as heap variables.
+    
+    When supported, buffer references can be declared in a `resourceheap`
+    block in any of the following manners:
+    
+    ```glsl
+    layout(buffer_reference) buffer ForwardRefType;
+    
+    layout(buffer_reference, std430, buffer_reference_align = 16) buffer ConcreteRefType {
+       ...
+    };
+
+    resourceheap {
+        ForwardRefType forwardRef;
+        ConcreteRefType concreteRef;
+        layout(buffer_reference) buffer {
+            uint data;
+        } inlineRef;
+    } myResourceHeapView[];
+
+    layout(buffer_reference) buffer ForwardRefType {
+        ...
+    };
+    ```
+    
+    Each of these is accessed as a buffer device address in SPIR-V.
+
+Revision History
+
+    Rev.  Date          Author     Changes
+    ----  -----------   --------   -------------------------------------------
+     1    17-Sep-2025   thector    Initial revision.
