@@ -112,15 +112,16 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
     
     Add to the table of layout qualifiers:
     
-    | Layout              | Qualifier | Individual      | Block | Block  | Allowed    |
-    | Qualifier           | Only      | Variable        |       | Member | Interfaces |
-    |---------------------------------------------------------------------------------|
-    | descriptor_heap     |     X     | opaque types    |   X   |        | uniform /  |
-    |                     |           | only            |       |        | buffer     |
-    |---------------------------------------------------------------------------------|
-    | descriptor_stride = |           | descriptor_heap |   X   |        | uniform /  |
-    |                     |           | qualified only  |       |        | buffer     |
-    |---------------------------------------------------------------------------------|
+    | Layout              | Qualifier | Individual      | Block     | Block  | Allowed    |
+    | Qualifier           | Only      | Variable        |           | Member | Interfaces |
+    |-------------------------------------------------------------------------------------|
+    | descriptor_heap     |           | arrays of       | arrays of |        | uniform /  |
+    |                     |     X     | opaque types    | blocks    |        | buffer     |
+    |                     |           | only            | only      |        |            |
+    |-------------------------------------------------------------------------------------|
+    | descriptor_stride = |           | descriptor_heap |     X     |        | uniform /  |
+    |                     |           | qualified only  |           |        | buffer     |
+    |-------------------------------------------------------------------------------------|
 
 
     Modify Section 4.4.5, Uniform and Shader Storage Block Layout Qualifiers
@@ -141,7 +142,7 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
         When targeting Vulkan, any uniform or shader storage block declared
         with a descriptor_heap qualifier is associated with the resource
         heap.
-        If the declaration is an array, indexing into the array will index
+        Indexing into a descriptor_heap qualified array will index
         into the heap using the size of the descriptor, unless otherwise
         specified by descriptor_stride.
         Such array declarations may be unsized.
