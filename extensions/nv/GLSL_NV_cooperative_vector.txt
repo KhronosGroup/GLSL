@@ -513,8 +513,8 @@ Issues
     we can remove the layout and stride parameters.
 
     RESOLVED: No restriction on layout, at least not at the language/IR level;
-    the current training functions does only support TrainingOptimal layout but it is
-    subject to change.
+    the current training functions only support TrainingOptimal layout but future extensions
+    may relax this.
 
 Example syntax:
 
