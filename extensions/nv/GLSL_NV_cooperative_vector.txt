@@ -395,7 +395,8 @@ Add a new Section 8.X, Cooperative Vector Functions
     coopVecOuterProductAccumulateNV is only supported for certain
     component types, as defined by the Vulkan extension specification.
 
-    The matrixLayout parameter must be gl_CooperativeVectorMatrixLayoutTrainingOptimalNV.
+    The matrixLayout parameter must be gl_CooperativeVectorMatrixLayoutTrainingOptimalNV,
+    and the stride parameter is ignored.
 
     matrixInterpretation selects the type used for the accumulation (i.e. the
     type of elements of the outer product matrix).
