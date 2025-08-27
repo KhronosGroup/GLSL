@@ -19,8 +19,8 @@ Status
 
 Version
 
-    Last Modified: January 30, 2025
-    Revision: 1
+    Last Modified: Aug 27, 2025
+    Revision: 2
 
 Dependencies
 
@@ -394,12 +394,8 @@ Add a new Section 8.X, Cooperative Vector Functions
     aligned, and the offset must be a multiple of 16.
     coopVecOuterProductAccumulateNV is only supported for certain
     component types, as defined by the Vulkan extension specification.
-    If the matrixLayout is RowMajorNV or ColumnMajorNV, then stride is the
-    number of bytes to add to the pointer to go from one row or column to
-    the next, and must be a multiple of 16. For optimal layouts, the
-    stride is ignored unless otherwise specified.
 
-    The matrixLayout parameter must be a constant expression.
+    The matrixLayout parameter must be gl_CooperativeVectorMatrixLayoutTrainingOptimalNV.
 
     matrixInterpretation selects the type used for the accumulation (i.e. the
     type of elements of the outer product matrix).
@@ -516,7 +512,9 @@ Issues
     (13) Can the training functions support only TrainingOptimal layout? If so,
     we can remove the layout and stride parameters.
 
-    RESOLVED: No restriction on layout, at least not at the language/IR level.
+    RESOLVED: No restriction on layout, at least not at the language/IR level;
+    the current training functions does only support TrainingOptimal layout but it is
+    subject to change.
 
 Example syntax:
 
@@ -529,7 +527,7 @@ Example syntax:
 
     const int MLPDim = 32;
     coopvecNV<float16_t, MLPDim> mlpVec;
-    coopVecMatMulNV(mlpVec, inputVec, gl_ComponentTypeFloat16NV, matrixBuf.matrixData, offset1, gl_ComponentTypeFloat16NV, MLPDim, inputDim, gl_CooperativeVectorMatrixLayoutRowMajorNV, false, MLPDim*sizeof(float16_t));
+    coopVecMatMulNV(mlpVec, inputVec, gl_ComponentTypeFloat16NV, matrixBuf.matrixData, offset1, gl_ComponentTypeFloat16NV, MLPDim, inputDim, gl_CooperativeVectorMatrixLayoutRowMajorNV, false, inputDim*sizeof(float16_t));
 
     // ReLU activation
     mlpVec = max(coopvecNV<float16_t, MLPDim>(0), mlpVec);
@@ -542,12 +540,15 @@ Example syntax:
     const int resultDim = 8;
     coopvecNV<float16_t, resultDim> resultVec;
 
-    coopVecMatMulNV(resultVec, mlpVec, gl_ComponentTypeFloat16NV, matrixBuf.matrixData, offset3, gl_ComponentTypeFloat16NV, resultDim, MLPDim, gl_CooperativeVectorMatrixLayoutRowMajorNV, false, resultDim*sizeof(float16_t));
+    coopVecMatMulNV(resultVec, mlpVec, gl_ComponentTypeFloat16NV, matrixBuf.matrixData, offset3, gl_ComponentTypeFloat16NV, resultDim, MLPDim, gl_CooperativeVectorMatrixLayoutRowMajorNV, false, MLPDim*sizeof(float16_t));
 
     // use resultVec[...]
 
 Revision History
 
-Revision 1
+    Revision 2, 2025/08/20 (tianyuny)
+    - Clarify matrix layout support for training functions.
+    - Fix example coopVecMatMulNV's matrix stride argument.
 
+    Revision 1
     - Internal revisions.
