@@ -1,0 +1,149 @@
+Name
+
+    EXT_shader_64bit_indexing
+
+Name Strings
+
+    GL_EXT_shader_64bit_indexing
+
+Contact
+
+    Jeff Bolz, NVIDIA (jbolz 'at' nvidia.com)
+
+Contributors
+
+Status
+
+    Complete.
+
+Version
+
+    Last Modified:      July 7, 2025
+    Revision:           1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.50
+    (#version 450) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification, version 4.60.8, dated August 14, 2023.
+
+    This extension interacts with GL_KHR_cooperative_matrix,
+    GL_NV_cooperative_matrix2, GL_NV_cooperative_vector.
+
+Overview
+
+    This extension adds various enabling features to allow runtime-sized
+    arrays in storage buffers to have sizes greater than 4GB.
+
+    64-bit address calculations can be enabled in two ways - either through
+    pipeline/shader creation flags in Vulkan, or through a SPIR-V execution
+    mode enabled via #pragma shader_64bit_indexing. The Vulkan extension
+    controls and describes which calculations occur with 64 bits of range.
+    This extension also has some enabling features that are useful once
+    64-bit address calculations are enabled in the API:
+
+    - Array indexing can use 64-bit integer indices.
+
+    - A new length64() operator is added for arrays that returns the length as
+      a 64-bit signed integer.
+
+    - For cooperative matrix load/store, new overloads are introduced that
+      have a 64-bit element offset.
+
+    - For cooperative vector intrinsics, new overloads are introduced that
+      have 64-bit byte offsets.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following lines in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_shader_64bit_indexing : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+      #define GL_EXT_shader_64bit_indexing              1
+
+    Modify Section 3.3, Preprocessor
+
+    Add at the end of the discussion of #pragma:
+
+        #pragma shader_64bit_indexing
+
+    can be used to request 64-bit indexing, as defined in the Vulkan
+    specification.
+
+    Modify Section 4.1.9, Arrays
+
+    Add at the end of the section:
+
+    Arrays also have a length64() method that behaves the same as the length()
+    method, but returns an int64_t. If an array's size is greater than the
+    maximum value of a signed integer, then length() returns an undefined
+    value and length64() should be used instead.
+
+    Modify any sections that normatively mention length() to also mention
+    length64().
+
+    Modify Section 5.7, Structure and Array Operations
+
+    Add int64_t and uint64_t to the set of allowed types for array indices.
+
+    Only the indexing of runtime-sized arrays in storage buffers can
+    use 64-bit address calculations. Any structure (other than a buffer block)
+    or sized array must be less than 4GB.
+
+    By default, uint32_t array indices may be interpreted as signed and thus
+    only have 31 bits of range. To guarantee the full range, use the pragma:
+
+        #pragma promote_uint32_indices
+
+    This will promote uint32_t indices to a 64-bit integer for use in the
+    SPIR-V access chain. This enables the full 32 bit range, but will require
+    the Int64 SPIR-V Capability.
+
+    Modify Section 8.X, Cooperative Matrix Functions
+
+    Add overloads of coopMatLoad and coopMatStore with the "element" parameter
+    having uint64_t type.
+
+    Add overloads of coopMatLoadTensorNV and coopMatStoreTensorNV with the
+    "elementOffset" parameter having uint64_t type.
+
+    Modify Section 8.X, Cooperative Vector Functions
+
+    Add overloads of coopVecMatMulAddNV and coopVecMatMulNV where the
+    matrixOffset and biasOffset parameters have uint64_t type.
+    
+    Add overloads of coopVecLoadNV, coopVecStoreNV,
+    coopVecOuterProductAccumulateNV, and coopVecReduceSumAccumulateNV
+    where the offset parameters have uint64_t type.
+
+Issues
+
+    (1) GLSL allows uint32_t array indices, but SPIR-V considers accesschain
+    indices to all be signed. Should the compiler zero-extend these to 64 bits?
+
+    RESOLVED: Added a pragma (promote_uint32_indices) to request this behavior.
+
+    (2) Should enablement of 64-bit indexing be controlled by the shader or API
+    or both?
+
+    RESOLVED: It can be enabled either via #pragma, or via pipeline/shader
+    creation flags. In some use cases it will be statically known that the
+    shader needs 64-bit indexing and controlling from the shader is more
+    natural. Other use cases may want to share the same shader code across
+    devices that support 64-bit indexing and those that don't, and enable it
+    based on device support.
+
+Revision History
+
+    Revision 1
+    - Internal revisions.
