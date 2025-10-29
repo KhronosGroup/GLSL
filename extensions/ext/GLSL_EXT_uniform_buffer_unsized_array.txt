@@ -1,0 +1,241 @@
+Name
+
+    GLSL_EXT_uniform_buffer_unsized_array
+
+Name Strings
+
+    GL_EXT_uniform_buffer_unsized_array
+
+Contact
+
+    Pat Brown, NVIDIA (pbrown 'at' nvidia.com)
+
+Contributors
+
+    Pranjal Dubey, NVIDIA
+
+Status
+
+    Draft.
+
+Version
+
+    Last Modified Date:         May 28, 2025
+    Revision:                   1
+
+Number
+
+    TBD
+
+Dependencies
+
+    OpenGL 3.1 or later is required.
+    
+    This extension is written against the OpenGL Shading Language
+    Specification, Version 4.60.
+    
+    OpenGL 3.1 or ARB_uniform_buffer_object is required, as this
+    extension extends the uniform buffer object functionality.
+
+Overview
+
+    This extension allows the last member of a uniform block to be declared as
+    an unsized array. This capability enables applications to create flexible
+    buffer layouts where the array size can vary based on runtime requirements.
+    
+    When the last member of a uniform block is declared as an unsized array,
+    the effective array size is inferred at run-time from the size of the
+    buffer object backing the uniform block. Such unsized arrays can be
+    indexed with general integer expressions, but may not be passed as
+    arguments to functions or indexed with negative constant expressions.
+    
+    Unlike shader storage blocks, this extension does not support the .length() method
+    for unsized arrays in uniform blocks. Applications needing to know array sizes at
+    runtime should calculate the length and pass it to shaders via a separate uniform.
+    This calculation can be performed using the formula: max((buffer_object_size - 
+    offset_of_array) / stride_of_array, 0), where buffer_object_size is the size of the
+    bound buffer, offset_of_array is the byte offset of the array in the block, and
+    stride_of_array is the byte stride between consecutive array elements.
+    
+    Uniform blocks have traditionally required explicit sizes for all arrays
+    which limits flexibility. With this extension, developers can create a
+    single shader that adapts to different data set sizes at runtime by binding
+    differently sized buffers.
+
+New Procedures and Functions
+
+    None.
+
+New Tokens
+
+    None.
+
+Additions to the OpenGL Shading Language 4.60 Specification
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_uniform_buffer_unsized_array : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+      #define GL_EXT_uniform_buffer_unsized_array       1
+
+
+    Modify Section 4.1.9, Arrays (p. 40-43)
+
+    (modify second sentence of first paragraph, p. 40) 
+    ... Except for the last declared member of a shader storage block or uniform block
+    (see section "Interface Blocks"), the size of an array must be declared 
+    (explicitly sized) before it is indexed with anything other than a constant integral
+    expression. ...
+
+    (modify second and third sentences of second paragraph, p. 40)
+    ... All arrays are inherently homogeneous; made of elements all having the same 
+    type and size, with one exception. The exception is a shader storage block or 
+    uniform block having an unsized array as its last member (run-time sized); 
+    an array can be formed from such a block, even if the blocks have differing 
+    lengths for their last member. ...
+
+    (modify last paragraph, p. 42)
+    ... This returns a type int. If an array has been explicitly sized, the value 
+    returned by the length() method is a constant expression. If an array has not 
+    been explicitly sized and is the last declared member of a shader storage block, 
+    the value returned will not be a constant expression and will be 
+    determined at runtime based on the size of the buffer object providing storage 
+    for the block. Such arrays are runtime sized. For runtime-sized arrays, 
+    the value returned by the length() method will be undefined if the array is contained 
+    in an array of shader storage blocks that is indexed with a non-constant 
+    expression less than zero or greater than or equal to the number of blocks in the array.
+    If an array has not been explicitly sized and is the last declared 
+    member of a uniform block, the length() method is not supported and will result 
+    in a compile-time error if used. ...
+
+    (modify second-to-last paragraph, p. 43)
+    ... For implicitly-sized or run-time-sized arrays, only the outer-most dimension 
+    can be lacking a size. A type that includes an unknown array size cannot be formed 
+    into an array until it gets an explicit size, except for shader storage blocks or 
+    uniform blocks where the only unsized array member is the last member of the block. ...
+
+    (modify last paragraph, p. 43)
+    ... In a shader storage block or uniform block, the last member may be declared 
+    without an explicit size. In this case, the effective array size is inferred at 
+    run-time from the size of the data store backing the interface block. Such 
+    run-time-sized arrays may be indexed with general integer expressions. However, 
+    it is a compile-time error to pass them as an argument to a function or index them 
+    with a negative constant expression. ...
+
+    Modify Section 4.3.9, Interface Blocks (p. 64)
+
+    (modify the paragraph about uniform/shader storage block arrays, before "A uniform or shader storage block array can only be indexed...")
+
+    For uniform or shader storage blocks declared as an array, each individual array element
+    corresponds to a separate buffer object bind range, backing one instance of the block. As the array
+    size indicates the number of buffer objects needed, uniform and shader storage block array
+    declarations must specify an array size. Additionally, both uniform blocks and shader storage 
+    blocks may have an unsized array as their last member (see section 4.1.9 "Arrays"). A uniform or 
+    shader storage block array can only be indexed with a dynamically uniform integral expression, 
+    otherwise results are undefined.
+
+Conformance Tests
+
+    TBD
+
+Interactions with Other Extensions
+
+    This extension extends ARB_uniform_buffer_object functionality by allowing
+    unsized arrays as the last member of uniform blocks.
+    
+    When both this extension and ARB_uniform_buffer_object are supported, uniform
+    blocks may have an unsized array as their last member, and the size of this
+    array is determined at runtime based on the size of the buffer object bound
+    to the uniform block.
+
+Sample Code
+
+    #version 450
+    #extension GL_EXT_uniform_buffer_unsized_array : require
+
+    // Main UBO with unsized array
+    layout(std140, binding=0) uniform DataBlock {
+        float scale;
+        float values[]; // unsized array as the last member
+    };
+
+    // Additional UBO for size information
+    layout(std140, binding=1) uniform SizeBlock {
+        int arraySize;  // Application provides the size
+    };
+
+    void main() {
+        // Use variable/general expression indexing
+        int index = gl_VertexIndex % arraySize;
+        float value = values[index];
+        
+        // Use the values in the shader
+        gl_Position = vec4(value * scale, 0.0, 0.0, 1.0);
+    }
+
+Issues
+
+    1) How is the size of an unsized array in a uniform block determined?
+
+       RESOLVED: The effective size is determined from the underlying buffer 
+       object size using the formula:
+       
+       size = max((buffer_size - array_offset) / array_stride, 0)
+       
+       This calculation accounts for the actual size of the buffer object bound to
+       the uniform block, the offset of the unsized array within the block, and the
+       stride between array elements according to the layout rules.
+
+    2) Should we provide access to the .length() method for unsized arrays
+       in uniform blocks?
+
+       RESOLVED: No. Implementing .length() for unsized uniform block arrays would
+       require substantial modifications to both compiler infrastructure and driver
+       runtime components at several hardware vendors involved in this extension.
+       The implementation complexity to track buffer sizes at runtime was deemed
+       disproportionate to the practical benefits. Instead, we recommend that
+       developers who need this functionality calculate array lengths in their
+       application code when setting up buffer bindings, and provide these values
+       to shaders through separate uniform variables.
+
+    3) What happens when an application indexes beyond the effective bounds
+       of an unsized array?
+
+       RESOLVED: As with regular buffer accesses, accesses beyond the bound
+       buffer object's size are undefined and may result in GL interruption
+       or termination. Applications should be careful to ensure that array
+       accesses remain within the effective bounds of the array.
+       When applications enable "robustness" features that include bounds
+       checking of accesses to uniform and storage blocks, those bounds
+       checks should also apply when reading unsized array elements that are
+       not fully contained in the uniform buffer memory associated with the block.
+
+    4) Should we allow unsized arrays at any position within a uniform block?
+
+       RESOLVED: No. Only the last member of a uniform block may be declared
+       as an unsized array. This restriction simplifies implementation and
+       memory layout, as only the final member's size needs to be determined
+       at runtime. Allowing unsized arrays in arbitrary positions would
+       significantly complicate the memory layout of the entire block.
+
+    5) What are the restrictions on using unsized arrays in uniform blocks?
+
+       RESOLVED: Several restrictions apply to unsized arrays in uniform blocks:
+       
+       - They can only appear as the last member of a uniform block
+       - They cannot be passed as arguments to functions
+       - They cannot be indexed with negative constant expressions
+       - The length() method is not supported
+       
+       These restrictions ensure predictable behavior and manageable implementation
+       complexity while still providing the core functionality of variable-sized arrays.
+
+Revision History
+
+    Revision 1, 2025/05/28
+    - Initial draft
