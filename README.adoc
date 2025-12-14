@@ -105,3 +105,4 @@ that do not live in the Khronos registries for OpenGL or OpenGL ES.
 - link:{repo}/ext/GL_EXT_float8_e5m2_e4m3.txt[GL_EXT_float8_e5m2_e4m3]
 - link:{repo}/ext/GL_EXT_shader_64bit_indexing.txt[GL_EXT_shader_64bit_indexing]
 - link:{repo}/ext/GLSL_EXT_shader_invocation_reorder.txt[GL_EXT_shader_invocation_reorder]
+- link:{repo}/ext/GL_EXT_relaxed_block_layout.txt[GL_EXT_relaxed_block_layout]
