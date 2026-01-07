@@ -1,0 +1,125 @@
+Name
+
+    GL_EXT_long_vector
+
+Contact
+
+    Jeff Bolz, NVIDIA (jbolz 'at' nvidia.com)
+
+Contributors
+
+Status
+
+    Complete.
+
+Version
+
+    Last Modified: December 8, 2025
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.50
+    (#version 450) and higher.
+
+    This extension interacts with GL_NV_cooperative_vector.
+
+Overview
+
+    This extension adds a templated "vector<ComponentType, NumElements>"
+    type where the number of elements is not limited to four and can either
+    be a literal or a constant expression.
+
+Mapping to SPIR-V
+-----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+        vector<T, literal> -> OpTypeVector
+        vector<T, constant expression> -> OpTypeVectorIdEXT
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_EXT_long_vector : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+        #define GL_EXT_long_vector 1
+
+Modify Section 3.6, Keywords
+(add to list of keywords)
+
+    vector
+
+Modify Section 4.1.5, Vectors
+
+    Add to the end of the section:
+
+    Vectors with arbitrary length, or length determined by a constant
+    expression, can be declared using 'vector<T, N>'.
+
+    Vectors are parameterized by two type parameters: type per component,
+    and number of components. The parameters are specified in order between angle
+    brackets ('<' and '>') and are comma-separated. The number of
+    components can be a constant expression or specialization constant
+    expression, and no error checking is performed on the value at
+    compile time. The type per component must be a scalar numerical or boolean type.
+
+    Vector types with more than four components can be used as global
+    variables, local variables, function parameters, function return values,
+    and in uniform, buffer, shared memory, push constant, or shaderrecord storage.
+
+    If GL_NV_cooperative_vector is supported, coopvecNV and vector types
+    with matching parameters are constructable from each other.
+
+Modify Section 5.5, Vector and Scalar Components and Length
+
+    Add to the end of the section:
+
+    Component selection using the period (.) operator is not allowed for
+    vector types declared using the `vector` keyword. Array subscripting
+    syntax is allowed.
+
+Modify Chapter 8. Built-In Functions
+
+    Modify the gen*Type placeholders to allow vector<T, N> for any value of N,
+    and for the appropriate component type T.
+
+Modify Section 8.7. Vector Relational Functions
+
+    Modify the *vec placeholders to allow vector<T, N> for any value of N,
+    and for the appropriate component type T.
+
+Modify Section 9, Shading Language Grammar for Core Profile
+(Add to tokens list)
+
+    VECTOR
+
+Modifications to the OpenGL Specification, Version 4.6
+
+Modify 7.6.2.2 Standard Uniform Block Layout
+
+    Modify rule 3:
+
+    3. If the member is a vector with three or more components, with components
+    consuming N basic machine units, the base alignment is 4N.
+
+Issues
+
+    (1) Is there an upper limit on N?
+
+    RESOLVED: The API will define a limit, GLSL will not define a limit.
+
+Examples
+
+Revision History
+
+Revision 1
+
+    - Internal revisions.
