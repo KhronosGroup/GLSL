@@ -1,0 +1,114 @@
+Name
+
+    EXT_relaxed_block_layout
+
+Name Strings
+
+    GL_EXT_relaxed_block_layout
+
+Contact
+
+    Karpov Ruslan, independent
+
+Contributors
+
+    Karpov Ruslan, independent
+
+Status
+
+    Draft.
+
+Version
+
+    Last Modified Date: 14-Dec-2025
+    Revision: 1
+
+Number
+
+    TBD
+
+Dependencies
+
+    Written against SPIR-V 1.0.
+    Written against GLSL 4.6.
+    Written against Vulkan 1.0 with the VK_KHR_relaxed_block_layout extension.
+
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.00
+    (#version 300) and higher.
+
+    This extension requires the GL_KHR_vulkan_glsl extension.
+
+Overview
+
+    Adds a new layout qualifier (relaxed) for uniform, push constant, storage
+    buffer block. The qualifier modifies the alignment rules of vector offsets.
+
+Add to Chapter 3 of the OpenGL Shading Language Specification
+
+    Including the following line in a shader will control the language features described in this extension:
+
+      #extension GL_EXT_relaxed_block_layout : <behavior>
+
+    Where <behavior> is as specified in section 3.3.
+
+    This new definition is added to the OpenGL Shading Language:
+
+      #define GL_EXT_relaxed_block_layout 1
+
+Add to Chapter 4 of the OpenGL Shading Language Specification
+
+    Modify table in Section 4.4 (Layout Qualifiers)
+
+
+    Layout Qualifier  Qualifier  Individual   Block    Block      Allowed
+                        Only      Variable             Member    Interface
+    ----------------  ---------  ----------   -----    ------    ---------
+
+    relaxed               X                     X                uniform
+                                                                 buffer
+
+
+    Modify section "4.4.5 - Uniform and Storage Block Qualifiers"
+
+        Add "relaxed" to the list defining layout-qualifier-id.
+
+        Add the following paragraph immediately after the paragraph starting
+        with "The std140 and std430 qualifiers override only...":
+
+            The _relaxed_ qualifier overrides the vector offset alignment
+            rules defined for the std430 and std140 layout qualifiers when
+            using them as follows: the vector aligned offset is computed by
+            rounding the base offset up to a multiple of the base alignment
+            of the vector component. If the _relaxed_ qualifier is used with
+            other layout qualifiers, it is ignored. Also, if S and F are the
+            size and offset of a vector in machine units, respectively, then
+            the vectors must obey the following rules:
+
+            1. If S is less than or equal to 16, then F must satisfy
+               the equality: floor(F / 16) == floor((F + S - 1) / 16).
+            2. If S is more than 16, then F must satisfy the equality:
+               (F % 16) == 0.
+
+            This matches the alignment and offset rules for vectors of the
+            "Offset and Stride Assignment" section of the interfaces chapter
+            in the Vulkan 1.0 specification when VK_KHR_relaxed_block_layout
+            is enabled.
+
+            Note that the base alignment of the vectors is not overridden by
+            _relaxed_ qualifier.
+
+        Add "relaxed" to the list of qualifiers that can only be declared at
+        global scope or on a block decoration.
+
+Issues
+
+    None
+
+Revision History
+
+    Rev.    Date         Author         Changes
+    ----  -----------    -------------  ---------------------------------------
+    1     14-Dec-2025    Karpov Ruslan  Initial draft
