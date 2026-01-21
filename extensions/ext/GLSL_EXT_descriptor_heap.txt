@@ -1,0 +1,247 @@
+Name
+
+    EXT_descriptor_heap
+
+Name Strings
+
+    GL_EXT_descriptor_heap
+
+Contact
+
+    Tobias Hector (tobias.hector 'at' amd.com), AMD
+
+Notice
+
+    Copyright (c) 2024-2025 The Khronos Group Inc. Copyright terms at
+        http://www.khronos.org/registry/speccopyright.html
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date: 2025-07-08
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.20
+    (#version 420) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    This extension is written against revision 8 of the OpenGL Shading Language
+    version 4.60, dated August 14, 2023.
+
+    This extension interacts with GL_KHR_ray_tracing and GL_KHR_ray_query.
+
+Overview
+
+    This extension document modifies GLSL resource bindings to allow
+    declaring resources with the `descriptor_heap` qualifier rather than
+    set and binding qualifiers, and declaring multiple such resources as
+    unsized arrays.
+    
+    Mapping to SPIR-V
+    -----------------
+
+    All declarations of gtexture* or gimage* types without set and binding
+    qualifiers are mapped to the `ResourceHeapKHR` built-in and cast to the
+    appropriate type on access.
+    
+    All declarations of sampler or samplerShadow types without set and
+    binding qualifiers are mapped to the `SamplerHeapKHR` built-in and cast
+    to the appropriate type on access.
+    
+    All declarations of buffer or uniform blocks without set and binding
+    qualifiers are mapped to the `ResourceHeapKHR` built-in and dereferenced
+    with OpBufferPointerKHR to the appropriate type on access.
+    
+    All declarations of accelerationStructure types without set and binding
+    qualifiers are mapped to the `ResourceHeapKHR` built-in and cast to the
+    appropriate type on access.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_descriptor_heap : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    A new preprocessor #define is added:
+
+      #define GL_EXT_descriptor_heap                1
+
+
+Additions to Chapter 4 of the OpenGL Shading Language Specification
+(Variables and Types)
+
+    Modify Section 4.1.9, Arrays
+    
+    Replace:
+    
+        Except for the last declared member of a shader storage block (see
+        section “Interface Blocks”), the size of an array must be declared
+        (explicitly sized) before it is indexed with anything other than a
+        constant integral expression.
+    
+    With:
+    
+        Except for the last declared member of a shader storage block (see
+        section “Interface Blocks”) or a descriptor heap declaration (without
+        set and binding qualifiers), the size of an array must be declared
+        (explicitly sized) before it is indexed with anything other than a
+        constant integral expression.
+
+    Add:
+    
+        Any uniform or shader storage block, texture, image, sampler, or
+        accelerationStructure declaration without set and binding qualifiers
+        may be declared without an explicit size. In this case, the effective
+        array size is inferred at run-time from the size of the data store
+        backing each descriptor heap. Such run-time-sized arrays may be
+        indexed with general integer expressions. However, it is a
+        compile-time error to pass them as an argument to a function or index
+        them with a negative constant expression.
+
+    Modify Section 4.4, Layout Qualifiers
+    
+    Add to the table of layout qualifiers:
+    
+    | Layout              | Qualifier | Individual      | Block     | Block  | Allowed    |
+    | Qualifier           | Only      | Variable        |           | Member | Interfaces |
+    |-------------------------------------------------------------------------------------|
+    | descriptor_heap     |           | arrays of       | arrays of |        | uniform /  |
+    |                     |     X     | opaque types    | blocks    |        | buffer     |
+    |                     |           | only            | only      |        |            |
+    |-------------------------------------------------------------------------------------|
+    | descriptor_stride = |           | descriptor_heap |     X     |        | uniform /  |
+    |                     |           | qualified only  |           |        | buffer     |
+    |-------------------------------------------------------------------------------------|
+
+
+    Modify Section 4.4.5, Uniform and Shader Storage Block Layout Qualifiers
+    
+    Add to the list of qualifiers under `layout-qualifier-id`:
+    
+        descriptor_heap
+        descriptor_stride = `layout-qualifier-value`
+        
+    Remove the following sentence:
+    
+        It is a compile-time or link-time error to use the same binding
+        number for more than one uniform block or for more than one buffer
+        block.
+
+    Add to the end of the section:
+    
+        When targeting Vulkan, any uniform or shader storage block declared
+        with a descriptor_heap qualifier is associated with the resource
+        heap.
+        Indexing into a descriptor_heap qualified array will index
+        into the heap using the size of the descriptor, unless otherwise
+        specified by descriptor_stride.
+        Such array declarations may be unsized.
+        All such arrays alias onto the same heap.
+
+        A compile-time error is generated if both descriptor_heap and
+        set/binding qualifiers are specified.
+        A compile-time error is generated if descriptor_stride is specified
+        without descriptor_heap.
+        A compile-time error is generated if descriptor_stride is not a
+        power-of-two value.
+
+
+    Modify Section 4.4.6, Opaque Uniform Layout Qualifiers
+
+    Add to the list of qualifiers under `layout-qualifier-id`:
+    
+        descriptor_heap
+        descriptor_stride = `layout-qualifier-value`
+        
+    Add the following sentences:
+
+        When targeting Vulkan, it is a compile-time or link-time error to use
+        the same binding and set numbers for more than one `sampler`,
+        `samplerShadow`, or `*sampler*` declaration, for more than one
+        `*texture*` or `*sampler*` declaration, or for more than one
+        `*image*` declaration, in the same shader stage.
+        When targeting OpenGL, it is a compile-time or link-time error
+        to use the same binding number for any two declarations in the same
+        shader stage, with the exception of two atomic counters with
+        different `offset` values.
+
+    Add to the end of the section:
+    
+        When targeting Vulkan, any opaque uniform variable with the
+        descriptor_heap qualifier is associated with a descriptor heap.
+        image*, texture*, and accelerationStructure* declarations are
+        associated with the resource heap.
+        sampler or samplerShadow declarations are associated with the sampler heap.
+        sampler*D declarations must not be declared with the descriptor_heap
+        qualifier, but can be constructed from a sampler and texture
+        qualified with descriptor_heap.
+        If the declaration is an array, indexing into the array will index
+        into the heap using the stride specified in the API, unless otherwise
+        specified by descriptor_stride.
+        Such array declarations may be unsized.
+        All such arrays alias onto the same heap.
+        
+        A compile-time error is generated if both descriptor_heap and
+        set/binding qualifiers are specified.
+        A compile-time error is generated if descriptor_stride is specified
+        without descriptor_heap.
+        A compile-time error is generated if descriptor_stride is not a
+        power-of-two value.
+
+        
+Interactions with GL_KHR_ray_query and GL_KHR_ray_tracing
+
+    If both GL_KHR_ray_query and GL_KHR_ray_tracing are not supported,
+    accelerationStructure declarations are not supported.
+
+
+Examples
+
+    The following code illustrates a number of heap declarations and how they
+    could be used:
+    
+        // Sampler array aliased to the sampler heap
+        layout(descriptor_heap) uniform sampler heapSampler[];
+        
+        // Different image arrays aliased to the image heap
+        layout(descriptor_heap) uniform texture2D heapTexture2D[];
+        layout(descriptor_heap) uniform texture3D heapTexture3D[];
+
+        // Different buffer arrays aliased to the buffer heap
+        layout(descriptor_heap) buffer StorageBufferA {
+            vec4 a;
+        } heapStorageBufferA[];
+        layout(descriptor_heap) buffer StorageBufferB {
+            vec4 b;
+        } heapStorageBufferB[];
+        layout(descriptor_heap) uniform UniformBuffer {
+            vec4 colorOffset;
+        } heapUniformBuffer[];
+
+        layout (location = 0) in vec2 uvs;
+        layout (location = 1) flat in uint index;
+
+        layout (location = 0) out vec4 fragColor;
+
+        void main()
+        {
+            fragColor = texture(sampler2D(heapTexture2D[27], heapSampler[0]), uvs);
+            fragColor += heapUniformBuffer[nonuniformEXT(index)].colorOffset;
+        }
+    
+
+Revision History
+
+    Rev.  Date          Author     Changes
+    ----  -----------   --------   -------------------------------------------
+     1    08-Jul-2025   thector    Initial revision.
