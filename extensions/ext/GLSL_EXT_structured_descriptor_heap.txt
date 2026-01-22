@@ -1,0 +1,388 @@
+Name
+
+    EXT_structured_descriptor_heap
+
+Name Strings
+
+    GL_EXT_structured_descriptor_heap
+
+Contact
+
+    Tobias Hector (tobias.hector 'at' amd.com), AMD
+
+Notice
+
+    Copyright (c) 2025 The Khronos Group Inc. Copyright terms at
+        http://www.khronos.org/registry/speccopyright.html
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date: 2025-09-17
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.20
+    (#version 420) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    This extension is written against revision 8 of the OpenGL Shading Language
+    version 4.60, dated August 14, 2023.
+    
+    This extension is written against version 1 of GLSL_EXT_descriptor_heap.
+    
+    This extension interacts with GLSL_EXT_buffer_reference and
+    GLSL_EXT_buffer_reference2.
+    
+    This extension interacts with GL_EXT_scalar_block_layout.
+    
+    This extension interacts with GL_KHR_ray_tracing and GL_KHR_ray_query.
+
+Overview
+
+    This extension document modifies the shader interface to allow declaring
+    new `resourceheap` and `samplerheap` blocks that enable applications to
+    pull structured data and descriptors from Vulkan resource and sampler
+    heaps.
+    
+    Each block can also be declared with a variable indicating a byte offset
+    applied to each lookup, so that different regions of the heap can be used
+    for different resource types.
+    
+    For example, the following code is now valid:
+    
+    ```glsl
+    layout (constant_id = 0) const uint materialsOffset = 0;
+    
+    layout (push_constant) uniform MyPushData {
+        vec4    someData;
+        uint    someMoreData;
+        uint    buffersOffset;
+    } myPushData;
+    
+    struct MaterialData {
+        texture2D myTexture;
+        uniform {
+            uint data;
+        } myBuffer;
+        vec4 data0;
+        uint data1;
+    };
+    
+    layout (heap_offset = materialsOffset) resourceheap MaterialHeap {
+        uint materialCount;
+        MaterialData materials[];
+    } materialHeap;
+            
+    layout (heap_offset = myPushData.buffersOffset) resourceheap BufferHeap {
+        uint bufferCount;
+        layout (descriptor_stride = 128) buffer {
+            vec4 data;
+        } myFirstBuffer;
+        buffer {
+            uint data;
+        } myStorageBuffers[];
+    } bufferHeap;
+    
+    samplerheap SamplerHeap {
+        sampler samplers[];
+    } samplerHeap;
+    ```
+    
+    Accessing parts of these heap blocks is performed similarly to buffer
+    block access, with each element read from an appropriate offset into the
+    heap.
+    Layout of data is always as if `scalar` layout were used for a buffer.
+    The size of resource types in the heap is dependent on the client API,
+    though can be overridden with the "descriptor_stride" qualifier.
+
+    Mapping to SPIR-V
+    -----------------
+
+    The structure is laid out in the same way as any other structure would
+    be, with the exception that resource variables are laid out using the
+    `OffsetIdEXT` decoration based on the result of `OpConstantSizeOfEXT` for
+    various descriptor types, as their sizes are not known until client API
+    compilation.
+    This does add some complexity to compilation as various sizes and
+    alignments must now be calculated when the shader is compiled in the
+    client API.
+    
+    For example, the `MaterialData materials[];` declaration would map to the
+    following SPIR-V:
+    
+    ```spir-v
+    // Offset and Stride decorations
+                                  OpMemberDecorateIdEXT %materials_t OffsetIdEXT %offset_0 0
+                                  OpMemberDecorateIdEXT %materials_t OffsetIdEXT %offset_1 1
+                                  OpMemberDecorateIdEXT %materials_t OffsetIdEXT %offset_2 2
+                                  OpMemberDecorateIdEXT %materials_t OffsetIdEXT %offset_3 3
+                                  OpDecorateIdEXT %materials_t_array_t ArrayStrideIdEXT %materials_size
+    
+    // Types
+    %float_t                    = OpTypeFloat 32
+    %texture_t                  = OpTypeImage %float_t 2D 0 0 0 1 Unknown
+    %buffer_t                   = OpTypeBufferEXT Uniform
+    %vec4_t                     = OpTypeVector %float_t 4
+    %uint_t                     = OpTypeInt 32 0
+    %materials_t                = OpTypeStruct %texture_t %buffer_t %vec4_t %uint_t
+    %materials_array_t          = OpTypeRuntimeArray %materials_t
+    
+    // Member sizes/alignments
+    %texture_size               = OpConstantSizeOfEXT %texture_t
+    %buffer_size                = OpConstantSizeOfEXT %uniform_buffer_t
+    %vec4_size                  = OpConstant 16
+    %vec4_alignment             = OpConstant 4  // Only type with alignment != size known to the shader
+    %uint_size                  = OpConstant 4
+    
+    // MaterialData structure alignment
+    %texture_bigger             = OpSpecConstantOp OpUGreaterThan %boolean_t %texture_size %buffer_size
+    %texture_buffer_align       = OpSpecConstantOp OpSelect %uint_t %member0_bigger %texture_size %buffer_size
+    %plain_old_data_align       = OpConstant 4 // We know the largest alignment of POD statically
+    %texture_buffer_bigger      = OpSpecConstantOp OpUGreaterThan %boolean_t %texture_buffer_size %plain_old_data_align
+    %materials_alignment        = OpSpecConstantOp OpSelect %uint_t %texture_buffer_bigger %texture_buffer_align %plain_old_data_align
+    
+    // Member offsets
+    %offset_0                   = OpConstant %uint_t 0
+    %offset_1_unaligned         = OpSpecConstantOp OpIAdd %uint_t %offset_0 %texture_size
+    %offset_1_padding           = OpSpecConstantOp OpUMod %buffer_size %offset_1_unaligned
+    %offset_1                   = OpSpecConstantOp OpIAdd %uint_t %offset_1_unaligned %offset_1_padding
+    %offset_2_unaligned         = OpSpecConstantOp OpIAdd %uint_t %offset_1 %buffer_size
+    %offset_2_padding           = OpSpecConstantOp OpUMod %vec4_alignment %offset_2_unaligned
+    %offset_2                   = OpSpecConstantOp OpIAdd %uint_t %offset_2_unaligned %offset_2_padding
+    %offset_3_unaligned         = OpSpecConstantOp OpIAdd %uint_t %offset_2 %vec4_size
+    %offset_3_padding           = OpSpecConstantOp OpUMod %uint_size %offset_3_unaligned
+    %offset_3                   = OpSpecConstantOp OpIAdd %uint_t %offset_3_unaligned %offset_3_padding
+    
+    // Size of the MaterialData type
+    %materials_size_unaligned   = OpSpecConstantOp OpIAdd %uint_t %offset_3 %uint_size
+    %materials_padding          = OpSpecConstantOp OpUMod %materials_alignment %materials_size_unaligned
+    %materials_size             = OpSpecConstantOp OpIAdd %materials_size_unaligned %materials_padding
+    ```
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_structured_descriptor_heap : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    A new preprocessor #define is added:
+
+      #define GL_EXT_structured_descriptor_heap                1
+
+
+Additions to Chapter 4 of the OpenGL Shading Language Specification
+(Variables and Types)
+
+    Modify Section 4.1.9, Arrays
+    
+    Replace:
+    
+        Except for the last declared member of a shader storage block (see
+        section “Interface Blocks”) or a descriptor heap declaration (without
+        set and binding qualifiers), the size of an array must be declared
+        (explicitly sized) before it is indexed with anything other than a
+        constant integral expression.
+    
+    With:
+    
+        Except for the last declared member of a shader storage, resource
+        heap, or sampler heap block (see section “Interface Blocks” and “Heap
+        Blocks”), or a descriptor heap declaration (without set and binding
+        qualifiers), the size of an array must be declared (explicitly sized)
+        before it is indexed with anything other than a constant integral
+        expression.
+
+
+    Modify Section 4.3, Storage Qualifiers
+    
+    Add to the table of storage qualifiers:
+    
+    |===
+    | Storage Qualifier | Meaning
+    | resourceheap      | Value is stored in a resource heap.
+                          Values do not change across the primitive being
+                          processed.
+                          Forms linkage between a shader, API, and the
+                          application.
+    | samplerheap       | Value is stored in a sampler heap.
+                          Values do not change across the primitive being
+                          processed.
+                          Forms linkage between a shader, API, and the
+                          application.
+    |===
+    
+    Add a new section 4.3.10, Heap Blocks
+    
+    The `resourceheap` and `samplerheap` qualifiers are used to declare
+    global interface blocks whose values are stored in the data store of a
+    resource or sampler heap, respectively, bound through the API.
+    Heap variables are read-only, with the underlying storage shared among
+    all active shader invocations.
+    Arrays of blocks are not allowed.
+    
+    `resourceheap` blocks may contain plain-old-data variables, buffer and
+    uniform blocks, image*, texture*, and accelerationStructure*
+    declarations, and buffer references.
+    Structures or arrays containing these types are also allowed.
+    These types may not be nested inside buffer or uniform blocks.
+    All `resourceheap` blocks are aliased on top of the same heap, but may
+    be placed at different offsets using `heap_offset`.
+    
+    `samplerheap` blocks may contain plain-old-data variables and sampler*
+    declarations.
+    Structures or arrays containing these types are also allowed.
+    All `samplerheap` blocks are aliased on top of the same heap, but may
+    be placed at different offsets using `heap_offset`.
+    
+    
+    Modify Section 4.4, Layout Qualifiers
+    
+    Add to the table of layout qualifiers:
+    
+    |----------------------------------------------------------------------------------|
+    | Layout              | Qualifier | Individual | Block | Block      | Allowed      |
+    | Qualifier           | Only      | Variable   |       | Member     | Interfaces   |
+    |----------------------------------------------------------------------------------|
+    | descriptor_stride = |           |            |       |      X     | resourceheap |
+    |                     |           |            |       |            | /samplerheap |
+    |----------------------------------------------------------------------------------|
+    | heap_offset       = |           |            |   X   |            | resourceheap |
+    |                     |           |            |       |            | /samplerheap |
+    |----------------------------------------------------------------------------------|
+    | buffer_reference    |    X      |            |       | buffer     | resourceheap |
+    |                     |           |            |       | block only | /samplerheap |
+    |----------------------------------------------------------------------------------|
+    | buffer_reference  = |    X      |            |       | buffer     | resourceheap |
+    |                     |           |            |       | block only | /samplerheap |
+    |----------------------------------------------------------------------------------|
+    | row_major           |    X      |            |       | matrix     | resourceheap |
+    | column_major        |           |            |       | only       | /samplerheap |
+    |----------------------------------------------------------------------------------|
+    | offset            = |           |            |       |      X     | resourceheap |
+    |                     |           |            |       |            | /samplerheap |
+    |----------------------------------------------------------------------------------|
+    | shared              |    X      |            |       | buffer or  | resourceheap |
+    | packed              |           |            |       | uniform    | /samplerheap |
+    | std140              |           |            |       | blocks     |              |
+    | std430              |           |            |       | only       |              |
+    | scalar              |           |            |       |            |              |
+    |----------------------------------------------------------------------------------|
+            
+    Modify Section 4.4.5, Uniform and Shader Storage Block Layout Qualifiers
+    
+    Add to the end of the section:
+    
+        When targeting Vulkan, any uniform or shader storage block declared
+        inside a `resourceheap` block is read as a descriptor from the
+        resource heap, with its elements read from that descriptor.
+        Subsequent members of the resourceheap block are offset by the size
+        of the descriptor in the client API, unless otherwise specified by
+        `descriptor_stride`.
+
+    Modify Section 4.4.6, Opaque Uniform Layout Qualifiers
+    
+    Add to the end of the section:
+    
+        When targeting Vulkan, any image*, texture*, and
+        accelerationStructure* variable inside a `resourceheap` block is read
+        as a descriptor from the resource heap, and any sampler* variable
+        inside a `samplerheap` block is read as a descriptor from the sampler
+        heap.
+        Subsequent members of the resourceheap or samplerheap block are
+        offset by the size of the descriptor in the client API, unless
+        otherwise specified by `descriptor_stride`.
+        
+    Add Section 4.4.10, Resource and Sampler Heap Layout Qualifiers
+    
+        Resource and sampler heap blocks are only available when targeting
+        Vulkan.
+        
+        Resource and sampler heap blocks can be declared with the following
+        layout qualifiers:
+        
+        _layout-qualifier-id_:
+            *heap_offset* = _layout-qualifier-value_
+            *heap_offset* = __variable_identifier__
+        
+        The `heap_offset` qualifier specifies an offset in bytes to be added
+        to any heap access, enabling shaders to access different regions of
+        a heap in different ways through multiple declarations.
+        
+        Unlike other layout qualifiers, this allows the offset to be
+        specified as either a literal or any global read-only variable value,
+        such that the offset can come through things like push constants.
+        There is no guarantee made about when the variable is read, so care
+        should be taken to avoid data races if the value is sourced from a
+        buffer.
+        
+        It is a compile-time error if a variable is specified that can be
+        written to during the lifetime of the shader.
+        
+        Members of such heap blocks can be qualified with the `offset=`,
+        `row_major`, `column_major`, `buffer_reference`, and
+        `buffer_reference_align` qualifiers in the same manner as if they
+        were declared in a buffer block.
+        
+        `buffer` and `uniform` blocks declared inside a heap block can be
+        qualified with `shared`, `packed`, `std430`, `std140`, and `scalar`
+        qualifiers just as if they were declared outside of a resource heap.
+        
+Interactions with GL_KHR_ray_query and GL_KHR_ray_tracing
+
+    If both GL_KHR_ray_query and GL_KHR_ray_tracing are not supported,
+    acceleration structures cannot be specified as heap variables.
+
+    When supported, acceleration structures can be declared in a
+    `resourceheap` block:
+    
+    ```glsl
+    resourceheap {
+        accelerationStructureKHR myAccelerationStructure;
+    } myResourceHeapView;    
+    ```
+
+Interactions with GLSL_EXT_buffer_reference
+
+    If GLSL_EXT_buffer_reference is not supported, buffer references cannot
+    be specified as heap variables.
+    
+    When supported, buffer references can be declared in a `resourceheap`
+    block in any of the following manners:
+    
+    ```glsl
+    layout(buffer_reference) buffer ForwardRefType;
+    
+    layout(buffer_reference, std430, buffer_reference_align = 16) buffer ConcreteRefType {
+       ...
+    };
+
+    resourceheap {
+        ForwardRefType forwardRef;
+        ConcreteRefType concreteRef;
+        layout(buffer_reference) buffer {
+            uint data;
+        } inlineRef;
+    } myResourceHeapView;
+
+    layout(buffer_reference) buffer ForwardRefType {
+        ...
+    };
+    ```
+    
+    Each of these is accessed as a buffer device address in SPIR-V.
+
+Revision History
+
+    Rev.  Date          Author     Changes
+    ----  -----------   --------   -------------------------------------------
+     1    17-Sep-2025   thector    Initial revision.
