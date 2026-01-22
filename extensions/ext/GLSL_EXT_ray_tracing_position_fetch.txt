@@ -1,0 +1,137 @@
+Name
+
+    EXT_ray_tracing_position_fetch
+
+Name Strings
+
+    GL_EXT_ray_tracing_position_fetch
+
+Contact
+
+    Eric Werness (ewerness 'at' nvidia.com), NVIDIA
+
+Contributors
+
+    Stu Smith, AMD
+    Daniel Koch, NVIDIA
+    Members of the Vulkan Ray Tracing TSG
+
+Status
+
+    Complete
+
+Version
+
+    Last Modified Date: 2023-04-21
+    Revision: 2
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.60
+    (#version 460) and higher.
+
+    This extension is written against revision 5 of the OpenGL Shading Language
+    version 4.60, dated September 4, 2017.
+
+    This extension interacts with revision 43 of the GL_KHR_vulkan_glsl
+    extension, dated October 25, 2017.
+
+    This extension interacts with GLSL_EXT_ray_tracing.
+
+    This extension interacts with GLSL_EXT_ray_query.
+
+Overview
+
+    This extension document modifies GLSL to add support for ray tracing
+	to query the vertex position of a triangle hit for both ray query
+	and ray pipelines.
+
+    This extension document adds support for the following extensions to be used
+    within GLSL:
+
+    - GL_EXT_ray_tracing_position_fetch - enables ray tracing triangle position fetch.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+      gl_HitTriangleVertexPositionsEXT -> HitTriangleVertexPositionsKHR decorated OpVariable
+
+      rayQueryGetIntersectionTriangleVertexPositionsEXT
+           -> OpRayQueryGetIntersectionTriangleVertexPositionsKHR instruction
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_ray_tracing_position_fetch       : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+    New preprocessor #defines are added:
+
+      #define GL_EXT_ray_tracing_position_fetch          1
+
+Additions to Chapter 7 of the OpenGL Shading Language Specification
+(Built-in Variables)
+
+    Modify Section 7.1, Built-in Languages Variables
+
+    In the any-hit and closest-hit shading languages, built-in variables are declared
+    as follows
+
+        // Vertex positions of the currently hit triangle
+        in    vec3  gl_HitTriangleVertexPositionsEXT[3];
+
+Additions to Chapter 8 of the OpenGL Shading Language Specification
+(Built-in Functions)
+
+    Modify Section 8.19, Ray Query Functions
+
+    Syntax:
+
+        void rayQueryGetIntersectionTriangleVertexPositionsEXT(rayQueryEXT q,
+                                                               bool committed,
+                                                               out vec3 positions[3]);
+
+    Returns the three vertex positions corresponding to the current
+    intersection of the ray if the intersection is a triangle.
+
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
+
+
+Interactions with GLSL_EXT_ray_tracing
+
+    If GLSL_EXT_ray_tracing is not supported then the
+    gl_HitTriangleVertexPositionsEXT builtin is not added.
+
+Interactions with GLSL_EXT_ray_query
+
+    If GLSL_EXT_ray_query is not supported then the
+    rayQueryGetIntersectionTriangleVertexPositionsEXT function is not added.
+
+Issues
+
+    1) Should gl_HitTriangleVertexPositionsEXT be an array or three variables?
+       Should rayQueryGetIntersectionTriangleVertexPositionsEXT have an array out
+       parameter or three variables?
+
+       RESOLVED. An array of three items for both.
+
+    2) Should there be "hit" in the builtin name?
+
+       RESOLVED. Most builtins don't have hit, but gl_TriangleVertexPositionsEXT
+       feels somewhat too general, so going with gl_HitTriangleVertexPositionsEXT
+
+Revision History
+
+    Rev.  Date          Author     Changes
+    ----  -----------   ------     -------------------------------------------
+     1    2022-05-12    ewerness   Initial draft
+     2    2023-04-21    dgkoch     Cleanup for release
+

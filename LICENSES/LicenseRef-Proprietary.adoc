@@ -1,0 +1,4 @@
+Copyright <Dates> <Owners>
+
+These extension specifications are authored by various IHVs and copyright is
+owned by the authors.

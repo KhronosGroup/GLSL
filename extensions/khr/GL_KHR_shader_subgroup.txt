@@ -50,8 +50,8 @@ Status
 
 Version
 
-    Last Modified Date: 28-Feb-2018
-    Revision: 6
+    Last Modified Date: 14-Jul-2019
+    Revision: 8
 
 Number
 
@@ -318,43 +318,43 @@ Overview
         /*Operation*/ExclusiveScan,
         /*Value*/value)
 
-      subgroupClusteredAdd(value) -> OpGroupNonUniformIAdd | OpGroupNonUniformFAdd(
+      subgroupClusteredAdd(value, clusterSize) -> OpGroupNonUniformIAdd | OpGroupNonUniformFAdd(
         /*Execution*/Subgroup,
         /*Operation*/ClusteredReduce,
         /*Value*/value,
         /*ClusterSize*/clusterSize)
 
-      subgroupClusteredMul(value) -> OpGroupNonUniformIMul | OpGroupNonUniformFMul(
+      subgroupClusteredMul(value, clusterSize) -> OpGroupNonUniformIMul | OpGroupNonUniformFMul(
         /*Execution*/Subgroup,
         /*Operation*/ClusteredReduce,
         /*Value*/value,
         /*ClusterSize*/clusterSize)
 
-      subgroupClusteredMin(value) ->  OpGroupNonUniformSMin | OpGroupNonUniformUMin | OpGroupNonUniformFMin(
+      subgroupClusteredMin(value, clusterSize) ->  OpGroupNonUniformSMin | OpGroupNonUniformUMin | OpGroupNonUniformFMin(
         /*Execution*/Subgroup,
         /*Operation*/ClusteredReduce,
         /*Value*/value,
         /*ClusterSize*/clusterSize)
 
-      subgroupClusteredMax(value) ->  OpGroupNonUniformSMax | OpGroupNonUniformUMax | OpGroupNonUniformFMax(
+      subgroupClusteredMax(value, clusterSize) ->  OpGroupNonUniformSMax | OpGroupNonUniformUMax | OpGroupNonUniformFMax(
         /*Execution*/Subgroup,
         /*Operation*/ClusteredReduce,
         /*Value*/value,
         /*ClusterSize*/clusterSize)
 
-      subgroupClusteredAnd(value) -> OpGroupNonUniformBitwiseAnd | OpGroupNonUniformLogicalAnd(
+      subgroupClusteredAnd(value, clusterSize) -> OpGroupNonUniformBitwiseAnd | OpGroupNonUniformLogicalAnd(
         /*Execution*/Subgroup,
         /*Operation*/ClusteredReduce,
         /*Value*/value,
         /*ClusterSize*/clusterSize)
 
-      subgroupClusteredOr(value) -> OpGroupNonUniformBitwiseOr | OpGroupNonUniformLogicalOr(
+      subgroupClusteredOr(value, clusterSize) -> OpGroupNonUniformBitwiseOr | OpGroupNonUniformLogicalOr(
         /*Execution*/Subgroup,
         /*Operation*/ClusteredReduce,
         /*Value*/value,
         /*ClusterSize*/clusterSize)
 
-      subgroupClusteredXor(value) -> OpGroupNonUniformBitwiseXor | OpGroupNonUniformLogicalXor(
+      subgroupClusteredXor(value, clusterSize) -> OpGroupNonUniformBitwiseXor | OpGroupNonUniformLogicalXor(
         /*Execution*/Subgroup,
         /*Operation*/ClusteredReduce,
         /*Value*/value,
@@ -449,8 +449,9 @@ Additions to Chapter 3 of the OpenGL Shading Language Specification
         - In a compute shader, invocations may be inactive within a subgroup
           if the local workgroup size is not a multiple of the subgroup size.
 
-        In fragment shaders, helper invocations participate in subgroup
-        operations.
+        Helper invocations participate in subgroup operations but, for operations
+        other than subgroupQuad operations, they may be treated as inactive even
+        if they would be considered otherwise active.
 
         For each active invocation within a subgroup that reaches the same
         dynamic instance of a subgroup built-in function, all active invocations
@@ -467,7 +468,7 @@ Additions to Chapter 3 of the OpenGL Shading Language Specification
         the completion of accesses to buffer, shared, and image variables,
         respectively.  The built-in functions subgroupBarrier() and
         subgroupMemoryBarrier() wait for the completion of accesses to all of
-        the above variable types.  The function subgroupmemoryBarrierShared() is
+        the above variable types.  The function subgroupMemoryBarrierShared() is
         available only in compute shaders; the other functions are available in
         all shader types.
 
@@ -608,7 +609,8 @@ Additions to Chapter 3 of the OpenGL Shading Language Specification
         corresponding to the three neighboring pixels at (x + 1, y), (x, y + 1),
         and (x + 1, y + 1).  These four invocations are arranged in a 2x2 grid,
         that make up the quad.  If the neighbors of a fragment are not covered
-        by the primitive, fragment shader invocations will still be generated.
+        by the primitive, helper fragment shader invocations will still be
+        generated.
 
         Note: in non-fragment shaders, the quad has no defined mapping to
         non-subgroup shader stage state.
@@ -799,9 +801,11 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     Only usable if the extension GL_KHR_shader_subgroup_ballot is enabled.
 
     The function subgroupBroadcast() returns the <value> from the invocation
-    whose <gl_SubgroupInvocationID> is equal to <id>.  <id> must be an integral
-    constant expression.  If the <id> is an inactive invocation or is
-    greater than or equal to <gl_SubgroupSize>, an undefined value is returned.
+    whose <gl_SubgroupInvocationID> is equal to <id>. <id> must be an integral
+    constant expression when targeting SPIR-V 1.4 and below, otherwise it must
+    be dynamically uniform within the subgroup.  If the <id> is an inactive
+    invocation or is greater than or equal to <gl_SubgroupSize>, an undefined
+    value is returned.
 
     Syntax:
 
@@ -948,17 +952,7 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     <gl_SubgroupInvocationID> is equal to the current invocation's
     <gl_SubgroupInvocationID> xored with <mask>.  If the calculated index is
     an inactive invocation or is greater than or equal to <gl_SubgroupSize>, an
-    undefined value is returned.  <mask> must be a power of 2.  The <mask> must
-    be an integral constant expression, or if subgroupShuffleXor() is used
-    within a loop:
-
-    - The initial value of the variable to be passed as <mask> (set in or
-      before the loop statement) must be an integral constant expression.
-    - Any operation that increases or decreases the value to be passed as <mask>
-      within the loop statement only modifies <mask> by an integral constant
-      expression.
-    - The variable to be passed as <mask> is not otherwise modified within the
-      loop.
+    undefined value is returned.
 
     Syntax:
 
@@ -1379,8 +1373,10 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
     The function subgroupQuadBroadcast() returns the <value> from the invocation
     within the quad whose <gl_SubgroupInvocationID> % 4 is equal to <id>.  <id>
-    must be an integral constant expression.  If the <id> is an inactive
-    invocation or is greater than or equal to 4, an undefined value is returned.
+    must be an integral constant expression when targeting SPIR-V 1.4 and
+    below, otherwise it must be dynamically uniform within the quad.  If the <id>
+    is an inactive invocation or is greater than or equal to 4, an undefined value
+    is returned.
 
     Syntax:
 
@@ -1480,6 +1476,8 @@ Revision History
 
     Rev.  Date          Author     Changes
     ----  -----------   --------   -------------------------------------------
+     8    14-Jul-2019   groth      Clarified behavior of uncovered quad fragments
+     7    17-Dec-2018   gnl21      Remove restriction on ShuffleXor mask.
      6    28-Feb-2018   nhenning   Add approved and ratification dates.
      5    12-Feb-2018   jbolz/     Add recommended mappings of GLSL builtin
                         nhenning   functions to SPIR-V.

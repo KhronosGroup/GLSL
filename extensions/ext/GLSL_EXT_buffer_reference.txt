@@ -1,0 +1,253 @@
+Name
+
+    EXT_buffer_reference
+
+Name Strings
+
+    GL_EXT_buffer_reference
+
+Contact
+
+    Jeff Bolz, NVIDIA Corporation (jbolz 'at' nvidia.com)
+
+Contributors
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date:         October 25, 2024
+    Revision:                   3
+
+Number
+
+    TBD
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.50
+    (#version 450) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification, version 4.60, dated July 23, 2017.
+
+    Interacts with GL_KHR_vulkan_glsl.
+
+    Interacts with GL_ARB_gpu_shader_int64 and
+    GL_EXT_shader_explicit_arithmetic_types_int64.
+
+Overview
+
+    This extension allows storage block names to be declared with
+    a "buffer_reference" layout, which lets them act as reference type names
+    and be used to declare references within another block declaration, or as
+    variables.
+    
+    A corresponding API extension provides functionality to retrieve the
+    address value for a given buffer, and also defines the size and alignment
+    of the reference types.
+
+New Procedures and Functions
+
+    None.
+
+New Tokens
+
+    None.
+
+Modifications to GL_KHR_vulkan_glsl
+
+    Add to the "Mapping to SPIR-V" section
+
+    Uses the SPV_EXT_physical_storage_buffer extension to define reference
+    types as pointer types to the PhysicalStorageBufferEXT storage class.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_EXT_buffer_reference : <behavior>
+
+    where <behavior> is as specified in section 3.3
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+        #define GL_EXT_buffer_reference     1
+
+    Modify section 4.1.9 (Arrays)
+
+    Add to the end of the section:
+
+      It is a compile-time error to use the *length* method on an unsized
+      array member of a shader storage block type declared with the
+      buffer_reference layout.
+      
+    Modify section 4.3.2 (Constant Qualifier)
+
+    Change the first paragraph to clarify that the constant qualifier is
+    disallowed on reference types:
+
+      Named compile-time constants or read-only variables can be declared
+      using the const qualifier. The const qualifier can be used with any of
+      the non-void transparent basic data types (this does not include
+      reference types), ...
+
+    Modify section 4.3.9 (Interface Blocks)
+
+    Add to the end of the section:
+
+      Shader storage blocks can be declared with the "buffer_reference" layout
+      qualifier, which alters their behavior to create a type that is a
+      reference to the block (as if the block were a structure type). The
+      reference type's name is the block name. If there is no instance name,
+      then no block variable is declared. If there is an instance name, then
+      a block variable is declared and that variable behaves the same as if
+      "buffer_reference" were not used. Set and binding layouts as well as
+      qualifiers like coherent and volatile don't apply to the reference
+      type, but do apply to the instance variable.
+
+      The reference type can be used to declare block references in any
+      storage type, including as block members, local variables, and function
+      parameters and return types. When a reference type is used as a buffer
+      or uniform block member, it is treated as an eight byte scalar type
+      for the purposes of the block layout rules. Reference types are treated
+      as transparent types (but not as a "basic type").
+
+      The field selector ( . ) operator is used to access members through a
+      reference. The only operators allowed to operate on reference types are
+      field selector, assignment ( = ), ternary selection ( ?: ), and
+      sequence ( , ).
+
+      Additionally, the "buffer_reference" layout qualifier can be used to
+      define a forward declaration to the reference type, so it can be used
+      in other block declarations or in its own block declaration. A forward
+      declaration is made by omitting the member list and instance name.
+      All layout qualifiers except "buffer_reference" are ignored during
+      forward declaration.
+
+      If any access through a buffer reference value uses an address that is
+      not within the bounds of a buffer, it produces undefined behavior.
+
+      Each buffer reference type has an alignment that can be specified via
+      the "buffer_reference_align" layout qualifier. This must be a power of
+      two and be greater than or equal to the largest scalar/component type
+      in the block. If the layout qualifier is not specified, it defaults to
+      16 bytes. All buffer reference addresses used for a particular buffer
+      reference type are assumed to be aligned to this alignment value. That
+      is, the base of the block must be aligned, and members of the block can
+      be aligned within the block using standard layouts and offset layout
+      qualifiers.
+
+      Example:
+
+        // forward declaration
+        layout(buffer_reference) buffer blockType;
+
+        // complete reference type definition
+        layout(buffer_reference, std430, buffer_reference_align = 16) buffer blockType {
+            int x;
+            blockType next;
+        };
+
+        // A normal block declaration that includes a reference to blockType
+        layout(std430) buffer rootBlock {
+            blockType root;
+        } r;
+
+        void main()
+        {
+            blockType b = r.root;
+            // "pointer chasing" through a linked list
+            b = b.next.next.next.next.next;
+            // ...
+            // use b.x;
+        }
+
+
+    Modify section 4.4 (Layout Qualifiers):
+
+    Update the table to add a row for "buffer_reference":
+
+      Layout Qualifier    Qualifier Only    Individual Variable    Block    Block Member    Allowed Interfaces
+       buffer_reference          X                                   X                            buffer
+    buffer_reference_align       X                                   X                            buffer
+
+    Modify section 4.4.5 (Uniform and Shader Storage Block Layout Qualifiers):
+
+    Add "buffer_reference" and "buffer_reference_align = integer-constant-expression"
+    to the layout-qualifier-id grammar rule.
+
+    Modify section 5.4.1 (Conversion and Scalar Constructors)
+
+    Add to the end of the section:
+
+      Buffer reference types can be constructed from other buffer reference
+      types. Buffer reference types can be constructed from a single uint64_t
+      value, and a uint64_t value can be constructed from a buffer reference
+      type value.
+
+    Modify section 5.9 (Expressions)
+
+    Change the bullet about the equality operators:
+
+      The equality operators equal ( == ), and not equal ( != ) operate on
+      all types except opaque types, aggregates that contain opaque types,
+      subroutine uniforms, aggregates that contain subroutine uniforms,
+      reference types, and aggregates that contain reference types. ...
+
+Errors
+
+    None.
+
+Interactions with GL_ARB_gpu_shader_int64 and
+GL_EXT_shader_explicit_arithmetic_types_int64
+
+    If neither GL_ARB_gpu_shader_int64 nor
+    GL_EXT_shader_explicit_arithmetic_types_int64 is supported, then remove
+    the constructors to convert to and from uint64_t.
+
+Interactions with GL_KHR_vulkan_glsl
+
+    If GL_KHR_vulkan_glsl isn't supported, remove mention of descriptor set
+    decorations.
+
+Issues
+
+    (1) Why "references" and not pointers?
+
+    RESOLVED: Extending the block syntax to allow the types to be used
+    similarly to C++ references is a small incremental change to the language
+    and grammar, and provides most of the same functionality.
+
+    (2) Should we provide a way to compare a reference to "null"?
+
+    RESOLVED: No. Shaders can convert to uint64_t and compare the value
+    against the NULL value specified by the API (zero, for Vulkan).
+
+    (3) What operations are supported for reference types?
+
+    RESOLVED: Certain operations are disallowed because they don't have a
+    direct mapping to SPIR-V. Equality == and != are disallowed because there
+    are no pointer comparison instructions in SPIR-V, though it is possible
+    to convert to uint64_t and compare those integer values. The constant
+    qualifier is disallowed because OpConstant doesn't support generating
+    pointer constants (but note that reference types *can* participate in
+    constant expressions).
+
+Revision History
+
+    Revision 1
+      - Internal revisions.
+    Revision 2
+      - Clarify that reference types are "transparent" types. Clarify that
+        the constant qualifier is forbidden on reference types. Clarify that
+        only assignment, construction, conversion, and field selection
+        operators are supported.
+    Revision 3
+      - Clarify forward declaration ignore layout qualifiers

@@ -1,0 +1,179 @@
+Name
+
+  EXT_terminate_invocation
+
+Name Strings
+
+  GL_EXT_terminate_invocation
+
+Contact
+
+  Alan Baker, Google LLC (alanbaker 'at' google.com)
+
+Contributors
+
+
+Status
+
+  Final
+
+Version
+
+  Last Modified Date:      April 8, 2020
+  Revision:                1
+
+Number
+
+  TBD
+
+Depenendencies
+
+  This extension can be applied to OpenGL GLSL versions 1.40
+  (#version 140) and higher.
+
+  This extension can be applied to OpenGL ES ESSL versions 3.10
+  (#version 310) and higher.
+
+  This extension is written against the OpenGL Shading Language
+  Specification, version 4.60 (revision 7), dated July 10, 2019
+
+  This extension requires GL_KHR_vulkan_glsl.
+
+Overview
+
+  This extension adds a new type of jump to the language, terminateInvocation. Similarly
+  to discard, terminateInvocation discards the fragment being processed.
+  TerminateInvocation allows a programmer to disambiguate the underlying
+  behavior they wish to express for discard. It is recommended that programmers
+  use demote (see GL_EXT_demote_to_helper_invocation) or terminateInvocation
+  instead of discard.
+
+New Procedures and Functions
+
+  None.
+
+New Tokens
+
+  None.
+
+Modifications to GL_KHR_vulkan_glsl
+
+  Add to the "Mapping to SPIR-V" section
+
+  Mapping terminateInvocation:
+
+    terminateInvocation should be generated as OpTerminateInvocation.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+  Including the following line in a shader can be used to control the language
+  features described in this extension:
+
+    #extension GL_EXT_terminate_invocation : <behavior>
+
+  where <behavior> is as specified in section 3.3.
+
+  New preprocessor #defines are added to the OpenGL Shading Language:
+
+    #define GL_EXT_terminate_invocation    1
+
+  In section 3.6 Keywords:
+
+  Add "terminateInvocation" to the list of keywords.
+
+  In chapter 6 Statements and Structures:
+
+  Add terminateInvocation to the list of jumps.
+
+  In section 6.4 Jumps:
+
+  Add the following to the grammar of jump_statement:
+
+    terminateInvocation; // in the fragment shader language only
+
+  Replace the paragraph:
+
+    The discard keyword is only allowed within fragment shaders. It can be used
+    within a fragment shader to abandon the operation on the current fragment.
+    This keyword causes the fragment to be discarded and no updates to any
+    buffers will occur. Any prior writes to other buffers such as shader
+    storage buffers are unaffected. Control flow exits the shader, and
+    subsequent implicit or explicit derivatives are undefined when this control
+    flow is non-uniform (meaning different fragments within the primitive take
+    different control paths). It would typically be used within a conditional
+    statement, for example:
+
+  With:
+
+    The discard and terminateInvocation keywords are only allowed within fragment
+    shaders. They can be used within a fragment shader to abandon the operation
+    on the current fragment. These keywords cause the fragment to be discarded
+    and no updates to any buffers will occur. Any prior writes to other buffers
+    such as shader storage buffers are unaffected. Control exits the shader,
+    and subsequent implicit or explicit derivatives are undefined when this
+    control is non-uniform (meaning different fragments within the primitive
+    take different control paths). They would typically be used within a
+    conditional statement, for example:
+
+  Replace the paragraph:
+
+    The function main can use return. This simply causes main to exit in the
+    same way as when the end of the function had been reached. It does not
+    imply a use of discard in a fragment shader. Using return in main before
+    defining outputs will have the same behavior as reaching the end of main
+    before defining outputs.
+
+  With:
+
+    The function main can use return. This simply causes main to exit in the
+    same way as when the end of the function had been reached. It does not
+    imply a use of discard or terminateInvocation in a fragment shader. Using return in
+    main before defining outputs will have the same behavior as reaching the
+    end of main before defining outputs.
+
+  In section 7.1.5 Fragment Shader Special Variables:
+
+  Replace the paragraph:
+
+    If a shader executes the discard keyword, the fragment is discarded, and
+    the values of any user-defined fragment outputs, gl_FragDepth, and
+    gl_SampleMask become irrelevant.
+
+  With:
+
+    If a shader executes the discard or terminateInvocation keyword, the fragment is
+    discarded, and the values of any user-defined fragment outputs,
+    gl_FragDepth, and gl_SampleMask become irrelevant.
+  
+  In section 7.1.7 Compatibility Profile Built-In Language Variables:
+
+  Replace the paragraph:
+
+    If a shader executes the discard keyword, the fragment is discarded, and
+    the values of gl_FragDepth and gl_FragColor become irrelevant.
+
+  With:
+
+    If a shader executes the discard or terminateInvocation keyword, the fragment is
+    discarded, and the values of gl_FragDepth and gl_FragColor become
+    irrelevant.
+
+  In chapter 9 Shading Language Grammar:
+
+  Add TERMINATE_INVOCATION to the list of tokens.
+
+  Add the following line to the grammar of jump_statement:
+
+    TERMINATE_INVOCATION SEMICOLON // Fragment shader only.
+
+Errors
+
+  None.
+
+Issues
+
+Revision History
+
+  Revision 1
+    - Internal revision
+

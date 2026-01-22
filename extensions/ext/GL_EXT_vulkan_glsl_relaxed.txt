@@ -1,0 +1,210 @@
+Name
+
+    EXT_vulkan_glsl_relaxed
+
+Name Strings
+
+    GL_EXT_vulkan_glsl_relaxed
+
+Contact
+
+    Malcolm Bechard (malcolm 'at' derivative.ca), Derivative
+
+Contributors
+
+    William Brown, (will.brown039 'at' gmail.com), Derivative 
+    Malcolm Bechard, Derivative
+
+Notice
+
+    Copyright (c) 2020 The Khronos Group Inc. Copyright terms at
+        http://www.khronos.org/registry/speccopyright.html
+
+Status
+
+Version
+
+Number
+
+    TBD.
+
+Dependencies
+
+    This extension requires GL_KHR_vulkan_glsl.
+    
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    All these versions map GLSL/ESSL semantics to the same SPIR-V 1.0
+    semantics (approximating the most recent versions of GLSL/ESSL).
+    
+    This extension is written against the OpenGL Shading Language
+    Specification, Version 4.60.7, Wed, 10 Jul 2019.
+
+Overview
+
+    This extension is built upon the new language features added by
+    GL_KHR_vulkan_glsl, but relaxes some of it's changes and restrictions
+    to allow for compiling existing OpenGL GLSL and ESSL legal shaders
+    without requiring any edits for Vulkan compliance.
+
+    The following previously removed features are re-added:
+        * default uniforms (uniform variables not inside a uniform block).
+        * shared and packed block layouts, but they are silently ignored.
+        * gl_VertexID and gl_InstanceID
+        * atomic-counters (those based on atomic_uint)
+             
+    New features:
+        * The type of backing used for a block, push constant or uniform
+          buffer, and the layout of the block, can be changed at compile
+          time by the user of the GLSL front-end.
+        * The set which a uniform blocks belong to can be changed at compile time
+          by the user of the GLSL front-end.
+
+    Each of these is discussed in more detail below.
+
+    Enabling These Features
+    -----------------------
+
+    This extension is not enabled with a #extension as other extensions are.
+    It is also not enabled through use of a profile or #version.  The intended
+    level of GLSL/ESSL features, independent from Vulkan-specific usage, comes
+    from the traditional use of #version, profile, and #extension.
+
+    Instead, use of this extension is an effect of using a GLSL front-end in a
+    mode that has it generate SPIR-V for Vulkan.  Such tool use is outside the
+    scope of using the Vulkan API and outside the definition of GLSL and this
+    extension. See the documentation of the compiler to see how to request
+    generation of SPIR-V for Vulkan using these rules.
+
+    When a front-end is used to accept this extension, it must error check and
+    reject shaders not adhering to this specification, and accept those that
+    do. Implementation-dependent maximums and capabilities are supplied to, or
+    part of, the front-end, so it can do error checking against them.
+             
+    Default Uniforms
+    ---------------
+    
+    All default uniforms will be silently grouped into a single anonymous
+    uniform block. The block name of the block, the backing, set, and binding
+    number can all be controlled via options to the GLSL front-end. If no
+    name is given, the block name will be 'gl_DefaultUniformBlock'. 
+
+    Shared and Packed Block Layouts
+    -------------------------------
+    
+    If a block is declared with shared or packed layouts, those layouts will
+    be ignored and instead the default layout for that block type will be used.
+    
+    gl_VertexID and gl_InstanceID
+    -----------------------------
+
+    Built-in variables gl_VertexID and gl_InstanceID are accepted, but are
+    simply aliases to gl_VertexIndex and gl_InstanceIndex which were introduced
+    in GL_EXT_vulkan_glsl. They will include the base offset like the
+    GL_EXT_vulkan_glsl behavior.
+    
+    Atomic Counters
+    ---------------
+    
+    atomic_uint declarations and functions inteacting with them will be
+    silently converted to use storage buffers and related atomic functions.
+    For each binding used for the atomic_uint variables, a different 
+    buffer block will be allocated and the variables will be placed
+    within that buffer using the variable's offset. The block name of
+    the block and set number can all be controlled via options to the
+    GLSL front-end. If no name is given, the block name will start with
+    'gl_AtomicBufferBlock'. The block name will suffixed with '_<bindingNumber>'.
+    Where <bindingNumber> is the original binding specified for the
+    atomic_uints contained within that block. The actual binding of the
+    block may be different than what was originally specified in the shader.
+    Reflection should be used to find the final binding locations of these
+    blocks.
+   
+Changes to Chapter 4 of the OpenGL Shading Language Specification
+
+    Modify section 4.1.7 (Opaque Types)
+    In the seciotn 'Atomic Counters', remove the line:
+
+      Atomic counter types are not available when targeting Vulkan.
+
+    Modify the section 4.3.5 (Uniform Variables)
+    
+    Remove the line:
+      
+      When targeting Vulkan, it is a compile-time error to declare uniform
+      variables outside a block.
+      
+    Add the line:
+      
+      Uniforms variables delcared outside a block will implicitly be grouped into
+      a uniform block named 'gl_DefaultUniformBlock'.
+
+    Modify section 4.4.5 (Uniform and Shader Storage Block Layout Qualifiers)
+      
+    Remove the paragraphs describing the of the 'shared' and 'packed' layout qualifiers.
+      
+    Add the paragraph:
+      
+      Use of the 'shared' and 'packed' layout qualifiers will be silently ignored. The
+      default layout for the block type will be used when these qualifiers are encountered.
+      
+    Modify the section 4.4.7 (Atomic Counter Layout Qualifiers)
+
+    Add a paragraph at the end:
+    
+      Atomic Counters will be grouped into storage blocks with a name prefixed with
+      gl_AtomicBufferBlock_ and the suffix being the binding number of the uniforms
+      that were grouped into that block.
+
+Changes to Chapter 7 of the OpenGL Shading Language Specification
+
+    Modify section 7.1.1 (Built-In Language Variables)
+
+      Replace the lines for non-ES with:
+
+        in int gl_VertexID; // only present when not targeting Vulkan
+        in int gl_InstanceID; // only present when not targeting Vulkan
+        
+      with:
+        
+        in int gl_VertexID; // Alias for gl_VertexIndex when targetting Vulkan
+        in int gl_InstanceID; // Alias for gl_InstanceIndex when targetting Vulkan
+        
+     Remove the paragraphs defining gl_VertexID and gl_InstanceID.
+     
+     Add the paragraph:
+       gl_VertexID and gl_InstanceID are aliases for gl_VertexIndex and
+       gl_InstanceIndex respectively.
+       
+Changes to Chapter 12 of the OpenGL Shading Language Specification
+
+  Modify section 12.1 (Feature Comparisons)
+    
+    Remove the line:
+    
+      * shared and packed block layouts
+
+    Remove the lines:
+      * Default uniforms, for non-opaque types: The UniformConstant storage class can 
+        be used on individual variables at global scope. (That is, uniforms don’t have 
+        to be in a block, unless they are built-in members that are in block in GLSL
+        version 4.5 or above.)
+      * gl_VertexID and gl_InstanceID (more detail follows)
+  
+  Modify section 12.2.5. (Mapping Variables)
+  
+  Changes the lines:
+    in gl_VertexID (OpenGL only)
+    in gl_InstanceID (OpenGL only)
+    
+  to:
+    in gl_VertexID (Alias for gl_VertexIndex)
+    in gl_InstanceID (Alias for gl_InstanceIndex)
+  
+Revision History
+
+

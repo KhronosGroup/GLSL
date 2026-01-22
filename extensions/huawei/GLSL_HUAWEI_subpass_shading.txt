@@ -1,0 +1,105 @@
+Name
+
+    HUAWEI_subpass_shading
+
+Name Strings
+
+    GL_HUAWEI_subpass_shading
+
+Contact
+
+    Hueilong Wang (wyvernathuawei), HUAWEI
+
+Contributors
+
+    Hueilong Wang, HUAWEI
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date: 2021-04-26
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.60
+    (#version 460) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+    
+    This extension is written against revision 7 of the OpenGL Shading Language
+    version 4.60, dated July 10, 2019, and can be applied to OpenGL ES ESSL
+    version 3.20, dated July 10, 2019.
+
+    This extension interacts with revision 43 of the GL_KHR_vulkan_glsl
+    extension, dated October 25, 2017.
+
+Overview
+
+    This extension allows a subpass shading shader to delcare subpass inputs and use subpass input functions.    
+    
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_HUAWEI_subpass_shading                          : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+    New preprocessor #defines are added:
+
+      #define GL_HUAWEI_subpass_shading  
+
+Additions to Chapter 2 of the OpenGL Shading Language Specification, Version 4.60
+
+    Add Section 2.7. Subpass Shading Processor
+    
+    The subpass shading processor is a programmable unit that operates the subpass inputs. It runs independently 
+    from the other shader processors. Compilation units written in the OpenGL Shading Language to run on this
+    processor are called subpass shading shaders. When a set of subpass shading shaders are successfully compiled 
+    and linked, they result in a subpass shading shader executable that runs on the subpass shading processor.
+
+    A subpass shading shader is almost identical to a compute shader except the following
+    differences.
+        
+        * A subpass shading shader must be dispatched in a dedicated subpass
+        * A subpass shading shader is allowed to read fragment froms input attachments
+        * The work dimension is defined by the size of render area and the number of layers of the framebuffer
+        
+Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
+
+    Modify Section 4.1.7, (Opaque Types)
+
+    Change the "Subpass-input types are only available in fragment shaders." to 
+
+    Subpass-input types are only available in fragment or subpass shading shaders.
+
+Changes to Chapter 8 of The OpenGL Shading Language Specification, Version 4.60 
+
+    Modify Section 8.18, (Subpass-Input Functions)
+
+    Change the "Subpass-input functions are only available when targeting a Vulkan fragment stage." to 
+
+    Subpass-input functions are only available when targeting a Vulkan fragment or subpass shading stage.
+
+Changes to Chapter 12 of The OpenGL Shading Language Specification, Version 4.60 
+
+    Modify Section 12.2.4, (Vulkan Only: Samplers, Images, Textures, and Buffers)
+
+    Change the "Subpass inputs are read through a new set of types, available only to fragment shaders:" to 
+
+    Subpass inputs are read through a new set of types, available only to fragment or subpass shading shaders:
+
+Issues
+
+    TBD
+
+Revision History
+
+    Rev.  Date          Author             Changes
+    ----  -----------   --------------     -------------------------------------------
+     1    2021-04-26    wyvernathuawei     Initial draft

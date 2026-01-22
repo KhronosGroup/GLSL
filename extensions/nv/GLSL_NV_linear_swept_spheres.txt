@@ -1,0 +1,365 @@
+Name
+
+    NV_linear_swept_spheres
+
+Name Strings
+
+    GL_NV_linear_swept_spheres
+
+Contact
+
+    Ashwin Lele (alele 'at' nvidia.com), NVIDIA
+    Eric Werness (ewerness 'at' nvidia.com), NVIDIA
+    Vikram Kushwaha (vkushwaha 'at' nvidia.com), NVIDIA
+
+
+Status
+
+    Complete
+
+Version
+
+    Last Modified Date: 2025-01-01
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.60
+    (#version 460) and higher.
+
+    This extension is written against revision 5 of the OpenGL Shading Language
+    version 4.60, dated September 4, 2017.
+
+    This extension interacts with revision 43 of the GL_KHR_vulkan_glsl
+    extension, dated October 25, 2017.
+
+    This extension interacts with GLSL_EXT_ray_tracing.
+
+    This extension interacts with GLSL_EXT_ray_query.
+
+    This extension interacts with GLSL_EXT_ray_flags_primitive_culling.
+
+    This extension interacts with GLSL_NV_shader_invocation_reorder.
+
+Overview
+
+    Vulkan Ray Tracing extensions support triangle and AABB primitives in
+    acceleration structures natively. Rendering high quality hair and fur
+    require using either of these primitives both of which have drawbacks.
+    Triangles require tessellation schemes to represent fine strands
+    and requires additional storage, whereas AABB primitive with custom intersection
+    shaders require less storage but increases computational cost.
+
+    This extension introduces two new primitives, a sphere primitive and
+    a linear swept sphere henceforth abbreviated as LSS which are supported natively 
+    and allows high quality rendering of hair and fur with low storage overhead 
+    and computational cost.
+
+    This extension document adds support for the following extensions to be used
+    within GLSL:
+
+    - GL_NV_linear_swept_spheres - enables LSS primitives
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+      gl_HitIsSphereNV -> HitIsSphereNV decorated OpVariable
+      gl_HitIsLSSNV -> HitIsLSSNV decorated OpVariable
+
+      gl_HitSpherePositionNV -> HitSpherePositionNV decorated OpVariable
+      gl_HitSphereRadiusNV   -> HitSphereRadiusNV decorated OpVariable
+      gl_HitLSSPositionsNV   -> HitLSSPositionsNV decorated OpVariable
+      gl_HitLSSRadiiNV       -> HitLSSRadiiNV decorated OpVariable
+
+      rayQueryGetIntersectionSpherePositionNV ->
+                                OpRayQueryGetSphereIntersectionRadiusNV instruction
+
+      rayQueryGetIntersectionSphereRadiusNV ->
+                                OpRayQueryGetSphereIntersectionPositionNV instruction
+
+      rayQueryGetIntersectionLSSPositionsNV ->
+                                OpRayQueryGetIntersectionLSSPositionsNV instruction
+
+      rayQueryGetIntersectionLSSRadiiNV ->
+                                OpRayQueryGetIntersectionLSSRadiiNV instruction
+         
+      rayQueryGetIntersectionLSSHitValueNV ->
+                                OpRayQueryGetIntersectionLSSHitValueNV instruction
+
+      rayQueryIsSphereHitNV ->
+                                OpRayQueryIsSphereHitNV instruction
+
+      rayQueryIsLSSHitNV ->  
+                                OpRayQueryIsLSSHitNV instruction
+
+      hitObjectGetSpherePositionNV ->
+                                OpHitObjectGetSpherePositionsNV instruction
+
+      hitObjectGetSphereRadiusNV ->
+                                OpHitObjectGetSphereRadiusNV instruction
+ 
+      hitObjectGetLSSPositionsNV ->
+                                OpHitObjectGetLSSPositionsNV instruction
+
+      hitObjectGetLSSRadiiNV -> OpHitObjectGetLSSRadiiNV instruction
+
+      hitObjectIsSphereHitNV -> OpHitObjectIsSphereHitNV instruction
+        
+      hitObjectIsLSSHitNV -> OpHitObjectIsLSSHitNV instruction
+ 
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_NV_linear_swept_spheres  : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+    New preprocessor #defines are added:
+
+      #define GL_NV_linear_swept_spheres
+
+Modify Section 4.3 (Storage Qualifiers) 
+
+Additions to section 4.3.X hitAttributeEXT Variables
+
+    For the case of sphere or LSS primitives with no custom intersection shaders, any-hit and
+    closest-hit shaders can access a single 32-bit floating point value specifying position of
+    the hit along LSS midsection by declaring hitAttributeEXT variable of 32-bit floating 
+    point element
+
+    For example (either of)
+      hitAttributeEXT float uVal;
+      hitAttributeEXT block { float uVal; }
+
+    For only sphere primitives, the value returned will be 0.0f.
+
+Additions to Chapter 7 of the OpenGL Shading Language Specification
+(Built-in Variables)
+
+    Modify Section 7.1, Built-in Languages Variables
+
+    In the any-hit and closest-hit shading languages, built-in variables are declared
+    as follows
+
+      // Returns position of intersected sphere.
+      in vec3  gl_HitSpherePositionNV;
+      // Returns the radius of intersected sphere.
+      in float gl_HitSphereRadiusNV;
+
+      // Returns the position of the two endcaps of LSS.
+      in vec3 gl_HitLSSPositionsNV[2];
+      // Returns the radius of the two endcaps of LSS.
+      in float gl_HitLSSRadiiNV[2];
+
+      // Returns 'true' if current primitive hit is sphere primitive
+      in bool gl_HitIsSphereNV;
+      // Returns 'true' if current primitive hit is LSS primitive
+      in bool gl_HitIsLSSNV;
+
+    Modify Section 7.3, Built-in Constants
+
+    Add a new subsection 7.3.x, "Fixed Constants"
+
+    The following constants are provided in all shader stages when this
+    extension is enabled
+
+        const uint gl_RayFlagsSkipBuiltinPrimitivesNV = 256U;
+
+    This value is same as gl_RayFlagsSkipTrianglesEXT as defined in 
+    GLSL_EXT_ray_flags_primitive_culling
+
+
+Additions to Chapter 8 of the OpenGL Shading Language Specification
+(Built-in Functions)
+
+    Modify Section 8.19, Ray Query Functions
+
+    Syntax:
+
+        vec3 rayQueryGetIntersectionSpherePositionNV(rayQueryEXT q, bool committed);
+
+
+    Returns the position of the sphere corresponding to the current
+    intersection of the ray if the intersection is a sphere primitive.
+
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
+
+
+    Syntax:
+
+        float rayQueryGetIntersectionSphereRadiusNV(rayQueryEXT q, bool committed);
+
+
+    Returns the radius of the sphere corresponding to the current
+    intersection of the ray if the intersection is a sphere primitive.
+
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
+
+
+    Syntax:
+
+        void rayQueryGetIntersectionLSSPositionsNV(rayQueryEXT q,
+                                                 bool committed,
+                                                 out vec3 positions[2]);
+
+    Returns the positions for the two endcap spheres corresponding to the current 
+    intersection of the ray if the intersection is a LSS primitive.
+
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
+
+
+    Syntax:
+
+        void rayQueryGetIntersectionLSSRadiiNV(rayQueryEXT q,
+                                               bool committed,
+                                               out float radii[2]);
+
+    Returns the radii for the two endcap spheres corresponding to the 
+    current intersection of the ray if the intersection is a LSS primitive.
+
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
+
+
+    Syntax:
+            
+        float rayQueryGetIntersectionLSSHitValueNV(rayQueryEXT rq, bool committed);
+
+    Returns the value identifying the position of the hit along the LSS midsection
+    if the current intersection of the the ray is with a LSS primitive. The value
+    will be between [0, 1]
+
+
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
+
+
+    Syntax:
+            
+        bool rayQueryIsSphereHitNV(rayQueryEXT rq, bool committed);
+
+    Returns 'true' is current primitive hit is a sphere primitive.
+
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
+
+
+    Syntax:
+            
+        bool rayQueryIsLSSHitNV(rayQueryEXT rq, bool committed);
+
+    Returns 'true' is current primitive hit is a LSS primitive.
+
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
+
+
+    Syntax:
+
+        vec3 hitObjectGetSpherePositionNV(hitObjectNV hitObject)
+
+    Returns the position of the sphere primitive as encoded in the hit object.
+
+
+    Syntax:
+
+        float hitObjectGetSphereRadiusNV(hitObjectNV hitObject)
+
+    Returns the radius of the sphere primitive as encoded in the hit object.
+
+
+    Syntax:
+
+        void hitObjectGetLSSPositionsNV(hitObjectNV hitObject, out vec3 positions[2])
+
+    Returns the positions of two endcaps of LSS primitive as encoded in the hit object.
+
+
+    Syntax:
+
+        vec3 hitObjectGetLSSRadiiNV(hitObjectNV hitObject, out float radii[2])
+
+    Returns the radii of the two endcaps of LSS primitive as encoded in the hit object.
+
+
+Interactions with GLSL_EXT_ray_tracing
+
+    If GLSL_EXT_ray_tracing is not supported then gl_HitIsSphereNV, gl_HitIsLSSNV,
+    gl_HitSpherePositionNV, gl_HitSphereRadiusNV, gl_HitLSSPositionsNV
+    and gl_HitLSSRadiiNV builtins are not added.
+
+Interactions with GLSL_EXT_ray_query
+
+    If GLSL_EXT_ray_query is not supported then rayQueryGetIntersectionSpherePositionNV,
+    rayQueryGetIntersectionSphereRadiusNV, rayQueryGetIntersectionLSSPositionsNV,
+    rayQueryGetIntersectionLSSRadiiNV, rayQueryGetIntersectionLSSHitValueNV,
+    rayQueryIsSphereHitNV and rayQueryIsLSSHitNV built-in functions are not added.
+
+Interactions with GLSL_EXT_ray_flags_primitive_culling
+
+    If GLSL_EXT_ray_flags_primitive_culling is not supported then
+    gl_RayFlagsSkipBuiltinPrimitivesNV built-in constant is not added.
+
+Interactions with GLSL_NV_shader_invocation_reorder
+
+    If GLSL_NV_shader_invocation_reorder is not supported then
+    hitObjectGetSpherePositionNV, hitObjectGetSphereRadiusNV, hitObjectGetLSSPositionsNV,
+    hitObjectGetLSSRadiiNV, hitObjectIsSphereHitNV and hitObjectIsLSSHitNV
+    built-in functions are not added.
+
+Issues
+
+      1) Does gl_HitKindNV/gl_HitKindEXT encode hit for sphere or LSS primitives
+       
+         Resolved : No, additional builtins gl_HitIsSphereNV and gl_HitIsLSSNV
+         are added to detect these cases. One can distinguish hit on different
+         primitive geometries as below
+
+         For ex
+         
+         uint kind = gl_HitKindEXT;
+         if (gl_HitIsSphereNV)   { // Sphere code  } 
+         else if (gl_HitIsLSSNV) { // LSS code }
+         else if (kind == gl_HitKindFrontFacingTriangleEXT) { // front facing triangle}
+         else if (kind == gl_HitKindBackFacingTriangleEXT) { // back facing triangle}
+        
+
+      2) Does rayQueryGetIntersectionTypeEXT return different enums for
+         intersection with sphere or LSS primitives?
+ 
+         Resolved : No, additional intrinsics rayQueryIsSphereHitNV and 
+         rayQueryIsLSSHitNV are added. One can distinguish hit on different
+         primitive geometries as below
+    
+         For ex
+         uint hitKind = rayQueryGetIntersectionTypeEXT(rq, true);
+         if (hitKind != 0) {
+             if (rayQueryIsSphereHitNV(rq, true)) { // sphere hit }
+             else if (rayQueryIsLSSHitNV(rq, true)) { // LSS hit }
+             else if (hitKind == gl_RayQueryCommittedIntersectionTriangleEXT) 
+             { // Triangle hit }
+             
+         }
+
+
+Revision History
+
+    Rev.  Date          Author     Changes
+    ----  -----------   ------     -------------------------------------------
+     1    2025-01-01    alele      Internal revisions

@@ -1,0 +1,306 @@
+Name
+
+    EXT_shader_tile_image
+
+Name Strings
+
+    GL_EXT_shader_tile_image
+
+Contact
+
+    Jan-Harald Fredriksen (jan-harald.fredriksen 'at' arm.com)
+
+Contributors
+
+    Sandeep Kakarlapudi, ARM
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date: 2023-03-13
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.60
+    (#version 460) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    version 4.60.7, dated Jul 10, 2019.
+
+    This extension interacts with revision 43 of the GL_KHR_vulkan_glsl
+    extension, dated October 25, 2017.
+
+Overview
+
+    This extension adds support for tile image functionality in GLSL.
+
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60.7
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_shader_tile_image : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+    New preprocessor #defines are added:
+
+      #define GL_EXT_shader_tile_image 1
+
+    Modify Section 3.6, Keywords (p. 17)
+
+    (add to the end of the additional keywords list for Vulkan, p. 20)
+      tileImageEXT
+      attachmentEXT iattachmentEXT uattachmentEXT
+
+    Modify Section 4.1, Basic Types (p. 23)
+
+    (add to table of Floating-Point opaque types, p. 26)
+
+    Type             Meaning
+    -------------    ----------------------------------------------
+    attachmentEXT    a handle for accessing a floating-point color framebuffer attachment
+
+    (add to table of Signed-Integer opaque types, p. 27)
+
+    Type             Meaning
+    -------------    ----------------------------------------------
+    iattachmentEXT   a handle for accessing an integer color framebuffer attachment
+
+    (add to table of Unsigned-Integer opaque types, p. 27)
+
+    Type             Meaning
+    -------------    ----------------------------------------------
+    uattachmentEXT   a handle for accessing an unsigned integer color framebuffer attachment
+
+    Modify the Definition subsection of 4.1.7, Opaque types from
+
+      They can only be declared as function parameters or in uniform-qualified
+      variables (see "Uniform Variables").
+
+    to
+
+      With the exception of attachment types (see "Attachment Types"), they can
+      only be declared as function parameters or in uniform-qualified variables
+      (see "Uniform Variables").
+
+    Add sub section under Section 4.1.7, Opaque types
+
+    4.1.7.x Attachment Types
+
+    Attachment types are only available when targeting Vulkan.
+
+    Attachment types (e.g., attachmentEXT) are opaque types, declared and
+    behaving as described above for opaque types.  When aggregated into arrays
+    within a shader, they can only be indexed with a dynamically uniform
+    integral expression, otherwise results are undefined.
+
+    Attachment types can only be declared as function parameters or tileImageEXT
+    qualified variables.
+
+    Attachment types are used to read framebuffer color attachment values from
+    within fragment shaders using attachment read functions listed in section
+    8.x, Attachment read functions.  Depth and stencil attachment values are
+    read without explicit attachment variables.
+
+    Attachment types are only available in fragment shaders. It is a
+    compile-time error to use them in any other stage. It is a compile-time error
+    to declare both attachment type and subpass-input type variables in a shader.
+
+    Members of structures cannot be declared with attachment types.
+
+    Modify Section 4.3, Storage Qualifiers (p. 46)
+
+    (add to storage qualifier table, p. 47)
+
+    Storage Qualifier    Meaning
+    -----------------    ------------------------------------------
+    tileImageEXT         fragment shader only; attachment variables with
+                         tileImageEXT storage can be used to access the
+                         framebuffer value at a pixel location.
+
+    Add a subsection to Section 4.3, Storage Qualifiers
+
+    4.3.x Tile Image Variables
+
+    Tile image variables are only available when targeting Vulkan.
+
+    The tileImageEXT qualifier is used to declare global variables of type
+    attachmentEXT, iattachmentEXT, or uattachmentEXT in fragment shaders. It is a
+    compile time error to use the qualifier with any other types or in any other
+    shader stage.
+
+    Modify Section 4.4, Layout Qualifiers (p. 63)
+
+    (add to the layout qualifier table, pg. 63-65)
+
+                                              Qualifier  Individual           Block     Allowed
+    Layout Qualifier                            Only      Variable   Block   Member   Interfaces
+    ----------------------------------------  ---------  ----------  -----  --------  -----------
+    non_coherent_color_attachment_readEXT        X          -         -        -     fragment in
+    non_coherent_depth_attachment_readEXT        X          -         -        -     fragment in
+    non_coherent_stencil_attachment_readEXT      X          -         -        -     fragment in
+
+
+    (modifications to existing entries in the layout qualifier table, pg. 63-65)
+
+                                              Qualifier  Individual           Block     Allowed
+    Layout Qualifier                            Only      Variable   Block   Member   Interfaces
+    ----------------------------------------  ---------  ----------  -----  --------  -----------
+    location =                                              X         -        -      uniform /
+                                                                                      buffer /
+                                                                                      tileImageEXT
+                                                                                      and subroutine
+                                                                                      variables
+
+    Modify the Fragment Shader Inputs subsection under 4.4.1 Input Layout Qualifiers (p. 75)
+
+    Fragment shaders allow the following layout qualifier of in only (not with variable declarations):
+
+    layout-qualifier-id:
+        early_fragment_tests
+        non_coherent_color_attachment_readEXT
+        non_coherent_depth_attachment_readEXT
+        non_coherent_stencil_attachment_readEXT
+
+    The early_fragment_tests qualifier is used to request that fragment tests be
+    performed before fragment shader execution, as described in section 15.2.4
+    "Early Fragment Tests" of the OpenGL Specification.
+
+    (add to the end of the Fragment Shaders Input subsection).
+
+    non_coherent_color_attachment_readEXT,
+    non_coherent_depth_attachment_readEXT, and
+    non_coherent_stencil_attachment_readEXT are used to request that attachment
+    reads ignore rasterization order for color, depth, and stencil, respectively.
+    Only one fragment shader (compilation unit) need declare these, though more
+    than one can. If at least one declares a non-coherent attachment read
+    qualifier, then the non-coherent attachment read is enabled.
+
+    See the Vulkan API documentation for details on rasterization order.
+
+    Add a subsection to 4.4, Layout Qualifiers
+
+    4.4.x Tile Image Layout Qualifiers
+
+    The layout qualifiers supported for tile image variable declarations are:
+
+    layout-qualifier-id:
+        location = layout-qualifier-value
+
+    Tile image variables must be declared with the location layout qualifier or
+    a compile-time error results.
+    For example:
+
+      layout( location = 0 ) tileImageEXT highp attachmentEXT color0;
+
+    The location qualifier selects which color attachment is read from. See the
+    Vulkan API documentation for details on mapping from the tile image
+    variables to the color attachments.
+
+    If an array of size N is declared, it consumes N consecutive location
+    values, starting with the one provided.
+
+    It is a compile time error to have different tile image variables declared
+    with the same location. This includes any overlap in the implicit location
+    consumed by array declarations.
+
+    It is a compile time error if the explicit or implicit location of a tile
+    image variable is greater than or equal to gl_MaxDrawBuffers.
+
+    It is a compile time error to have incompatible numerical types between a
+    tile image variable and a fragment output variable at the same location.
+       * A tile image variables of type attachmentEXT is numerically compatible
+         with output variables of type float, vec2, vec3 and vec3.
+       * A tile image variables of type iattachmentEXT is numerically compatible
+         with output variables of type int, ivec2, ivec3 and ivec4.
+       * A tile image variables of type uattachmentEXT is numerically compatible
+         with output variables of type uint, uvec2, uvec3 and uvec4.
+
+    Add a section to chapter 8, Built-in Functions
+
+    8.x Attachment read functions
+
+    Attachment read functions are only available when targeting a Vulkan
+    fragment stage.
+
+    Attachment variables are read through the built-in functions below. The g is
+    again a placeholder for either nothing, i, or u, indicating either a
+    floating-point, signed integer or unsigned integer respectively, and these
+    must match between argument type and return type.
+
+    Syntax                                                Description
+    ----------------------------------------------------  --------------------------------------------------
+    gvec4 colorAttachmentReadEXT(gattachment attachment)  Read from a color attachment at the implicit location of the
+    gvec4 colorAttachmentReadEXT(gattachment attachment,  current fragment invocation. Sample 0 is returned if a sample
+                                 int sample)              is not specified and the attachment is multisampled.
+
+    highp float depthAttachmentReadEXT()                  Read from the depth attachment at the implicit location of the
+    highp float depthAttachmentReadEXT(int sample)        current fragment invocation. Sample 0 is returned if a sample
+                                                          is not specified and the attachment is multisampled.
+
+    lowp uint stencilAttachmentReadEXT()                  Read from the stencil attachment at the implicit location of the
+    lowp uint stencilAttachmentReadEXT(int sample)        current fragment invocation. Sample 0 is returned if a sample
+                                                          is not specified and the attachment is multisampled.
+
+    The sample numbering is identical to that used by gl_SampleID.
+
+    Add subsection 12.2.x to Chapter 12, Non-Normative SPIR-V Mappings
+
+    12.2.x Mapping of tile image variables
+
+      Fragment shaders can read framebuffer values at the fragment location
+      through tile image attachment variables.
+
+      Attachment variables are declared with the following opaque types only
+      available to fragment shaders:
+
+        attachmentEXT
+        iattachmentEXT
+        uattachmentEXT
+
+      There are no specialized types for multisampled attachments. The above
+      types can be used both with multisampled and non-multisampled attachments.
+
+      Attachment variables are declared with tileImageEXT storage class and
+      location layout qualifiers.
+
+        layout(location = i) tileImageEXT attachmentEXT colorAttachment;
+
+      Which maps to the following SPIR-V:
+
+                ...
+        %1 = OpExtInstImport "GLSL.std.450"
+                ...
+                OpName %9 "colorAttachment"
+                OpDecorate %9 Location i
+        %2 = OpTypeVoid
+        %3 = OpTypeFunction %2
+        %6 = OpTypeFloat 32
+        %7 = OpTypeImage %6 TileImageDataEXT 0 0 0 2 Unknown
+        %8 = OpTypePointer TileImageEXT %7
+        %9 = OpVariable %8 TileImageEXT
+                ...
+
+      Color attachment values are read using colorAttachmentReadEXT functions.
+      Depth and stencil attachment values are read using depthAttachmentReadEXT
+      and stencilAttachmentReadEXT functions.
+
+      Mapping of the glsl functions to SPIR-V is as follows:
+      colorAttachmentReadEXT    -> OpColorAttachmentReadEXT
+      depthAttachmentReadEXT    -> OpDepthAttachmentReadEXT
+      stencilAttachmentReadEXT  -> OpStencilAttachmentReadEXT
+
+Issues
+
+    None
+
+Revision History
+
+    Rev.  Date          Author     Changes
+    ----  -----------   ------     -------------------------------------------
+     1    2023-03-13    S.K.       Initial revision

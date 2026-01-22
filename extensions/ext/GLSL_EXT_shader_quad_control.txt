@@ -1,0 +1,182 @@
+Name
+
+    EXT_shader_quad_control
+
+Name Strings
+
+    GL_EXT_shader_quad_control
+
+Contact
+
+    Tobias Hector (tobias.hector 'at' amd.com), AMD
+
+Contributors
+
+    Tobias Hector, AMD
+    Jeff Bolz, Nvidia
+
+Notice
+
+    Copyright (c) 2024 The Khronos Group Inc. Copyright terms at
+        http://www.khronos.org/registry/speccopyright.html
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date: 2024-01-25
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    This extension is written against revision 6 of the OpenGL Shading Language
+    version 4.50, dated April 14, 2016.
+
+    This extension interacts with revision 36 of the GL_KHR_vulkan_glsl
+    extension, dated February 13, 2017.
+        
+    This extension requires GL_KHR_shader_subgroup and GL_EXT_maximal_reconvergence.
+
+Overview
+
+    This extension document modifies GLSL to add quad group functionality.
+    
+    Quads are a small partition of 4 shader invocations, that are a subset
+    of subgroups.
+        
+    When the new quad_derivatives layout is used, derivative operations are
+    well defined as long as they are executed in control flow that is uniform
+    within a quad.
+    
+    Two new quad operations - subgroupQuadAny and subgroupQuadAll - allow
+    applications to programmatically ensure that code is in control flow
+    that is uniform within a quad.
+    
+    The new full_quads layout qualifier additionally allows shaders to specify
+    that full quads must be spawned for a fragment shader, enabling quad
+    operations to always be well defined.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-specification), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+    
+      layout (quad_derivatives) in; -> QuadDerivativesKHR execution mode
+      layout (full_quads) in;       -> RequireFullQuadsKHR execution mode
+
+      subgroupQuadAll(value) -> OpGroupNonUniformQuadAllKHR(
+        /*Predicate*/value)
+
+      subgroupQuadAny(value) -> OpGroupNonUniformQuadAnyKHR(
+        /*Predicate*/value)
+
+Modifications to the OpenGL Shading Language Specification, Version 4.50
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_shader_quad_control : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    A new preprocessor #define is also added when GL_EXT_shader_quad_control is
+    supported:
+
+      #define GL_EXT_shader_quad_control 1
+
+Additions to Chapter 3 of the OpenGL Shading Language Specification
+(Basics)
+
+    Modify Section 3.8, Definitions
+
+    (Add a new subsection to the end of this section)
+
+        Quad
+
+        A quad is a set of exactly 4 invocations exposed as a subset of the
+        invocations making up a subgroup, where every consecutive set of 4
+        invocations making up a subgroup form a distinct quad.
+        
+        In fragment shaders, the quad corresponds to 4 pixels arranged in a
+        2x2 grid:
+
+            0 | 1
+            --|--
+            2 | 3
+
+        such that:
+
+        - 0th index corresponds to a pixel with a coordinate of (x, y)
+        - 1st index corresponds to a pixel with a coordinate of (x + 1, y)
+        - 2nd index corresponds to a pixel with a coordinate of (x, y + 1)
+        - 3rd index corresponds to a pixel with a coordinate of (x + 1, y + 1)
+        
+        Invocations in a quad are subject to the same behaviors and
+        requirements as invocations in a subgroup.
+
+Additions to Chapter 4 of the OpenGL Shading Language Specification
+(Variables and Types)
+
+    Modify Section 4.4, Layout Qualifiers, add the following layout qualifiers:
+    
+        |-------------------|-----------|------------|-------|--------|--------------------|
+        | Layout Qualifiier | Qualifier | Individual |       | Block  |                    |
+        |                   |   Only    |  Variable  | Block | Member | Allowed Interfaces |
+        |-------------------|-----------|------------|-------|--------|--------------------|
+        | quad_derivatives  |     X     |            |       |        | all *in*           |
+        |-------------------|-----------|------------|-------|--------|--------------------|
+        | full_quads        |     X     |            |       |        | fragment *in*      |
+        |-------------------|-----------|------------|-------|--------|--------------------|
+    
+    Modify Section 4.4.1, Input Layout Qualifiers, add the following paragraph at the end:
+    
+        If the `quad_derivatives` layout qualifier is specified on the *in* storage qualifier,
+        all derivative operations performed by the shader (either implicit or explicit) will
+        be calculated by the quad that this invocation is a part of.
+
+    Modify Section 4.4.1.3, Fragment Shader Inputs, add the following paragraph at the end:
+    
+        If the `full_quads` layout qualifier is specified on the *in* storage qualifier,
+        all fragment shader invocations must be part of a quad with four active invocations,
+        with additional helper invocations created to fill the quad as necessary.
+    
+Additions to Chapter 8 of the OpenGL Shading Language Specification
+(Built-in Functions)
+
+    Add Section 8.18, Shader Invocation Group Functions
+
+    Syntax:
+
+        bool subgroupQuadAll(bool value);
+
+    Only usable if the extensions GL_KHR_shader_subgroup_vote and
+    GL_EXT_shader_quad_control are enabled.
+
+    The function subgroupQuadAll() returns true if for all active invocations in the
+    quad <value> evaluates to true.
+
+    Syntax:
+
+        bool subgroupQuadAny(bool value);
+
+    Only usable if the extensions GL_KHR_shader_subgroup_vote and
+    GL_EXT_shader_quad_control are enabled.
+
+    The function subgroupQuadAny() returns true if for any active invocation in the
+    quad its <value> evaluates to true.
+
+Revision History
+
+    Rev.  Date          Author     Changes
+    ----  -----------   --------   -------------------------------------------
+     1    2024-01-25    thector    Initial revision.

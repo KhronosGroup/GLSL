@@ -1,0 +1,259 @@
+Name
+
+    NV_push_constant_bank
+
+Name Strings
+
+    GL_NV_push_constant_bank
+
+Contact
+
+    Vassili Nikolaev (vnikolaev 'at' nvidia.com), NVIDIA
+
+Contributors
+
+    Piers Daniell, NVIDIA
+    Ashwin Lele, NVIDIA
+
+Status
+
+    Provisional
+
+Version
+
+    Last Modified Date: 2025-12-16
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.60
+    (#version 460) and higher.
+
+    This extension is written against revision 5 of the OpenGL Shading Language
+    version 4.60, dated September 4, 2017.
+
+    This extension interacts with revision 43 of the GL_KHR_vulkan_glsl
+    extension, dated October 25, 2017.
+
+    This extension interacts with VK_KHR_push_descriptor.
+
+Overview
+
+    This extension provides new layout qualifiers for push constant uniform
+    blocks that allow shaders to organize push constant data into multiple
+    independent memory banks and specify explicit byte offsets for block
+    members within those banks.
+
+    Traditional push constant blocks in GLSL/Vulkan share a single contiguous
+    memory region, this prevents multiple shader stages from using use push 
+    constants with different layouts. This extension introduces the "bank"
+    layout qualifier to allow shaders to specify which logical bank of push 
+    constant memory a block should reside in, and the "member_offset" 
+    qualifier to specify the starting byte offset of the block's members
+    within that bank.
+
+    This is useful for:
+
+    - Allowing different pipeline stages to have non-overlapping push constant
+      layouts without conflicts
+    - Providing explicit control over memory placement for performance
+      optimization on specific hardware configurations
+    - Enabling larger effective push constant storage by utilizing multiple
+      banks
+
+    Example usage:
+
+        // Push constant in bank 0 at default offset
+        layout(push_constant) uniform PushDataA
+        {
+            mat4 modelMatrix;
+        };
+
+        // Push constant in bank 4 starting at byte offset 128
+        layout(push_constant, bank=4, member_offset=128) uniform PushDataB
+        {
+            vec4 b;
+        };
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+      bank layout qualifier -> BankNV Decoration on OpVariable
+      member_offset layout qualifier -> MemberOffsetNV Decoration on OpVariable
+
+      The bank value specifies the logical push constant bank index.
+      The member_offset value specifies the byte offset within the bank.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_NV_push_constant_bank                          : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+    New preprocessor #defines are added:
+
+      #define GL_NV_push_constant_bank                             1
+
+Changes to Chapter 4 of The OpenGL Shading Language Specification, Version 4.60
+
+    Modify Section 4.4 (Layout Qualifiers)
+
+    Add to the table in section 4.4:
+
+    Layout Qualifier    Qualifier  Individual   Block    Block      Allowed
+                          Only      Variable             Member    Interface
+    ----------------    ---------  ----------   ------   ------    ---------
+
+    bank =                                        X                 uniform
+                                                                  (push_constant
+                                                                   only)
+
+    member_offset =                               X                 uniform
+                                                                  (push_constant
+                                                                   only)
+
+
+    Add new sub-section to Section 4.4.5, Uniform and Shader Storage Block
+    Layout Qualifiers
+
+    4.4.5.X Push Constant Bank Layout Qualifiers
+
+    The "bank" and "member_offset" layout qualifiers are used to control the
+    placement of push constant uniform blocks in memory. These qualifiers are
+    only valid on uniform blocks that also have the "push_constant" layout
+    qualifier. It is a compile-time error to use these qualifiers on blocks
+    without "push_constant" or on non-block declarations.
+
+    The layout qualifiers are:
+
+    layout-qualifier-id :
+        bank = integer-constant-expression
+        member_offset = integer-constant-expression
+
+    bank
+    ----
+
+    The "bank" layout qualifier specifies which logical push constant memory
+    bank the uniform block should reside in. The value must be a non-negative
+    integer constant expression.
+
+    When "bank" is not specified, the block is placed in bank 0 (the default
+    push constant bank, which corresponds to the standard Vulkan push constant
+    range).
+
+    Different banks represent independent regions of push constant memory.
+    The number of available banks and the size of each bank is
+    implementation-dependent and can be queried through the Vulkan API.
+
+    Limits on bank indices and bank sizes are enforced at runtime by the
+    Vulkan driver. Valid Usage rules in the Vulkan specification define the
+    constraints, and validation layers will report errors when these limits
+    are exceeded. Shader compilation may succeed, but pipeline creation will
+    fail if limits are violated.
+
+    Multiple push constant blocks may use the same bank, but their memory
+    ranges (determined by member_offset and block size) must not overlap.
+    Overlapping ranges within the same bank result in undefined behavior.
+
+    Example:
+
+        // Block in default bank 0
+        layout(push_constant) uniform BlockA { vec4 a; };
+
+        // Block in bank 2
+        layout(push_constant, bank=2) uniform BlockB { vec4 b; };
+
+        // Another block in bank 2 (must not overlap with BlockB)
+        layout(push_constant, bank=2, member_offset=16) uniform BlockC { vec4 c; };
+
+
+    member_offset
+    -------------
+
+    The "member_offset" layout qualifier specifies the starting byte offset
+    within the bank where the block's members begin. The value must be a
+    non-negative integer constant expression representing a byte offset.
+
+    When "member_offset" is not specified, the block's members start at
+    byte offset 0 within the specified bank.
+
+    The member_offset value must satisfy the alignment requirements of the
+    block's members. Specifically:
+    - The offset must be a multiple of the alignment requirement of the
+      first member of the block
+    - For standard uniform block layout rules, the offset should typically
+      be a multiple of 16 bytes for vec4-aligned data
+
+    Limits on valid member_offset values are enforced at runtime by the
+    Vulkan driver. Valid Usage rules in the Vulkan specification define the
+    constraints, and validation layers will report errors when these limits
+    are exceeded. Shader compilation may succeed, but pipeline creation will
+    fail if limits are violated.
+
+    The member_offset qualifier specifies the base offset of the entire block
+    within the bank. Individual member offsets (using the standard "offset"
+    layout qualifier on block members) are then added relative to this base.
+    For example:
+
+        layout(push_constant, bank=0, member_offset=64) uniform Block
+        {
+            layout(offset=0) vec4 a;   // At byte 64 in bank 0
+            layout(offset=16) vec4 b;  // At byte 80 in bank 0
+        };
+
+    Example:
+
+        // Block starting at byte 0 in bank 4
+        layout(push_constant, bank=4) uniform BlockX { mat4 m; };
+
+        // Block starting at byte 128 in bank 4
+        layout(push_constant, bank=4, member_offset=128) uniform BlockY { vec4 v; };
+
+
+    Combined Usage
+    --------------
+
+    The "bank" and "member_offset" qualifiers may be used together or
+    independently:
+
+        // Default bank (0), default offset (0)
+        layout(push_constant) uniform Block1 { vec4 a; };
+
+        // Bank 3, default offset (0)
+        layout(push_constant, bank=3) uniform Block2 { vec4 b; };
+
+        // Default bank (0), offset 64
+        layout(push_constant, member_offset=64) uniform Block3 { vec4 c; };
+
+        // Bank 4, offset 128
+        layout(push_constant, bank=4, member_offset=128) uniform Block4 { vec4 d; };
+
+
+Interactions with GL_KHR_vulkan_glsl
+
+    The "push_constant" layout qualifier is defined by GL_KHR_vulkan_glsl.
+    The "bank" and "member_offset" qualifiers introduced by this extension
+    extend the functionality of push constants as defined in GL_KHR_vulkan_glsl.
+
+    When targeting Vulkan, the bank and member_offset values are used to
+    determine which VkPushConstantRange the block maps to and at what
+    offset within that range.
+
+
+Issues
+
+    None.
+
+
+Revision History
+
+    Rev.  Date          Author     Changes
+    ----  -----------   ------     -------------------------------------------
+     1    16-Dec-2025   vnikolaev  Initial revision.
+

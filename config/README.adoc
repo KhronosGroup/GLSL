@@ -1,0 +1,59 @@
+// Copyright 2008-2024 The Khronos Group Inc.
+// SPDX-License-Identifier: CC-BY-4.0
+
+= GLSL Asciidoc Configuration Files
+
+== Macros
+
+The macros in `vulkan-macros.rb` and `vulkan-macros/extension.rb` are
+described in the "`Vulkan Documentation and Extensions: Procedures and
+Conventions`" document in the
+link:https://registry.khronos.org/vulkan/[Vulkan Registry].
+They are not currently used, but included as examples.
+
+== Support for Math
+
+Asciidoctor is customized to insert KaTeX `<script>` tags from
+`math.js` for HTML5, and properly pass through math which has
+`\begin{}\/end{}` delimiters instead of $$\[\]\(\).
+
+For PDF builds, asciidoctor-mathematical is used to generate
+images.
+
+// == Stylesheets
+//
+// `khronos.css` is the stylesheet used for HTML output.
+// It is a slightly tweaked version of the Asciidoctor 'Colony' theme.
+
+// == Title Page Images
+//
+// Asciidoctor requires use of `docinfo` files to get logos onto the title
+// page, and has very restrictive naming conventions forcing the
+// subdirectories:
+//
+// * `vulkan/docinfo-header.html` - Vulkan logo in docinfo HTML form
+// * `vulkansc/docinfo-header.html` - Vulkan SC logo in docinfo HTML form
+// * `makedocinfologo` - script to convert SVG file to docinfo HTML file
+
+== Asciidoctor Extensions
+
+We use a number of Asciidoctor customizations written in Ruby, described
+briefly below.
+
+// * `asciidoctor-mathematical-ext.rb` - make latexmath: blocks work in table cells
+// * `extension-highlighter.rb` - one way of constructing a diff HTML document
+* `katex_replace.rb` - substitute KaTeX for MathJax in output HTML
+// * `loadable_html.rb` - add some status messages for slow-loading documents
+// * `rouge-extend-css.rb` - override parts of the 'rouge' highlighter CSS
+// * `spec-macros.rb` - custom asciidoctor macros used in spec markup
+// * `open_listing_block.rb` - allow '----' as a nested open block delimiter when tagged by '[open]'
+// * `vuid-expander.rb` - add anchors to valid usage ID tags
+// * `vu-to-json.rb` - extract valid usage statements to JSON as part of a dummy spec build
+
+// == CI support files
+//
+// These files are auxiliary data supplied to CI scripts
+//
+// * CI/contractions - disallowed contractions
+// * CI/contractions-allowed - regular expressions matching filenames allowed
+//   to have contractions

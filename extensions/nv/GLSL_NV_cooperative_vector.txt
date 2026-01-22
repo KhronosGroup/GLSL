@@ -1,0 +1,555 @@
+Name
+
+    GL_NV_cooperative_vector
+
+Contact
+
+    Jeff Bolz, NVIDIA (jbolz 'at' nvidia.com)
+
+Contributors
+
+    Karthik Vaidyanathan, NVIDIA
+    Yury Uralsky, NVIDIA
+    Sean Treichler, NVIDIA
+    Eric Werness, NVIDIA
+
+Status
+
+    Complete
+
+Version
+
+    Last Modified: Aug 27, 2025
+    Revision: 2
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.50
+    (#version 450) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+
+    All these versions map GLSL/ESSL semantics to the same SPIR-V 1.5 semantics (approximating the most recent versions of GLSL/ESSL).
+
+    This extension interacts with physical_storage_buffer,
+    EXT_shader_explicit_arithmetic_types, and GL_KHR_cooperative_matrix.
+
+Overview
+
+    This extension adds a new set of types known as "cooperative vector" types.
+    Unlike cooperative matrix types, a variable with a cooperative vector type
+    is logically stored in the invocation it belongs to, but they can opportunistically
+    cooperate behind the scenes when performing matrix-vector multiplies. Cooperative
+    vectors don't require a fully occupied subgroup or uniform control flow like
+    cooperative matrices, although these do increase the likelihood of being on
+    the fast path. And unlike normal vector types, they have arbitrary length
+    and support a relatively limited set of operations. These types are intended
+    to help accelerate the evaluation of small neural networks, where each
+    invocation is performing its own independent evaluation of the network.
+
+    This extension introduces the types and built-in functions, but does not
+    specify rules about what types are supported. This is left to the Vulkan
+    extension specifications, and it is expected that different implementations
+    may support different types.
+
+    This extension relies on the parameterized type support from
+    GL_KHR_cooperative_matrix, but cooperative vectors and cooperative matrices
+    don't directly interact with each other, and cooperative matrix support is
+    not required for this extension. The new built-in type "coopvecNV" can be
+    parameterized, and its parameters are a scalar type for the component type
+    and an integer number of elements in the vector.
+
+    Cooperative vector types may only be supported in certain shader stages, and
+    the supported stages can be queried from the API. There are no compile-time
+    checks to disallow cooperative vector types in any shader stage.
+
+Mapping to SPIR-V
+-----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+        coopvecNV -> OpTypeCooperativeVectorNV
+        coopvecNV constructor from components -> OpConstantComposite, OpCompositeConstruct
+        coopvecNV constructor from coopvecNV -> Op*Convert, OpConvert*To*
+        coopvecNV.length() -> OpConstant
+        coopvecNV[i] -> OpCompositeExtract/OpCompositeInsert/OpAccessChain
+        +, -, *, / -> OpFAdd, OpFNegate/OpFSub, OpFMul/OpVectorTimesScalar, OpFDiv
+        coopVecMatMulNV -> OpCooperativeVectorMatrixMulNV
+        coopVecMatMulAddNV -> OpCooperativeVectorMatrixMulAddNV
+        coopVecOuterProductAccumulateNV -> OpCooperativeVectorOuterProductAccumulateNV
+        coopVecReduceSumAccumulateNV -> OpCooperativeVectorReduceSumAccumulateNV
+        coopVecLoadNV -> OpCooperativeVectorLoadNV
+        coopVecStoreNV -> OpCooperativeVectorStoreNV
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_NV_cooperative_vector : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+        #define GL_NV_cooperative_vector 1
+
+Modify Section 3.6, Keywords
+(add to list of keywords)
+
+    coopvecNV
+
+Add a new Section 4.1.X, Cooperative Vector Types
+
+    Cooperative vector types are vector types with an arbitrary number of
+    components, and are optimized for matrix-vector multiplies.
+
+    Cooperative vectors (coopvecNV) are supported in the language, and are
+    parameterized by two type parameters: type per component, and number
+    of components. The parameters are specified in order between angle
+    brackets ('<' and '>') and are comma-separated. The number of
+    components can be a constant expression or specialization constant
+    expression, and no error checking is performed on the value at
+    compile time. The type per component must be a scalar numerical type.
+    It is left to the Vulkan specification to define which types are valid.
+
+    Example cooperative vector declaration:
+
+        coopvecNV<float16_t, 6> vec1; // float16, 6 components
+
+    Cooperative vector types can be used as global variables, local
+    variables, function parameters, and function return values. They must not
+    be used in uniform, buffer, or shared memory, or in input/output storage
+    classes.
+
+    There are no implicit type conversions between cooperative vector types.
+
+Add a new Section 5.4.X, Cooperative Vector Type Constructors
+
+    Cooperative vectors can be constructed from a single scalar value whose
+    type matches the vector's component type (or any value that can be
+    implicitly converted to that type). This initializes all components of the
+    vector to that same value.
+
+    Cooperative vectors can be constructed from another cooperative vector
+    type with the same number of components. This performs a component-wise
+    type conversion to initialize the new cooperative vector.
+
+    Cooperative vectors can be constructed from a set of scalars, vectors,
+    or matrices, with rules similar to vector constructors, as defined in
+    Section 5.4.2. Vector and Matrix Constructors.
+
+Add a new Section 5.X, Cooperative Vector Components
+
+    The components of a cooperative vector are logically owned by the
+    invocation that declared it, and invocations cannot directly observe each
+    other's cooperative vector values. The components can be accessed using
+    array subscripting syntax, and the number of components in the vector can
+    be queried using the *length* method. The type returned by *length* is an
+    int. There is no compile-time bounds checking of array indices.
+
+    This can be used, for example, to perform component-wise operations on
+    all components of a cooperative vector:
+
+    coopvecNV<float16_t, 6> v;
+    ...
+    for (int i = 0; i < v.length(); ++i) {
+	    v[i] = f(v[i]);
+    }
+
+    Note that component-wise access may be suboptimal, and performing vector
+    operations on the cooperative vector type is strongly preferred.
+
+Modify Section 5.9, Expressions
+
+    The arithmetic binary operators add (+), subtract (-), multiply (*), and
+    divide (/) operate on cooperative vector types and perform the operation
+    component-wise. The operands must have identical types.
+
+    The arithmetic binary operator multiply (*) also operates on a cooperative
+    vector type and a scalar (in either order) and performs the multiply
+    component-wise. The scalar type must match the component type of the
+    vector.
+
+    The arithmetic unary operator negate (-) operates on cooperative vector
+    types and performs the operation component-wise.
+
+    The bitwise operators &, ^, |, and ~, and the shift operators << and >>
+    are supported for integer cooperative vector types, and perform the
+    operation component-wise.
+
+    Conversions are allowed between cooperative vector types with the same
+    number of components.
+
+    The built-in functions fma, exp, log, tanh, atan, min, max, clamp, and step,
+    are supported for a cooperative vector type if the function is supported
+    for the vector's component type. The operation is performed component-wise.
+
+Add a new Section 8.X, Cooperative Vector Functions
+
+    The following functions perform a matrix-vector multiplication using a matrix
+    loaded from memory and a vector passed as a parameter. The input vector has K logical
+    components and is left-multiplied by an MxK matrix to produce a result with
+    M components that is stored in the output parameter 'result'. One function
+    also loads a 'bias' vector with M components from memory, which is added to
+    the product before it is stored in 'result'.
+
+        void coopVecMatMulAddNV(out coopvecNV<ResultTy, ResultComps> result,
+                                coopvecNV<InputTy, InputComps> input,
+                                int inputInterpretation,
+                                const MatrixTy[] matrix,
+                                uint matrixOffset,
+                                int matrixInterpretation,
+                                const BiasTy[] bias,
+                                uint biasOffset,
+                                int biasInterpretation,
+                                uint M,
+                                uint K,
+                                int matrixLayout,
+                                bool transpose,
+                                uint matrixStride);
+
+        void coopVecMatMulNV   (out coopvecNV<ResultTy, ResultComps> result,
+                                coopvecNV<InputTy, InputComps> input,
+                                int inputInterpretation,
+                                const MatrixTy[] matrix,
+                                uint matrixOffset,
+                                int matrixInterpretation,
+                                uint M,
+                                uint K,
+                                int matrixLayout,
+                                bool transpose,
+                                uint matrixStride);
+
+    Description: Linear-algebraic matrix multiply of an MxK matrix by a
+    K-component column vector input, with bias added to the result. The order of
+    the operations is implementation-dependent. The internal precision of the
+    operations is defined by the Vulkan specification.
+
+    The input, matrix, and bias each have a physical storage type (InputTy,
+    MatrixTy, BiasTy) and an "interpretation" parameter that specifies how the
+    values are interpreted. The interpretation parameters take gl_ComponentType*
+    values, and the behavior and interactions between physical types and
+    interpretations is as specified below.
+
+    ResultTy is the actual type of the result (no reinterpretation), and must be
+    float16_t, float32_t, uint32_t, or int32_t. ResultComps must equal M.
+
+    The input vector is converted to the type indicated by inputInterpretation.
+    This conversion step allows the input type to be converted to a smaller type
+    that the shading language may not natively support. Non-"Packed" types are
+    used to request arithmetic conversions. "Packed" types are used to request
+    a bitcast conversion, e.g. if the shader wants to convert to the smaller
+    type manually before the call.
+
+    If the inputInterpretation is not a Packed enum value, then the conversion
+    is an arithmetic conversion. InputTy must be float16_t, float32_t,
+    uint32_t, or int32_t. Integer to integer conversion saturates. Float to
+    float conversion is implementation-dependent but preserves the value as
+    accurately as reasonably possible. Float to integer conversion is
+    round-to-nearest-even and saturating. Integer to float conversion is
+    round-to-nearest-even.
+
+    If the inputInterpretation is a Packed enum value, then the conversion is a
+    bitcast where element(s) of InputTy are bitcast to element(s) of the type
+    described by the enum. InputTy must be uint32_t.
+    The input vector must have enough components to hold K values of the packed
+    type. If the packed type is not a power of two number of bits, then the
+    extension that introduces the enum defines how bits are packed. Packed
+    types with a power of two number of bits are tightly packed with lower
+    numbered components stored in lower bits.
+
+    MatrixTy can be any scalar type, and is ignored. The matrix is loaded
+    starting from a byte offset of matrixOffset from the start of the array,
+    and raw data is loaded according to matrixInterpretation. No conversion
+    is performed.
+
+    BiasTy can be any scalar type, and is ignored. The bias is loaded starting
+    from a byte offset of biasOffset from the start of the array, and raw data
+    is loaded according to biasInterpretation. No conversion is performed.
+
+    matrixOffset must be 64B aligned. biasOffset must be 16B aligned.
+    These alignment requirements also apply to the base of the array and the
+    buffer that contains it.
+
+    The matrix array must be in buffer storage, and the array that is passed
+    in can be sized or unsized. If the matrixLayout is RowMajorNV or
+    ColumnMajorNV, then matrixStride is the number of bytes to add to the
+    pointer to go from one row or column to the next, and must be a multiple of
+    16B. For optimal layouts, matrixStride is ignored unless otherwise
+    specified.
+
+    Similarly, the bias is loaded from memory starting at the requested offset
+    in "bias". M consecutive elements are loaded. The bias array must be in
+    buffer storage, and the array that is passed in can be sized or unsized.
+
+    The Vulkan implementation advertises supported combinations of ResultTy,
+    inputInterpretation, matrixInterpretation, and biasInterpretation.
+
+    M is the output vector size and K is the logical input vector size. The
+    matrix is MxK if transpose is false and KxM (before transposing) if
+    transpose is true.
+
+    gl_ComponentType* are constant integer values which can be used for the
+    inputInterpretation, matrixInterpretation, and biasInterpretation
+    parameters in coopVecMatMulAddNV and coopVecMatMulNV. Values match
+    the VkComponentTypeKHR enum.
+
+        const int gl_ComponentTypeFloat16NV                = 0;
+        const int gl_ComponentTypeFloat32NV                = 1;
+        const int gl_ComponentTypeFloat64NV                = 2;
+        const int gl_ComponentTypeSignedInt8NV             = 3;
+        const int gl_ComponentTypeSignedInt16NV            = 4;
+        const int gl_ComponentTypeSignedInt32NV            = 5;
+        const int gl_ComponentTypeSignedInt64NV            = 6;
+        const int gl_ComponentTypeUnsignedInt8NV           = 7;
+        const int gl_ComponentTypeUnsignedInt16NV          = 8;
+        const int gl_ComponentTypeUnsignedInt32NV          = 9;
+        const int gl_ComponentTypeUnsignedInt64NV          = 10;
+        const int gl_ComponentTypeSignedInt8PackedNV       = 1000491000;
+        const int gl_ComponentTypeUnsignedInt8PackedNV     = 1000491001;
+        const int gl_ComponentTypeFloatE4M3NV              = 1000491002;
+        const int gl_ComponentTypeFloatE5M2NV              = 1000491003;
+
+    The transpose parameter indicates that the matrix is transposed before
+    performing the multiply. Transposing is not supported for the
+    RowMajorNV/ColumnMajorNV layouts. Not all component types support transposing.
+    It is left to the Vulkan specification to define which types support
+    transposing.
+
+    gl_CooperativeVectorMatrixLayout* are constant integer values which can be used for
+    the matrixLayout parameter in coopVecMatMulAddNV.
+
+        const int gl_CooperativeVectorMatrixLayoutRowMajorNV                = 0;
+        const int gl_CooperativeVectorMatrixLayoutColumnMajorNV             = 1;
+        const int gl_CooperativeVectorMatrixLayoutInferencingOptimalNV      = 2;
+        const int gl_CooperativeVectorMatrixLayoutTrainingOptimalNV         = 3;
+
+    If matrixLayout is gl_CooperativeVectorMatrixLayoutRowMajorNV, then
+    contiguous ranges of K elements in memory form the row vectors of the
+    matrix that are dotted with the input vector. That is,
+    result[j] = sum_{k<K} input[k] * matrix[matrixOffsetInElements + strideInElements*j + k].
+
+    If matrixLayout is gl_CooperativeVectorMatrixLayoutColumnMajorNV, then
+    contiguous ranges of M elements in memory form the column vectors of the
+    matrix. That is,
+    result[j] = sum_{k<K} input[k] * matrix[matrixOffsetInElements + strideInElements*k + j].
+
+    Optimal matrix layouts use an implementation-dependent layout that may not
+    be publicly documented. The Vulkan extension specification offers commands to
+    convert a matrix into an optimal layout on the host or device, and to compute the
+    size of a matrix in an optimal layout. This allows applications to reserve
+    the appropriate amount of memory in buffers. All optimal layouts have the
+    property that initializing the whole region of memory to zero is equivalent
+    to initializing all elements with a bit pattern of zero. This conversion
+    command can also perform type conversions, to fill a matrix in a type
+    matching the matrixInterpretation that will be used in the shader.
+
+    The inputInterpretation, matrixInterpretation, biasInterpretation, M, K,
+    matrixLayout, and transpose parameters must be constant expressions.
+
+    Memory loads performed by these functions are performed as if the memory
+    were private, readonly, and restrict. This means the matrix and bias values
+    must not be modified while a shader might be using them.
+
+
+    The following function loads a cooperative vector from memory:
+
+        void coopVecLoadNV(out coopvecNV<VectorElemTy, NumComps> v, volatile coherent ArrayElemTy[] buf, uint offset);
+
+    ArrayElemTy can be any scalar or vector type, and is ignored. The vector is
+    loaded starting from a byte offset of 'offset' from the start of the 'buf'
+    array. No conversion is performed. The conditions under which bounds
+    checking is performed are left to the Vulkan extension.
+
+    The following function stores a cooperative vector to memory:
+
+        void coopVecStoreNV(coopvecNV<VectorElemTy, NumComps> v, volatile coherent ArrayElemTy[] buf, uint offset);
+
+    ArrayElemTy can be any scalar or vector type, and is ignored. The vector is
+    stored starting at a byte offset of 'offset' from the start of the 'buf'
+    array. No conversion is performed. The conditions under which bounds
+    checking is performed are left to the Vulkan extension.
+
+    For both coopVecLoadNV and coopVecStoreNV, 'v' can be a cooperative vector
+    type with any supported type parameters. The 'buf' arrays must be in either
+    buffer or shared storage, and the array that is passed in can be sized or
+    unsized. The load or store is done using memory qualifiers taken from the
+    declaration of 'buf'. offset must be a multiple of 16. For buffer storage,
+    the start of 'buf' must be 16B aligned.
+
+
+    The following function computes the outer product between column vectors v1
+    and v2, i.e. v1*transpose(v2), and the resulting MxN matrix is atomically
+    (with device scope) accumulated in memory.
+
+        void coopVecOuterProductAccumulateNV(const coopvecNV<T, M> v1, const coopvecNV<T, N> v2,
+                                             T[] buf, uint offset, uint stride,
+                                             int matrixLayout, int matrixInterpretation);
+
+    The "buf" array must be in buffer storage, and the array that is passed in
+    can be sized or unsized. The starting offset of the buf array must be 16B
+    aligned, and the offset must be a multiple of 16.
+    coopVecOuterProductAccumulateNV is only supported for certain
+    component types, as defined by the Vulkan extension specification.
+
+    The matrixLayout parameter must be gl_CooperativeVectorMatrixLayoutTrainingOptimalNV,
+    and the stride parameter is ignored.
+
+    matrixInterpretation selects the type used for the accumulation (i.e. the
+    type of elements of the outer product matrix).
+
+    The following function component-wise atomically (with device scope) adds
+    components of the vector v to the corresponding elements of an array in
+    memory.
+
+        void coopVecReduceSumAccumulateNV(const coopvecNV<VectorElemTy, NumComps> v,
+                                          T[] buf, uint offset);
+
+    The "buf" array must be in buffer storage, and the array that is passed in
+    can be sized or unsized. The starting offset of the buf array must be 16B
+    aligned, and offset must be a multiple of 16.
+    coopVecReduceSumAccumulateNV is only supported for certain component types,
+    as defined by the Vulkan extension specification.
+
+    All functions in this section are supported in all shader stages (subject
+    to API-specific limitations) and don't require uniform control flow or
+    fully occupied subgroups.
+
+
+Modify Section 9, Shading Language Grammar for Core Profile
+(Add to tokens list)
+
+    COOPVECNV
+
+Issues
+
+    (1) Do we really need "cooperative vectors" or can they just be "vectors"
+    and we happen to optimize around the matrix multiply function? Type name
+    could just be vec<T, K>.
+
+    RESOLVED: Calling them generic vectors would be more generally useful,
+    and may require fewer new types and instructions. But having dedicated
+    types makes it easier to limit the scope of this functionality, to have
+    an implementation designed around matrix multiplies, and to avoid having
+    to deal with the full generality of spec interactions.
+
+    This extension uses a dedicated type, but this may be generalized in the
+    future.
+
+    (2) Do we need special functions to load/store cooperative vectors from
+    buffer/shared storage? Options include: (A) functions to load/store a
+    cooperative vector from an array, (B) use normal
+    loads and then construct the cooperative vector (and use component access
+    and normal stores to store to memory), (C) allow cooperative vector types
+    to be placed in buffer/shared storage.
+
+    RESOLVED: Resolved to use option (A). We expect some performance benefits
+    from being able to do larger loads, and for loads directly from shared
+    memory.
+
+    (3) Should we have functions to convert to/from a temporary array, or
+    use constructor syntax and compoment access as with normal vectors?
+
+    RESOLVED: Be consistent with vector types.
+
+    (4) Should we require cooperative vector support in all shader stages?
+
+    RESOLVED: The types and matrix multiply should be supported in all stages,
+    but leave it to the API to advertise which stages support it, in case some
+    implementations have unforeseen limitations.
+
+    (5) Should we allow specialization constants for the number of components?
+
+    RESOLVED: Yes.
+
+    (6) Should we reuse gl_CooperativeMatrixLayout values or create a new enum
+    type?
+
+    RESOLVED: Use separate enums.
+
+    (7) Does coopVecMatMulAddNV need to support mixing component types?
+
+    RESOLVED: Yes, we should not preclude different input and output types.
+    Particularly with low precision weights, we shouldn't prevent the shader
+    from seeing a higher precision result that it can condition before reducing
+    the precision.
+
+    (8) How should we support transposing matrices?
+
+    RESOLVED: Add a transpose parameter to coopVecMatMulAddNV, only supported for
+    "easy" cases (fp16 for NVIDIA). This works for optimal layouts,
+    which spoofing the layout in memory (swap K and M, and swap row/col major)
+    would not.
+
+    (9) Should we support comparisons and boolean vectors?
+
+    RESOLVED: In the long run it's desirable to support these (see issue 1),
+    but it significantly increases the testing surface so for now these are not
+    supported. Many common activation functions that include comparisons are
+    more efficiently implemented using max or min, or failing that the 'step'
+    function can be used to compare floating point numbers, which can be used
+    to emulate booleans. Reverse activations (activation function derivatives)
+    for piecewise continuous activation functions could benefit from a builtin
+    function to select (component-wise) between two values based on a comparison.
+
+    (10) With what scope is coopVecOuterProductAccumulateNV atomic? Does it need a
+    scope operand to select the scope?
+
+    RESOLVED: Assume device scope.
+
+    (11) Does there need to be a way to zero-initialize the storage for
+    coopVecOuterProductAccumulateNV?
+
+    RESOLVED: These can generally be zero-initialized outside of the shader.
+
+    (12) How should coopVecReduceSumAccumulateNV work? Should it accumulate into
+    a register, or accumulate directly into memory?
+
+    RESOLVED: The reduced value is accumulated directly into memory.
+
+    (13) Can the training functions support only TrainingOptimal layout? If so,
+    we can remove the layout and stride parameters.
+
+    RESOLVED: No restriction on layout, at least not at the language/IR level;
+    the current training functions only support TrainingOptimal layout but future extensions
+    may relax this.
+
+Example syntax:
+
+    restrict buffer {
+        float16_t matrixData[];
+    } matrixBuf;
+
+    const int inputDim = 6;
+    coopvecNV<float16_t, inputDim> inputVec = coopvecNV<float16_t, inputDim>(materialstate, shininess, ... );
+
+    const int MLPDim = 32;
+    coopvecNV<float16_t, MLPDim> mlpVec;
+    coopVecMatMulNV(mlpVec, inputVec, gl_ComponentTypeFloat16NV, matrixBuf.matrixData, offset1, gl_ComponentTypeFloat16NV, MLPDim, inputDim, gl_CooperativeVectorMatrixLayoutRowMajorNV, false, inputDim*sizeof(float16_t));
+
+    // ReLU activation
+    mlpVec = max(coopvecNV<float16_t, MLPDim>(0), mlpVec);
+
+    coopVecMatMulNV(mlpVec, mlpVec, gl_ComponentTypeFloat16NV, matrixBuf.matrixData, offset2, gl_ComponentTypeFloat16NV, MLPDim, MLPDim, gl_CooperativeVectorMatrixLayoutRowMajorNV, false, MLPDim*sizeof(float16_t));
+
+    // tanh activation
+    mlpVec = tanh(mlpVec);
+
+    const int resultDim = 8;
+    coopvecNV<float16_t, resultDim> resultVec;
+
+    coopVecMatMulNV(resultVec, mlpVec, gl_ComponentTypeFloat16NV, matrixBuf.matrixData, offset3, gl_ComponentTypeFloat16NV, resultDim, MLPDim, gl_CooperativeVectorMatrixLayoutRowMajorNV, false, MLPDim*sizeof(float16_t));
+
+    // use resultVec[...]
+
+Revision History
+
+    Revision 2, 2025/08/20 (tianyuny)
+    - Clarify matrix layout support for training functions.
+    - Fix example coopVecMatMulNV's matrix stride argument.
+
+    Revision 1
+    - Internal revisions.

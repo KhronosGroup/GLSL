@@ -16,15 +16,16 @@ Contributors
     Daniel Koch, NVIDIA
     Tobias Hector, AMD
     Joshua Barczak, Intel
+    Tyler Nowicki, Huawei
 
 Status
 
-    Draft
+    Complete
 
 Version
 
-    Last Modified Date: 2020-09-16
-    Revision: 11
+    Last Modified Date: 2022-05-27
+    Revision: 17
 
 Dependencies
 
@@ -46,7 +47,6 @@ Overview
     This extension document modifies GLSL to add support for ray tracing
     which allows existing shader stages to execute ray intersection queries
     without using separate dynamic shaders or shader bindings tables.
-    
 
     This extension document adds support for the following extensions to be used
     within GLSL:
@@ -73,8 +73,10 @@ Overview
       gl_RayFlagsCullOpaqueEXT -> CullOpaqueKHR ray flag
       gl_RayFlagsCullNoOpaqueEXT -> CullNoOpaqueKHR ray flag
 
-      gl_RayQueryCommittedIntersectionEXT -> RayQueryCommittedIntersectionKHR enum
-      gl_RayQueryCandidateIntersectionEXT -> RayQueryCandidateIntersectionKHR enum
+      The boolean <committed> argument of any rayQueryGetIntersection* function
+      translates in SPIR-V to an <Intersection> argument of
+      RayQueryCommittedIntersectionKHR if 'true' and
+      RayQueryCandidateIntersectionKHR if 'false'.
 
       gl_RayQueryCommittedIntersectionNoneEXT -> RayQueryCommittedIntersectionNoneKHR enum
       gl_RayQueryCommittedIntersectionTriangleEXT ->RayQueryCommittedIntersectionTriangleKHR enum
@@ -111,6 +113,9 @@ Overview
       rayQueryGetIntersectionObjectRayOriginEXT -> OpRayQueryGetIntersectionObjectRayOriginKHR instruction
       rayQueryGetIntersectionObjectToWorldEXT -> OpRayQueryGetIntersectionObjectToWorldKHR instruction
       rayQueryGetIntersectionWorldToObjectEXT -> OpRayQueryGetIntersectionWorldToObjectKHR instruction
+
+    Note: When mapping to SPIR-V, ray query objects are always passed by pointer, and it is invalid to access the underlying object.
+    This differs from other arguments, notably including the acceleration structure handle used to initialize a ray query, which are passed by value. 
 
 Modifications to the OpenGL Shading Language Specification, Version 4.60
 
@@ -266,19 +271,26 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     The parameters <origin>, <direction>, <tMin>, or <tMax> may not contain Nans.
 
     <rayFlags> is a bit-wise combination of the built-in constants as defined
-    in  Section 7.3.x "Fixed Constants". Behavior is undefined if more than
-    one of the gl_RayFlagsOpaqueEXT, gl_RayFlagsNoOpaqueEXT,
-    gl_RayFlagsCullOpaqueEXT, or gl_RayFlagsCullNoOpaqueEXT are set, or if both
-    gl_RayFlagsCullBackFacingTrianglesEXT and
-    gl_RayFlagsCullFrontFacingTrianglesEXT are set.
+    in  Section 7.3.x "Fixed Constants". Behavior is undefined if:
+
+      * more than one of the gl_RayFlagsOpaqueEXT, gl_RayFlagsNoOpaqueEXT,
+        gl_RayFlagsCullOpaqueEXT, or gl_RayFlagsCullNoOpaqueEXT are set,
+      * both gl_RayFlagsCullBackFacingTrianglesEXT and
+        gl_RayFlagsCullFrontFacingTrianglesEXT are set,
+    [[if GL_EXT_ray_flags_primitive_culling is supported]]
+      * both gl_RayFlagsSkipTrianglesEXT and gl_RayFlagsSkipAABBEXT are set,
+      * more than one of gl_RayFlagsSkipTrianglesEXT, gl_RayFlagsCullBackFacingTrianglesEXT,
+        or gl_RayFlagsCullFrontFacingTrianglesEXT are set.
+    [[end if GL_EXT_ray_flags_primitive_culling]]
 
     <cullMask> is a mask which specifies the instances to be intersected
-    i.e visible to the traced ray. Only the 8 least-significant bits are used;
+    i.e. visible to the traced ray. Only the 8 least-significant bits are used;
     other bits are ignored. This mask will be combined with the mask field
-    specified in VkGeometryInstanceKHR as defined in the Ray Traversal chapter of
-    Vulkan Specification using a bitwise AND operation. The instance is visible 
-    only if the result of the operation is non-zero. The upper 24 bits of this 
-    value are ignored. If the value is zero, no instances are visible.
+    specified in VkAccelerationStructureInstanceKHR as defined in the Ray
+    Traversal chapter of Vulkan Specification using a bitwise AND operation.
+    The instance is visible only if the result of the operation is non-zero.
+    The upper 24 bits of this value are ignored. If the value is zero, no
+    instances are visible.
 
 
     Syntax:
@@ -286,11 +298,11 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
         bool rayQueryProceedEXT(rayQueryEXT q);
 
     Allows traversal to proceed when traversal is incomplete.
-    Returns true if traversal is incomplete after the operation, and false
+    Returns 'true' if traversal is incomplete after the operation, and 'false'
     if traversal is complete.
 
     Syntax:
-        
+
         void rayQueryTerminateEXT(rayQueryEXT q);
 
     Terminates execution of ray query when traversal is incomplete.
@@ -302,10 +314,10 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     Generates and commits an intersection at <tHit>. Only valid when a
     candidate AABB intersection is found.
 
-    tHit is the parameteric value for intersection
+    <tHit> is the parametric value for intersection.
 
     Syntax:
-        
+
         void rayQueryConfirmIntersectionEXT(rayQueryEXT q);
 
     Commits current candidate triangle intersection to be included in
@@ -313,19 +325,18 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     candidate triangle intersection is found.
 
     Syntax:
-    
+
         uint rayQueryGetIntersectionTypeEXT(rayQueryEXT q, bool committed);
 
     Returns type of committed or candidate intersection.
-    
-    If committed is 'true'  returns value for committed intersection
-    If committed is 'false' returns value for candidate intersection
-    'committed' must be a compile time constant value.
-    
-    Returns values as described in Section 7.3.x
+    The return values are described in Section 7.3.x.
+
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
 
     Syntax:
-        
+
         float rayQueryGetRayTMinEXT(rayQueryEXT q);
 
     Returns the parametric <tMin> value for the ray query.
@@ -337,13 +348,13 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     Returns the ray flags for the ray query, as described in Section 7.3.x.
 
     Syntax:
-    
+
         vec3 rayQueryGetWorldRayOriginEXT(rayQueryEXT q);
 
     Returns the world-space origin of ray for the ray query.
 
     Syntax:
-    
+
         vec3 rayQueryGetWorldRayDirectionEXT(rayQueryEXT q);
 
     Returns the world-space direction of ray for the ray query.
@@ -354,38 +365,45 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
     Returns the parametric <t> value for current intersection.
 
-    If committed is 'true'  returns value for committed intersection
-    If committed is 'false' returns value for candidate intersection
-    'committed' must be a compile time constant value.
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
 
     Syntax:
-        
+
         int rayQueryGetIntersectionInstanceCustomIndexEXT(rayQueryEXT q, bool committed);
 
     Returns the custom index of the instance for current intersection.
 
-    If committed is 'true'  returns value for committed intersection
-    If committed is 'false' returns value for candidate intersection
-    'committed' must be a compile time constant value.
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
 
     Syntax:
 
         int rayQueryGetIntersectionInstanceIdEXT(rayQueryEXT q, bool committed);
 
-    Returns the index of the instance for current intersection
+    Returns the index of the instance for current intersection.
 
-    If committed is 'true'  returns value for committed intersection
-    If committed is 'false' returns value for candidate intersection
-    'committed' must be a compile time constant value.
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
 
     Syntax:
         uint rayQueryGetIntersectionInstanceShaderBindingTableRecordOffsetEXT(rayQueryEXT q, bool committed);
 
-    Return offset 
+    Returns the application-specified
+    VkAccelerationStructureInstanceKHR::instanceShaderBindingTableRecordOffset
+    value from the bottom-level acceleration structure instance within the
+    top-level acceleration structure. For ray queries this member has no
+    functional effect, but is provided for completeness as the application
+    could use this to store arbitray instance data. When used
+    with ray tracing pipelines, this value is used in calculating
+    the hit shader binding table index.
 
-    If committed is 'true'  returns value for committed intersection
-    If committed is 'false' returns value for candidate intersection
-    'committed' must be a compile time constant value.
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
 
     Syntax:
         int rayQueryGetIntersectionGeometryIndexEXT(rayQueryEXT q, bool committed);
@@ -393,18 +411,20 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     Returns implementation defined index of geometry for current
     intersection.
 
-    If committed is 'true'  returns value for committed intersection
-    If committed is 'false' returns value for candidate intersection
-    'committed' must be a compile time constant value.
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
 
     Syntax:
-    
+
         int rayQueryGetIntersectionPrimitiveIndexEXT(rayQueryEXT q, bool committed);
 
-    Returns primitive 
-    If committed is 'true'  returns value for committed intersection
-    If committed is 'false' returns value for candidate intersection
-    'committed' must be a compile time constant value.
+    Returns the index of the primitive (triangle or bounding box) within the
+    geometry of the bottom-level acceleration structure being processed.
+
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
 
     Syntax:
 
@@ -413,67 +433,65 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     Returns two component floating point barycentric coordinates of
     current intersection of ray.
 
-    If committed is 'true'  returns value for committed intersection
-    If committed is 'false' returns value for candidate intersection
-    'committed' must be a compile time constant value.
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
 
     Syntax:
 
         bool rayQueryGetIntersectionFrontFaceEXT(rayQueryEXT q, bool committed);
 
-    Returns whether current intersection is front face or back facing
-    triangle.
+    Returns 'true' if the current intersection is a front facing triangle.
 
-    If committed is 'true'  returns value for committed intersection
-    If committed is 'false' returns value for candidate intersection
-    'committed' must be a compile time constant value.
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
 
     Syntax:
 
         bool rayQueryGetIntersectionCandidateAABBOpaqueEXT(rayQueryEXT q);
 
-    Returns whether current candidate intersection is opaque geometry
-    or not.
+    Returns 'true' if the current candidate intersection is an opaque AABB.
 
     Syntax:
-        
+
         vec3 rayQueryGetIntersectionObjectRayDirectionEXT(rayQueryEXT q, bool committed);
 
-    Returns object-space origin of ray for current intersection
+    Returns object-space direction of ray for current intersection.
 
-    If committed is 'true'  returns value for committed intersection
-    If committed is 'false' returns value for candidate intersection
-    'committed' must be a compile time constant value.
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
 
     Syntax:
 
         vec3 rayQueryGetIntersectionObjectRayOriginEXT(rayQueryEXT q, bool committed);
 
-    Returns object-space direction of ray for current intersection.
+    Returns object-space origin of ray for current intersection
 
-    If committed is 'true'  returns value for committed intersection
-    If committed is 'false' returns value for candidate intersection
-    'committed' must be a compile time constant value.
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
 
     Syntax:
-        
+
         mat4x3 rayQueryGetIntersectionObjectToWorldEXT(rayQueryEXT q, bool committed);
 
     Returns object to world transformation matrix for current intersection.
 
-    If committed is 'true'  returns value for committed intersection
-    If committed is 'false' returns value for candidate intersection
-    'committed' must be a compile time constant value.
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
 
     Syntax:
-    
+
         mat4x3 rayQueryGetIntersectionWorldToObjectEXT(rayQueryEXT q, bool committed);
- 
+
     Returns world to object transformation matrix for current intersection.
 
-    If committed is 'true'  returns value for committed intersection
-    If committed is 'false' returns value for candidate intersection
-    'committed' must be a compile time constant value.
+    If <committed> is 'true'  returns value for committed intersection.
+    If <committed> is 'false' returns value for candidate intersection.
+    <committed> must be a compile time constant value.
 
 Interactions with GLSL_EXT_ray_tracing
 
@@ -507,3 +525,14 @@ Revision History
      9    2020-07-24    jbarczack  Add numeric limits on ray parameters (vulkan issue 2235)
     10    2020-09-11    tobias     Clarify ray query storage class (GLSL!70), fix typo (github!135)
     11    2020-09-16    dgkoch     Document ray flag exclusive combinations (vulkan #2286)
+    12    2020-11-10    dgkoch     correct reference to Vulkan structure containing the mask
+                                   (vulkan issue 2414)
+    13    2020-12-04    dgkoch     swap descriptions of rayQueryGetIntersectionObjectRay{Origin,
+                                   Direction}EXT (#143)
+                                   various typographical improvements (vulkan issue 2432)
+    14    2020-12-16    dgkoch     Add description for rayQueryGetIntersectionPrimitiveIndexEXT and
+                                   rayQueryGetIntersectionInstanceShaderBindingTableRecordOffsetEXT
+                                   (vulkan issue 2432)
+    15    2021-02-03    dgkoch     Clarify the SPIR-V mapping for the 'committed' arg (vulkan issue 2516)
+    16    2021-03-04    tnowicki   Clarify GetIntersectionFrontFace and GetIntersectionAABBOpaque
+    17    2022-05-27    dgkoch     Disallow more combinations of ray flags (vk-gl-cts#3647)

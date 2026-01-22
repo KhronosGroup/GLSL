@@ -1,0 +1,318 @@
+Name
+
+    ARM_tensors
+
+Name Strings
+
+    GL_ARM_tensors
+
+Contact
+
+    Kevin Petit (kevin.petit 'at' arm.com), Arm
+    Sven van Haastregt (sven.vanhaastregt 'at' arm.com), Arm
+
+Contributors
+
+    Erik Hogeman, Arm
+    Jacob Bohlin, Arm
+    Jan-Harald Fredriksen, Arm
+    Kevin Petit, Arm
+    Neil Hickey, Arm
+    Sven van Haastregt, Arm
+
+Status
+
+    Complete
+
+Version
+
+    Last Modified Date: June 19, 2025
+    Revision: 1
+
+Number
+
+    TBD
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.60
+    (#version 460) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+
+    This extension interacts with the
+    GL_EXT_shader_explicit_arithmetic_types_int8,
+    GL_EXT_shader_explicit_arithmetic_types_int16,
+    GL_EXT_shader_explicit_arithmetic_types_int32,
+    GL_EXT_shader_explicit_arithmetic_types_int64,
+    GL_EXT_shader_explicit_arithmetic_types_float16,
+    GL_EXT_shader_explicit_arithmetic_types_float32, and
+    GL_EXT_shader_explicit_arithmetic_types_float64 extensions.
+
+Overview
+
+    This extension adds support for tensor objects. Tensor objects are an opaque
+    abstraction for multidimensional arrays. Elements in a tensor are read or
+    written using accessor functions.
+
+Mapping to SPIR-V
+
+    For informational purposes (non-specification), the following is an
+    expected way for an implementation to map GLSL constructs from this
+    extension to SPIR-V constructs:
+
+        tensorARM -> OpTypeTensorARM
+
+        tensorSizeARM -> OpTensorQuerySizeARM
+        tensorReadARM -> OpTensorReadARM
+        tensorWriteARM -> OpTensorWriteARM
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following lines in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_ARM_tensors : <behaviour>
+
+    Where <behaviour> is as specified in Section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+        #define GL_ARM_tensors 1
+
+    Modify Section 3.6, Keywords:
+    (add to list of keywords)
+
+    tensor
+
+    Add a new Section 4.1.X, Tensor Types:
+    Tensor types are opaque types, declared and behaving as described in
+    Section 4.1.7 "Opaque Types". They can be further qualified with memory
+    qualifiers. When aggregated into arrays within a shader, tensor arrays
+    can only be indexed with a dynamically uniform integral expression.
+
+    Tensor types are parameterized by two type parameters: data type and rank.
+    The parameters are specified in order between angle brackets ('<' and '>')
+    and comma separated. The data type parameter must be a scalar basic type.
+    The rank parameter must be an integral constant expression.
+
+    There are no implicit conversions between tensor types.
+
+    Examples of tensor declarations:
+
+        // float16 tensor of rank 1 that can only be read.
+        layout(set=0, binding=0) uniform readonly tensorARM<float16_t, 1> t0;
+
+        // int8 tensor of rank 4 that can only be written.
+        layout(set=0, binding=1) uniform writeonly tensorARM<int8_t, 4> t1;
+
+        // int tensor of rank 1 that can be read and written.
+        layout(set=0, binding=2) uniform tensorARM<int, 1> t2;
+
+        // Function with a float32 tensor of rank 5 parameter that can be read
+        // and written.
+        func(tensorARM<float32_t, 5> tp) {}
+
+    Modify Section 4.1.7 Opaque Types:
+    Add tensor types to the list of types that take memory qualifiers.
+
+    Add to Section 4.10 Memory Qualifiers:
+    Add variables declared as tensor types to the types that can be qualified with
+    a memory access qualifier.
+
+    Add a new Section 7.3.X, Tensor Built-In Constants:
+    The following constants are used to construct a bitmask to be passed as the
+    tensorOperands argument of tensorReadARM and tensorWriteARM calls.
+
+        // Specifies that the elements accessed by this call are not likely to be
+        // accessed again in the near future.
+        const uint gl_TensorOperandsNonTemporalARM = 0x1U;
+
+        // Specifies that the following argument is a value returned when reading
+        // elements outside of the bounds of a tensor.  The type of the following
+        // argument must match the tensor element type.  Applies to tensorReadARM
+        // calls only.
+        const uint gl_TensorOperandsOutOfBoundsValueARM = 0x2U;
+
+    Add a new Section 8.X, Tensor Functions:
+    The following functions are used to read/write one or more elements from/to
+    a tensor.
+
+        void tensorReadARM(tensorARM t, uint coords[], out bool data, uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], out int8_t data, uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], out int16_t data, uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], out int32_t data, uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], out int64_t data, uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], out uint8_t data, uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], out uint16_t data, uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], out uint32_t data, uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], out uint64_t data, uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], out float16_t data, uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], out float32_t data, uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], out float64_t data, uint tensorOperands = 0U, ...)
+
+        void tensorReadARM(tensorARM t, uint coords[], bool data[], uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], int8_t data[], uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], int16_t data[], uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], int32_t data[], uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], int64_t data[], uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], uint8_t data[], uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], uint16_t data[], uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], uint32_t data[], uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], uint64_t data[], uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], float16_t data[], uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], float32_t data[], uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], float64_t data[], uint tensorOperands = 0U, ...)
+
+    Description: Read one, or more, elements from Tensor *t*. The number of
+    elements read is specified by the type of the *data* parameter.
+    If *data* is a scalar type, a single element is read.
+    If *data* is an array, the number of elements read equals the array size.
+    The type of element(s) read is given by the tensorARM type.
+    *coords* specifies the coordinates of the first element to read.
+    The first element of the *coords* array corresponds to the outermost
+    dimension of the tensor.
+    It is a compile-time error if the number of supplied coordinates does not
+    equal the rank of the tensor.
+    *tensorOperands* is a constant bitmask of zero or more gl_TensorOperands*
+    values.
+    Depending on the specified tensorOperands, additional arguments may have to
+    be specified.
+    The behavior when one or more tensor elements read are outside of the tensor
+    bounds and gl_TensorOperandsOutOfBoundsValueARM is not provided, is specified
+    by the client API.
+    It is a compile-time error to read from a tensor that is decorated with the
+    writeonly memory access qualifier.
+
+        void tensorWriteARM(tensorARM t, uint coords[], bool data, uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], int8_t data, uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], int16_t data, uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], int32_t data, uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], int64_t data, uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], uint8_t data, uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], uint16_t data, uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], uint32_t data, uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], uint64_t data, uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], float16_t data, uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], float32_t data, uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], float64_t data, uint tensorOperands = 0U, ...)
+
+        void tensorWriteARM(tensorARM t, uint coords[], bool data[], uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], int8_t data[], uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], int16_t data[], uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], int32_t data[], uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], int64_t data[], uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], uint8_t data[], uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], uint16_t data[], uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], uint32_t data[], uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], uint64_t data[], uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], float16_t data[], uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], float32_t data[], uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], float64_t data[], uint tensorOperands = 0U, ...)
+
+    Description: Write one or more elements to Tensor *t*. The number and type of
+    the elements written are given by the parameter *data*.
+    If *data* is a scalar type, a single element is written.
+    If *data* is an array, the number of elements written equals the array size.
+    *coords* specifies the coordinates of where to write the first element.
+    The first element of the *coords* array corresponds to the outermost
+    dimension of the tensor.
+    It is a compile-time error if the number of supplied coordinates does not
+    equal the rank of the tensor.
+    *tensorOperands* is a constant bitmask of zero or more gl_TensorOperands*
+    values.
+    Depending on the specified tensorOperands, additional arguments may have to
+    be specified.
+    The behavior when one or more tensor elements written to are outside of the
+    tensor bounds is specified by the client API.
+    It is a compile-time error to write to a tensor that is decorated with the
+    readonly memory access qualifier.
+
+        uint tensorSizeARM(tensorARM t, uint dim);
+
+    Description: Return the size of the dimension specified in *dim* of Tensor *t*.
+    Dimension 0 corresponds to the outermost dimension of the tensor.
+    *dim* must be less than the rank of tensor *t*.
+
+    Modify Section 9, Shading Language Grammar for Core Profile:
+    (Add to token list)
+
+    TENSOR
+
+    (modify type_specifier to add type_parameter_specifier_opt)
+
+    type_specifier:
+    type_specifier_nonarray type_parameter_specifier_opt
+    type_specifier_nonarray type_parameter_specifier_opt array_specifier
+
+    (new rules)
+
+    type_parameter_specifier_opt:
+    type_parameter_specifier
+    /*empty*/
+
+    type_parameter_specifier:
+    LEFT_ANGLE type_parameter_specifier_list RIGHT_ANGLE
+
+    type_parameter_specifier_element:
+    type_specifier
+    unary_expression
+
+    type_parameter_specifier_list:
+    type_parameter_specifier_element
+    type_parameter_specifier_list COMMA type_parameter_specifier_element
+
+Interactions with GL_EXT_shader_explicit_arithmetic_types_float16
+
+    If GL_EXT_shader_explicit_arithmetic_types_float16 is not supported,
+    remove the tensorReadARM/tensorWriteARM overloads that use float16_t.
+
+Interactions with GL_EXT_shader_explicit_arithmetic_types_float32
+
+    If GL_EXT_shader_explicit_arithmetic_types_float32 is not supported,
+    remove the tensorReadARM/tensorWriteARM overloads that use float32_t.
+
+Interactions with GL_EXT_shader_explicit_arithmetic_types_float64
+
+    If GL_EXT_shader_explicit_arithmetic_types_float64 is not supported,
+    remove the tensorReadARM/tensorWriteARM overloads that use float64_t.
+
+Interactions with GL_EXT_shader_explicit_arithmetic_types_int8
+
+    If GL_EXT_shader_explicit_arithmetic_types_int8 is not supported,
+    remove the tensorReadARM/tensorWriteARM overloads that use int8_t and
+    uint8_t.
+
+Interactions with GL_EXT_shader_explicit_arithmetic_types_int16
+
+    If GL_EXT_shader_explicit_arithmetic_types_int16 is not supported,
+    remove the tensorReadARM/tensorWriteARM overloads that use int16_t and
+    uint16_t.
+
+Interactions with GL_EXT_shader_explicit_arithmetic_types_int32
+
+    If GL_EXT_shader_explicit_arithmetic_types_int32 is not supported,
+    remove the tensorReadARM/tensorWriteARM overloads that use int32_t and
+    uint32_t.
+
+Interactions with GL_EXT_shader_explicit_arithmetic_types_int64
+
+    If GL_EXT_shader_explicit_arithmetic_types_int64 is not supported,
+    remove the tensorReadARM/tensorWriteARM overloads that use int64_t and
+    uint64_t.
+
+Issues
+
+    1) Converting between vectors and arrays is cumbersome for shader writers.
+
+    Resolution:
+
+    This extension will not change or extend the language rules for conversions
+    between vector and array types.
+
+Revision History
+
+    Rev.  Date        Author                Changes
+    ----  ----------  --------------------  -----------------------------------------
+     1    2025-06-19  Sven van Haastregt    Initial revision.
