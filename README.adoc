@@ -108,4 +108,4 @@ that do not live in the Khronos registries for OpenGL or OpenGL ES.
 - link:{repo}/ext/GLSL_EXT_long_vector.txt[GL_EXT_long_vector]
 - link:{repo}/ext/GLSL_EXT_uniform_buffer_unsized_array.txt[GL_EXT_uniform_buffer_unsized_array]
 - link:{repo}/nv/GLSL_NV_push_constant_bank.txt[GL_NV_push_constant_bank]
-- link:{repo}/ext/GL_EXT_descriptor_heap.txt[GL_EXT_descriptor_heap]
+- link:{repo}/ext/GLSL_EXT_descriptor_heap.txt[GL_EXT_descriptor_heap]
