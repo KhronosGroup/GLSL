@@ -1,0 +1,121 @@
+Name
+
+    NV_explicit_typecast
+
+Name Strings
+
+    GL_NV_explicit_typecast
+
+Contact
+
+    Ashwin Lele, NVIDIA (alele 'at' nvidia.com)
+    Diego Novillo, NVIDIA (dnovillo 'at' nvidia.com)
+
+Contributors
+
+Status
+
+    Completed.
+
+Version
+
+    Last Modified:      November 1, 2025
+    Revision:           1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.50
+    (#version 450) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification, version 4.60.8, dated August 14, 2023.
+
+    This extension interacts with GL_EXT_buffer_reference and 
+    GL_EXT_buffer_reference_uvec2.
+
+Overview
+
+    This extension adds ability to convert expressions from one type
+    to another using explicit typecasts in addition to the constructor syntax
+    already present in GLSL.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following lines in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_NV_explicit_typecast : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+      #define GL_NV_explicit_typecast              1
+
+    Modify Section 5.1, Operators, p. 112
+
+    (add new entries to the precedence table; for a full spec, renumber the
+    new precedence row "3.5" to "4", and renumber all subsequent rows)
+
+    Precedence  Operator Class               Operators    Associativity
+    ----------  --------------------------   ---------    -------------
+      3.5       typecast                        ()        right to left    
+
+    (modify the last paragraph, p.112, to delete language saying that
+     typecast operators are not supported)  
+
+
+    Modify Section 5.4, Constructors, p. 113
+
+    (Insert after Section 5.4.2, Vector and Matrix Operations, p. 114)
+
+    Section 5.11, Typecast Operations
+
+    The typecast operator may be used to convert an expression from one type
+    to another, operating in a manner similar to scalar, vector, and matrix
+    constructors.  The typecast operator specifies a new data type in
+    parentheses, followed by an expression.
+
+    For scalar, vector, and matrix data types, the set of typecasts supported
+    is equivalent to the set of single-operand constructors supported, and a
+    typecast operates identically to an equivalent constructor.  A scalar
+    expression may be typecast to any scalar, vector, or matrix data type.  A
+    vector expression may be typecast to any vector type, except vectors with a
+    larger number of components.  Additionally, four-component vector
+    expressions may also be cast to a mat2 type.  A matrix expression may be
+    typecast to any other matrix data type.
+
+    Typecast operators are not supported for array or struct types.
+
+    Typecast operators are also supported for buffer reference types and
+    operates identically to an equivalent constructor converting from uint64_t
+    or uvec2 or other buffer reference types as outlined in
+    GL_EXT_buffer_reference or GL_EXT_buffer_reference_uvec2.
+
+    Note that the typecast operator takes only a single expression.  Unlike
+    constructors, they can not be used to generate a vector, structure, or
+    matrix from multiple inputs.  For example,
+
+      vec3 f = (vec3) (1.0, 2.0, 3.0);
+
+    generates a three-component vector <f>.  But all three components
+    are set to 3.0, which is the scalar value of the expression "(1.0, 2.0,
+    3.0)".  The commas in that expression are sequence operators, not list
+    delimiters.
+
+Interactions with GL_EXT_buffer_reference, GL_EXT_buffer_reference_uvec2
+
+    If GL_EXT_buffer_reference and GL_EXT_buffer_reference_uvec2 are not 
+    supported, remove mention of typecasting to buffer reference types.
+
+Issues
+
+    None
+
+Revision History
+
+    Revision 1
+    - Internal revisions.
