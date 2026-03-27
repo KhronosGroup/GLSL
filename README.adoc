@@ -24,7 +24,7 @@ that do not live in the Khronos registries for OpenGL or OpenGL ES.
 
 == Extension Specifications in this Repository
 
-:repo: https://github.com/KhronosGroup/GLSL/blob/master/extensions
+:repo: https://github.com/KhronosGroup/GLSL/blob/main/extensions
 
 - link:{repo}/khr/GL_KHR_vulkan_glsl.txt[GL_KHR_vulkan_glsl]
 - link:{repo}/ext/GL_EXT_vulkan_glsl_relaxed.txt[GL_EXT_vulkan_glsl_relaxed]
