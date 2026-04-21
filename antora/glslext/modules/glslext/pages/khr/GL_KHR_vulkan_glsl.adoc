@@ -1,0 +1,9 @@
+= GL_KHR_vulkan_glsl
+
+The original text file describing this extension as a set of diffs to the
+OpenGL Shading Language Specification follows.
+
+[listing,subs="macros"]
+----
+include::partial$khr/GL_KHR_vulkan_glsl.txt[]
+----
