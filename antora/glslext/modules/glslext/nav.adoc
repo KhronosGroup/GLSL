@@ -1,8 +1,0 @@
-// Copyright 2026 The Khronos Group Inc.
-// SPDX-License-Identifier: CC-BY-4.0
-
-* xref:index.adoc[OpenGL Shading Language Extensions]
-
-* Index
-** V
-*** xref:khr/GL_KHR_vulkan_glsl.adoc[GL_KHR_vulkan_glsl]

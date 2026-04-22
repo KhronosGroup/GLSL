@@ -158,7 +158,7 @@ $(PYXREFMAP): $(OUTDIR)/glsl.html
 	    $(OUTDIR)/glsl.html -pyfile $(PYXREFMAP)
 
 # Generate all Antora module content
-setup_antora: setup_spec_antora
+setup_antora: setup_glslext_antora setup_spec_antora
 
 # Generate Antora spec module content by rewriting spec sources
 # Individual files must be specified last

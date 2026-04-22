@@ -101,7 +101,7 @@ if __name__ == '__main__':
         stubnav += '.adoc'
         stubpath = Path(args.component) / Pages / stubnav
 
-        navfiles.append(stubnav)
+        navfiles.append(((extname, stubnav)))
 
         # Create the stub file directory
         dir = os.path.dirname(stubpath)
@@ -123,4 +123,41 @@ include::partial${relpath}[]
 ----\n""")
         fp.close()
 
-    print(f'Navigation files: {len(navfiles)} found')
+    def apiSortKey(extname):
+        """The key to sort on is the extname with any GL{,SL}_{AUTHOR_
+           prefix removed."""
+        name = extname
+
+        # Remove vendor prefix
+        if name[0:5] == 'GLSL_':
+            name = name[5:]
+        elif name[0:3] == 'GL_':
+            name = name[3:]
+        else:
+            raise ValueError(f'{extname} is not prefixed by GL_ or GLSL_')
+
+        # Remove author ID
+        sepindex = name.find('_')
+        if sepindex != -1:
+            name = name[sepindex+1:]
+        else:
+            raise ValueError(f'{extname} does not include an author name followed by _')
+
+        return name.upper()
+
+    navfile = Path(args.component) / 'nav.adoc'
+    fp = open(navfile, 'w')
+
+    sorted_pages = sorted(navfiles, key=lambda pair: apiSortKey(pair[0]))
+    lastLetter = ''
+    for (extname, relpath) in sorted_pages:
+        letter = apiSortKey(extname)[0:1]
+
+        if letter != lastLetter:
+            # Start new section
+            print(f'* {letter}', file=fp)
+            lastLetter = letter
+
+        print(f'** xref:{relpath}[{extname}]', file=fp)
+
+    fp.close()
