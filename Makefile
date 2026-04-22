@@ -212,9 +212,8 @@ CLEAN_ANTORA_PATHS = \
 	$(ANTORA_SPECMODULE)/pages/chapters \
 	$(ANTORA_SPECMODULE)/pages/partials \
 	$(ANTORA_SPECMODULE)/partials \
-	$(ANTORA_EXTMODULE_FILELIST) \
 	$(ANTORA_EXTMODULE)/partials \
-	$(filter-out %index.adoc, $(wildcard $(ANTORA_EXTMODULE)/pages/*))
+	$(filter-out %index.adoc, $(wildcard $(ANTORA_EXTMODULE)/pages/* $(ANTORA_EXTMODULE)/partials/* $(ANTORA_EXTMODULE)/nav.adoc))
 
 clean_antora:
 	$(QUIET)$(RMRF) $(CLEAN_ANTORA_PATHS)
