@@ -1,0 +1,21 @@
+# Copyright 2026 The Khronos Group Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+name: glslext
+title: OpenGL Shading Language Extensions
+version: latest
+start_page: glslext:index.adoc
+# stem (latexmath) support is provided by the @djencks/asciidoctor-mathjax
+# extension, loaded in the playbook.
+asciidoc:
+  attributes:
+    stem: latexmath
+    config: partial$config
+    chapters: partial$chapters
+    appendices: partial$appendices
+    generated: partial$gen
+    images: image$
+    imageopts: inline
+    refprefix: ''
+nav:
+- modules/glslext/nav.adoc
