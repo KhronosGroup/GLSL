@@ -146,35 +146,35 @@ Overview
     %materials_array_t          = OpTypeRuntimeArray %materials_t
     
     // Member sizes/alignments
-    %texture_size               = OpConstantSizeOfEXT %texture_t
-    %buffer_size                = OpConstantSizeOfEXT %uniform_buffer_t
-    %vec4_size                  = OpConstant 16
-    %vec4_alignment             = OpConstant 4  // Only type with alignment != size known to the shader
-    %uint_size                  = OpConstant 4
+    %texture_size               = OpConstantSizeOfEXT %uint_t %texture_t
+    %buffer_size                = OpConstantSizeOfEXT %uint_t %uniform_buffer_t
+    %vec4_size                  = OpConstant %uint_t 16
+    %vec4_alignment             = OpConstant %uint_t 4  // Only type with alignment != size known to the shader
+    %uint_size                  = OpConstant %uint_t 4
     
     // MaterialData structure alignment
     %texture_bigger             = OpSpecConstantOp OpUGreaterThan %boolean_t %texture_size %buffer_size
     %texture_buffer_align       = OpSpecConstantOp OpSelect %uint_t %member0_bigger %texture_size %buffer_size
-    %plain_old_data_align       = OpConstant 4 // We know the largest alignment of POD statically
+    %plain_old_data_align       = OpConstant %uint_t 4 // We know the largest alignment of POD statically
     %texture_buffer_bigger      = OpSpecConstantOp OpUGreaterThan %boolean_t %texture_buffer_size %plain_old_data_align
     %materials_alignment        = OpSpecConstantOp OpSelect %uint_t %texture_buffer_bigger %texture_buffer_align %plain_old_data_align
     
     // Member offsets
     %offset_0                   = OpConstant %uint_t 0
     %offset_1_unaligned         = OpSpecConstantOp OpIAdd %uint_t %offset_0 %texture_size
-    %offset_1_padding           = OpSpecConstantOp OpUMod %buffer_size %offset_1_unaligned
+    %offset_1_padding           = OpSpecConstantOp OpUMod %uint_t %offset_1_unaligned %buffer_size
     %offset_1                   = OpSpecConstantOp OpIAdd %uint_t %offset_1_unaligned %offset_1_padding
     %offset_2_unaligned         = OpSpecConstantOp OpIAdd %uint_t %offset_1 %buffer_size
-    %offset_2_padding           = OpSpecConstantOp OpUMod %vec4_alignment %offset_2_unaligned
+    %offset_2_padding           = OpSpecConstantOp OpUMod %uint_t %offset_2_unaligned %vec4_alignment
     %offset_2                   = OpSpecConstantOp OpIAdd %uint_t %offset_2_unaligned %offset_2_padding
     %offset_3_unaligned         = OpSpecConstantOp OpIAdd %uint_t %offset_2 %vec4_size
-    %offset_3_padding           = OpSpecConstantOp OpUMod %uint_size %offset_3_unaligned
+    %offset_3_padding           = OpSpecConstantOp OpUMod %uint_t %offset_3_unaligned %uint_size
     %offset_3                   = OpSpecConstantOp OpIAdd %uint_t %offset_3_unaligned %offset_3_padding
     
     // Size of the MaterialData type
     %materials_size_unaligned   = OpSpecConstantOp OpIAdd %uint_t %offset_3 %uint_size
-    %materials_padding          = OpSpecConstantOp OpUMod %materials_alignment %materials_size_unaligned
-    %materials_size             = OpSpecConstantOp OpIAdd %materials_size_unaligned %materials_padding
+    %materials_padding          = OpSpecConstantOp OpUMod %uint_t %materials_size_unaligned %materials_alignment
+    %materials_size             = OpSpecConstantOp OpIAdd %uint_t %materials_size_unaligned %materials_padding
     ```
 
 Modifications to the OpenGL Shading Language Specification, Version 4.60
