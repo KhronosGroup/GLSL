@@ -365,7 +365,7 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
     <attributeLocation> is a compile-time constant to select
     a shader defined structure containing attributes which is used to populate
-    this hit object. 
+    this hit object.
     It is possible for a shader to contain multiple invocations 'hitObjectRecordFromQueryEXT'
     with different attribute types. Different attribute types are chosen based on the 
     different values of the compile-time constant <attributeLocation> which correspond 
@@ -378,8 +378,48 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     are automatically available to closest-hit shaders executed via
     hitObjectExecuteShaderEXT, as described in the specification for that
     function. The type and structure of attributes stored must match the
-    type expected when retrieved or used in closest-hit shaders.
+    type expected when retrieved or used in closest-hit shaders. If the
+    committed intersection in ray query is for triangle geometry, the value
+    is ignored and taken directly from ray query.
+
     
+
+    Syntax:
+
+        void hitObjectRecordFromQueryEXT(hitObjectEXT hitobject,
+                    rayQueryEXT rayQuery, uint sbtRecordIndex
+                    int attributeLocation, uint hitKind)
+
+    Populates 'hitobject' representing a hit without tracing a ray.
+
+    <rayQuery> is the ray query from which the intersection parameters
+    are copied.
+
+    <sbtRecordIndex> is the record index of the hit shader of
+    <shader binding table> to be encoded in the hit object.
+
+    <attributeLocation> is a compile-time constant to select
+    a shader defined structure containing attributes which is used to populate
+    this hit object.
+    It is possible for a shader to contain multiple invocations 'hitObjectRecordFromQueryEXT'
+    with different attribute types. Different attribute types are chosen based on the
+    different values of the compile-time constant <attributeLocation> which correspond
+    to the hitObjectAttributeEXT qualified variables having the same value for the
+    location layout qualifier.
+
+    The attributes from the hitObjectAttributeEXT variable selected by
+    <attributeLocation> are encoded and stored in the hit object. These stored
+    attributes are available for retrieval via hitObjectGetAttributesEXT and
+    are automatically available to closest-hit shaders executed via
+    hitObjectExecuteShaderEXT, as described in the specification for that
+    function. The type and structure of attributes stored must match the
+    type expected when retrieved or used in closest-hit shaders. If the
+    committed intersection in ray query is for triangle geometry, the value
+    is ignored and taken directly from ray query.
+
+    <hitKind> is the integer hit kind to be encoded in the hit object.
+    If the committed intersection in ray query is for triangle geometry,
+    this value will be ignored and taken directly from ray query.
 
     Syntax:
 
@@ -891,6 +931,8 @@ Issues
 Revision History
 
     Rev.  Date          Author     Changes
-    ----  -----------   ------     -------------------------------------------
+    ----  -----------   ------     ----------------------------------------------------
      1    2024-05-29    ewerness   Port from NV to EXT
      2    2025-11-11    alele      Misc fixes 
+     3    2026-03-19    alele      Add hitkind overload for hitObjectRecordFromQueryEXT
+                                   and fix for github spirv issue 373.
