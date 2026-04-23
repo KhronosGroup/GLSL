@@ -55,6 +55,10 @@ Overview
     applied to each lookup, so that different regions of the heap can be used
     for different resource types.
     
+    There is also a new "buffer_type" qualifier for `uniform` and `buffer`
+    block declarations, allowing their types to be embedded in the resource
+    heap.
+    
     For example, the following code is now valid:
     
     ```glsl
@@ -66,11 +70,13 @@ Overview
         uint    buffersOffset;
     } myPushData;
     
+    layout(buffer_type, scalar) uniform MyUbo {
+        uint data;
+    };
+    
     struct MaterialData {
         texture2D myTexture;
-        uniform {
-            uint data;
-        } myBuffer;
+        MyUbo myBuffer;
         vec4 data0;
         uint data1;
     };
@@ -79,15 +85,19 @@ Overview
         uint materialCount;
         MaterialData materials[];
     } materialHeap;
-            
+    
+    layout(buffer_type, scalar) buffer MyFirstSsbo {
+        vec4 data;
+    };
+    
+    layout(buffer_type, scalar) buffer MySecondSsbo {
+        uint data;
+    };
+    
     layout (heap_offset = myPushData.buffersOffset) resourceheap BufferHeap {
         uint bufferCount;
-        layout (descriptor_stride = 128) buffer {
-            vec4 data;
-        } myFirstBuffer;
-        buffer {
-            uint data;
-        } myStorageBuffers[];
+        layout (descriptor_size = 128) MyFirstSsbo myFirstBuffer;
+        buffer MySecondSsbo myStorageBuffers[];
     } bufferHeap;
     
     samplerheap SamplerHeap {
@@ -98,9 +108,10 @@ Overview
     Accessing parts of these heap blocks is performed similarly to buffer
     block access, with each element read from an appropriate offset into the
     heap.
-    Layout of data is always as if `scalar` layout were used for a buffer.
+    Layout of data in a resource heap is always as if `scalar` layout were
+    used for a buffer.
     The size of resource types in the heap is dependent on the client API,
-    though can be overridden with the "descriptor_stride" qualifier.
+    though can be overridden with the "descriptor_size" qualifier.
 
     Mapping to SPIR-V
     -----------------
@@ -110,7 +121,7 @@ Overview
     `OffsetIdEXT` decoration based on the result of `OpConstantSizeOfEXT` for
     various descriptor types, as their sizes are not known until client API
     compilation.
-    This does add some complexity to compilation as various sizes and
+    This does add some complexity to compilation, as various sizes and
     alignments must now be calculated when the shader is compiled in the
     client API.
     
@@ -221,6 +232,24 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
                           application.
     |===
     
+    Add to the end of section 4.3.9 (Interface Blocks)
+    
+    Uniform and shader storage blocks can be declared with the "buffer_type"
+    layout qualifier, which alters their behavior to create an opaque buffer
+    type that describes a block (as if the block were a structure type). The
+    buffer type's name is the block name. There must be no instance name.
+    Set and binding layouts as well as qualifiers like coherent and volatile
+    don't apply to the buffer type, and can instead be applied to instances
+    of the buffer type.
+    
+    The buffer type can be used to declare block members in the
+    `resourceheap` interface, either directly or nested as part of a
+    `struct` type.
+    
+    The field selector ( . ) operator is used to access members through a
+    buffer type instance. This is the only operator allowed to operate on
+    buffer types.
+    
     Add a new section 4.3.10, Heap Blocks
     
     The `resourceheap` and `samplerheap` qualifiers are used to declare
@@ -230,16 +259,15 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
     all active shader invocations.
     Arrays of blocks are not allowed.
     
-    `resourceheap` blocks may contain plain-old-data variables, buffer and
-    uniform blocks, image*, texture*, and accelerationStructure*
-    declarations, and buffer references.
+    `resourceheap` blocks may contain plain-old-data variables, buffer types,
+    image*, texture*, and accelerationStructure* declarations, and buffer
+    references.
     Structures or arrays containing these types are also allowed.
-    These types may not be nested inside buffer or uniform blocks.
     All `resourceheap` blocks are aliased on top of the same heap, but may
     be placed at different offsets using `heap_offset`.
     
-    `samplerheap` blocks may contain plain-old-data variables and sampler*
-    declarations.
+    `samplerheap` blocks may contain plain-old-data variables, sampler*
+    declarations, and buffer references.
     Structures or arrays containing these types are also allowed.
     All `samplerheap` blocks are aliased on top of the same heap, but may
     be placed at different offsets using `heap_offset`.
@@ -253,7 +281,10 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
     | Layout              | Qualifier | Individual | Block | Block      | Allowed      |
     | Qualifier           | Only      | Variable   |       | Member     | Interfaces   |
     |----------------------------------------------------------------------------------|
-    | descriptor_stride = |           |            |       |      X     | resourceheap |
+    | buffer_type         |    X      |            |   X   |            | uniform      |
+    |                     |           |            |       |            | /buffer      |
+    |----------------------------------------------------------------------------------|
+    | descriptor_size   = |           |            |       |      X     | resourceheap |
     |                     |           |            |       |            | /samplerheap |
     |----------------------------------------------------------------------------------|
     | heap_offset       = |           |            |   X   |            | resourceheap |
@@ -279,6 +310,8 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
     |----------------------------------------------------------------------------------|
             
     Modify Section 4.4.5, Uniform and Shader Storage Block Layout Qualifiers
+
+    Add "buffer_type" to the layout-qualifier-id grammar rule.
     
     Add to the end of the section:
     
@@ -287,7 +320,7 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
         resource heap, with its elements read from that descriptor.
         Subsequent members of the resourceheap block are offset by the size
         of the descriptor in the client API, unless otherwise specified by
-        `descriptor_stride`.
+        `descriptor_size`.
 
     Modify Section 4.4.6, Opaque Uniform Layout Qualifiers
     
@@ -300,7 +333,7 @@ Additions to Chapter 4 of the OpenGL Shading Language Specification
         heap.
         Subsequent members of the resourceheap or samplerheap block are
         offset by the size of the descriptor in the client API, unless
-        otherwise specified by `descriptor_stride`.
+        otherwise specified by `descriptor_size`.
         
     Add Section 4.4.10, Resource and Sampler Heap Layout Qualifiers
     
@@ -385,4 +418,6 @@ Revision History
 
     Rev.  Date          Author     Changes
     ----  -----------   --------   -------------------------------------------
+     2    23-Apr-2026   thector    Add buffer types instead of inline blocks.
+                                   Allow buffer references in sampler heap.
      1    17-Sep-2025   thector    Initial revision.
