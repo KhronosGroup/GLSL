@@ -29,9 +29,9 @@ Status
 
 Version
 
-    Last Modified Date: 2025-11-11
 Last Modified Date: 2026-03-19
-Revision: 3
+    Last Modified Date: 2026-03-19
+    Revision: 3
 
 Dependencies
 
@@ -936,4 +936,4 @@ Revision History
      1    2024-05-29    ewerness   Port from NV to EXT
      2    2025-11-11    alele      Misc fixes 
      3    2026-03-19    alele      Add hitkind overload for hitObjectRecordFromQueryEXT
-                                   and fix for github spirv issue 373.
+                                   and fix for github spirv registry issue 373.
