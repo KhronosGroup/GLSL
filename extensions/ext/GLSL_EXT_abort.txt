@@ -1,0 +1,136 @@
+Name
+
+    EXT_abort
+
+Name Strings
+
+    GL_EXT_abort
+
+Contact
+
+    Tobias Hector, AMD (tobias.hector 'at' amd.com)
+
+Contributors
+
+    Contributors to the GL_EXT_debug_printf extension
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date:         September 31, 2024
+    Revision:                   1
+
+Number
+
+    TBD
+
+Dependencies
+
+    This extension requires GL_KHR_vulkan_glsl
+
+Overview
+
+    This extension adds an "abortEXT" built-in function that takes a string
+    message and a list of arguments, similar to debugPrintfEXT.
+
+Modifications to GL_KHR_vulkan_glsl
+
+    Add to the "Mapping to SPIR-V" section
+
+      abortEXT -> OpAbortKHR
+      literal string -> OpConstantDataKHR, 8-bit uint array type with UTFCodePoints decoration
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60.8
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_EXT_abort : <behavior>
+
+    where <behavior> is as specified in section 3.3
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+        #define GL_EXT_abort     1
+
+    Modify section 3.1 Character Set and Phases of Compilation 
+
+    Add to the list of supported characters:
+
+        single quote ('), double quote ("), backslash (\)
+
+
+    Replace the paragraph beginning with "There are no digraphs or trigraphs"
+    with:
+    
+    There are no digraphs or trigraphs. Outside of string literals (described
+    below), there are no escape sequences or uses of the backslash beyond use
+    as the line-continuation character
+
+
+    Replace the paragraph "There are no character or string data types, so
+    no quoting characters are included" with:
+
+    There are no character or string data types, but literal strings can be
+    used. A literal string is an initial double quote character, followed by
+    a sequence of characters and escape sequences, followed by a final double
+    quote character. An escape sequence is a short sequence of characters
+    contained within a string literal where the first character of the
+    sequence is a backslash. The escape sequences and character they are
+    treated as are:
+
+     - \'   ->  single quote
+     - \"   ->  double quote
+     - \?   ->  question mark
+     - \\   ->  backslash
+     - \a   ->  alert (ASCII 0x07)
+     - \b   ->  backspace (ASCII 0x08)
+     - \f   ->  page break (ASCII 0x0C)
+     - \n   ->  new line (ASCII 0x0A)
+     - \r   ->  carriage return (ASCII 0x0D)
+     - \t   ->  horizontal tab (ASCII 0x09)
+     - \v   ->  vertical tab (ASCII 0x0B)
+     - \xhh ->  'hh' interpreted as a hexadecimal number
+     - \nnn ->  'nnn' interpreted as an octal number
+
+    Octal escape sequences consist of one, two, or three octal digits, and end
+    at the first character that is not an octal digit or at the third octal
+    digit, whichever comes first.
+
+    Hexadecimal escape sequences have one or more hex digits, and end at the
+    first character that is not a hex digit.
+
+    If the octal or hexadecimal value is greater than 127, then the escape
+    sequence has an undefined value.
+
+    Add a new section 8.X Debug Functions:
+
+        void abortEXT(...);
+
+    abortEXT writes its output as-is to an implementation-defined stream,
+    using scalar packing rules, and treating the string as an array of UTF-8
+    code points with a terminating character.
+
+    This function has a variable number of arguments, and the first argument
+    must be a literal string. Other arguments can be of any type.
+    It may have no arguments.
+
+    The abort string may include format specifiers for further processing,
+    though it is implementation-defined whether this processing occurs.
+    Applications may process the stream themselves.
+        
+    If an implementation does process format specifiers, additional arguments
+    after the string must match the type indicated by the order of the format
+    specifiers in the string. If there are insufficient arguments for the
+    format specifiers, the behavior is undefined. If the format is exhausted
+    while arguments remain, the excess arguments are ignored.
+    The set of format specifiers is implementation-dependent, but must
+    include at least "%d" and "%i" (int), "%u" (uint), and "%f" (float).
+
+Revision History
+
+    Revision 1
+      - Internal revisions.
