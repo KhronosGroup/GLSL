@@ -1,0 +1,155 @@
+Name
+
+    QCOM_image_processing3
+
+Name Strings
+
+    GL_QCOM_image_processing3
+
+Contact
+
+    Wooyoung Kim, Qualcomm (wooykim 'at' qti.qualcomm.com)
+
+Contributors
+
+    Wooyoung Kim, Qualcomm (wooykim 'at' qti.qualcomm.com)
+
+Status
+
+    Final
+
+Version
+
+    Last Modified Date: 2025-08-27
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 1.30
+    (#version 130) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    version 4.60.8, dated Aug 12, 2023.
+
+Overview
+
+    This extension provides four new sets of texture functions
+    (textureGather4x1QCOM, textureGatherV2QCOM, textureGatherH2QCOM, and
+    textureGatherDQCOM) that determine four texels and return a
+    vector consisting of the specified component from each of the four
+    texels.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60.8
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_QCOM_image_processing3 : <behavior>
+
+    where <behavior> is as specified in Section 3.3.
+
+    A new preprocessor #define is added:
+
+      #define GL_QCOM_image_processing3 1
+
+
+    Add the followings to 8.9.4. Texture Gather Functions
+
+    The GL_QCOM_image_processing3 extension adds four new groups of texture gather functions:
+    textureGather4x1QCOM, textureGatherV2QCOM, textureGatherH2QCOM, and textureGatherDQCOM.
+
+    These functions take components of a single floating-point vector operand as a texture
+    coordinate, determine a set of four texels to sample from the base level-of-detail of 
+    the specified texture image, and return one component from each texel in a four-component
+    result vector.
+
+    When performing a texture gather operation, the minification and magnification filters are
+    ignored, and the rules for LINEAR filtering in the OpenGL Specification are applied to the
+    base level of the texture image to identify the four texels.
+
+    Assuming that the textureGather functions with coordinate P determine (x, y, z, w) below, 
+
+    
+    (0,0)
+
+          |.|.|d|c|.|.|.|.|
+          |.|h|w|z|g|.|.|.|
+          +-+-+-P-+-+-+-+-+
+          |.|e|x|y|f|.|.|.|
+          |.|.|a|b|.|.|.|.|
+          |.|.|.|.|.|.|.|.|
+          |.|N|.|.|.|.|.|.|
+          |W|Q|E|.|R|S|T|U|
+          |.|S|.|.|.|.|.|.| 
+
+                            (1.0,1.0)
+
+    The textureGatherV2QCOM functions with coordinate P determine (a, b, c, d).
+
+    The textureGatherH2QCOM functions with coordinate P determine (e, f, g, h).
+
+    The textureGatherDQCOM functions with coordinate Q determine (S, E, N, W).
+
+    The textureGather4x1QCOM functions with coordinate R determine (R, S, T, U).
+
+    The texels are then converted to texture base colors (Rs, Gs, Bs, As) according to table 15.1,
+    followed by application of the texture swizzle as described in section 15.2.1 “Texture Access” 
+    of the OpenGL Specification. A four component vector is assembled by taking the selected
+    component from each of the post-swizzled texture source colors in the specified order.
+
+    -------------------------------------------------------------------------------------------------
+    | gvec4 textureGather4x1QCOM(gsampler2D sampler,    |                                           |
+    |   vec2 P [, int comp])                            | If specified, the value of comp must      |
+    | gvec4 textureGather4x1QCOM(gsampler2DArray        | be a constant integer expression with     |
+    |   sampler, vec3 P [, int comp])                   | a value of 0, 1, 2, or 3, identifying     |
+    ----------------------------------------------------| the x, y, z, or w post-swizzled           |
+    | gvec4 textureGatherV2QCOM(gsampler2D sampler,     | component of the four-component vector    |
+    |   vec2 P [, int comp])                            | lookup result for each texel,             |
+    | gvec4 textureGatherV2QCOM(gsampler2DArray         | respectively. If comp is not specified,   |
+    |   sampler, vec3 P [, int comp])                   | it is treated as 0, selecting the x       |
+    ----------------------------------------------------| component of each texel to generate the   |
+    | gvec4 textureGatherH2QCOM(gsampler2D sampler,     | result.                                   |
+    |   vec2 P [, int comp])                            |                                           |
+    | gvec4 textureGatherH2QCOM(gsampler2DArray         |                                           |
+    |   sampler, vec3 P [, int comp])                   |                                           |
+    ----------------------------------------------------|                                           |
+    | gvec4 textureGatherDQCOM(gsampler2D sampler,      |                                           |
+    |   vec2 P [, int comp])                            |                                           |
+    | gvec4 textureGatherDQCOM(gsampler2DArray sampler, |                                           |
+    |   vec3 P [, int comp])                            |                                           |
+    -------------------------------------------------------------------------------------------------
+    | gvec4 textureGather4x1OffsetQCOM(gsampler2D       |                                           |
+    |   sampler, vec2 P, ivec2 offset [, int comp])     | Perform a texture gather operation as in  |
+    | gvec4 textureGather4x1OffsetQCOM(gsampler2DArray  | textureGather*QCOM by offset as described |
+    |   sampler, vec3 P, ivec2 offset [, int comp])     | in textureOffset except that the offset   |
+    ----------------------------------------------------| can be variable (non constant) and the    |
+    | gvec4 textureGatherV2OffsetQCOM(gsampler2D        | implementation-dependent minimum and      |
+    |   sampler, vec2 P, ivec2 offset [, int comp])     | maximum offset values are given by        |
+    | gvec4 textureGatherV2OffsetQCOM(gsampler2DArray   | MIN_PROGRAM_TEXTURE_GATHER_OFFSET and     |
+    |   sampler, vec3 P, ivec2 offset [, int comp])     | MAX_PROGRAM_TEXTURE_GATHER_OFFSET,        |
+    ----------------------------------------------------| respectively.                             |
+    | gvec4 textureGatherH2OffsetQCOM(gsampler2D        |                                           |
+    |   sampler, vec2 P, ivec2 offset [, int comp])     |                                           |
+    | gvec4 textureGatherH2OffsetQCOM(gsampler2DArray   |                                           |
+    |   sampler, vec3 P, ivec2 offset [, int comp])     |                                           |
+    ----------------------------------------------------|                                           |
+    | gvec4 textureGatherDOffsetQCOM(gsampler2D         |                                           |
+    |   sampler, vec2 P, ivec2 offset [, int comp])     |                                           |
+    | gvec4 textureGatherDOffsetQCOM(gsampler2DArray    |                                           |
+    |   sampler, vec3 P, ivec2 offset [, int comp])     |                                           |
+    -------------------------------------------------------------------------------------------------
+
+
+Issues
+
+    None
+
+Revision History
+
+    Rev.  Date          Author           Changes
+    ----  -----------   ------           -------------------------------------------
+     1    2025-08-27    Wooyoung Kim     Initial revision
+
