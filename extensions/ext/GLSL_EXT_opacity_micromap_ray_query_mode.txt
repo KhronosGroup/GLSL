@@ -1,0 +1,99 @@
+Name
+
+    EXT_opacity_micromap_ray_query_mode
+
+Name Strings
+
+    GL_EXT_opacity_micromap_ray_query_mode
+
+Contact
+    Wooyoung Kim (wooykim 'at' qti.qualcomm.com), Qualcomm
+
+Contributors
+
+    Wooyoung Kim, Qualcomm
+    Fred Saucedo, Qualcomm
+
+Status
+
+    Draft
+
+Version
+
+    Last Modified Date: 2026-01-08
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.60
+    (#version 460) and higher.
+
+    This extension is written against revision 8 of the OpenGL Shading Language
+    version 4.60, dated August 14, 2023.
+
+    This extension interacts with revision 43 of the GL_KHR_vulkan_glsl
+    extension, dated October 25, 2017.
+
+    This extension requires GL_EXT_ray_query as well as GL_EXT_opacity_micromap.
+
+Overview
+
+    This extension document modifies GLSL to add a new built-in variable for opacity micromaps.
+
+    Mapping to SPIR-V
+    -----------------
+
+    If a shader re-declares the built-in constant gl_EnableOpacityMicromapEXT
+    with a specialization constant layout qualifier, the generated SPIRV must
+    contain the "SPV_KHR_opacity_micromap" OpExtension string.
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map the GLSL built-in constant
+    gl_EnableOpacityMicromapEXT to SPIR-V constructs:
+
+      gl_EnableOpacityMicromapEXT -> OpacityMicromapIdKHR
+
+
+    If it has a specialization constant layout qualifier with 2 as its location
+
+      layout(constant_id = 2) gl_EnableOpacityMicromapEXT;
+
+      ->
+
+      OpExecutionModeId %main OpacityMicromapIdKHR %7
+      ...
+      OpDecorate %7 SpecId 2
+      ...
+      %7 = OpSpecConstantFalse
+ 
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_opacity_micromap_ray_query_mode : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+    New preprocessor #defines are added:
+
+      #define GL_EXT_opacity_micromap_ray_query_mode 1
+
+
+Modify 7.3. Built-In Constants, add the following at the end
+
+In addition, the following built-in constant is declared in all shaders. 
+
+      const bool gl_EnableOpacityMicromapEXT = false;
+
+To use opacity micromaps with ray query, declare the built-in constant to be a 
+specialization constant and set it to true using the API or other tools.
+
+Issues
+
+
+Revision History
+
+    Rev.  Date          Author         Changes
+    ----  -----------   ------         -------------------------------------------
+     1    2026-01-08    Wooyoung Kim   Initial revision
