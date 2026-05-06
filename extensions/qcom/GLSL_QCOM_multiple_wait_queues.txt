@@ -1,0 +1,92 @@
+Name
+
+    QCOM_multiple_wait_queues
+
+Name Strings
+
+    GL_QCOM_multiple_wait_queues
+
+Contact
+
+    Wooyoung Kim, Qualcomm (wooykim 'at' qti.qualcomm.com)
+
+Contributors
+
+    Wooyoung Kim, Qualcomm
+
+Notice
+
+    Copyright (c) 2026 Qualcomm, Inc.
+
+Status
+
+    Final
+
+Version
+
+    Last Modified Date: 05-May-2026
+    Revision: 1
+
+Number
+
+    TBD
+
+Dependencies
+
+    Written against SPIR-V 1.4.
+    Written against GLSL 4.60.8.
+
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    This extension is dependent on an earlier extension GL_EXT_control_flow_attributes.
+
+Overview
+
+    A compiler hides data load latency by scheduling independent instructions between loads and their uses.
+    It usually employs loop unrolling to facilitate such latency hiding. 
+
+    This extension adds a loop attribute named "multiple_wait_queues" to give a compiler an additional hint for latency hiding.
+    For a loop with the attribute, a compiler may assign load requests to different wait queues
+    to allow instructions dependent on data loads assigned to one queue to execute when data become available
+    while data requests assigned to the other queues are still in flight.
+
+      [[multiple_wait_queuesQCOM]]  for (int i = 0; i < 8; ++i) { ... }
+      [[multiple_wait_queuesQCOM(2)]]  for (int i = 0; i < 8; ++i) { ... }
+
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader will control the language
+    features described in this extension:
+
+      #extension GL_QCOM_multiple_wait_queues : <behavior>
+
+    Where <behavior> is as specified in section 3.3.
+
+    This new definition is added to the OpenGL Shading Language:
+
+      #define GL_QCOM_multiple_wait_queues 1
+
+
+Add the following control-flow attributes to the table in Section 6.5 Control-Flow Attributes
+
+       Attribute                     | Relevant on | Intent
+      -------------------------------+-------------+------------------------------------
+       *multiple_wait_queuesQCOM*    | Loop        | compiler may optimize the loop using multiple wait queues
+       *multiple_wait_queuesQCOM(N)* | Loop        | compiler may optimize the loop using at most *N* multiple wait queues
+
+
+Add the following before "The *unroll*, *dont_unroll*, *flatten*, and *dont_flatten* attributes are"
+
+    /N/ in *multiple_wait_queuesQCOM(N)* must be a 32-bit unsigned non-specialization compile-time
+    constant integral expression greater than 0, or a compile-time error results.
+
+Revision History
+
+    Rev.    Date         Author          Changes
+    ----  -----------    ------------    ----------------------------------------------
+    1     05-May-2026    Wooyoung Kim    initial version
