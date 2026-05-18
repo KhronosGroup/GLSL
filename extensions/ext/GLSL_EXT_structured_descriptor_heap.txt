@@ -130,7 +130,7 @@ Overview
     
     ```spir-v
     // Offset and Stride decorations
-                                  OpMemberDecorateIdEXT %materials_t OffsetIdEXT %offset_0 0
+                                  OpMemberDecorateIdEXT %materials_t 0 OffsetIdEXT %offset_0
                                   OpMemberDecorateIdEXT %materials_t OffsetIdEXT %offset_1 1
                                   OpMemberDecorateIdEXT %materials_t OffsetIdEXT %offset_2 2
                                   OpMemberDecorateIdEXT %materials_t OffsetIdEXT %offset_3 3
