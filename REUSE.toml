@@ -1,0 +1,39 @@
+version = 1
+SPDX-PackageName = "GLSL"
+SPDX-PackageDownloadLocation = "https://github.com/KhronosGroup/GLSL"
+
+[[annotations]]
+path = ["images/**.svg", "images/**.odg", "config/**/docinfo-header.html", ".gitignore"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2008-2024 The Khronos Group Inc."
+SPDX-License-Identifier = "CC-BY-4.0"
+
+[[annotations]]
+path = "katex/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2013-2019 Khan Academy and other contributors"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "config/khronos.css"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2013 Dan Allen"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "config/fonts/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2019 M+ Fonts Project"
+SPDX-License-Identifier = "LicenseRef-mplus"
+
+[[annotations]]
+path = "config/copyright-spec.adoc"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2014-2024 The Khronos Group Inc"
+SPDX-License-Identifier = "LicenseRef-KhronosSpecCopyright"
+
+[[annotations]]
+path = ["extensions/**/**.txt", "extensions/extension_headers/**.glsl"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Various dates, various Khronos Members"
+SPDX-License-Identifier = "LicenseRef-Proprietary"
