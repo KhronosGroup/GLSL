@@ -1,4 +1,4 @@
-// Copyright 2008-2024 The Khronos Group Inc.
+// Copyright 2008-2026 The Khronos Group Inc.
 // SPDX-License-Identifier: CC-BY-4.0
 
 = GLSL
@@ -24,7 +24,7 @@ that do not live in the Khronos registries for OpenGL or OpenGL ES.
 
 == Extension Specifications in this Repository
 
-:repo: https://github.com/KhronosGroup/GLSL/blob/master/extensions
+:repo: https://github.com/KhronosGroup/GLSL/blob/main/extensions
 
 - link:{repo}/khr/GL_KHR_vulkan_glsl.txt[GL_KHR_vulkan_glsl]
 - link:{repo}/ext/GL_EXT_vulkan_glsl_relaxed.txt[GL_EXT_vulkan_glsl_relaxed]
@@ -110,3 +110,5 @@ that do not live in the Khronos registries for OpenGL or OpenGL ES.
 - link:{repo}/nv/GLSL_NV_push_constant_bank.txt[GL_NV_push_constant_bank]
 - link:{repo}/ext/GLSL_EXT_descriptor_heap.txt[GL_EXT_descriptor_heap]
 - link:{repo}/ext/GLSL_EXT_structured_descriptor_heap.txt[GL_EXT_structured_descriptor_heap]
+- link:{repo}/nv/GLSL_NV_explicit_typecast.txt[GL_NV_explicit_typecast]
+- link:{repo}/nv/GLSL_NV_cooperative_matrix_decode_vector.txt[GLSL_NV_cooperative_matrix_decode_vector]

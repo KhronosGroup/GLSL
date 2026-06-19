@@ -1,4 +1,4 @@
-// Copyright 2008-2024 The Khronos Group Inc.
+// Copyright 2008-2026 The Khronos Group Inc.
 // SPDX-License-Identifier: CC-BY-4.0
 
 [[variables-and-types]]
@@ -6296,7 +6296,7 @@ different directions, yet need to yield the same result, as shown in the
 diagram below.
 
 [[img-precise]]
-image::images/precise.svg[]
+image::{images}/precise.svg[]
 
 ifdef::ESSL[]
 As stated in "`<<evaluation-of-expressions,Evaluation of Expressions>>`",
