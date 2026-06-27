@@ -1,0 +1,308 @@
+Name
+
+    EXT_spirv_intrinsics_variadic
+
+Name Strings
+
+    GL_EXT_spirv_intrinsics_variadic
+
+Contact
+
+    Reinier de Blois (me 'at' rdb.name)
+
+Contributors
+
+    Reinier de Blois
+    Tobias Hector, AMD
+
+Status
+
+    Draft
+
+Version
+
+    Revision: 1
+    Last Modified Date: 2026-06-24
+
+Dependencies
+
+    This extension is written against version 4.60.8 of the
+    OpenGL Shading Language Specification, dated August 14, 2023.
+
+    This extension requires GL_EXT_spirv_intrinsics.
+
+Overview
+
+    GL_EXT_spirv_intrinsics allows a SPIR-V instruction to be exposed to
+    GLSL by declaring a function whose signature matches the instruction's
+    operands. That mechanism requires the declared function to be of fixed
+    arity: it has exactly as many parameters as the instruction has operands.
+
+    A number of SPIR-V instructions, however, end in a variable-length tail
+    of operands. A notable example is the DebugPrintf instruction in the
+    NonSemantic.DebugPrintf extended instruction set. Such instructions cannot
+    be expressed with GL_EXT_spirv_intrinsics today.
+
+    This extension allows the use of a trailing ellipsis (`...`) as the last
+    entry in the parameter list of a function declaration qualified with
+    `spirv_instruction`, permitting a variable number of trailing arguments to
+    be supplied at the call site and appended to the instruction's operands.
+
+    As with GL_EXT_spirv_intrinsics generally, the compiler cannot validate
+    that the resulting operand sequence is correct for the target
+    instruction. It is strongly recommended that generated SPIR-V be validated
+    by a tool such as spirv-val.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60.8
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_EXT_spirv_intrinsics_variadic : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    A preprocessor #define is added to the OpenGL Shading Language:
+
+        #define GL_EXT_spirv_intrinsics_variadic 1
+
+Additions to Chapter 6 of the OpenGL Shading Language Specification
+(Statements and Structure)
+
+    Modify section 6.1, Function Definitions
+
+        After the paragraph "A function is called by using its name", add:
+
+            A function declaration qualified with `spirv_instruction` (as
+            described in the section "SPIR-V Instructions") may end its
+            parameter list with a variadic tail (a trailing ellipsis). This is
+            called a variadic function declaration. The variadic tail is not a
+            formal parameter and has no type and no in, out or inout qualifier.
+            A variadic function declaration with N formal parameters may be
+            called with N or more arguments, of which the first N arguments are
+            matched to the declared formal parameters, and the remaining
+            arguments are matched to the variadic tail.
+
+        Replace the paragraph "Function names can be overloaded." with:
+
+            Function names can be overloaded. The same function name can be
+            used for multiple functions, as long as the parameter types or the
+            presence of a variadic tail differs. If a function name is declared
+            twice with the same parameter types, then the return types and all
+            qualifiers, including those on any variadic tail, must also match,
+            and it is the same function being declared.
+
+        Replace the paragraph "When function calls are resolved" with:
+
+            When function calls are resolved, an exact type match for all the
+            arguments is sought. If an exact match is found, all other
+            functions are ignored, and the exact match is used. A function
+            declaration with a variadic tail is not considered when searching
+            for an exact match. If no exact match is found, then the implicit
+            conversions in section "Implicit Conversions" will be applied to
+            find a match for the arguments matched to a formal parameter, and
+            any remaining arguments are matched to the variadic tail, if one is
+            present, and are passed without conversion. Mismatched types on
+            input parameters (in or inout or default) must have a conversion
+            from the calling argument type to the formal parameter type.
+            Mismatched types on output parameters (out or inout) must have a
+            conversion from the formal parameter type to the calling argument
+            type.
+
+        Replace the sentences "If implicit conversions can be used ... for
+        each function argument and pair of matching functions." with:
+
+            If implicit conversions can be used to find more than one matching
+            function, or if a function with a variadic tail is matched, a
+            single best-matching function is sought. To determine a best match,
+            the conversions between calling argument and formal parameter types
+            are compared for each function argument that is matched to a formal
+            parameter in both matching function declarations. A calling
+            argument matched to a variadic tail in either declaration is not
+            used to compare that pair of declarations.
+
+        Before the paragraph "If a single function declaration is considered a
+        better match than every other matching function declaration", add:
+
+            If neither function declaration is otherwise considered a better
+            match, but exactly one of them has a variadic tail, the function
+            without a variadic tail will be considered a better match.
+
+    Modify section 6.1.1, Function Calling Conventions
+
+        At the end of this section, add the following text:
+
+            The optional variadic tail at the end of the parameter list of a
+            function declaration qualified with `spirv_instruction` may also be
+            preceded by at most one of the `spirv_literal` or
+            `spirv_by_reference` qualifiers. In this case, the semantics and
+            constraints associated with these qualifiers apply to all arguments
+            that are matched to the variadic tail.
+
+            An argument matched to a variadic tail that is not qualified by
+            `spirv_literal` may be of any type that can be given a SPIR-V <id>.
+            It is a compile-time error to supply such an argument with a type
+            that cannot be given an <id>.
+
+    Modify section 6.1.3, SPIR-V Instructions (added by
+    GL_EXT_spirv_intrinsics)
+
+        Add the following to the end of this section:
+
+            A function declaration qualified with `spirv_instruction` may end
+            its parameter list with a variadic tail. When generating SPIR-V, at
+            each call to such a declaration, each argument matched to a formal
+            parameter is encoded exactly as it would be for a non-variadic
+            declaration, and each trailing argument is then appended, in the
+            order supplied and without any type conversions, to the operands of
+            the generated instruction.
+
+            A variadic SPIR-V instruction declaration may be called with zero
+            trailing arguments, in which case no trailing operands are
+            appended.
+
+Additions to Chapter 9 of the OpenGL Shading Language Specification
+(Shading Language Grammar)
+
+    Add the following token:
+
+        ELLIPSIS
+
+    where ELLIPSIS matches the character sequence "..." with no intervening
+    white space. The sequence "..." is tokenized as ELLIPSIS rather than three
+    DOT tokens.
+
+    Add the following new rules:
+
+        spirv_instruction_variadic_tail:
+
+            ELLIPSIS
+            SPIRV_LITERAL ELLIPSIS
+            SPIRV_BY_REFERENCE ELLIPSIS
+
+        function_prototype_with_variadic_tail:
+
+            function_header spirv_instruction_variadic_tail RIGHT_PAREN
+            function_header_with_parameters COMMA spirv_instruction_variadic_tail RIGHT_PAREN
+
+    Under the rule for declaration, add:
+
+        spirv_instruction-qualifier function_prototype_with_variadic_tail SEMICOLON
+
+Examples
+
+    This shows a printf-like instruction with the arguments of its variadic
+    tail encoded by <id>. The trailing arguments are arbitrary values; see
+    GL_EXT_spirv_intrinsics_string for the string-typed leading operand needed
+    by NonSemantic.DebugPrintf:
+
+        #version 460
+
+        #extension GL_EXT_spirv_intrinsics : enable
+        #extension GL_EXT_spirv_intrinsics_variadic : enable
+        #extension GL_EXT_spirv_intrinsics_string : enable
+
+        spirv_instruction(extensions = ["SPV_KHR_non_semantic_info"],
+                          set = "NonSemantic.DebugPrintf", id = 1)
+        void debugPrintfEXT(spirv_string format, ...);
+
+        void main()
+        {
+            debugPrintfEXT("The values are %f and %d", 1.5, 42);
+        }
+
+Issues
+
+    1) Should the qualifier preceding the ellipsis be allowed to be
+       `spirv_by_reference`?
+
+    PROPOSED: Yes.
+
+    A by-pointer operand tail falls out naturally and is symmetric with the
+    `spirv_literal` and default (by-id) cases. It is included for completeness.
+
+    2) Should the ellipsis be permitted on user-defined functions?
+
+    PROPOSED: No.
+
+    Like `spirv_literal`, the variadic tail only has meaning in terms of the
+    operands of a generated SPIR-V instruction. GLSL has no general variadic
+    function mechanism, and this extension does not add one. The ellipsis is
+    therefore restricted to declarations qualified with `spirv_instruction`.
+
+    3) How are trailing arguments type-checked?
+
+    PROPOSED:
+
+    For the default (by-id) and `spirv_by_reference` forms, a trailing
+    argument may be of any type that can be given an <id>; no further type
+    constraint is imposed by this extension. For the `spirv_literal` form,
+    each trailing argument is constrained exactly as a `spirv_literal`
+    parameter is.
+
+    4) Are default argument promotions applied to the variadic arguments?
+
+    PROPOSED: No.
+
+    Each variadic argument is emitted as an operand of its own type. The SPIR-V
+    instruction consumes typed operands and there is no portable notion of a
+    promoted type here, so a `float` argument is emitted as a 32-bit float
+    operand rather than being widened. This is a deliberate divergence from C
+    variadics.
+
+    5) How is ambiguity between variadic and non-variadic overloads resolved?
+
+    PROPOSED: Apply ordinary overload ranking to the fixed parameters. If that
+    process leaves a variadic and a non-variadic candidate indistinguishable,
+    choose the non-variadic candidate.
+
+    This tie-break applies only when exactly one of the indistinguishable
+    candidates has a variadic tail. If two variadic candidates remain
+    indistinguishable on their shared fixed parameters, the call is ambiguous.
+
+    This rule is intentionally narrow. It avoids importing the more general
+    "longer fixed prefix is better" rule from C++. For example, `f(int, ...)`
+    and `f(int, float, ...)` remain ambiguous for `f(1, 1.0)` because the
+    second argument is fixed in only one candidate.
+
+    Three alternatives were considered and rejected:
+
+    (a) Preserve the pre-existing implementation behavior in glslang, in which
+        an exact match to the non-variadic overload is resolved but a match
+        requiring a conversion is reported as ambiguous. This was rejected
+        because the discontinuity between exact and converting calls becomes
+        surprising in the context of variadic calls, since `f(float)` and
+        `f(float, ...)` would work with `f(1.0)` but be ambiguous with `f(1)`.
+
+    (b) Treat any call matching both a variadic and a non-variadic declaration
+        as ambiguous. This is what C-style ellipsis does in C++, where
+        `f(float)` and `f(float, ...)` called with a single argument is
+        ambiguous even on an exact match: no argument is matched by the
+        ellipsis, so it contributes no conversion sequence that can distinguish
+        the candidates. It is internally consistent, but was rejected because
+        it would undermine the exact-match rule in GLSL that this extension
+        otherwise preserves: a call to `f(1.0)` would become ambiguous even
+        though `f(float)` matches the argument exactly, which is supposed to
+        pre-empt overload resolution according to section 6.1.
+
+    (c) Always prefer the non-variadic overload, unconditionally. This was
+        rejected because it would prefer a non-variadic overload requiring a
+        conversion over a variadic overload whose fixed parameters match
+        exactly (e.g. select `f(float)` over `f(int, ...)` for `f(0)`), which
+        is surprising in the opposite direction and diverges from the
+        per-argument ranking used elsewhere in section 6.1.
+
+    The chosen behavior preserves the per-argument ranking used elsewhere in
+    section 6.1: fixed parameters are ranked exactly as for non-variadic
+    overloads, and the additional tie-break toward the declaration without a
+    variadic tail treats the non-variadic declaration as the more specialized
+    form. This is analogous to the way C++ overload resolution prefers `f(T)`
+    over a function-template overload such as `f(T, Args...)` when both are
+    otherwise equally good and the parameter pack is empty, without adopting
+    C-style ellipsis ambiguity.
+
+Revision History
+
+    Rev.    Date      Author   Changes
+    ----  ----------  -------  -----------------------------------------------
+     1    2026-06-24  rdb      Initial revision
