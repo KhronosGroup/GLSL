@@ -1,0 +1,333 @@
+Name
+
+    EXT_spirv_intrinsics_string
+
+Name Strings
+
+    GL_EXT_spirv_intrinsics_string
+
+Contact
+
+    Reinier de Blois (me 'at' rdb.name)
+
+Contributors
+
+    Reinier de Blois
+
+Status
+
+    Draft
+
+Version
+
+    Revision: 1
+    Last Modified Date: 2026-06-27
+
+Dependencies
+
+    This extension is written against version 4.60.8 of the
+    OpenGL Shading Language Specification, dated August 14, 2023.
+
+    This extension requires GL_EXT_spirv_intrinsics.
+
+    This extension interacts with GL_EXT_spirv_intrinsics_variadic.
+
+    This extension interacts with GL_KHR_vulkan_glsl.
+
+Overview
+
+    GL_EXT_spirv_intrinsics allows a SPIR-V instruction to be exposed to
+    GLSL by declaring a function whose signature matches the instruction's
+    operands. It also defines the lexical machinery for literal strings.
+    However, it does not add syntax to pass a string to a function parameter,
+    so a SPIR-V instruction that takes an OpString <id> as operand cannot be
+    expressed with GL_EXT_spirv_intrinsics today.
+
+    To that end this extension adds a `spirv_string` pseudo-type, which may be
+    used as the type of a parameter in a function declaration qualified with
+    `spirv_instruction`. A literal string supplied for such a parameter is
+    turned into an OpString, and that OpString's <id> is passed as the operand.
+    When GL_EXT_spirv_intrinsics_variadic is also enabled, a literal string may
+    likewise be supplied as a trailing variadic argument.
+
+    A motivating use case is the NonSemantic.DebugPrintf extended instruction
+    set, whose `debugPrintfEXT` instruction takes a format string followed by a
+    variable-length list of arguments. Other use cases could include
+    tool-defined debugging and instrumentation functions.
+
+    Note that it does not add a general string data type to GLSL:
+    `spirv_string` may only be used in a parameter declaration of a SPIR-V
+    instruction, and no string-typed variables are provided by this extension.
+
+Modifications to GL_KHR_vulkan_glsl
+
+    Add to the "Mapping to SPIR-V" section
+
+        literal string (in function call argument) -> OpString
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60.8
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+        #extension GL_EXT_spirv_intrinsics_string : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+        #define GL_EXT_spirv_intrinsics_string          1
+
+Additions to Chapter 3 of the OpenGL Shading Language Specification
+(Basics)
+
+    Modify Section 3.6, Keywords
+
+    Add the following keyword:
+
+        spirv_string
+
+Additions to Chapter 4 of the OpenGL Shading Language Specification
+(Variables and Types)
+
+    Add a new section to the end of the chapter, SPIR-V Strings
+
+        The `spirv_string` type represents a SPIR-V OpString <id>. It may
+        only be used as the declared type of a parameter of a function
+        declaration qualified with `spirv_instruction`, as defined in the
+        section "SPIR-V Instructions". It is a compile-time error to use
+        `spirv_string` in any other context, including as a constructor
+        invocation, the type of a variable, structure member, function return
+        value, or user-defined function parameter, or to form an array of
+        `spirv_string`. A `spirv_string` parameter may have either no parameter
+        qualifier or the explicit parameter qualifier `in`; these are
+        equivalent, and any other qualifier is a compile-time error.
+
+        This functionality is only available when generating SPIR-V.
+
+        A formal parameter of type `spirv_string` can be matched only by a
+        literal-string argument. Conversely, except when matched to a variadic
+        tail as described below, a literal string used as a function call
+        argument can match only a formal parameter of type `spirv_string`. Such
+        a match is an exact match for overload resolution as defined by section
+        6.1. No implicit conversions are defined between literal strings and
+        any other type.
+
+        It is a compile-time error for a literal string used as a function call
+        argument to contain an embedded NUL character after escape processing.
+
+        When generating SPIR-V, an OpString is produced in the module's debug
+        section for each literal string that is matched to a `spirv_string`
+        formal parameter, and its result <id> is used for the operand of the
+        instruction corresponding to that parameter. The operand of the
+        OpString is the literal string after escape processing, without the
+        enclosing quotation marks, encoded in UTF-8 and terminated by a single
+        NUL character, as required for a SPIR-V literal string. An
+        implementation may reuse a single OpString for literal strings that
+        would be encoded identically.
+
+        It is a compile-time error for a literal string used as a function call
+        argument to be long enough that the generated OpString would exceed the
+        maximum word count permitted for a SPIR-V instruction.
+
+        A literal string may be empty (""), which produces an OpString whose
+        operand contains only the terminating NUL character.
+
+        If GL_EXT_spirv_intrinsics_variadic is enabled, a literal string
+        argument may also match an unqualified variadic tail of a function
+        declaration qualified with `spirv_instruction`. In that case, an
+        OpString is also generated and its result <id> is appended as the
+        corresponding operand. It is a compile-time error for a literal string
+        to match a variadic tail with a `spirv_by_reference` or `spirv_literal`
+        qualifier.
+
+Additions to Chapter 9 of the OpenGL Shading Language Specification
+(Shading Language Grammar)
+
+    Add the following token:
+
+        SPIRV_STRING
+
+    Under the rule for type_specifier_nonarray, add:
+
+        SPIRV_STRING
+
+    Add the following rule:
+
+        function_call_argument:
+            assignment_expression
+            STRING_LITERAL
+
+    Replace the "function_call_header_with_parameters" rule as follows:
+
+        function_call_header_with_parameters:
+            function_call_header function_call_argument
+            function_call_header_with_parameters COMMA function_call_argument
+
+Examples
+
+    A hypothetical "debug marker" extension:
+
+        #version 460
+
+        #extension GL_EXT_spirv_intrinsics : enable
+        #extension GL_EXT_spirv_intrinsics_string : enable
+
+        spirv_instruction(extensions = ["SPV_KHR_non_semantic_info"],
+                          set = "NonSemantic.EXAMPLE.DebugMarker", id = 1)
+        void debugMarker(spirv_string s);
+
+        void main()
+        {
+            debugMarker("marker");
+        }
+
+    Defining the NonSemantic.DebugPrintf printf instruction. This requires
+    both GL_EXT_spirv_intrinsics_string (for the format-string operand) and
+    GL_EXT_spirv_intrinsics_variadic (for the trailing argument list), and
+    is sufficient to express the function provided by GL_EXT_debug_printf:
+
+        #version 460
+
+        #extension GL_EXT_spirv_intrinsics : enable
+        #extension GL_EXT_spirv_intrinsics_variadic : enable
+        #extension GL_EXT_spirv_intrinsics_string : enable
+
+        spirv_instruction(extensions = ["SPV_KHR_non_semantic_info"],
+                          set = "NonSemantic.DebugPrintf", id = 1)
+        void debugPrintfEXT(spirv_string format, ...);
+
+        void main()
+        {
+            float x = 1.0;
+            debugPrintfEXT("x = %f\n", x);
+        }
+
+Issues
+
+    1) Should the string operand be described by a pseudo-type or by a
+       parameter qualifier?
+
+    PROPOSED: By a pseudo-type called `spirv_string`.
+
+    A SPIR-V instruction that takes a string operand consumes an <id> whose
+    defining instruction is an OpString. The intrinsic declaration must give
+    that parameter some spelling, so that the operand is documented and so that
+    calls participate in overload resolution. The question is whether that
+    spelling should be a dedicated pseudo-type or a qualifier applied to an
+    already existing carrier type.
+
+    A dedicated pseudo-type describes the operand kind directly: a literal
+    string at the call site is lowered to an OpString, and the result <id> of
+    that instruction is emitted as the operand. It also integrates cleanly with
+    overload resolution, since `spirv_string` is a distinct type for matching
+    (see section 6.1), and it follows the precedent set by `spirv_type` in
+    GL_EXT_spirv_intrinsics, which is likewise modelled as a type-specifier
+    rather than a qualifier.
+
+    The qualifier alternatives were rejected because they make the source-level
+    type misleading. A new qualifier applied to `uint` (or the reuse of an
+    existing one) would suggest that ordinary integer expressions are accepted
+    and that an integer value is passed to the instruction, and it would
+    require overload resolution to distinguish candidates by qualifier, which
+    GLSL does not otherwise do. Reusing `spirv_literal` would be worse still: a
+    `spirv_literal` is explicitly not an <id>, and a literal SPIR-V string
+    operand is an inline packed string, not an OpString <id> (see issue 3).
+
+    Modelling the operand as an ordinary byte array was also considered and is
+    rejected for the reasons given in issue 2.
+
+    2) Should a `spirv_string` parameter accept anything other than a single
+       literal string, such as a byte array?
+
+    PROPOSED: No.
+
+    Allowing a byte array (for example a `const uint8_t[]`) would require this
+    extension to define general-purpose string storage: element type, length
+    and null-termination rules, constant-expression requirements, and the
+    coercion from such an array to an OpString. That is a separate, general
+    byte/string facility and is out of scope here; a future extension may add
+    it. This is also why a dedicated pseudo-type, rather than a byte-array
+    model, was chosen in issue 1.
+
+    3) Should the combination `spirv_literal spirv_string` (an inline literal
+       string operand) be allowed?
+
+    PROPOSED: No.
+
+    Some SPIR-V instructions take an inline literal string operand, whose
+    characters are packed into successive 32-bit words terminated by a null
+    byte, rather than an OpString <id>; OpEntryPoint is one example. Such
+    operands, however, appear only on module-scope instructions. The
+    `spirv_instruction` qualifier generates an instruction at a call site, that
+    is, in a function body, and no function-body instruction is known that
+    takes an inline literal string operand. Without a current use case, it was
+    decided to defer this until a need for it arises by making it a
+    compile-time error, covered by the blanket ban on qualifiers other than
+    `in` (see the section "SPIR-V Strings").
+
+    4) How is the OpString operand encoded, and what happens to characters
+       outside the ASCII range?
+
+    PROPOSED: The operand is encoded as UTF-8, as required for a SPIR-V literal
+    string. Escape sequences are interpreted as defined in section 3.1 (as
+    amended by the base GL_EXT_spirv_intrinsics), which specifies that an
+    escape sequence whose value exceeds 127 is undefined, and defines no
+    Unicode escape sequences. For the defined range, a character and its UTF-8
+    encoding are identical, so there is nothing further to specify.
+
+    As GLSL uses UTF-8 as the source character set, a byte-for-byte
+    passthrough, as glslang currently does, is therefore a
+    conforming implementation.
+
+    5) Should parenthesized literal strings, like ("foo"), be allowed in the
+       specified grammar?
+
+    PROPOSED: No.
+
+    The reference glslang compiler currently treats a literal string as a
+    primary expression, and consequently accepts it within parentheses; there
+    is also a real benefit to allowing this because it is common to wrap an
+    argument in parentheses in macro definitions as a hygienic practice.
+
+    Nevertheless, parentheses in GLSL are expression syntax, and neither the
+    base GLSL specification nor the base extension makes a literal string an
+    expression. GL_EXT_spirv_intrinsics defines lexical machinery for literal
+    strings, but admits STRING_LITERAL only in specific grammar positions, such
+    as extension names, instruction-set names, and decorate-string operands.
+    The motivating GL_EXT_debug_printf example also explicitly only allows a
+    literal string as the first argument.
+
+    Accepting ("foo") for a `spirv_string` argument would therefore require
+    either making literal strings primary expressions, or adding a special
+    function-call-only grammar rule for parenthesized literal strings. The
+    first option would define string expressions as a new language feature,
+    which this extension intentionally tries to avoid. And either option would
+    make literal strings less restrictive in this extension than in
+    GL_EXT_debug_printf, deviating from the purpose of being able to define
+    debugPrintfEXT accurately.
+
+    6) Should concatenated adjacent literal strings, like "foo" "bar", be
+       accepted?
+
+    PROPOSED: No.
+
+    Concatenation would be convenient for composing format strings from macros,
+    and is common in other languages. However, adjacent-string concatenation is
+    properly a general lexical rule about how a sequence of adjacent
+    literal-string tokens forms a single literal string, not a property of
+    function-call arguments.
+
+    Defining concatenation only for function-call arguments would make literal
+    strings behave differently by context, since the other literal-string uses
+    from GL_EXT_spirv_intrinsics (extension names, instruction-set names, and
+    decorate-string operands) would still accept only a single STRING_LITERAL.
+    If it is desired in the future, it should be added to the definition of a
+    literal string itself, so that it applies uniformly, which can be done
+    without invalidating any existing shader.
+
+Revision History
+
+    Rev.    Date      Author   Changes
+    ----  ----------  -------  -----------------------------------------------
+     1    2026-06-27  rdb      Initial revision
