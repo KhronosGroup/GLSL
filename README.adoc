@@ -112,3 +112,4 @@ that do not live in the Khronos registries for OpenGL or OpenGL ES.
 - link:{repo}/ext/GLSL_EXT_structured_descriptor_heap.txt[GL_EXT_structured_descriptor_heap]
 - link:{repo}/nv/GLSL_NV_explicit_typecast.txt[GL_NV_explicit_typecast]
 - link:{repo}/nv/GLSL_NV_cooperative_matrix_decode_vector.txt[GLSL_NV_cooperative_matrix_decode_vector]
+- link:{repo}/ext/GLSL_EXT_spirv_intrinsics_variadic.txt[GL_EXT_spirv_intrinsics_variadic]
