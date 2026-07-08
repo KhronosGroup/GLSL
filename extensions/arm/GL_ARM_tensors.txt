@@ -5,6 +5,9 @@ Name
 Name Strings
 
     GL_ARM_tensors
+    GL_ARM_tensors_bfloat16
+    GL_ARM_tensors_float_e5m2
+    GL_ARM_tensors_float_e4m3
 
 Contact
 
@@ -26,8 +29,8 @@ Status
 
 Version
 
-    Last Modified Date: June 19, 2025
-    Revision: 1
+    Last Modified Date: Feb 27, 2026
+    Revision: 2
 
 Number
 
@@ -42,6 +45,9 @@ Dependencies
     (#version 320) and higher.
 
     This extension interacts with the
+    GL_EXT_bfloat16,
+    GL_EXT_float_e5m2,
+    GL_EXT_float_e4m3,
     GL_EXT_shader_explicit_arithmetic_types_int8,
     GL_EXT_shader_explicit_arithmetic_types_int16,
     GL_EXT_shader_explicit_arithmetic_types_int32,
@@ -74,12 +80,27 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     language features described in this extension:
 
         #extension GL_ARM_tensors : <behaviour>
+        #extension GL_ARM_tensors_bfloat16 : <behaviour>
+        #extension GL_ARM_tensors_float_e5m2 : <behaviour>
+        #extension GL_ARM_tensors_float_e4m3 : <behaviour>
 
     Where <behaviour> is as specified in Section 3.3.
+
+    GL_EXT_bfloat16 and GL_ARM_tensors_bfloat16 must be enabled to use overloads
+    with bfloat16_t type.
+
+    GL_EXT_float_e5m2 and GL_ARM_tensors_float_e5m2 must be enabled to use
+    overloads with floate5m2_t type.
+
+    GL_EXT_float_e4m3 and GL_ARM_tensors_float_e4m3 must be enabled to use
+    overloads with floate4m3_t type.
 
     New preprocessor #defines are added to the OpenGL Shading Language:
 
         #define GL_ARM_tensors 1
+        #define GL_ARM_tensors_bfloat16 1
+        #define GL_ARM_tensors_float_e5m2 1
+        #define GL_ARM_tensors_float_e4m3 1
 
     Modify Section 3.6, Keywords:
     (add to list of keywords)
@@ -151,6 +172,9 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
         void tensorReadARM(tensorARM t, uint coords[], out float16_t data, uint tensorOperands = 0U, ...)
         void tensorReadARM(tensorARM t, uint coords[], out float32_t data, uint tensorOperands = 0U, ...)
         void tensorReadARM(tensorARM t, uint coords[], out float64_t data, uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], out bfloat16_t data, uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], out floate5m2_t data, uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], out floate4m3_t data, uint tensorOperands = 0U, ...)
 
         void tensorReadARM(tensorARM t, uint coords[], bool data[], uint tensorOperands = 0U, ...)
         void tensorReadARM(tensorARM t, uint coords[], int8_t data[], uint tensorOperands = 0U, ...)
@@ -164,6 +188,9 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
         void tensorReadARM(tensorARM t, uint coords[], float16_t data[], uint tensorOperands = 0U, ...)
         void tensorReadARM(tensorARM t, uint coords[], float32_t data[], uint tensorOperands = 0U, ...)
         void tensorReadARM(tensorARM t, uint coords[], float64_t data[], uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], bfloat16_t data[], uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], floate5m2_t data[], uint tensorOperands = 0U, ...)
+        void tensorReadARM(tensorARM t, uint coords[], floate4m3_t data[], uint tensorOperands = 0U, ...)
 
     Description: Read one, or more, elements from Tensor *t*. The number of
     elements read is specified by the type of the *data* parameter.
@@ -197,6 +224,9 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
         void tensorWriteARM(tensorARM t, uint coords[], float16_t data, uint tensorOperands = 0U, ...)
         void tensorWriteARM(tensorARM t, uint coords[], float32_t data, uint tensorOperands = 0U, ...)
         void tensorWriteARM(tensorARM t, uint coords[], float64_t data, uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], bfloat16_t data, uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], floate5m2_t data, uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], floate4m3_t data, uint tensorOperands = 0U, ...)
 
         void tensorWriteARM(tensorARM t, uint coords[], bool data[], uint tensorOperands = 0U, ...)
         void tensorWriteARM(tensorARM t, uint coords[], int8_t data[], uint tensorOperands = 0U, ...)
@@ -210,6 +240,9 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
         void tensorWriteARM(tensorARM t, uint coords[], float16_t data[], uint tensorOperands = 0U, ...)
         void tensorWriteARM(tensorARM t, uint coords[], float32_t data[], uint tensorOperands = 0U, ...)
         void tensorWriteARM(tensorARM t, uint coords[], float64_t data[], uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], bfloat16_t data[], uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], floate5m2_t data[], uint tensorOperands = 0U, ...)
+        void tensorWriteARM(tensorARM t, uint coords[], floate4m3_t data[], uint tensorOperands = 0U, ...)
 
     Description: Write one or more elements to Tensor *t*. The number and type of
     the elements written are given by the parameter *data*.
@@ -302,6 +335,24 @@ Interactions with GL_EXT_shader_explicit_arithmetic_types_int64
     remove the tensorReadARM/tensorWriteARM overloads that use int64_t and
     uint64_t.
 
+Interactions with GL_EXT_bfloat16
+
+    If GL_EXT_bfloat16 is not supported, remove the
+    tensorReadARM/tensorWriteARM overloads that use bfloat16_t and
+    the GL_ARM_tensors_bfloat16 extension.
+
+Interactions with GL_EXT_float_e5m2
+
+    If GL_EXT_float_e5m2 is not supported, remove the
+    tensorReadARM/tensorWriteARM overloads that use floate5m2_t and
+    the GL_ARM_tensors_float_e5m2 extension.
+
+Interactions with GL_EXT_float_e4m3
+
+    If GL_EXT_float_e4m3 is not supported, remove the
+    tensorReadARM/tensorWriteARM overloads that use floate4m3_t and
+    the GL_ARM_tensors_float_e4m3 extension.
+
 Issues
 
     1) Converting between vectors and arrays is cumbersome for shader writers.
@@ -315,4 +366,5 @@ Revision History
 
     Rev.  Date        Author                Changes
     ----  ----------  --------------------  -----------------------------------------
+     2    2026-02-27  Kevin Petit           Add support for bfloat16_t, floate5m2_t, and floate4m3_t
      1    2025-06-19  Sven van Haastregt    Initial revision.

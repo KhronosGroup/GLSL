@@ -1,0 +1,295 @@
+Name
+
+    NV_cooperative_matrix_decode_vector
+
+Name Strings
+
+    GL_NV_cooperative_matrix_decode_vector
+
+Contact
+
+    Jeff Bolz, NVIDIA (jbolz 'at' nvidia.com)
+
+Contributors
+
+    Jeff Bolz, NVIDIA
+
+Status
+
+    Complete
+
+Version
+
+    Last Modified: April 28, 2026
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.50
+    (#version 450) and higher.
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+
+    This extension depends on GL_NV_cooperative_matrix2.
+
+    The examples in this document are written using the vector<T,V>
+    template syntax provided by GL_EXT_long_vector for uniformity across
+    component types and vector lengths. This extension does not require
+    GL_EXT_long_vector to be enabled; the same shaders can be expressed
+    using the built-in vector types (e.g. f16vec2, u8vec4) when the
+    component type and length are representable that way.
+
+Overview
+
+    This extension extends GL_NV_cooperative_matrix2 to allow a single
+    coopMatLoadTensorNV call to provide a vector-returning decode function
+    in addition to the existing scalar-returning _decodeFunc_. With this
+    optional second function, one invocation of the vector decode function
+    decodes V block-adjacent elements at once, instead of being invoked V
+    separate times via the scalar function.
+
+    The motivating case is block-quantized weight tensors: a small unit
+    of encoded data (such as one dword of a 4-bit format, or one byte
+    of a 1-bit format) can be loaded and decoded once for V block-adjacent
+    elements at a time, rather than being loaded and decoded V separate
+    times.
+
+    Because not every call site of a load can map V neighboring matrix
+    elements onto a single packed-vector register, the implementation
+    may invoke _decodeVectorFunc_ or rely on _decodeFunc_ (per element)
+    at any call site, choosing whichever fits better. For example, the
+    implementation may use _decodeVectorFunc_ when staging through shared
+    memory and _decodeFunc_ when loading directly into registers along an
+    axis that does not match the vector function's V-direction.
+
+    V can be 2, 4, or 8. Larger V matches the natural pack unit of formats
+    such as 1-bit (8 elements per byte) and 4-bit (8 elements per dword)
+    quantized weights, and amortizes per-invocation overhead over more
+    outputs.
+
+Mapping to SPIR-V
+-----------------
+
+    For informational purposes (non-normative), the
+    decodeVectorFunc parameter is expected to map to the DecodeVectorFunc
+    tensor addressing operand on OpCooperativeMatrixLoadTensorNV.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_NV_cooperative_matrix_decode_vector : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+      #define GL_NV_cooperative_matrix_decode_vector 1
+
+Modify Section 8.X, Cooperative Matrix Functions
+
+    Augment the description of the Load functions defined by
+    GL_NV_cooperative_matrix2 (the variants of coopMatLoadTensorNV that
+    take a _decodeFunc_ parameter) by allowing an additional optional
+    parameter _decodeVectorFunc_ that immediately follows _decodeFunc_:
+
+      void coopMatLoadTensorNV(out coopmat<...> result,
+                               <buffer or buffer_reference> buf,
+                               uint elementOffset,
+                               tensorLayoutNV<...> t,
+                               <function> decodeFunc,
+                               <function> decodeVectorFunc);
+
+      void coopMatLoadTensorNV(out coopmat<...> result,
+                               <buffer or buffer_reference> buf,
+                               uint elementOffset,
+                               tensorLayoutNV<...> t,
+                               tensorViewNV<...> view,
+                               <function> decodeFunc,
+                               <function> decodeVectorFunc);
+
+    _decodeVectorFunc_'s function is subject to the same parameter pattern
+    as _decodeFunc_: its first parameter must be a buffer_reference type, and
+    its second and third parameters must be const-in arrays of uint32_t
+    whose dimension matches the tensor dimension, but the two functions
+    can use different buffer_reference types for their first parameters.
+    _decodeVectorFunc_ must return a vector of length V whose component
+    type matches the component type of _result_, where V must be one of
+    2, 4, or 8.
+
+    Let V be the length of the vector returned by _decodeVectorFunc_.
+    For each matrix element of _result_, the implementation invokes either
+    _decodeFunc_ for that element, or _decodeVectorFunc_ for a group of V
+    block-adjacent matrix elements that contains it. The implementation
+    chooses which function to invoke and how often. Multiple invocations
+    of the same function with the same parameter values are expected to
+    return the same value.
+
+    When _decodeVectorFunc_ is invoked, the V matrix elements covered by
+    the invocation are V matrix elements whose tensor coordinates, as
+    computed by matrixCoordToTensorElement(WithView), share the same
+    blockCoord and the same coordInBlock components in every dimension
+    except LDim - 1, and whose coordInBlock[LDim - 1] values are V
+    consecutive integers starting at a multiple of V. The blockCoord,
+    coordInBlock, and pointer parameters passed to _decodeVectorFunc_
+    are those for the element of the group with the lowest
+    coordInBlock[LDim - 1]. For each i in the range 0 to V - 1, component
+    i of the returned vector is stored to the matrix element whose
+    coordInBlock[LDim - 1] is the group's lowest value plus i.
+
+    The behavior of coopMatLoadTensorNV is undefined when
+    _decodeVectorFunc_ is invoked if the following requirement is not
+    satisfied:
+
+      - t.blockSize[LDim - 1] must be a multiple of V.
+
+    This condition, together with coordInBlock[LDim - 1] being a
+    multiple of V, ensures that the V matrix elements covered by one
+    invocation of _decodeVectorFunc_ always lie within a single block.
+
+    In any function used as a _decodeFunc_ or _decodeVectorFunc_
+    parameter, and any function called directly or indirectly by those
+    functions, tangled instructions (as defined in the SPIR-V spec) are
+    not allowed.
+
+Examples
+
+    Decode a Q8_0-style block-quantized weight tensor (32 int8 quants per
+    block sharing one float16_t scale) into a gl_MatrixUseA matrix of
+    float16_t. Each block is 2 + 32 = 34 bytes packed, so the
+    buffer_reference is only 2-byte aligned. Two buffer_reference types
+    describe the same block layout in two different shapes: one uses
+    int8_t for each quant, the other packs pairs of quants in int16_t.
+    The shader supplies a per-element scalar decode using the byte view
+    and a per-V-group vector decode with V == 2 using the int16_t view.
+    The vector function does a single 16-bit load and unpacks both quants
+    into a 2-lane vector scaled by b.d once. The implementation picks
+    between the two functions per call site:
+
+        #extension GL_NV_cooperative_matrix2               : enable
+        #extension GL_NV_cooperative_matrix_decode_vector  : enable
+        #extension GL_EXT_long_vector                      : enable
+        #extension GL_EXT_shader_explicit_arithmetic_types : enable
+
+        layout(buffer_reference, std430,
+               buffer_reference_align = 2) readonly buffer block_q8_0_b {
+            float16_t d;        // per-block scale
+            int8_t    qs[32];   // 32 quantized int8 values
+        };
+
+        layout(buffer_reference, std430,
+               buffer_reference_align = 2) readonly buffer block_q8_0_w {
+            float16_t d;        // per-block scale
+            int16_t   qs[16];   // two int8 quants per int16
+        };
+
+        float16_t decode_q8_0_scalar(
+            const in block_q8_0_b b,
+            const in uint32_t blockCoord[2],
+            const in uint32_t coordInBlock[2])
+        {
+            return float16_t(b.qs[coordInBlock[1]]) * b.d;
+        }
+
+        vector<float16_t, 2> decode_q8_0_v2(
+            const in block_q8_0_w b,
+            const in uint32_t blockCoord[2],
+            const in uint32_t coordInBlock[2])
+        {
+            // coordInBlock[1] is a multiple of V == 2, so a single
+            // 16-bit load yields both quants for this group.
+            int16_t pair = b.qs[coordInBlock[1] >> 1];
+            uint p = uint(pair);
+            return vector<float16_t, 2>(int8_t(p & 0xFFu), int8_t(p >> 8)) * b.d;
+        }
+
+        void load(coopmat<float16_t, gl_ScopeSubgroup, M, N, gl_MatrixUseA> mat,
+                  uint elementOffset, uint row, uint col)
+        {
+            tensorLayoutNV<2> t = createTensorLayoutNV(2);
+            // 1 x 32 block of matrix elements per Q8_0 block.
+            t = setTensorLayoutBlockSizeNV(t, 1, 32);
+            t = setTensorLayoutDimensionNV(t, NumRows, NumCols);
+            t = sliceTensorLayoutNV(t, row, M, col, N);
+
+            coopMatLoadTensorNV(mat, input.buf, elementOffset, t,
+                                decode_q8_0_scalar, decode_q8_0_v2);
+        }
+
+    The same load can be used for any matrix Use, with or without a
+    tensorViewNV, and the implementation may invoke either function at
+    any call site.
+
+Issues
+
+    (1) Why is _decodeVectorFunc_ a separate parameter rather than
+        having _decodeFunc_ return a vector?
+
+    RESOLVED: An alternate design could make _decodeFunc_ return a
+    vector and couple it to static restrictions on the matrix Use and
+    tensorViewNV and to dynamic alignment on the load's span, offset,
+    and layout dimensions. That approach gets intricate and still misses
+    important cases: for example, loading a matrix with gl_MatrixUseB from
+    row-major memory can require an effective transpose relative to tensor
+    storage, so vector decode aligned to the blocking layout can be harmful
+    when values are written straight into registers, while the same
+    tensor load can still benefit from vector decode when a shared-memory
+    staging pass makes loads match that layout. A single vector-returning
+    _decodeFunc_ cannot serve both kinds of call site without further
+    special cases.
+
+    This extension keeps _decodeFunc_ as the required scalar decode
+    function (unchanged from GL_NV_cooperative_matrix2) and adds an
+    optional _decodeVectorFunc_. The implementation may invoke either at
+    any call site. The shader supplies both; the implementation chooses
+    per site. Use and tensorViewNV stay independent of decode shape; the only
+    structural rule is that t.blockSize[LDim - 1] is a multiple of V. One load
+    covers both paths without an up-front shader choice. For example, the
+    implementation may decline _decodeVectorFunc_ where V lanes map poorly to
+    registers or a V-group would straddle a span or clip boundary.
+
+    (2) Are there static restrictions on the matrix Use or the
+        tensorViewNV when _decodeVectorFunc_ is used?
+
+    RESOLVED: No. The semantic mapping of _decodeVectorFunc_'s V return
+    components is defined entirely in terms of post-view
+    coordInBlock[LDim - 1] values and does not depend on the matrix Use
+    or on the tensorViewNV. Whether _decodeVectorFunc_ is invoked at a
+    particular call site is the implementation's choice.
+
+    (3) Why must blockSize[LDim - 1] be a multiple of V?
+
+    RESOLVED: This is the only condition needed to guarantee that the V
+    matrix elements covered by one invocation of _decodeVectorFunc_ all
+    lie in a single block (so the function reads from a single,
+    well-defined encoded block). Whether _decodeVectorFunc_ is profitable
+    at a given call site is left to the implementation, as discussed in
+    issue (1).
+
+    (4) Why only a single _decodeVectorFunc_ instead of letting the shader
+        supply multiple vector decode functions for different V (e.g.
+        V == 2, V == 4, and V == 8) and letting the implementation pick
+        among them?
+
+    RESOLVED: An alternate design could let the shader provide several
+    vector decode functions for different V and let the implementation
+    pick the most profitable one per call site. The incremental benefit
+    over a single shader-chosen V is small: each block-quantized format
+    has a natural pack unit (one byte for 1-bit formats, one dword for
+    4-bit formats, and so on), and once V is matched to that unit, larger
+    V mostly amortizes overhead that is already small at the matched
+    unit. Supporting multiple vector decode functions would add
+    per-call-site selection logic in the implementation and a
+    cross-product of allowed combinations to validate, in exchange for
+    that small benefit. In practice, a shader author can experiment with
+    different V values and keep whichever is fastest for their format and
+    target. coopMatLoadTensorNV therefore accepts at most one
+    _decodeVectorFunc_; the implementation only chooses, per call site,
+    whether to invoke it or fall back to _decodeFunc_.
+
+Revision History
+
+Revision 1, 2026-04-28 (Jeff Bolz)
+
+- Initial revision.
