@@ -1,0 +1,391 @@
+Name
+
+    EXT_ocp_microscaling_types
+
+Name Strings
+
+    GL_EXT_float_e2m1
+    GL_EXT_float_e3m2
+    GL_EXT_float_e2m3
+    GL_EXT_float_ue8m0
+    GL_EXT_float_mxint8
+
+Contact
+
+    Jeff Bolz, NVIDIA (jbolz 'at' nvidia.com)
+
+Contributors
+
+Status
+
+    Complete.
+
+Version
+
+    Last Modified:      May 28, 2026
+    Revision:           1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.50
+    (#version 450) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.20
+    (#version 320) and higher.
+
+    This extension is written against the OpenGL Shading Language
+    Specification, version 4.60.8, dated August 14, 2023.
+
+    This extension interacts with GL_EXT_shader_explicit_arithmetic_types,
+    GL_EXT_long_vector, GL_EXT_bfloat16, GL_EXT_float_e5m2, and
+    GL_EXT_float_e4m3.
+
+Overview
+
+    This extension introduces new floating point data types described in the
+    "OCP Microscaling Formats v1.0" specification
+    (https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf).
+    The mxint8 type is similar to a signed 8-bit integer with an implicit 2^-6
+    scale factor applied. The other types describe how many exponent and
+    mantissa bits are in the type. These types are primarily intended for
+    machine learning usage and only a few operations are supported, including
+    loading from and storing to memory and conversion to other floating point
+    types.
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+      floate2m1_t               -> OpTypeFloat 4 FPEncodingFloat4E2M1EXT
+      floate3m2_t               -> OpTypeFloat 6 FPEncodingFloat6E3M2EXT
+      floate2m3_t               -> OpTypeFloat 6 FPEncodingFloat6E2M3EXT
+      floatue8m0_t              -> OpTypeFloat 8 FPEncodingFloat8UnsignedE8M0EXT
+      floatmxint8_t             -> OpTypeFloat 8 FPEncodingMXInt8EXT
+
+      constructors              -> OpFConvert
+
+      float*BitsToIntEXT,
+      float*BitsToUintEXT,
+      intBitsToFloat*EXT,
+      uintBitsToFloat*EXT,
+      packFloat*,
+      unpackFloat*              -> OpBitcast
+
+      bitcastExtract*EXT        -> OpBitcastExtractEXT
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following lines in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_float_e2m1 : <behavior>
+      #extension GL_EXT_float_e3m2 : <behavior>
+      #extension GL_EXT_float_e2m3 : <behavior>
+      #extension GL_EXT_float_ue8m0 : <behavior>
+      #extension GL_EXT_float_mxint8 : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+    GL_EXT_float_e2m1 must be enabled to use the floate2m1_t types.
+    GL_EXT_float_e3m2 must be enabled to use the floate3m2_t types.
+    GL_EXT_float_e2m3 must be enabled to use the floate2m3_t types.
+    GL_EXT_float_ue8m0 must be enabled to use the floatue8m0_t types.
+    GL_EXT_float_mxint8 must be enabled to use the floatmxint8_t types.
+
+    New preprocessor #defines are added to the OpenGL Shading Language:
+
+      #define GL_EXT_float_e2m1                   1
+      #define GL_EXT_float_e3m2                   1
+      #define GL_EXT_float_e2m3                   1
+      #define GL_EXT_float_ue8m0                  1
+      #define GL_EXT_float_mxint8                 1
+
+    Modify Section 3.6, Keywords
+
+    (add to list of keywords)
+
+      floate2m1_t fe2m1vec2 fe2m1vec3 fe2m1vec4
+      floate3m2_t fe3m2vec2 fe3m2vec3 fe3m2vec4
+      floate2m3_t fe2m3vec2 fe2m3vec3 fe2m3vec4
+      floatue8m0_t fue8m0vec2 fue8m0vec3 fue8m0vec4
+      floatmxint8_t fmxint8vec2 fmxint8vec3 fmxint8vec4
+
+    Modify Section 4.1, Basic Types
+
+    Add entries to the table of Transparent Types:
+
+      floate2m1_t a floating-point scalar with a leading sign bit, 2 exponent bits, and 1 mantissa bit
+      fe2m1vec2 a two-component floate2m1_t vector
+      fe2m1vec3 a three-component floate2m1_t vector
+      fe2m1vec4 a four-component floate2m1_t vector
+
+      floate3m2_t a floating-point scalar with a leading sign bit, 3 exponent bits, and 2 mantissa bits
+      fe3m2vec2 a two-component floate3m2_t vector
+      fe3m2vec3 a three-component floate3m2_t vector
+      fe3m2vec4 a four-component floate3m2_t vector
+
+      floate2m3_t a floating-point scalar with a leading sign bit, 2 exponent bits, and 3 mantissa bits
+      fe2m3vec2 a two-component floate2m3_t vector
+      fe2m3vec3 a three-component floate2m3_t vector
+      fe2m3vec4 a four-component floate2m3_t vector
+
+      floatue8m0_t a floating-point scalar with no sign bit, 8 exponent bits, and no mantissa bits
+      fue8m0vec2 a two-component floatue8m0_t vector
+      fue8m0vec3 a three-component floatue8m0_t vector
+      fue8m0vec4 a four-component floatue8m0_t vector
+
+      floatmxint8_t a floating-point scalar encoded as a signed 8-bit two's-complement value with an implicit 2^-6 scale
+      fmxint8vec2 a two-component floatmxint8_t vector
+      fmxint8vec3 a three-component floatmxint8_t vector
+      fmxint8vec4 a four-component floatmxint8_t vector
+
+    Modify Section 4.1.4, Floats
+
+    Modify the first four sentences of the first paragraph to say:
+     "Floating-point variables of several precisions are available for use in
+      a variety of scalar calculations. Generally, the term floating-point
+      will refer to any precision floating point type. Floating-point variables
+      are defined as in the following examples:
+
+        float a, b = 1.5; // single-precision floating-point
+        double c, d = 2.0LF; // double-precision floating-point
+        float16_t e, f = 0.5HF; // half-precision floating-point
+        floate2m1_t g = 0.5fe2m1; // e2m1 floating-point
+        floate3m2_t h = 0.5fe3m2; // e3m2 floating-point
+        floate2m3_t i = 0.5fe2m3; // e2m3 floating-point
+        floatue8m0_t j = 0.5fue8m0; // ue8m0 floating-point
+        floatmxint8_t k = 0.5fmxint8; // mxint8 floating-point
+
+      As an input value to one of the processing units, a half-precision,
+      single-precision, or double-precision floating-point variable is expected
+      to match the corresponding IEEE 754-2008 floating-point definition for
+      precision and dynamic range."
+
+    Modify the second paragraph to say:
+     "floating-suffix:
+          half-suffix single-suffix
+          double-suffix single-suffix
+          single-suffix
+          e2m1-suffix
+          e3m2-suffix
+          e2m3-suffix
+          ue8m0-suffix
+          mxint8-suffix
+
+      single-suffix: one of
+          f F
+      half-suffix: one of
+          h H
+      double-suffix: one of
+          l L
+      e2m1-suffix:
+          fe2m1
+      e3m2-suffix:
+          fe3m2
+      e2m3-suffix:
+          fe2m3
+      ue8m0-suffix:
+          fue8m0
+      mxint8-suffix:
+          fmxint8"
+
+    Add the following sentences to the third paragraph:
+     "When the suffix is present, the literal type is determined as follows:
+     ----------------------------------------
+     | suffix            | type             |
+     ----------------------------------------
+     | no suffix         | float32_t, float |
+     | f or F            | float32_t, float |
+     | both l/L and f/F  | float64_t, double|
+     | both h/H and f/F  | float16_t        |
+     | fe2m1             | floate2m1_t      |
+     | fe3m2             | floate3m2_t      |
+     | fe2m3             | floate2m3_t      |
+     | fue8m0            | floatue8m0_t     |
+     | fmxint8           | floatmxint8_t    |
+     ----------------------------------------
+     A suffix corresponding to a particular type must be
+     supported only if the extension enabling this type is supported."
+
+    floate2m1_t, floate3m2_t, and floate2m3_t types can be used as global
+    variables, local variables, function parameters, and function return
+    values. They must not be used in uniform, buffer, or shared memory, or in
+    input/output storage classes. floatue8m0_t and floatmxint8_t types can be
+    used as global variables, local variables, function parameters, function
+    return values, and in uniform, buffer, or shared memory.
+
+    Modify Section 4.1.10, Implicit Conversions
+
+    Add the following implicit conversions:
+
+    Type of expression              Can be implicitly converted to
+
+    floate2m1_t                     floate4m3_t, floate5m2_t, bfloat16_t, float16_t, float32_t, float64_t
+    floate3m2_t                     bfloat16_t, float16_t, float32_t, float64_t
+    floate2m3_t                     bfloat16_t, float16_t, float32_t, float64_t
+    floatue8m0_t                    none
+    floatmxint8_t                   bfloat16_t, float16_t, float32_t, float64_t
+
+    (and all corresponding vector promotions)
+
+    Modify Section 5.4.1, Conversion and Scalar Constructors
+
+    Add constructors to convert from floate2m1_t, floate3m2_t, floate2m3_t,
+    floatue8m0_t, and floatmxint8_t to floate4m3_t, floate5m2_t, bfloat16_t,
+    float16_t, float32_t, float64_t. Constructors for these new types do not
+    support conversions from other types except from (non-specialization)
+    constant values.
+
+    Modify Section 5.4.2, Vector and Matrix Constructors
+
+    Add to the end of the section:
+
+    Vector constructors for floate2m1_t, floate3m2_t, floate2m3_t, floatue8m0_t,
+    and floatmxint8_t component types don't support construction from other
+    component types except from (non-specialization) constant values.
+
+    Modify Section 5.9, Expressions
+
+    Arithmetic operators are not supported on floate2m1_t, floate3m2_t, floate2m3_t,
+    floatue8m0_t, floatmxint8_t, or vectors of those types.
+
+    Modify Chapter 8, Built-In Functions
+
+    Add "genFE2M1Type" as an alias for floate2m1_t, fe2m1vec2, fe2m1vec3, fe2m1vec4.
+    Add "genFE3M2Type" as an alias for floate3m2_t, fe3m2vec2, fe3m2vec3, fe3m2vec4.
+    Add "genFE2M3Type" as an alias for floate2m3_t, fe2m3vec2, fe2m3vec3, fe2m3vec4.
+    Add "genFUE8M0Type" as an alias for floatue8m0_t, fue8m0vec2, fue8m0vec3, fue8m0vec4.
+    Add "genFMXINT8Type" as an alias for floatmxint8_t, fmxint8vec2, fmxint8vec3, fmxint8vec4.
+
+    Add bitcast functions:
+
+        genI8Type               floatue8m0BitsToIntEXT(genFUE8M0Type value);
+        genU8Type               floatue8m0BitsToUintEXT(genFUE8M0Type value);
+        genFUE8M0Type           intBitsToFloatue8m0EXT(genI8Type value);
+        genFUE8M0Type           uintBitsToFloatue8m0EXT(genU8Type value);
+
+        genI8Type               floatmxint8BitsToIntEXT(genFMXINT8Type value);
+        genU8Type               floatmxint8BitsToUintEXT(genFMXINT8Type value);
+        genFMXINT8Type          intBitsToFloatmxint8EXT(genI8Type value);
+        genFMXINT8Type          uintBitsToFloatmxint8EXT(genU8Type value);
+
+    Add pack and unpack functions:
+
+        fe2m1vec2               unpackFloat2xfe2m1EXT(uint8_t value);
+        fe2m1vec4               unpackFloat4xfe2m1EXT(uint16_t value);
+        vector<floate2m1_t, 8>  unpackFloat8xfe2m1EXT(uint32_t value);
+        vector<floate2m1_t, 16> unpackFloat16xfe2m1EXT(u32vec2 value);
+
+        uint8_t                 packFloat2xfe2m1EXT(fe2m1vec2 value);
+        uint16_t                packFloat4xfe2m1EXT(fe2m1vec4 value);
+        uint32_t                packFloat8xfe2m1EXT(vector<floate2m1_t, 8> value);
+        u32vec2                 packFloat16xfe2m1EXT(vector<floate2m1_t, 16> value);
+
+        fe3m2vec4               unpackFloat4xfe3m2EXT(u8vec3 value);
+        vector<floate3m2_t, 8>  unpackFloat8xfe3m2EXT(u16vec3 value);
+        vector<floate3m2_t, 16> unpackFloat16xfe3m2EXT(u32vec3 value);
+
+        u8vec3                  packFloat4xfe3m2EXT(fe3m2vec4 value);
+        u16vec3                 packFloat8xfe3m2EXT(vector<floate3m2_t, 8> value);
+        u32vec3                 packFloat16xfe3m2EXT(vector<floate3m2_t, 16> value);
+
+        fe2m3vec4               unpackFloat4xfe2m3EXT(u8vec3 value);
+        vector<floate2m3_t, 8>  unpackFloat8xfe2m3EXT(u16vec3 value);
+        vector<floate2m3_t, 16> unpackFloat16xfe2m3EXT(u32vec3 value);
+
+        u8vec3                  packFloat4xfe2m3EXT(fe2m3vec4 value);
+        u16vec3                 packFloat8xfe2m3EXT(vector<floate2m3_t, 8> value);
+        u32vec3                 packFloat16xfe2m3EXT(vector<floate2m3_t, 16> value);
+
+    Add bitcastExtract functions:
+
+        genFE2M1Type bitcastExtractfe2m1EXT(genU8Type value, uint offset);
+        genFE3M2Type bitcastExtractfe3m2EXT(genU8Type value, uint offset);
+        genFE2M3Type bitcastExtractfe2m3EXT(genU8Type value, uint offset);
+
+        Description: For each component, a number of bits equal to the result
+        component size starting from _offset_ (counting from least to most
+        significant) are extracted from _value_ and bitcast to the
+        corresponding component of the result type. If bits past the end of
+        a component would be accessed, behavior is undefined.
+
+    Modify Chapter 9, Shading Language Grammar for Core Profile
+
+    (Add to token list)
+
+        FLOATE2M1_T FE2M1VEC2 FE2M1VEC3 FE2M1VEC4
+        FLOATE3M2_T FE3M2VEC2 FE3M2VEC3 FE3M2VEC4
+        FLOATE2M3_T FE2M3VEC2 FE2M3VEC3 FE2M3VEC4
+        FLOATUE8M0_T FUE8M0VEC2 FUE8M0VEC3 FUE8M0VEC4
+        FLOATMXINT8_T FMXINT8VEC2 FMXINT8VEC3 FMXINT8VEC4
+
+    (Add to type_specifier_non_array)
+
+        FLOATE2M1_T FE2M1VEC2 FE2M1VEC3 FE2M1VEC4
+        FLOATE3M2_T FE3M2VEC2 FE3M2VEC3 FE3M2VEC4
+        FLOATE2M3_T FE2M3VEC2 FE2M3VEC3 FE2M3VEC4
+        FLOATUE8M0_T FUE8M0VEC2 FUE8M0VEC3 FUE8M0VEC4
+        FLOATMXINT8_T FMXINT8VEC2 FMXINT8VEC3 FMXINT8VEC4
+
+Issues
+
+    (1) What conversions should be supported?
+
+    RESOLVED: These small floating point types have specific use cases and it's
+    possible that some implementations won't want to pay the cost of supporting
+    conversions to and from all of these types. To limit this cost, this
+    extension chooses not to support converting from larger floating point
+    types to the new types, since these would require relatively complex logic
+    for rounding, handling denorms, etc. Given that we'll be limiting
+    conversions, it makes less sense to keep conversions to/from integer types
+    as well. So this extension only supports conversions from the new types to
+    larger FP types. Conversions of constant values are still supported.
+
+    (2) How can you create constant values for the new types?
+
+    RESOLVED: Conversions to the new types are still supported for non-spec
+    constant values, e.g. "floate2m1_t(1.0)". This can also be written with
+    a literal suffix, e.g. "1.0fe2m1". But literal suffixes don't work for
+    negative values ('-' is treated as unary negation) so for negative values
+    the constructor syntax is required.
+
+    GLSL allows constants and constant expressions to be represented/evaluated
+    at higher precision than requested, so users should be careful to use
+    literal constants that are exactly representable.
+
+    (3) bfloat16 and float8 extensions didn't add literal suffixes, should we
+    add them?
+
+    RESOLVED: Not in this extension, but we should probably do a separate
+    extension to fill the gap.
+
+    (4) What bitcast conversions are supported?
+
+    RESOLVED: Bitcasts must be to types with matching total size, so for
+    8-bit types (ue8m0, mxint8) we have (u)intBitsToFloat/floatBitsTo(u)int,
+    but for 4- and 6-bit types we have unpack/pack intrinsics that convert
+    between integer types and float vectors whose total size is a whole number
+    of bytes.
+
+    (5) Should 4-bit types be allowed in all storage classes when used in a
+    vector with an even component count? What about 6-bit with component count
+    a multiple of 4?
+
+    RESOLVED: No, types whose component size is not a whole number of bytes
+    are not allowed in many storage classes. Instead, applications can use
+    uint types to represent vectors of these smaller types and unpack
+    intrinsics to convert to the float type.
+
+    (6) Should we have built-in constant values with the max representable
+    value for each type?
+
+    RESOLVED: No. The maximum representable values can be expressed as
+    constants, and GLSL does not otherwise provide built-in numeric-limit
+    constants for scalar types.
+
+Revision History
+
+    Revision 1
+    - Internal revisions.
