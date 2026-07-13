@@ -1,0 +1,228 @@
+Name
+
+    EXT_opacity_micromap_ray_query_mode
+
+Name Strings
+
+    GL_EXT_opacity_micromap_ray_query_mode
+
+Contact
+
+    Daniel Koch (dkoch 'at' nvidia.com), NVIDIA
+
+Contributors
+
+    Daniel Koch, NVIDIA
+    Members of the Vulkan Ray Tracing TSG
+
+Status
+
+    Complete
+
+Version
+
+    Last Modified Date: 2026-07-09
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.60
+    (#version 460) and higher.
+
+    This extension is written against revision 5 of the OpenGL Shading Language
+    version 4.60, dated September 4, 2017.
+
+    This extension interacts with revision 43 of the GL_KHR_vulkan_glsl
+    extension, dated October 25, 2017.
+
+    This extension requires GL_EXT_ray_query.
+
+    This extension interacts with GL_EXT_opacity_micromap.
+
+    This extension interacts with GL_EXT_ray_tracing.
+
+Overview
+
+    This extension modifies GLSL to add a built-in boolean constant
+    that declares whether the shader will perform ray query traversal against
+    acceleration structures containing opacity micromaps.
+
+    Opacity micromaps associate per-micromap-triangle opacity state with
+    geometry in an acceleration structure. When ray query traversal encounters
+    such geometry, the implementation must know in advance whether opacity
+    micromaps may be present. The execution mode declared by this extension
+    communicates that information to the compiler and the implementation.
+
+    The built-in constant gl_EnableOpacityMicromapEXT defaults to false,
+    indicating that the shader does not expect to encounter opacity micromaps
+    during ray query traversal. It may be redeclared as true to
+    unconditionally enable opacity micromap support, or as a specialization
+    constant so that the value can be set at pipeline creation time without
+    requiring shader recompilation.
+
+    This extension adds support for the following extensions to be used
+    within GLSL:
+
+    - GL_EXT_opacity_micromap_ray_query_mode - enables the opacity micromap
+      execution mode for shaders that perform ray query traversal
+
+    Mapping to SPIR-V
+    -----------------
+
+    For informational purposes (non-normative), the following is an
+    expected way for an implementation to map GLSL constructs to SPIR-V
+    constructs:
+
+      gl_EnableOpacityMicromapEXT -> OpacityMicromapIdKHR execution mode
+                                     operand _Enable_
+
+    Enabling this extension causes the OpacityMicromapIdKHR execution mode to
+    be emitted with the <id> of gl_EnableOpacityMicromapEXT as its operand,
+    enables the RayTracingOpacityMicromapExecutionModeKHR capability, and
+    requires the OpExtension "SPV_KHR_opacity_micromap" string.
+
+    When not redeclared, gl_EnableOpacityMicromapEXT maps to OpConstantFalse.
+    When redeclared as true, it maps to OpConstantTrue. When redeclared with
+    a constant_id layout qualifier, it maps to OpSpecConstantFalse.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_opacity_micromap_ray_query_mode              : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+    New preprocessor #defines are added:
+
+      #define GL_EXT_opacity_micromap_ray_query_mode                  1
+
+Additions to Chapter 7 of the OpenGL Shading Language Specification
+(Built-in Variables)
+
+    Modify Section 7.3, Built-in Constants
+
+    Add a new subsection 7.3.x, "Opacity Micromap Ray Query Mode"
+
+    The following built-in constant is provided in all shader stages when
+    this extension is enabled:
+
+      const bool gl_EnableOpacityMicromapEXT = false;
+
+    This constant indicates to the implementation whether the shader may
+    perform ray query traversal against acceleration structures that contain
+    opacity micromaps. If a ray query traversal encounters an acceleration
+    structure that contains opacity micromaps when gl_EnableOpacityMicromapEXT
+    is false, the behavior is undefined.
+
+    The built-in constant gl_EnableOpacityMicromapEXT may be redeclared in
+    the shader. To unconditionally enable opacity micromap support:
+
+      const bool gl_EnableOpacityMicromapEXT = true;
+
+    To allow the value to be controlled at pipeline creation time without
+    requiring shader recompilation, it may be redeclared using a
+    specialization constant layout qualifier (as described in GL_KHR_vulkan_glsl):
+
+      layout(constant_id = N) gl_EnableOpacityMicromapEXT;
+
+    where N is a non-negative integer that serves as the specialization
+    constant ID used to identify this constant to the API. As described in
+    GL_KHR_vulkan_glsl, this is not a full redeclaration; all other
+    characteristics of the built-in, including its default value of false, are
+    retained. The default may be overridden to true by the API when creating
+    the pipeline. It is not valid to specify a value in this redeclaration form.
+
+Interactions with GL_EXT_ray_query
+
+    Ray query traversal is initiated via rayQueryInitializeEXT() and
+    iterated via rayQueryProceedEXT(). The value of gl_EnableOpacityMicromapEXT
+    must reflect whether traversal initiated by these functions may encounter
+    acceleration structures containing opacity micromaps.
+
+Interactions with GL_EXT_ray_tracing
+
+    Ray tracing shader stages added by GL_EXT_ray_tracing (ray generation,
+    any-hit, closest-hit, and miss shaders) may also perform ray query
+    traversal by enabling GL_EXT_ray_query. When this extension is
+    used in such stages, the same rules apply: if ray query traversal in those
+    stages encounters opacity micromaps, gl_EnableOpacityMicromapEXT must be
+    true.
+
+    Note that the OpacityMicromapIdKHR execution mode applies only to ray
+    query traversal and does not affect traversal initiated by traceRayEXT().
+
+Interactions with GL_EXT_opacity_micromap
+
+    GL_EXT_opacity_micromap adds the gl_RayFlagsForceOpacityMicromap2StateEXT
+    ray flag, which forces opacity micromaps encountered by a ray to be
+    evaluated in 2-state mode. This flag may be used with rayQueryInitializeEXT()
+    regardless of the value of gl_EnableOpacityMicromapEXT, but if traversal
+    encounters opacity micromaps when gl_EnableOpacityMicromapEXT is false,
+    the behavior is undefined.
+
+Issues
+
+    1) What shader stages should gl_EnableOpacityMicromapEXT be available in?
+
+       RESOLVED: All shader stages. GL_EXT_ray_query allows ray queries to be
+       issued from any shader stage, so the built-in is available in all stages
+       when this extension is enabled. The OpacityMicromapIdKHR execution mode
+       will be emitted for the appropriate entry point regardless of stage.
+
+    2) Should the OpacityMicromapIdKHR execution mode be emitted only when
+       gl_EnableOpacityMicromapEXT is explicitly referenced in the shader, or
+       always when the extension is enabled?
+
+       RESOLVED: Always when the extension is enabled. The purpose of this
+       extension is to declare the OpacityMicromapIdKHR execution mode in the
+       SPIR-V module; enabling the extension is the declaration. Conditional
+       emission based on reference would make it impossible to use the default
+       value of false to explicitly declare that opacity micromaps will not be
+       used, which is itself useful for validation and debugging.
+
+    3) Why is GL_EXT_ray_query required but GL_EXT_ray_tracing is only an
+       interaction?
+
+       RESOLVED: The OpacityMicromapIdKHR execution mode governs ray query
+       traversal specifically; it does not affect traceRayEXT() traversal in
+       the ray tracing pipeline. A shader that uses GL_EXT_ray_tracing without
+       GL_EXT_ray_query has no ray query traversal and therefore has no need for
+       this extension. GL_EXT_ray_query is required because it is the feature
+       being gated by the execution mode. GL_EXT_ray_tracing is listed as an
+       interaction because ray tracing shader stages may also use ray queries.
+
+    4) Should this extension require GL_EXT_opacity_micromap?
+
+       RESOLVED: No. This extension declares the execution mode that controls
+       whether opacity micromaps may be encountered during traversal. It does
+       not require the GL_EXT_opacity_micromap ray flag extension; an application
+       may use opacity micromap traversal without also needing to force 2-state
+       evaluation mode. The two extensions complement each other but neither
+       depends on the other.
+
+    5) Can the user set gl_EnableOpacityMicromapEXT to true without using a
+       specialization constant?
+
+       RESOLVED: Yes. The built-in may be redeclared as
+       'const bool gl_EnableOpacityMicromapEXT = true' for shaders that always
+       traverse opacity micromaps. This maps to OpConstantTrue and avoids the
+       need to wire up a specialization constant. The specialization constant
+       path (layout(constant_id = N)) is available when the value needs to be
+       controlled at pipeline creation time without recompilation.
+
+    6) Should this extension require OpExtension "SPV_EXT_opacity_micromap"
+       as an alternative to "SPV_KHR_opacity_micromap"?
+
+       RESOLVED: No. While SPV_KHR_opacity_micromap generally accepts either
+       "SPV_KHR_opacity_micromap" or "SPV_EXT_opacity_micromap" as the
+       OpExtension string, its validation rules specifically require the KHR
+       string when the OpacityMicromapIdKHR execution mode is used. Since the
+       sole purpose of this GLSL extension is to emit that execution mode, only
+       "SPV_KHR_opacity_micromap" is valid.
+
+Revision History
+
+    Rev.  Date          Author     Changes
+    ----  -----------   ------     -------------------------------------------
+     1    2026-07-09    dkoch      Initial revision

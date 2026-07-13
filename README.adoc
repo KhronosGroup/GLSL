@@ -73,6 +73,7 @@ that do not live in the Khronos registries for OpenGL or OpenGL ES.
 - link:{repo}/ext/GLSL_EXT_fragment_shader_barycentric.txt[GL_EXT_fragment_shader_barycentric]
 - link:{repo}/ext/GLSL_EXT_mesh_shader.txt[GL_EXT_mesh_shader]
 - link:{repo}/ext/GLSL_EXT_opacity_micromap.txt[GL_EXT_opacity_micromap]
+- link:{repo}/ext/GLSL_EXT_opacity_micromap_ray_query_mode.txt[GL_EXT_opacity_micromap_ray_query_mode]
 - link:{repo}/nv/GLSL_NV_shader_invocation_reorder.txt[GL_NV_shader_invocation_reorder]
 - link:{repo}/arm/GLSL_ARM_shader_core_builtins.txt[GL_ARM_shader_core_builtins]
 - link:{repo}/huawei/GLSL_HUAWEI_cluster_culling_shader.txt[GL_HUAWEI_cluster_culling_shader]
