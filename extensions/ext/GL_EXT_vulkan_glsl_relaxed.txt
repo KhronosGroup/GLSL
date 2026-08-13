@@ -14,6 +14,7 @@ Contributors
 
     William Brown, (will.brown039 'at' gmail.com), Derivative 
     Malcolm Bechard, Derivative
+    Samuel Bourasseau, Adobe
 
 Notice
 
@@ -56,6 +57,7 @@ Overview
         * shared and packed block layouts, but they are silently ignored.
         * gl_VertexID and gl_InstanceID
         * atomic-counters (those based on atomic_uint)
+        * opaque types as struct members
              
     New features:
         * The type of backing used for a block, push constant or uniform
@@ -123,11 +125,27 @@ Overview
     block may be different than what was originally specified in the shader.
     Reflection should be used to find the final binding locations of these
     blocks.
+
+    Opaque Types as Struct Members
+    ------------------------------
+
+    Opaque struct members will be silently remapped to top-level variables, with
+    the original member removed from the structure's definition. The actual
+    behaviour depends on the source variable location. In the case of Default
+    Uniforms, all opaque members will be extracted into individual uniforms,
+    down to the last array level. If a struct containing opaque members is
+    passed as a function argument, new function parameters will be created for
+    opaque members. Variables created in such cases will be named in a way that
+    preserves existing access chains, most importantly in the case of Default
+    Uniforms, where reflection-based code needs to be able to locate the newly
+    created variables. For opaque members located under sized-arrays, one
+    variable will be created for each array element, for each array of the
+    access chain.
    
 Changes to Chapter 4 of the OpenGL Shading Language Specification
 
     Modify section 4.1.7 (Opaque Types)
-    In the seciotn 'Atomic Counters', remove the line:
+    In the section 'Atomic Counters', remove the line:
 
       Atomic counter types are not available when targeting Vulkan.
 
@@ -204,7 +222,16 @@ Changes to Chapter 12 of the OpenGL Shading Language Specification
   to:
     in gl_VertexID (Alias for gl_VertexIndex)
     in gl_InstanceID (Alias for gl_InstanceIndex)
-  
+
+Changes to GL_KHR_vulkan_glsl
+
+    Remove the following paragraph from Changes to Chapter 4 of the OpenGL Shading Language Specification:
+
+      Remove "structure member selection" from 4.1.7 and instead add a sentence
+      "Opaque types cannot be declared or nested in a structure (struct)."
+
+
+
 Revision History
 
 
