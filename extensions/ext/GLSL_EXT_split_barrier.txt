@@ -1,0 +1,220 @@
+Name
+
+    EXT_split_barrier
+
+Name Strings
+
+    GL_EXT_split_barrier
+
+Contact
+
+    Wooyoung Kim (wooykim 'at' qti.qualcomm.com), Qualcomm
+
+Contributors
+
+    Alexander Galazin, Qualcomm
+    Wooyoung Kim, Qualcomm
+    Rithwik Kollipara, Qualcomm
+    Matthew Netsch, Qualcomm
+
+Status
+
+    Final
+
+Version
+
+    Last Modified Date: 2026-05-06
+    Revision: 1
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 4.60
+    (#version 460) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.10
+    (#version 310) and higher.
+
+    This extension is written against revision 8 of the OpenGL Shading Language
+    version 4.60, dated August 14, 2023.
+
+    This extension interacts with revision 43 of the GL_KHR_vulkan_glsl
+    extension, dated October 25, 2017.
+
+    This extension interacts with the KHR_memory_scope_semantics extension,
+    dated June 13, 2019.
+
+Overview
+
+    This extension document adds two (Arrive,Wait) pairs of control barrier functions 
+    to add the split barrier support. The controlBarrierArrive functions indicate that
+    an invocation has "arrived" at the barrier but should continue executing. The
+    controlBarrierWait functions indicate that an invocation should "wait" for other
+    invocations in the execution scope to arrive at the corresponding controlBarrierArrive
+    function before executing further.
+
+    The controlBarrierArrive and controlBarrierWait functions correspond to SPIR-V's
+    OpControlBarrierArriveEXT and OpControlBarrierWaitEXT, respectively.
+
+    The pair controlBarrierArrive()/controlBarrierWait() does not take any arguments
+    and is a straight-forward split of barrier(). The pair controlBarrierArrive(...)/
+    controlBarrierWait(...) is available when the GLSL_KHR_memory_scope_semantics extension
+    is supported. Each function takes the same arguments that the controlBarrier function
+    in the extension takes.
+
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Including the following line in a shader can be used to control the
+    language features described in this extension:
+
+      #extension GL_EXT_split_barrier : <behavior>
+
+    where <behavior> is as specified in section 3.3.
+
+    A new preprocessor #define is added:
+
+      #define GL_EXT_split_barrier 1
+
+
+Modify 4.3.8. Shared Variables, change the following
+
+must be employed using the barrier() function (see "Shader Invocation Control
+Functions").
+
+to 
+
+must be employed using the barrier() function (see "Shader Invocation Control
+Functions") or a controlBarrierArrive()/controlBarrierWait() pair.
+
+
+Modify 8.16. Shader Invocation Control Functions
+
+Add the following rows in the table below "void barrier()"
+
+--------------------------------------------------------------------------------------------
+| void controlBarrierArrive() | For any given static instance of controlBarrierArrive()    |
+|                             | it registers that an invocation executing it has arrived.  |
+|                             | This may allow other invocations waiting on a              |
+|                             | controlBarrierWait() instance to continue executing.       |
+|                             | Only available in compute shaders.                         |
+--------------------------------------------------------------------------------------------
+| void controlBarrierWait()   | It indicates that an invocation should "wait" for other    |
+|                             | invocations to arrive at the controlBarrierArrive()        |
+|                             | before executing further. All compute shader invocations   |
+|                             | for a single workgroup must have arrived at                |
+|                             | controlBarrierArrive() before any will continue beyond it. |
+|                             | Only available in compute shaders.                         |
+--------------------------------------------------------------------------------------------
+| void controlBarrierArrive(  | For any given static instance of controlBarrierArrive(...) |
+|  int execution, int memory, | it registers that an invocation executing it has arrived.  |
+|  int storage, int sem);     | This may allow other invocations in the same execution     |
+|                             | scope waiting at a controlBarrierWait(...) instance to     |
+|                             | continue executing.                                        |
+--------------------------------------------------------------------------------------------
+| void controlBarrierWait(    | It indicates that an invocation should "wait" for other    |
+|  int execution, int memory, | invocations in the same execution scope to arrive at the   |
+|  int storage, int sem);     | corresponding controlBarrierArrive(...) before executing   |
+|                             | further. All invocations in the same execution scope must  |
+|                             | have arrived at controlBarrierArrive(...) before any may   |
+|                             | continue beyond it.                                        |
+--------------------------------------------------------------------------------------------
+
+Like a barrier() function for compute shaders, a controlBarrierArrive()/controlBarrierWait()
+pair affects control flow but only synchronizes memory accesses to shared variables.
+For other memory accesses, it does not ensure that values read by an invocation prior to
+a controlBarrierArrive() are what the memory location contained before other invocations
+write after the corresponding controlBarrierWait().
+
+Like a barrier() function for compute shaders, a controlBarrierArrive()/controlBarrierWait()
+pair may be placed within control flow, but that control flow must be uniform control flow.
+That is, all the controlling expressions that lead to execution of the barrier must be
+dynamically uniform expressions.  It is the author's responsibility to ensure a
+controlBarrierArrive()/controlBarrierWait() pair only exists inside uniform control flow.
+Otherwise, some shader invocations will stall indefinitely, waiting for a controlBarrierArrive()
+that is never reached by other invocations.
+
+The controlBarrierArrive(...)/controlBarrierWait(...) pair with arguments are available
+when the GLSL_KHR_memory_scope_semantics extension is supported.
+
+The values passed as execution, memory, storage, and sem parameters must
+all be integer constant expressions. Valid values are listed in the Scope
+and Semantics section of the GLSL_KHR_memory_scope_semantics extension.
+
+execution and memory must be gl_Scope*.
+
+sem must be either gl_SemanticsRelease or gl_SemanticsRelaxed for controlBarrierArrive
+and either gl_SemanticsAcquire or gl_SemanticsRelaxed for controlBarrierWait.
+
+storage must be a combination of gl_StorageSemantics* values.
+
+If execution is gl_ScopeSubgroup or gl_ScopeInvocation, the behaviors of these
+instructions in non-uniform control flow are defined by the client API.
+In particular, when targeting Vulkan, gl_ScopeInvocation execution scope is not
+allowed. Also, when targeting Vulkan, these instructions with gl_ScopeSubgroup
+execution scope do not need to be in uniform control flow. Otherwise, the
+behaviors are identical to those of the no-argument versions.
+
+The following error checks are applied. Each results in a compile-time error.
+
+* Semantics operands must only have gl_Semantics* bits set.
+
+* Storage class semantics operands must only have gl_StorageSemantics* bits set.
+
+* Semantics must not include multiple of gl_SemanticsRelease or
+  gl_SemanticsAcquire.
+
+* sem for controlBarrierArrive must be set to either gl_SemanticsRelease,
+  gl_SemanticsMakeAvailable, or gl_SemanticsRelaxed.
+
+* sem for controlBarrierWait must be set to either gl_SemanticsAcquire,
+  gl_SemanticsMakeVisible, or gl_SemanticsRelaxed.
+
+* If controlBarrierArrive or controlBarrierWait uses non-zero
+  semantics, then it must not use storage class semantics of zero.
+
+* gl_SemanticsVolatile must not be used with controlBarrierArrive or controlBarrierWait.
+
+
+12.2.11. Mapping of barriers
+
+Below the following,
+
+    barrier() (tess control) -> OpControlBarrier(/*Execution*/Workgroup,
+      /*Memory*/Invocation,
+      /*Semantics*/None)
+
+add the following lines
+
+    controlBarrierArrive() -> OpControlBarrierArriveEXT(/*Execution*/Workgroup,
+      /*Memory*/Workgroup,
+      /*Semantics*/Release |
+      WorkgroupMemory)
+
+    controlBarrierWait() -> OpControlBarrierWaitEXT(/*Execution*/Workgroup,
+      /*Memory*/Workgroup,
+      /*Semantics*/Acquire |
+      WorkgroupMemory)
+
+
+For informational purposes (non-specification), the following is an
+expected way for an implementation to map the controlBarrierArrive()/
+controlBarrierWait() built-in functions with arguments to the SPIR-V
+constructs:
+
+    controlBarrierArrive(...) -> OpControlBarrierArriveEXT(...)
+    controlBarrierWait(...)   -> OpControlBarrierWaitEXT(...)
+
+
+Validation
+
+    * gl_SemanticsVolatile must not be used either with
+      controlBarrierArrive or with controlBarrierWait.
+
+Issues
+
+
+Revision History
+
+    Rev.  Date          Author         Changes
+    ----  -----------   ------         -------------------------------------------
+     1    2026-05-06    Wooyoung Kim   Initial revision
