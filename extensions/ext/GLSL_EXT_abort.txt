@@ -126,7 +126,8 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60.8
     after the string must match the type indicated by the order of the format
     specifiers in the string. If there are insufficient arguments for the
     format specifiers, the behavior is undefined. If the format is exhausted
-    while arguments remain, the excess arguments are ignored.
+    while arguments remain, the excess arguments will still be consumed by the
+    implementation.
     The set of format specifiers is implementation-dependent, but must
     include at least "%d" and "%i" (int), "%u" (uint), and "%f" (float).
 
