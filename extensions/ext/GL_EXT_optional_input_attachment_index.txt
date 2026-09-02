@@ -16,7 +16,7 @@ Notice
 
 Status
 
-    Draft.
+    Complete
 
 Version
 
