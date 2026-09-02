@@ -1,0 +1,98 @@
+Name
+
+    EXT_optional_input_attachment_index
+
+Name Strings
+
+    GL_EXT_optional_input_attachment_index
+
+Contact
+
+    Ricardo Garcia (rgarcia 'at' igalia.com), Igalia
+
+Notice
+
+    Copyright (c) 2026 Valve Corporation
+
+Status
+
+    Draft.
+
+Version
+
+    Last Modified Date: 05-Aug-2026
+    Revision: 1
+
+Number
+
+    TBD
+
+Dependencies
+
+    This extension can be applied to OpenGL GLSL versions 1.40
+    (#version 140) and higher.
+
+    This extension can be applied to OpenGL ES ESSL versions 3.00
+    (#version 300) and higher.
+
+    This extension requires the GL_KHR_vulkan_glsl extension.
+
+Overview
+
+    GL_KHR_vulkan_glsl introduced 'subpassInput' types to declare subpass
+    inputs and made the "input_attachment_index" layout qualifier mandatory in
+    their declarations. This extension relaxes this requirement and makes
+    the "input_attachment_index" layout qualifier optional for some cases.
+    
+    In the Vulkan API, input attachments declared without an input attachment
+    index decoration can be used to read depth/stencil attachments inside
+    dynamic render passes with the VK_KHR_dynamic_rendering_local_read
+    extension. See the API specification for further details.
+
+Add to Chapter 3 of the OpenGL Shading Language Specification
+
+    Including the following line in a shader will control the language
+    features described in this extension:
+
+      #extension GL_EXT_optional_input_attachment_index : <behavior>
+
+    Where <behavior> is as specified in section 3.3.
+
+    This new definition is added to the OpenGL Shading Language:
+
+      #define GL_EXT_optional_input_attachment_index 1
+
+
+Modifications to GL_KHR_vulkan_glsl
+
+    Modify section "Subpass Inputs" removing the sentence "Input attachments are
+    decorated with their input attachment index in addition to descriptor set
+    and binding numbers." and replacing it with "Input attachments can be
+    decorated with their input attachment index in addition to descriptor set
+    and binding numbers".
+    
+    Add the following paragraph immediately after the paragraph starting with
+    "An input_attachment_index of i selects...":
+    
+        An input attachment with no input_attachment_index qualifier can be
+        mapped to a depth/stencil image in the input pass list. (See API
+        specification for more information.)
+
+    Modify the changes proposed to section 4.4 by removing the sentence
+    "However, they must have the layout qualifier "input_attachment_index"
+    declared with them, or a compile-time error results." and replace it with
+    the sentence "However, they must have the layout qualifier
+    "input_attachment_index" when declaring them as arrays, or a compile-time
+    error results."
+    
+Issues
+
+    None
+
+Revision History
+
+    Rev.    Date         Author           Changes
+    ----  -----------    --------------   --------------------------------------
+    1     05-Aug-2026    Ricardo Garcia   initial draft
+    
+
