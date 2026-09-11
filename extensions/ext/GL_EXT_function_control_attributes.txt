@@ -1,0 +1,137 @@
+Name
+
+  EXT_function_control_attributes
+
+Name Strings
+
+  GL_EXT_function_control_attributes
+
+Contact
+
+  Ruslan Karpov
+
+Contributors
+
+  Ruslan Karpov, independent
+
+Status
+
+  Draft.
+
+Version
+
+  Last Modified Date:   July 04, 2026
+  Revision: 1
+
+Dependencies
+
+  This extension can be applied to OpenGL GLSL versions 1.40
+  (#version 140) and higher.
+
+  This extension can be applied to OpenGL ES ESSL versions 3.10
+  (#version 310) and higher.
+
+  This extension is written against the OpenGL Shading Language
+  Specification, version 4.60.8, dated August 14, 2023.
+
+  Interacts with GL_KHR_vulkan_glsl.
+
+Overview
+
+  This extension adds the ability to annotate functions via attributes that
+  provide hints to the compiler about whether a function should be inlined.
+
+  This is done through the attribute syntax "[[ ... ]]". For example,
+
+    [[inline]] void foo(inout int i) { i += 52; }
+    [[noinline]] void bar(inout int i) { i -= 52; }
+
+  The "inline" and "noinline" attributes are incompatible. It is a
+  compile-time error to specify both attributes for the same function.
+
+Modifications to GL_KHR_vulkan_glsl
+
+  Add to the "Mapping to SPIR-V" section:
+
+  Function control attributes map to the Function Control mask operand of the
+  OpFunction instruction corresponding to the function where the attribute is
+  specified.
+
+  Function Control Attributes
+
+     Attribute    | SPIR-V Function Control mask bit
+    --------------+---------------------------------
+     *inline*     | Inline
+     *noinline*   | DontInline
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60.8
+
+  Including the following line in a shader can be used to control the
+  language features described in this extension:
+
+    #extension GL_EXT_function_control_attributes : <behavior>
+
+  where <behavior> is as specified in section 3.3.
+
+  New preprocessor #defines are added to the OpenGL Shading Language:
+
+    #define GL_EXT_function_control_attributes     1
+
+  In Section 3.6 Keywords:
+    Remove "inline" and "noinline" from the list of reserved keywords.
+
+  In Section 6.1 Function Definitions, add the paragraph:
+
+    The "inline" and "noinline" attributes can be added to a function
+    declaration or definition by including the attribute before the function
+    declarator or between the function prototype and the function body. These
+    attributes are hints for the compiler.
+
+    Function Control Attributes
+
+       Attribute  | Intent
+      ------------+-------------------------------------------
+       *inline*   | strong request to inline the function.
+       *noinline* | strong request to not inline the function.
+
+    The "inline" and "noinline" attributes are incompatible. It is a
+    compile-time error to specify both attributes for the same function.
+
+    If a function has multiple declarations or a declaration and a definition,
+    function control attributes from all declarations and the definition are
+    cumulative.
+
+  In Chapter 9 Shading Language Grammar:
+
+  Change the definition of function_prototype to:
+
+    function_prototype:
+      function_declarator RIGHT_PAREN
+      function_declarator RIGHT_PAREN attribute
+      attribute function_declarator RIGHT_PAREN
+      attribute function_declarator RIGHT_PAREN attribute
+
+  Add to the token list:
+
+    INLINE NOINLINE
+
+  Add new rules:
+
+    attribute:
+      LEFT_BRACKET LEFT_BRACKET attribute_list RIGHT_BRACKET RIGHT_BRACKET
+
+    attribute_list:
+      single_attribute
+      attribute_list COMMA single_attribute
+
+    single_attribute:
+      INLINE
+      NOINLINE
+
+Issues
+
+Revision History
+
+  Rev.  Date         Author         Changes
+  ----  ----------   -------------  -----------------
+   1    2026/07/04   Ruslan Karpov  Initial revision.

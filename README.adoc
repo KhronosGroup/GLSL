@@ -114,6 +114,7 @@ that do not live in the Khronos registries for OpenGL or OpenGL ES.
 - link:{repo}/nv/GLSL_NV_explicit_typecast.txt[GL_NV_explicit_typecast]
 - link:{repo}/nv/GLSL_NV_cooperative_matrix_decode_vector.txt[GLSL_NV_cooperative_matrix_decode_vector]
 - link:{repo}/ext/GL_EXT_ocp_microscaling_types.txt[GL_EXT_ocp_microscaling_types]
+- link:{repo}/ext/GL_EXT_function_control_attributes.txt[GL_EXT_function_control_attributes]
 - link:{repo}/ext/GLSL_EXT_cooperative_matrix_maintenance1.txt[GL_EXT_cooperative_matrix_maintenance1]
 - link:{repo}/ext/GLSL_EXT_split_barrier.txt[GLSL_EXT_split_barrier.txt]
 - link:{repo}/ext/GL_EXT_optional_input_attachment_index.txt[GL_EXT_optional_input_attachment_index]
