@@ -468,34 +468,25 @@ _function_header_with_parameters_ : ::
 _function_header_ : ::
     _fully_specified_type_ _IDENTIFIER_ _LEFT_PAREN_
 
-_parameter_declarator_ : ::
-    _type_specifier_ _IDENTIFIER_ +
-    _type_specifier_ _IDENTIFIER_ _array_specifier_
+_declarator_ : ::
+    _IDENTIFIER_ +
+    _IDENTIFIER_ _array_specifier_
 
 _parameter_declaration_ : ::
-    _type_qualifier_ _parameter_declarator_ +
-    _parameter_declarator_ +
-    _type_qualifier_ _parameter_type_specifier_ +
-    _parameter_type_specifier_
+    _fully_specified_type_ _declarator_ +
+    _fully_specified_type_
 
-_parameter_type_specifier_ : ::
-    _type_specifier_
+_init_declarator_ : ::
+    _declarator_ +
+    _declarator_ _EQUAL_ _initializer_
 
 _init_declarator_list_ : ::
     _single_declaration_ +
-    _init_declarator_list_ _COMMA_ _IDENTIFIER_ +
-    _init_declarator_list_ _COMMA_ _IDENTIFIER_ _array_specifier_ +
-    _init_declarator_list_ _COMMA_ _IDENTIFIER_ _array_specifier_ _EQUAL_
-    _initializer_ +
-    _init_declarator_list_ _COMMA_ _IDENTIFIER_ _EQUAL_ _initializer_
+    _init_declarator_list_ _COMMA_ _init_declarator_
 
 _single_declaration_ : ::
     _fully_specified_type_ +
-    _fully_specified_type_ _IDENTIFIER_ +
-    _fully_specified_type_ _IDENTIFIER_ _array_specifier_ +
-    _fully_specified_type_ _IDENTIFIER_ _array_specifier_ _EQUAL_
-    _initializer_ +
-    _fully_specified_type_ _IDENTIFIER_ _EQUAL_ _initializer_
+    _fully_specified_type_ _init_declarator_
 
 [NOTE]
 ====
@@ -733,8 +724,7 @@ _precision_qualifier_ : ::
     _LOW_PRECISION_
 
 _struct_specifier_ : ::
-    _STRUCT_ _IDENTIFIER_ _LEFT_BRACE_ _struct_declaration_list_
-    _RIGHT_BRACE_ +
+    _STRUCT_ _IDENTIFIER_ _LEFT_BRACE_ _struct_declaration_list_ _RIGHT_BRACE_ +
     _STRUCT_ _LEFT_BRACE_ _struct_declaration_list_ _RIGHT_BRACE_
 
 _struct_declaration_list_ : ::
@@ -742,16 +732,12 @@ _struct_declaration_list_ : ::
     _struct_declaration_list_ _struct_declaration_
 
 _struct_declaration_ : ::
-    _type_specifier_ _struct_declarator_list_ _SEMICOLON_ +
-    _type_qualifier_ _type_specifier_ _struct_declarator_list_ _SEMICOLON_
+    _type_specifier_ _declarator_list_ _SEMICOLON_ +
+    _type_qualifier_ _type_specifier_ _declarator_list_ _SEMICOLON_
 
-_struct_declarator_list_ : ::
-    _struct_declarator_ +
-    _struct_declarator_list_ _COMMA_ _struct_declarator_
-
-_struct_declarator_ : ::
-    _IDENTIFIER_ +
-    _IDENTIFIER_ _array_specifier_
+_declarator_list_ : ::
+    _declarator_ +
+    _declarator_list_ _COMMA_ _declarator_
 
 _initializer_ : ::
 ifdef::GLSL[]
