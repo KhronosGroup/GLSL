@@ -21,8 +21,8 @@ Status
 
 Version
 
-    Last Modified Date: 2022-09-01
-    Revision: 1
+    Last Modified Date: 2026-11-03
+    Revision: 2
 
 Dependencies
 
@@ -314,8 +314,8 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     'hitObjectTraceRayMotionNV' operates the same as 'hitObjectTraceRayNV', 
     with the exception of <currentTime> parameter.
 
-    This function is allowed only when GLSL_NV_ray_tracing_motion_blur 
-    extension is present.
+    This function is available only if the GLSL_NV_ray_tracing_motion_blur
+    extension is also enabled.
 
     Refer to 'traceRayMotionNV' for various parameter definitions.
 
@@ -397,8 +397,8 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
     Refer to 'traceRayMotionNV' for defintion of <currentTime>
 
-    This function is allowed only when GLSL_NV_ray_tracing_motion_blur 
-    extension is present.
+    This function is available only if the GLSL_NV_ray_tracing_motion_blur
+    extension is also enabled.
 
 
     Syntax:
@@ -475,8 +475,8 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
     Refer to 'traceRayMotionNV' for defintion of <currentTime>
 
-    This function is allowed only when GLSL_NV_ray_tracing_motion_blur 
-    extension is present.
+    This function is available only if the GLSL_NV_ray_tracing_motion_blur
+    extension is also enabled.
 
     Syntax:
 
@@ -515,8 +515,8 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
     Refer to 'traceRayMotionNV' for defintion of <currentTime>
 
-    This function is allowed only when GLSL_NV_ray_tracing_motion_blur 
-    extension is present.
+    This function is available only if the GLSL_NV_ray_tracing_motion_blur
+    extension is also enabled.
     
     Syntax:
 
@@ -697,6 +697,9 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     Returns the current time as encoded in the hit object.
     Only applicable if hit object was constructed for hitObjectTraceRayMotionNV
 
+    This function is available only if the GLSL_NV_ray_tracing_motion_blur
+    extension is also enabled.
+
 
     Add Section 8.20, Reorder Functions
 
@@ -776,6 +779,13 @@ Interactions with GL_EXT_scalar_block_layout
     a layout of hitobjectshaderrecordnv can also be laid out using the scalar
     block layout.
 
+Interactions with GLSL_NV_ray_tracing_motion_blur
+
+    The hitObjectTraceRayMotionNV, hitObjectRecordHitMotionNV,
+    hitObjectRecordHitWithIndexMotionNV, hitObjectRecordMissMotionNV and
+    hitObjectGetCurrentTimeNV functions are available only if the
+    GLSL_NV_ray_tracing_motion_blur extension is also enabled.
+
 Example
 
     #version 460
@@ -847,3 +857,5 @@ Revision History
     Rev.  Date          Author     Changes
     ----  -----------   ------     -------------------------------------------
      1    2022-09-01    alele      Initial revisions
+     2    2026-11-03    dgkoch     Require GLSL_NV_ray_tracing_motion_blur to be
+                                   enabled for motion and current time functions.
