@@ -29,8 +29,8 @@ Status
 
 Version
 
-    Last Modified Date: 2026-03-19
-    Revision: 3
+    Last Modified Date: 2026-11-03
+    Revision: 4
 
 Dependencies
 
@@ -46,6 +46,8 @@ Dependencies
     This extension requires GLSL_EXT_ray_tracing.
 
     This extension interacts with GLSL_NV_ray_tracing_motion_blur.
+
+    This extension interacts with GLSL_EXT_ray_tracing_position_fetch.
 
     This extension requires GLSL_EXT_buffer_reference_uvec2.
 
@@ -343,8 +345,8 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     'hitObjectTraceRayMotionEXT' operates the same as 'hitObjectTraceRayEXT', 
     with the exception of <currentTime> parameter.
 
-    This function is allowed only when GLSL_NV_ray_tracing_motion_blur 
-    extension is present.
+    This function is available only if the GLSL_NV_ray_tracing_motion_blur
+    extension is also enabled.
 
     Refer to 'traceRayMotionNV' for various parameter definitions.
 
@@ -460,8 +462,8 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
     Refer to 'traceRayMotionNV' for defintion of <currentTime>
 
-    This function is allowed only when GLSL_NV_ray_tracing_motion_blur 
-    extension is present.
+    This function is available only if the GLSL_NV_ray_tracing_motion_blur
+    extension is also enabled.
 
     Syntax:
 
@@ -584,6 +586,9 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
     Returns the three vertex positions encoded in the hit object if the
     intersection is a triangle.
 
+    This function is available only if the GLSL_EXT_ray_tracing_position_fetch
+    extension is also enabled.
+
     Syntax:
 
         int hitObjectGetInstanceCustomIndexEXT(hitObjectEXT hitObject);
@@ -682,6 +687,9 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
 
     Returns the current time as encoded in the hit object.
     Only applicable if hit object was constructed for hitObjectTraceRayMotionEXT
+
+    This function is available only if the GLSL_NV_ray_tracing_motion_blur
+    extension is also enabled.
 
 
     Add Section 8.20, Reorder Functions
@@ -838,6 +846,9 @@ Additions to Chapter 8 of the OpenGL Shading Language Specification
         reorderThreadEXT(hitObject, hint, bits);
         hitObjectExecuteShaderEXT(hitObject, payload);
 
+    This function is available only if the GLSL_NV_ray_tracing_motion_blur
+    extension is also enabled.
+
 Interactions with GLSL_EXT_ray_tracing
 
     This extension requires acceleration structures, shader stages,
@@ -857,9 +868,16 @@ Interactions with GL_EXT_scalar_block_layout
 
 Interactions with GLSL_NV_ray_tracing_motion_blur
 
-    If GLSL_NV_ray_tracing_motion_blur is not supported then
-    hitObjectTraceMotionReorderExecuteEXT, hitObjectTraceRayMotionEXT,
-    and hitObjectRecordMissMotionEXT are not allowed.
+    The hitObjectTraceRayMotionEXT, hitObjectRecordMissMotionEXT,
+    hitObjectTraceMotionReorderExecuteEXT and hitObjectGetCurrentTimeEXT
+    functions are available only if the GLSL_NV_ray_tracing_motion_blur
+    extension is also enabled.
+
+Interactions with GLSL_EXT_ray_tracing_position_fetch
+
+    The hitObjectGetIntersectionTriangleVertexPositionsEXT function is
+    available only if the GLSL_EXT_ray_tracing_position_fetch extension is
+    also enabled.
 
 
 Example
@@ -936,3 +954,6 @@ Revision History
      2    2025-11-11    alele      Misc fixes 
      3    2026-03-19    alele      Add hitkind overload for hitObjectRecordFromQueryEXT
                                    and fix for github spirv registry issue 373.
+     4    2026-11-03    dgkoch     Require the interacting extensions to be enabled
+                                   for motion, current time and vertex position
+                                   functions.
