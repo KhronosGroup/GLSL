@@ -1,0 +1,487 @@
+Name
+
+    EXT_type_deduction
+
+Name Strings
+
+    GL_EXT_type_deduction
+
+Contact
+
+    LBV 2012-26
+
+Contributors
+
+    LBV 2012-26, Independent
+
+Status
+
+    Draft.
+
+Version
+
+    Last Modified Date: October 15, 2026
+    Revision: 1
+
+Dependencies
+
+    This extension is written against the OpenGL Shading Language
+    Specification, version 4.60, and describes corresponding functionality
+    for the OpenGL ES Shading Language.
+
+    This extension is applicable to all versions of the OpenGL Shading
+    Language and the OpenGL ES Shading Language that support the
+    #extension directive.
+
+    This is a shading language extension. It does not require a new OpenGL,
+    OpenGL ES, or Vulkan API feature.
+
+    The language version, profile, shader stage, and enabled extensions must
+    support the deduced type and the equivalent explicitly typed declaration.
+    This extension does not make otherwise unavailable types or operations
+    available in an earlier language version or a different profile.
+
+    This extension interacts with GL_KHR_vulkan_glsl and with extensions that
+    introduce types usable in expressions, including cooperative matrices,
+    cooperative vectors, long vectors, tensor layouts, tensor views, and
+    buffer reference types. These extensions are not mandatory dependencies.
+
+Overview
+
+    This extension introduces the keyword "auto" for variable declarations
+    whose type is deduced from an initializer expression. It allows a shader
+    to declare a variable without repeating the type of an expression,
+    including a function call, a structure value, an array, or a value of a
+    parameterized type introduced by another extension.
+
+    Deduction preserves the initializer's type, including structure identity,
+    array dimensions, and type parameters. It does not inherit the top-level
+    qualifiers of the initializer expression. Qualifiers on the new variable
+    are determined by its own declaration and the applicable language rules.
+
+    For example:
+
+        const int source = 1;
+        auto value = source; // int; value is writable
+        const auto constantValue = source; // const int
+
+    Each declarator requires an initializer. An auto declaration can contain
+    a comma-separated declarator list, using the existing variable declaration
+    syntax. Every initializer in the list must deduce the same type, excluding
+    top-level qualifiers. This extension does not introduce function return
+    type deduction, parameter type deduction, or deduction from brace-enclosed
+    initializer lists.
+
+New Procedures and Functions
+
+    None.
+
+New Tokens
+
+    No API tokens are added.
+
+    The shading language keyword "auto" is added when this extension is
+    enabled. Its grammar token is AUTO.
+
+Modifications to the OpenGL Shading Language Specification, Version 4.60
+
+    Modify section 3.3, Preprocessor
+
+    A shader can control the features of this extension with:
+
+        #extension GL_EXT_type_deduction : <behavior>
+
+    where <behavior> has the meaning specified for extension directives.
+    The initial behavior is "disable".
+
+    A compiler supporting this extension predefines:
+
+        #define GL_EXT_type_deduction 1
+
+    This macro indicates support, not the current extension behavior. It
+    remains defined when the extension is disabled. Testing the macro does
+    not enable type deduction.
+
+    Modify section 3.6, Keywords
+
+    Add "auto" to the keywords when the extension behavior is "enable",
+    "require", or "warn". With behavior "warn", uses of this keyword produce
+    an extension-use warning.
+
+    When the extension behavior is "disable", including the initial state,
+    this extension does not reserve "auto". The spelling is processed as an
+    ordinary identifier, including as a previously declared structure type
+    name, according to the existing language rules.
+
+    Changes in extension behavior apply to subsequent source text. They do
+    not change the meaning of declarations already processed. The directives
+    "#extension all : disable" and "#extension all : warn" also affect this
+    extension according to the existing rules for "all".
+
+    Add a subsection to section 4.1, Basic Types, titled Type Deduction
+
+    A variable declaration with type deduction can have these forms:
+
+        auto identifier = assignment-expression;
+        type-qualifier auto identifier = assignment-expression;
+        auto first = assignment-expression, second = assignment-expression;
+
+    More initialized declarators can be appended with commas. Explicit
+    qualifiers before auto apply to every variable in the declaration.
+
+    The type-qualifier is a sequence of qualifiers permitted by the existing
+    type-qualifier grammar. Their validity is checked for the deduced type,
+    declaration scope, shader stage, and language environment.
+
+    An auto declaration is permitted at global scope and wherever a variable
+    declaration statement is permitted, including the initializer of a for
+    statement. It is not permitted as a function return type, a function
+    parameter type, a structure or interface-block member type, or a type in
+    a condition declaration. The keyword is not a general type specifier.
+
+    The initializer must be an assignment-expression with a type that can
+    be used to declare and initialize the variable. In particular:
+
+      - An initializer must be present.
+      - An expression of type void is not permitted.
+      - A function name or an overload set is not a value from which a
+        variable type can be deduced. A function call with a suitable
+        non-void result is permitted.
+      - A brace-enclosed initializer list is not an assignment-expression
+        and is not permitted, including an empty or single-element list.
+
+    The initializer is resolved using the existing expression rules before
+    the variable type is deduced. Function overload resolution, operator
+    semantics, and conversions within the expression are unchanged. An auto
+    declaration does not supply a destination type for resolving an otherwise
+    ill-formed or ambiguous initializer.
+
+    The deduced type is the type of the resolved initializer expression,
+    excluding its top-level qualifiers. Deduction preserves all properties
+    that identify that type, including:
+
+      - Scalar kind and component width.
+      - Vector size and matrix dimensions.
+      - Structure type identity and the declared types of its members.
+      - Array element type, number of dimensions, and each dimension's size.
+      - Type parameters and type identity defined by other extensions.
+
+    Deduction does not create a new structure type. It can preserve the type
+    of an anonymous structure without requiring a source-level type name.
+    It does not recursively remove qualifiers or other properties that are
+    part of member declarations or of the definition of an extension type.
+
+    Array expressions retain their array type; no array-to-pointer conversion
+    is introduced. If a dimension depends on a specialization constant, that
+    dependence is preserved instead of replacing it with the constant's
+    default value. Existing restrictions on declaring, copying, or
+    initializing such an array still apply.
+
+    The new variable is initialized using the existing initialization rules
+    for the deduced type. The initializer is evaluated according to those
+    rules, without an additional evaluation for deduction. The variable's
+    type remains fixed after the declaration.
+
+    The declaration introduces a new variable with the usual value semantics
+    of its type. It does not introduce a reference to the source variable.
+    For a reference or handle type supplied by another extension, the normal
+    value semantics of that type apply; copying the value does not imply
+    copying the referenced storage.
+
+    In a comma-separated auto declaration, deduce the type independently for
+    every initializer. All deduced types must be the same, excluding top-level
+    qualifiers; otherwise, the declaration is a compile-time error. Compare
+    the complete types, including structure identity, array dimensions, and
+    extension-defined type parameters. An implicit conversion to the first
+    deduced type does not make differing deduced types acceptable.
+
+    Every declarator must have an initializer. A brace-enclosed initializer
+    list is not permitted for any declarator, including one following a
+    comma. An array specifier must not be written after auto or after any
+    identifier; the complete array type, if any, is obtained from that
+    declarator's initializer.
+
+    A parenthesized expression containing the sequence operator remains a
+    valid assignment-expression if its result satisfies these requirements.
+    A comma separating declarators is not part of an initializer expression.
+
+    The scoping rules of section 4.2 are unchanged. The new variable is not
+    visible within its own initializer. A name in the initializer can refer
+    to a declaration in an enclosing scope. It is an error if no applicable
+    declaration exists.
+
+    Declarators are processed in source order. A variable declared earlier
+    in the same list is visible in a later initializer, according to the
+    existing scoping rules. A declaration in a later declarator is not
+    visible in an earlier initializer.
+
+    Add to section 4.3, Storage Qualifiers, and section 4.7, Precision and
+    Precision Qualifiers
+
+    For an auto declaration, qualifiers are determined from the qualifiers
+    written on that declaration and the existing defaults for its scope and
+    deduced type. They are not inherited from the initializer expression.
+
+    In particular, const, storage, precision, memory, interpolation, layout,
+    invariant, precise, and nonuniform qualifications are not copied from
+    the source expression onto the new variable merely by type deduction.
+    Reading and evaluating the source expression remains subject to its own
+    qualifiers and access restrictions.
+
+    If no precision qualifier is written, the applicable default precision
+    for the deduced type is used as for an explicitly typed declaration.
+    If a required precision cannot be established under the existing rules,
+    the declaration is a compile-time error.
+
+    Explicit qualifiers must satisfy all existing rules for a declaration
+    of the deduced type. For example, const auto requests a const variable;
+    auto by itself does not request const even when its initializer is a
+    constant expression. Existing rules determine whether an explicitly
+    const declaration initialized from a specialization expression is
+    itself a specialization expression. A source variable's constant_id
+    is not inherited by the new declaration.
+
+    Add to section 4.1.11, Initializers
+
+    Type deduction does not relax restrictions on initializers. The
+    declaration must be valid as an explicitly typed declaration of the
+    deduced type with the same explicit qualifiers, scope, and initializer.
+    For types without a source-level type name, the same semantic rules
+    apply without requiring such a name to be expressible.
+
+    This includes restrictions on global initializers, constant expressions,
+    opaque types, allowed storage classes, and arrays. For example, a
+    runtime-sized storage-buffer array cannot be copied to a local array by
+    using auto. A type that prohibits initialization with "=" does not become
+    copy-initializable through deduction. A write-only source cannot be read
+    through deduction.
+
+    The existing brace-initialization rules for explicitly typed declarations
+    are unchanged. They do not provide type deduction for an auto declaration.
+
+    Modify section 9, Shading Language Grammar
+
+    Add AUTO to the token list.
+
+    Add this production:
+
+        auto_declaration_specifier:
+            AUTO
+            type_qualifier AUTO
+
+    Add an alternative to single_declaration:
+
+        single_declaration:
+            auto_declaration_specifier IDENTIFIER EQUAL assignment_expression
+
+    Reuse the existing init_declarator_list productions for subsequent
+    declarators. When the first declarator uses auto, apply the deduction
+    requirements above to every declarator in that list, including the
+    requirements for an initializer, matching types, and no array specifier
+    or brace-enclosed initializer list. The grammar for explicitly typed
+    declarations is unchanged.
+
+    AUTO is not added to type_specifier or fully_specified_type. No separate
+    declaration-list grammar is introduced for auto.
+
+Modifications to the OpenGL ES Shading Language Specification
+
+    Apply the corresponding preprocessor, keyword, deduction, qualifier,
+    initialization, and grammar changes above.
+
+    Existing ESSL restrictions, including default precision and global
+    initializer requirements, continue to apply. Features such as
+    specialization constants require the relevant language environment or
+    extensions; this extension alone does not introduce them into ESSL.
+
+Interactions with Other Extensions
+
+    An enabled extension's types can be deduced whenever its rules permit
+    the resulting declaration and initialization. Deduction preserves the
+    type's full parameterization, not just its scalar component type.
+
+    For example, cooperative matrix deduction preserves the component type,
+    scope, dimensions, and use parameter as applicable. Cooperative vector
+    and long-vector deduction preserves the component type and length.
+    Tensor layout and tensor view deduction preserves all type parameters,
+    including rank, clamp mode, and permutation parameters where applicable.
+
+    Deduction of a buffer reference preserves the reference type identity
+    and its referenced block definition. Declaration qualifiers on the
+    source reference variable are not inherited by the new variable.
+
+    Any required extensions, capabilities, storage restrictions, or shader
+    stage restrictions continue to apply. The presence of a deducible type
+    does not grant permission to make an otherwise prohibited local copy of
+    an opaque resource, tensor object, or ray-query object.
+
+    An extension that permits an empty brace initializer does not thereby
+    make that initializer a typed expression for auto deduction.
+
+Mapping to SPIR-V
+
+    Type deduction is performed during compilation. Emit the deduced
+    declaration as the corresponding explicitly typed declaration, with the
+    qualifiers determined for the new declaration. No runtime type inference
+    or new SPIR-V instruction, capability, or SPIR-V extension is required
+    solely by GL_EXT_type_deduction.
+
+    Requirements of the deduced type and its operations remain applicable.
+    The source extension name may be recorded with OpSourceExtension.
+
+Examples
+
+    Unless stated otherwise, fragments below are inside a function in a
+    shader with this extension enabled. Other types and operations require
+    the appropriate language version and extensions.
+
+    1. Scalars, vectors, and matrices
+
+        auto integer = 1;                 // int
+        auto unsignedInteger = 1u;        // uint
+        auto real = 1.0;                  // float
+        auto vector = vec3(1.0);          // vec3
+        auto matrix = mat2x3(1.0);        // mat2x3
+        auto column = matrix[0];          // vec3
+        auto components = vector.yx;      // vec2
+
+    2. Source qualifiers are not inherited
+
+        const int source = 1;
+        auto writable = source;            // int
+        writable = 2;                      // legal
+        const auto readonlyValue = source; // const int
+        readonlyValue = 2;                 // error: const variable
+
+    A complete ESSL example demonstrates independent default precision:
+
+        #version 310 es
+        #extension GL_EXT_type_deduction : require
+        precision mediump float;
+        void main()
+        {
+            highp float source = 1.0;
+            auto a = source;              // mediump float
+            highp auto b = source;        // highp float
+        }
+
+    3. Arrays and subarrays
+
+        int source[2][3] = int[2][3](int[3](1, 2, 3), int[3](4, 5, 6));
+        auto whole = source;              // int[2][3]
+        auto row = source[0];             // int[3]
+        auto element = source[0][0];      // int
+        whole[1][2] = 7;                  // legal
+        auto constructed = int[](8, 9);   // int[2]
+
+    4. Structures and function results
+
+    Global declarations:
+
+        struct Data { vec3 position; int indices[2]; };
+        Data makeData() { return Data(vec3(1.0), int[2](0, 1)); }
+
+    Inside a function:
+
+        auto data = makeData();           // the existing Data type
+        auto indices = data.indices;      // int[2]
+        struct { int count; } source;
+        source.count = 1;
+        auto anonymousCopy = source;      // same anonymous structure type
+
+    5. Declarations and expressions that do not permit deduction
+
+        auto missing;                     // error: no initializer
+        auto list = {1, 2, 3};            // error: brace initializer
+        auto single = {1};                // error: brace initializer
+        auto empty = {};                  // error: brace initializer
+        auto suffix[2] = int[2](1, 2);    // error: array specifier
+        auto sequence = (1, 2u);          // legal: uint
+
+    For a function declared as "int getValue();":
+
+        auto value = getValue();          // legal: int
+        auto function = getValue;         // error: function name is not a value
+
+    These declarations are also errors:
+
+        auto makeValue() { return 1; }    // no return type deduction
+        void consume(auto value) {}       // no parameter type deduction
+        struct Invalid { auto value; };   // no member type deduction
+
+    6. Loop initializer and scope
+
+        for (auto i = 0; i < 4; ++i) { }  // legal: i is int
+        if (bool flag = true) { }         // error: GLSL if takes an expression
+        if (auto flag = true) { }         // error: same GLSL restriction
+
+    GLSL permits declarations in while conditions and in the condition part
+    of for statements. This proposal does not add auto to those condition
+    declarations; this is distinct from the existing restriction on if.
+
+    Given a global declaration "float value = 1.0;", a function body can
+    contain:
+
+        auto value = value;               // float, initialized from global
+
+    Without an applicable outer declaration, this initializer is an error.
+
+    7. Specialization constants, in the Vulkan GLSL environment
+
+    Global declarations:
+
+        layout(constant_id = 0) const int N = 3;
+        layout(constant_id = 7) const auto M = 5; // new ID, deduced int
+
+    Inside a function:
+
+        auto ordinary = N;                // ordinary int; no constant_id
+        ordinary = 4;                     // legal
+        const auto derived = N * 2 + 1;   // same semantics as const int
+
+    An array dimension depending on N retains that dependence when its type
+    is deduced. Whether a particular array copy is legal is determined by
+    the existing specialization-sized array and initialization rules.
+
+    8. Extension control
+
+    A complete shader can use auto as an identifier before enabling the
+    extension, then use deduction in subsequent source text:
+
+        #version 450
+        void before() { int auto = 1; auto = 2; }
+        #extension GL_EXT_type_deduction : require
+        void main() { auto value = 1; }
+
+    A portable support check is:
+
+        #ifdef GL_EXT_type_deduction
+        #extension GL_EXT_type_deduction : require
+        #endif
+
+    The shader must still provide an explicitly typed fallback if it needs
+    to compile on implementations without this extension.
+
+    9. Multiple declarators
+
+        auto first = 1, second = 2;       // legal: both int
+        auto a = 1, b = a + 1, c = b + 1; // legal: earlier names are visible
+        const auto x = 1, y = x + 1;      // legal: both const int
+        auto p = 1, q = 2.0;              // error: int and float differ
+        auto r = 1, s;                    // error: s has no initializer
+        auto t = 1, u = {2};              // error: brace initializer
+
+        int values[2] = int[2](1, 2);
+        auto left = values, right = left; // legal: both int[2]
+        auto small = values, large = int[3](1, 2, 3); // error: array sizes
+
+    Qualifiers on initializer expressions do not affect the type comparison:
+
+        const int source = 1;
+        auto mutableValue = 2, copy = source; // legal: both writable int
+
+Revision History
+
+    Rev.  Date         Author         Changes
+    ----  ----------   -------------  -----------------
+     1    2026/10/14   LBV 2012-26    Initial revision.
