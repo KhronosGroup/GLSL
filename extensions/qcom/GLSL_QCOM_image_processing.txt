@@ -38,8 +38,8 @@ Dependencies
 Overview
 
     GPUs commonly process images for a wide range of use-cases. These include enhancement
-    of externally sourced images (i.e., camera image enhancement), post processing of
-    GPU-rendered game content, image scaling, and image analysis (i.e., motion vector
+    of externally sourced images (e.g., camera image enhancement), post processing of
+    GPU-rendered game content, image scaling, and image analysis (e.g., motion vector
     generation). In some cases, higher-order filtering kernels and advanced image algorithms
     are required.
 
@@ -52,16 +52,16 @@ Overview
 
     Weighted Texture Sample: This instruction performs a weighted texture sampling operation
     involving two images: the sampled image and the weight image. An MxN region of texels
-    in the sampled image are convolved with an MxN set of scalar weights provided in the
+    in the sampled image is convolved with an MxN set of scalar weights provided in the
     weight image. Large filter sizes up to 64x64 taps enable important use-cases like
     edge-detection, feature extraction, and anti-aliasing.
 
-    Weighted Box Filter: This instruction performs weighted average of the texels within a
+    Weighted Box Filter: This instruction performs a weighted average of the texels within a
     screen-aligned box. The operation is similar to bi-linear filtering, except the region
     of texels is not limited to 2x2. The instruction includes a BoxSize parameter, with
     fractional box sizes up to [64.0, 64.0]. Similar to bi-linear filtering, the
     implementation computes a weighted average for all texels covered by the box, with the
-    weight for each texel proportional covered area. Large box sizes up to 64x64 enable
+    weight for each texel proportional to the covered area. Large box sizes up to 64x64 enable
     important use-cases like bulk mipmap generation and high quality single-pass image
     down-scaling with arbitrary scaling ratios (e.g. thumbnail generation).
 
@@ -70,7 +70,7 @@ Overview
     takes two sets of integer texture coordinates, and an integer BlockSize parameter. An MxN
     region of texels in the target image is compared with an MxN region in the reference image.
     The instruction returns a per-component error metric describing the difference between
-    the two regions. The SAD returns the sum of the absolute errors and the SSD returns
+    the two regions. The SAD returns the sum of the absolute differences and the SSD returns
     the sum of the squared differences.
 
     Mapping to SPIR-V
@@ -82,13 +82,13 @@ Overview
 
     textureWeightedQCOM      -> OpImageSampleWeightedQCOM
     textureBoxFilterQCOM     -> OpImageBoxFilterQCOM
-    textureBlockMatchSADQCOM -> OpImageBlockMatchSSDQCOM
-    textureBlockMatchSSDQCOM -> OpImageBlockMatchSADQCOM
+    textureBlockMatchSSDQCOM -> OpImageBlockMatchSSDQCOM
+    textureBlockMatchSADQCOM -> OpImageBlockMatchSADQCOM
 
     The <weight> texture operand of textureWeightedQCOM should be
     decorated with WeightTextureQCOM.  The decoration can
-    help SPIR-V reflection tools provide this information back to
-    application which in turn is helpful for the application to properly
+    help SPIR-V reflection tools provide this information back to the
+    application, which in turn is helpful for the application to properly
     create the weight texture object in the client API.
     
     For similar reasons, the <target> and <reference> texture operands of
@@ -114,7 +114,7 @@ Modifications to the OpenGL GL Shading Language Specification, Version 1.40, dat
 
         #define GL_QCOM_image_processing     1
 
-    Add to the table at the end of Subsection 8.9.2 "Texel Lookup Functions", add
+    At the end of the table in Subsection 8.9.2 "Texel Lookup Functions", add
     the following image processing functions.
 
     +------------------------------------+--------------------------------------------+
@@ -133,7 +133,7 @@ Modifications to the OpenGL GL Shading Language Specification, Version 1.40, dat
     |                                    | and boxSize.y.                             |
     +------------------------------------+--------------------------------------------+
     |   vec4 textureBlockMatchSADQCOM(   | Block matching operation measures the      |
-    |       sampler2D target             | correlation (or similarity) of the target  |
+    |       sampler2D target,            | correlation (or similarity) of the target  |
     |       uvec2     targetCoord,       | block and reference block.  targetCoord    |
     |       sampler2D reference,         | and refCoord specify the bottom-left corner|
     |       uvec2     refCoord,          | of the block in target and reference       |
@@ -141,12 +141,12 @@ Modifications to the OpenGL GL Shading Language Specification, Version 1.40, dat
     |                                    | Absolute Differences (SAD).                |
     +------------------------------------+--------------------------------------------+
     |   vec4 textureBlockMatchSSDQCOM(   | Block matching operation measures the      |
-    |       sampler2D target             | correlation (or similarity) of the target  |
-    |       uvec2     targetCoord,       | block and reference block.  TargetCoord    |
+    |       sampler2D target,            | correlation (or similarity) of the target  |
+    |       uvec2     targetCoord,       | block and reference block.  targetCoord    |
     |       sampler2D reference,         | and refCoord specify the bottom-left corner|
     |       uvec2     refCoord,          | of the block in target and reference       |
     |       uvec2     blockSize)         | images. The error metric is the Sum of     |
-    |                                    | Square Differences (SSD).                  |
+    |                                    | Squared Differences (SSD).                 |
     +------------------------------------+--------------------------------------------+
 
     * The textureBlockMatch* functions return a per-component metric that reflects
@@ -157,9 +157,9 @@ Modifications to the OpenGL GL Shading Language Specification, Version 1.40, dat
 
     * target and reference specify the two input textures. If
     the same block from one texture is going to be used repeatedly across multiple
-    instructions, that texture should be specified as the referenceTexture.
+    instructions, that texture should be specified as the reference.
 
-    * targetCoord and referenceCoord specify the texture coordinates (in texels)
+    * targetCoord and refCoord specify the texture coordinates (in texels)
     of the bottom-left corner of each block.
 
     * blockSize specifies the size (in texels) of the blocks to be compared.
