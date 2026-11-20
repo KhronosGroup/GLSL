@@ -20,8 +20,8 @@ Status
 
 Version
 
-    Last Modified: October 21, 2024
-    Revision: 1
+    Last Modified: November 3, 2026
+    Revision: 2
 
 Dependencies
 
@@ -604,16 +604,17 @@ Modify Section 8.X, Cooperative Matrix Functions
     called directly or indirectly by those functions, tangled instructions
     (as defined in the SPIR-V spec) are not allowed.
 
-    A gl_MatrixUseAccumulator matrix can be transposed to a gl_MatrixUseB
-    matrix by calling:
+    A gl_MatrixUseAccumulator matrix can be transposed and converted to a
+    gl_MatrixUseB matrix by calling:
 
       void coopMatTransposeNV(out coopmat result, coopmat m);
 
     _m_ must have use of gl_MatrixUseAccumulator, _result_ must have use of
-    gl_MatrixUseB. _m_ and _result_ must have the same scope and component
-    type, and the number of rows of _m_ must match the number of columns of
-    _result_ and the number of columns of _m_ must match the number of rows of
-    _result_. _result_ is filled with the transpose of the _m_.
+    gl_MatrixUseB. _m_ and _result_ must have the same scope,
+    and the number of rows of _m_ must match the number of columns of _result_
+    and the number of columns of _m_ must match the number of rows of _result_.
+    _result_ is filled with the transpose of _m_, with each component converted
+    to the component type of _result_.
 
 Modify Section 9, Shading Language Grammar for Core Profile
 
@@ -773,6 +774,12 @@ Issues
     to buffer and buffer_reference inputs.
 
 Revision History
+
+Revision 2
+
+- Correct the erroneous component-type restriction on coopMatTransposeNV.
+  Component-type conversion has always been supported and tested; the
+  restriction was a mistake in the specification.
 
 Revision 1
 
