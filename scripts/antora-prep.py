@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright 2022-2024 The Khronos Group Inc.
+# Copyright 2022-2026 The Khronos Group Inc.
 # SPDX-License-Identifier: Apache-2.0
 
 """Used to convert files from the asciidoctor spec tree to Antora module
@@ -51,7 +51,6 @@ import importlib
 import os
 import re
 import sys
-from generator import enquote
 from reflib import loadFile, logDiag, logWarn, logErr, setLogFile, getBranch
 from pathlib import Path
 
@@ -62,6 +61,17 @@ subtitlePat = re.compile(r'^[=#]{2,} (?P<title>[A-Z].*)')
 Pages = 'pages'
 Partials = 'partials'
 Images = 'images'
+
+# Original from Vulkan 'generator.py' module, almost none of which is needed for SPIR-V
+def enquote(s):
+    """Return string argument with surrounding quotes,
+      for serialization into Python code."""
+    if s:
+        if isinstance(s, str):
+            return f"'{s}'"
+        else:
+            return s
+    return None
 
 def undefquote(s, default='undefined'):
     """Quote a string, or return a default value if the string is None."""
@@ -111,19 +121,20 @@ def write_python_dictionary(filename, dictionary, varname = 'pageMap'):
 
 # Track anchors we could not rewrite so they are only reported once
 unresolvedAnchors = set()
+unresolvedAnchorTitles = set()
 
-def mapAnchor(anchor, title, pageMap, xrefMap, closeAnchor):
+def mapAnchor(anchor, title, pageMap, xrefMap, module, closeAnchor):
     """Rewrite a <<anchor{, title}>> xref -> xref:pagemap#anchor[{title}]
         - anchor - anchor name
         - title - xref description or '' if not specified, in which case the
           anchor text from the xrefMap is used if available
+        - pageMap, xrefMap, module - per rewriteXrefs below
         - closeAnchor - True if closing >> is on this line, False otherwise
-        - pageMap, xrefMap - per rewriteXrefs below
     """
 
-    # Determine which page anchor this anchor comes from
-    # If it cannot be determined, use the unmapped anchor
-    #@ Simplify the page anchor if pageName == current page
+    # Determine which page anchor this anchor comes from.
+    # If it cannot be determined, use the unmapped anchor.
+    # Could simplify the page anchor if pageName == current page.
     try:
         if title != '' or not closeAnchor:
             # Either a (possibly up to a line break) title is supplied, or
@@ -136,19 +147,18 @@ def mapAnchor(anchor, title, pageMap, xrefMap, closeAnchor):
             # If the title is *still* empty, make a note of it and just use
             # the anchor name
             if title == '':
-                print(f'No title found for anchor {anchor}', file=sys.stderr)
+                unresolvedAnchorTitles.add(anchor)
                 title = anchor
 
         # Page the page anchor comes from
         pageName = pageMap[pageAnchor]
 
-        # print(f'mapAnchor: anchor {anchor} pageAnchor {pageAnchor} -> pageName = {pageName}')
+        # print(f'mapAnchor: anchor {anchor} pageAnchor {pageAnchor} -> module {module} pageName = {pageName}')
 
-        xref = f'{pageName}#{anchor}'
+        xref = f'{module}{pageName}#{anchor}'
     except:
         if anchor not in unresolvedAnchors:
             unresolvedAnchors.add(anchor)
-            print(f'Cannot determine which page {anchor} comes from, passing through to Antora intact (additional occurrences will not be reported)', file=sys.stderr)
         xref = f'{anchor}'
 
     # Remove extraneous whitespace
@@ -159,37 +169,37 @@ def mapAnchor(anchor, title, pageMap, xrefMap, closeAnchor):
     else:
         return f'xref:{xref}[{title}'
 
-def replaceAnchorText(match, pageMap, xrefMap):
+def replaceAnchorText(match, pageMap, xrefMap, module):
     """Rewrite <<anchor,text>> to xref:newanchor[text]
         - match - match object, \1 = anchor, \2 = text
-        - pageMap, xrefMap - per rewriteXrefs below
+        - pageMap, xrefMap, module - per rewriteXrefs below
     """
 
     anchor = match.group(1)
     text = match.group(2)
 
-    return mapAnchor(anchor, text, pageMap, xrefMap, closeAnchor=True)
+    return mapAnchor(anchor, text, pageMap, xrefMap, module, closeAnchor=True)
 
-def replaceAnchorOnly(match, pageMap, xrefMap):
+def replaceAnchorOnly(match, pageMap, xrefMap, module):
     """Rewrite <<anchor>> to xref:newanchor[]
         - match - match object, \1 = anchor
-        - pageMap, xrefMap - per rewriteXrefs below
+        - pageMap, xrefMap, module - per rewriteXrefs below
     """
 
     anchor = match.group(1)
 
-    return mapAnchor(anchor, '', pageMap, xrefMap, closeAnchor=True)
+    return mapAnchor(anchor, '', pageMap, xrefMap, module, closeAnchor=True)
 
-def replaceAnchorTrailingText(match, pageMap, xrefMap):
+def replaceAnchorTrailingText(match, pageMap, xrefMap, module):
     """Rewrite <<anchor, to xref:newanchor[
         - match - match object, \1 = anchor, \2 = text (may be empty)
-        - pageMap, xrefMap - per rewriteXrefs below
+        - pageMap, xrefMap, module - per rewriteXrefs below
     """
 
     anchor = match.group(1)
     text = match.group(2)
 
-    return mapAnchor(anchor, text, pageMap, xrefMap, closeAnchor=False)
+    return mapAnchor(anchor, text, pageMap, xrefMap, module, closeAnchor=False)
 
 class DocFile:
     """Information about a markup file being converted"""
@@ -215,6 +225,7 @@ class DocFile:
              relpath
            - xrefMap - dictionary mapping an anchor within a page to a page
              anchor
+           - module - module name to prefix xrefs with or None
         """
 
         self.lines = None
@@ -232,6 +243,7 @@ class DocFile:
 
         self.pageMap = {}
         self.xrefMap = {}
+        self.module = ''
 
     def findTitle(self):
         """Find category (Pages or Partials) and title, for Pages, in a
@@ -287,23 +299,17 @@ class DocFile:
              which all destination files are written
         """
 
-        # Load file content
-        self.srcpath = os.path.abspath(filename)
-        self.lines, _ = loadFile(self.srcpath)
-        if self.lines is None:
-            raise RuntimeError(f'No such file {self.srcpath}')
-
-        # Miscellaneous relevant paths
-        self.root = root
-        self.relpath = os.path.relpath(self.srcpath, root)
-        self.component = component
-
-        # Determine file category.
         # Only .adoc files are candidates for pages, which is verified by
         # looking at the file header for a top-level title.
         # .svg .jpg .png are always images
         # Anything else is a partial
         (_, fileext) = os.path.splitext(filename)
+
+        # Miscellaneous relevant paths
+        self.srcpath = os.path.abspath(filename)
+        self.root = root
+        self.relpath = os.path.relpath(self.srcpath, root)
+        self.component = component
 
         # Defaults
         self.title = ''
@@ -312,13 +318,21 @@ class DocFile:
 
         if fileext in (('.svg', '.jpg', '.png')):
             self.category = Images
-        elif fileext == '.adoc':
-            (self.category,
-             self.title,
-             self.titleLine,
-             self.titleAnchor) = self.findTitle()
         else:
-            self.category = Partials
+            # Load text file content
+            # In principle it is possible for a Partial to not be text,
+            # which would require changes to determine and track that.
+            self.lines, _ = loadFile(self.srcpath)
+            if self.lines is None:
+                raise RuntimeError(f'No such file {self.srcpath}')
+
+            if fileext == '.adoc':
+                (self.category,
+                 self.title,
+                 self.titleLine,
+                 self.titleAnchor) = self.findTitle()
+            else:
+                self.category = Partials
 
         # Determine destination path based on category
         # images/ are treated specially since there is only a single
@@ -336,18 +350,19 @@ class DocFile:
             # to {images}, it is OK.
             self.dstpath = Path(self.component) / self.relpath
 
-
-    def rewriteXrefs(self, pageMap = {}, xrefMap = {}):
+    def rewriteXrefs(self, pageMap = {}, xrefMap = {}, module = ''):
         """Rewrite asciidoc <<>> xrefs into Antora xref: xrefs, including
            altering the xref target.
 
            - pageMap - map from page anchors to page names
-           - xrefMap - map from anchors within a page to the page anchor"""
+           - xrefMap - map from anchors within a page to the page anchor
+           - module - module name to prefix xref targets with, e.g. 'spec:' or '{spec:}'"""
 
         # pageMap and xrefMap are used in functions called by re.subn, so
         # save them in members.
         self.pageMap = pageMap
         self.xrefMap = xrefMap
+        self.module = module
 
         # Xref markup may be broken across lines, and may or may not include
         # anchor text. Track whether the closing >> is being looked for at
@@ -374,28 +389,49 @@ class DocFile:
 
             # First, complete xrefs with alt-text (<<anchor, text>>)
             (line, count) = re.subn(r'<<([^,>]*),([^>]+)>>',
-                lambda match: replaceAnchorText(match, pageMap, xrefMap),
+                lambda match: replaceAnchorText(match, pageMap, xrefMap, module),
                 line)
 
             # Next, complete xrefs without alt-text (<<anchor>>)
             (line, count) = re.subn(r'<<([^,>]*)>>',
-                lambda match: replaceAnchorOnly(match, pageMap, xrefMap),
+                lambda match: replaceAnchorOnly(match, pageMap, xrefMap, module),
                 line)
 
             # Finally, if there is a trailing '<<anchor,' at EOL, remap it
             # and set the flag so the terminating '>>' on the next line will
             # be mapped into an xref closing ']'.
             (line, count) = re.subn(r'<<([^,>]*),([^>]*)$',
-                lambda match: replaceAnchorTrailingText(match, pageMap, xrefMap),
+                lambda match: replaceAnchorTrailingText(match, pageMap, xrefMap, module),
                 line)
             if count > 0:
                 withinXref = True
 
             self.lines[lineno] = line
 
+    def rewriteProposalXrefs(self):
+        """Rewrite proposal file xrefs (to HTML refpages and specs) into
+           Antora xrefs (to .adoc files within the docs site)."""
+
+        for lineno in range(0, len(self.lines)):
+            line = self.lines[lineno]
+
+            # xref:{refpages}apiname.html -> xref:refpages:refpages:source/apiname.adoc
+            (line, count) = re.subn(r'xref:{refpages}([^ []+)\.html',
+                                    r'xref:refpages:refpages:source/\1.adoc',
+                                    line)
+
+            # xref:{docs}path/to/file.html[#anchor]\[ ->
+            #  xref:spec:ROOT:path/to/file.adoc[#anchor]\[
+            (line, count) = re.subn(r'xref:{docs}([^ [#]+)\.html',
+                                    r'xref:spec:ROOT:\1.adoc',
+                                    line)
+
+            self.lines[lineno] = line
+
+
     def __str__(self):
         lines = [
-            f'Input file {filename}: {len(self.lines)} lines',
+            f'Input file {filename}: {'BINARY' if self.lines is None else len(self.lines)} lines',
             f'root = {self.root} component = {self.component} relpath = {self.relpath}',
             f'category = {self.category} dstpath = {self.dstpath}',
             f'title = {self.title}',
@@ -420,9 +456,14 @@ class DocFile:
                 raise RuntimeError(f'Will not overwrite {text}: {path}')
 
         dir = os.path.dirname(path)
-        if not os.path.exists(dir):
-            # print(f'Creating {text} directory {dir}')
-            os.makedirs(dir)
+        # This used to only create the directory if os.path.exists(dir)
+        # failed, but this seemed to encounter race conditions with
+        # os.makedirs(dir) FileExistsError exceptions, even though there is
+        # no apparent parallelism that might cause it.
+        # Instead, call makedirs with exist_ok=True.
+
+        # print(f'Creating {text} directory {dir}')
+        os.makedirs(dir, exist_ok=True)
 
     def rewriteFile(self, overwrite = True, pageHeaders = None):
         """Write source file to component directory. Images are just symlinked
@@ -449,11 +490,12 @@ class DocFile:
             self.writeFile(self.dstpath)
         elif self.category == Pages:
             if pageHeaders is not None:
-                # Add blank lines before and after the pageHeaders to avoid
+                # Add whitespace after the pageHeaders to avoid
                 # coalescing with file content.
-                lines = self.lines[0:self.titleLine+1]
-                lines += ['\n'] + pageHeaders + ['\n']
-                lines = lines + self.lines[self.titleLine+1:]
+                lines = pageHeaders + ['\n'] + self.lines
+                #lines = self.lines[0:self.titleLine+1]
+                #lines += ['\n'] + pageHeaders + ['\n']
+                #lines = lines + self.lines[self.titleLine+1:]
                 self.lines = lines
 
             # Inject page headers immediately following page title
@@ -474,6 +516,10 @@ class DocFile:
         except:
             raise RuntimeError(f'Cannot open output file {path}')
 
+        if self.lines is None:
+            import pdb
+            pdb.set_trace()
+
         for line in self.lines:
             print(line, file=fp, end='')
 
@@ -492,7 +538,11 @@ def testHarness():
         '<<ext,ext chapter>> <<ext-label,',
         'ext chapter/label>>',
         '<<core>>, <<core-label, core chapter/label',
-        '>>'
+        '>>',
+        '# Proposal-type xrefs',
+        'xref:{refpages}VkDisplay.html[VkDisplay]',
+        'xref:{docs}chapters/introduction.html[introduction]',
+        'xref:{docs}chapters/introduction.html#data-format[data-format]',
     ]
 
     pageMap = {
@@ -508,7 +558,8 @@ def testHarness():
 
     printFile('Original File', docFile.lines)
 
-    docFile.rewriteXrefs(pageMap, xrefMap)
+    docFile.rewriteXrefs(pageMap, xrefMap, 'module:')
+    docFile.rewriteProposalXrefs()
 
     printFile('Edited File', docFile.lines)
 
@@ -524,12 +575,15 @@ if __name__ == '__main__':
     parser.add_argument('-component', action='store', dest='component',
                         required=True,
                         help='Specify module / component directory in which converted files are written')
+    parser.add_argument('-module', action='store', dest='module',
+                        default='', required=False,
+                        help='Specify module name to prefix xrefs with, e.g. "spec:" or {spec}')
     #parser.add_argument('-htmlspec', action='store', dest='htmlspec',
     #                    default=None, required=False,
     #                    help='Specify HTML of generated spec to extract anchor mapping from')
-    parser.add_argument('-xrefpath', action='store', dest='xrefpath',
+    parser.add_argument('-xrefMap', action='store', dest='xrefMap',
                         default=None, required=False,
-                        help='Specify path to xrefMap.py containing map of anchors to chapter anchors')
+                        help='Specify path to xrefMap.py, containing map of anchors to chapter anchors')
     parser.add_argument('-jspagemap', action='store', dest='jspagemap',
                         default=None, required=False,
                         help='Specify path to output page map as .cjs source containing map of anchors to chapter anchors')
@@ -541,6 +595,12 @@ if __name__ == '__main__':
                         help='Specify file containing a list of filenames to convert, one/line')
     parser.add_argument('files', metavar='filename', nargs='*',
                         help='Specify name of a single file to convert')
+    parser.add_argument('-debug', action='store_true',
+                        help='Run with Python debugger module enabled')
+    parser.add_argument('-test', action='store_true',
+                        help='Run simple test harness instead of converting targets')
+    parser.add_argument('-verbose', action='store_true',
+                        help='Print warnings about unresolved anchors and missing anchor titles')
 
     args = parser.parse_args()
 
@@ -550,7 +610,11 @@ if __name__ == '__main__':
     if args.pageHeaders is not None:
         args.pageHeaders, _ = loadFile(args.pageHeaders)
 
-    if False:
+    if args.debug:
+        import pdb
+        pdb.set_trace()
+
+    if args.test:
         testHarness()
         sys.exit(0)
 
@@ -558,14 +622,18 @@ if __name__ == '__main__':
     pageInfo = {}
     pageMap = {}
 
-    # The xrefmap is imported from the 'xrefMap' module, if it exists
+    # Import the xrefMap, if it exists.
+    # It must be in a file named 'xrefMap.py' because trying to get a
+    # variable into an 'import' is painful.
+    xrefMap = {}
     try:
-        if args.xrefpath is not None:
-            sys.path.append(args.xrefpath)
-        from xrefMap import xrefMap
+        if args.xrefMap is not None:
+            (path, file) = os.path.split(os.path.abspath(args.xrefMap))
+            if path not in sys.path:
+                sys.path.append(path)
+            from xrefMap import xrefMap
     except:
-        print('WARNING: No module xrefMap containing xrefMap dictionary', file=sys.stderr)
-        xrefMap = {}
+        print('WARNING: Cannot rewrite links - module xrefMap.py was not provided', file=sys.stderr)
 
     # If a file containing a list of files was specified, add each one.
     # Could try using os.walk() instead, but that is very slow.
@@ -602,8 +670,21 @@ if __name__ == '__main__':
         if path.endswith('.adoc'):
             # Look for <<>>-style anchors and rewrite them to Antora xref-style
             # anchors using the pageMap (of top-level anchors to page names) and
-            # xrefmap (of anchors to top-level anchors).
-            docFile.rewriteXrefs(pageMap, xrefMap)
+            # xrefMap (of anchors to top-level anchors).
+            # Additionally, qualify xrefs with the module name.
+            # This may be an explicit module name, e.g. 'spec:', or
+            # an asciidoctor attribute name, e.g. '{specmodule}:' that is
+            # defined at document build time.
+            # Defaults to the empty string.
+            docFile.rewriteXrefs(pageMap, xrefMap, args.module)
+
+            # Look for xref-style anchors matching specific patterns used
+            # in the Vulkan spec proposal documents and rewrite them to
+            # internal xrefs within the Vulkan docs site.
+            # This is specific to the proposals and could be enabled by a
+            # command-line option but is unlikely to match anything else the
+            # script is used for.
+            docFile.rewriteProposalXrefs()
 
         # Copy (possibly rewritten) file into the target path
         docFile.rewriteFile(overwrite = True, pageHeaders = args.pageHeaders)
@@ -614,3 +695,16 @@ if __name__ == '__main__':
         write_cjs_dictionary(args.jspagemap, pageMap, 'exports.pageMap')
     if args.pypagemap is not None:
         write_python_dictionary(args.pypagemap, pageMap, 'pageMap')
+
+    # Only print these warnings if requested.
+    # Unresolved anchor warnings are hard to eliminate, because unresolved
+    # anchors for Vulkan SC always show up.
+    if args.verbose:
+        if len(unresolvedAnchors) > 0:
+            print('WARNING: Could not determine which page the following anchors come from, passing through to Antora intact:')
+            for anchor in sorted(unresolvedAnchors):
+                print(f'    {anchor}')
+        if len(unresolvedAnchorTitles) > 0:
+            print('WARNING: No title found for the following anchors (these are usually anchors following bullet points):')
+            for anchor in sorted(unresolvedAnchorTitles):
+                print(f'    {anchor}')

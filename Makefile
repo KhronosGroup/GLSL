@@ -186,7 +186,7 @@ setup_spec_antora pagemap $(PYPAGEMAP): xrefmaps
 	$(QUIET)$(PYTHON) $(SCRIPTS)/antora-prep.py \
 	    -root . \
 	    -component $(shell realpath $(ANTORA_SPECMODULE)) \
-	    -xrefpath $(GENERATED) \
+	    -xrefMap $(PYXREFMAP) \
 	    -pageHeaders antora/pageHeaders-spec.adoc \
 	    -pypagemap $(PYPAGEMAP) \
 	    -filelist $(ANTORA_FILELIST)
