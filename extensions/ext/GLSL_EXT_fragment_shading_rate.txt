@@ -128,8 +128,8 @@ Modifications to the OpenGL Shading Language Specification, Version 4.60
     the current fragment shader invocation covers 2 pixels vertically.
     If gl_ShadingRateEXT contains gl_ShadingRateFlag4VerticalPixelsEXT,
     the current fragment shader invocation covers 4 pixels vertically.
-    If no horizontal flag is set, the current fragment shader invocation
-    covers a single pixel horizontally.
+    If no vertical flag is set, the current fragment shader invocation
+    covers a single pixel vertically.
 
     If gl_ShadingRateEXT contains gl_ShadingRateFlag2HorizontalPixelsEXT,
     the current fragment shader invocation covers 2 pixels horizontally.
